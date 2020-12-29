@@ -26,9 +26,9 @@ import (
 
 func TestCertify(t *testing.T) {
 
-	t.Run("uri is required", func(t *testing.T) {
+	t.Run("uri flag is required", func(t *testing.T) {
 
-		t.Run("flag -u not given", func(t *testing.T) {
+		t.Run("Should fail when flag -u not given", func(t *testing.T) {
 			cmd := NewCertifyCmd()
 			outBuf := bytes.NewBufferString("")
 			cmd.SetOut(outBuf)
@@ -38,7 +38,7 @@ func TestCertify(t *testing.T) {
 			require.Error(t, cmd.Execute())
 		})
 
-		t.Run("flag -u is given but no value is informed", func(t *testing.T) {
+		t.Run("Should fail when flag -u is given but no value is informed", func(t *testing.T) {
 			cmd := NewCertifyCmd()
 			outBuf := bytes.NewBufferString("")
 			cmd.SetOut(outBuf)
@@ -49,7 +49,7 @@ func TestCertify(t *testing.T) {
 			require.Error(t, cmd.Execute())
 		})
 
-		t.Run("flag -u and values are given", func(t *testing.T) {
+		t.Run("Should succeed when flag -u and values are given", func(t *testing.T) {
 			cmd := NewCertifyCmd()
 			outBuf := bytes.NewBufferString("")
 			cmd.SetOut(outBuf)
@@ -60,6 +60,16 @@ func TestCertify(t *testing.T) {
 			require.NoError(t, cmd.Execute())
 		})
 
+		t.Run("Should fail when flag -o is given but check doesn't exist", func(t *testing.T) {
+			cmd := NewCertifyCmd()
+			outBuf := bytes.NewBufferString("")
+			cmd.SetOut(outBuf)
+			errBuf := bytes.NewBufferString("")
+			cmd.SetErr(errBuf)
+
+			cmd.SetArgs([]string{"-u", "/tmp/chart.tgz", "-o"})
+			require.Error(t, cmd.Execute())
+		})
 	})
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 28/12/2020, 16:40 igors
+ * Copyright (C) 29/12/2020, 15:00 igors
  * This file is part of helmcertifier.
  *
  * helmcertifier is free software: you can redistribute it and/or modify
@@ -18,16 +18,39 @@
 
 package helmcertifier
 
-type CertifierBuilder interface {
-	SetRegistry(registry *Registry) CertifierBuilder
-	SetChecks(checks []string) CertifierBuilder
-	Build() (Certifier, error)
+import "errors"
+
+var registry *Registry
+
+func init() {
+	registry = NewRegistry()
 }
 
-type Certifier interface {
-	Certify(uri string) (CertificationResult, error)
+type builder struct {
+	registry *Registry
+	checks   []string
 }
 
-type CertificationResult interface {
-	IsOk() bool
+func (b *builder) SetRegistry(registry *Registry) CertifierBuilder {
+	b.registry = registry
+	return b
+}
+
+func (b *builder) SetChecks(checks []string) CertifierBuilder {
+	b.checks = checks
+	return b
+}
+
+func (b *builder) Build() (Certifier, error) {
+	if len(b.checks) == 0 {
+		return nil, errors.New("no checks have been required")
+	}
+
+	return &certifier{
+		registry: registry,
+	}, nil
+}
+
+func NewCertifierBuilder() CertifierBuilder {
+	return &builder{}
 }

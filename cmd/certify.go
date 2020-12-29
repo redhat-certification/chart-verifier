@@ -26,7 +26,7 @@ import (
 //goland:noinspection GoUnusedGlobalVariable
 var (
 	// allChecks contains all available checks to be executed by the program.
-	allChecks []string
+	allChecks []string = []string{"a"}
 	// chartUri contains the chart location as informed by the user; should accept anything that Helm understands as a Chart
 	// URI.
 	chartUri string
@@ -36,6 +36,19 @@ var (
 	exceptChecks []string
 )
 
+func buildChecks(allChecks, onlyChecks, _ []string) []string {
+	if onlyChecks != nil {
+		return onlyChecks
+	}
+	return allChecks
+}
+
+func buildCertifier(checks []string) (helmcertifier.Certifier, error) {
+	return helmcertifier.NewCertifierBuilder().
+		SetChecks(checks).
+		Build()
+}
+
 func NewCertifyCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "certify",
@@ -43,8 +56,14 @@ func NewCertifyCmd() *cobra.Command {
 		Short: "Certifies a Helm chart by checking some of its characteristics",
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			b := helmcertifier.NewCertificationBuilder()
-			result, err := b.SetUri(chartUri).Build()
+			checks := buildChecks(allChecks, onlyChecks, exceptChecks)
+
+			certifier, err := buildCertifier(checks)
+			if err != nil {
+				return err
+			}
+
+			result, err := certifier.Certify(chartUri)
 			if err != nil {
 				return err
 			}
@@ -57,9 +76,9 @@ func NewCertifyCmd() *cobra.Command {
 	cmd.Flags().StringVarP(&chartUri, "uri", "u", "", "uri of the Chart being certified")
 	_ = cmd.MarkFlagRequired("uri")
 
-	cmd.Flags().StringSliceVarP(&onlyChecks, "only", "o", []string{}, "only the informed checks will be performed")
+	cmd.Flags().StringSliceVarP(&onlyChecks, "only", "o", nil, "only the informed checks will be performed")
 
-	cmd.Flags().StringSliceVarP(&exceptChecks, "except", "e", []string{}, "all available checks except those informed will be performed")
+	cmd.Flags().StringSliceVarP(&exceptChecks, "except", "e", nil, "all available checks except those informed will be performed")
 
 	return cmd
 }

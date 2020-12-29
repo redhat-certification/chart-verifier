@@ -25,31 +25,22 @@ import (
 
 func TestCertificationBuilder(t *testing.T) {
 
-	t.Run("Should fail when uri is not set", func(t *testing.T) {
-		b := NewCertificationBuilder()
+	t.Run("Should fail building certifier when requiredChecks are not set", func(t *testing.T) {
+		b := NewCertifierBuilder()
 
-		r, err := b.Build()
+		c, err := b.Build()
 		require.Error(t, err)
-		require.False(t, r.Ok)
+		require.Nil(t, c)
 	})
 
-	t.Run("Should fail when checks are not set", func(t *testing.T) {
-		b := NewCertificationBuilder()
+	t.Run("Should build certifier when requiredChecks are set", func(t *testing.T) {
+		b := NewCertifierBuilder()
 
-		r, err := b.SetUri("http://www.example.com/chart.tgz").Build()
-		require.Error(t, err)
-		require.False(t, r.Ok)
-	})
-
-	t.Run("Should succeed when uri and checks are set", func(t *testing.T) {
-		b := NewCertificationBuilder()
-
-		r, err := b.
-			SetUri("http://www.example.com/chart.tgz").
+		c, err := b.
 			SetChecks([]string{"a", "b"}).
 			Build()
 
 		require.NoError(t, err)
-		require.True(t, r.Ok)
+		require.NotNil(t, c)
 	})
 }
