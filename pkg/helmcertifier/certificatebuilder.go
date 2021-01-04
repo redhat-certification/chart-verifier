@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 29/12/2020, 15:35 igors
+ * Copyright (C) 04/01/2021, 06:48, igors
  * This file is part of helmcertifier.
  *
  * helmcertifier is free software: you can redistribute it and/or modify
@@ -18,39 +18,30 @@
 
 package helmcertifier
 
-type Result interface {
-	IsOk() bool
+import "helmcertifier/pkg/helmcertifier/checkregistry"
+
+type CertificateBuilder interface {
+	AddCheckResult(checkResult checkregistry.CheckResult) CertificateBuilder
+	Build() (Certificate, error)
 }
 
-type result struct {
-	Ok bool
+type certificateBuilder struct {
+	CheckResults []checkregistry.CheckResult
 }
 
-func (r result) IsOk() bool {
-	return r.Ok
-}
-
-type ResultBuilder interface {
-	AddCheckResult(checkResult CheckResult)
-	Build() (CertificationResult, error)
-}
-
-type resultBuilder struct {
-	CheckResults []CheckResult
-}
-
-func NewCertificationResultBuilder() ResultBuilder {
-	return &resultBuilder{
-		CheckResults: []CheckResult{},
+func NewCertificateBuilder() CertificateBuilder {
+	return &certificateBuilder{
+		CheckResults: []checkregistry.CheckResult{},
 	}
 }
 
-func (r *resultBuilder) AddCheckResult(checkResult CheckResult) {
+func (r *certificateBuilder) AddCheckResult(checkResult checkregistry.CheckResult) CertificateBuilder {
 	r.CheckResults = append(r.CheckResults, checkResult)
+	return r
 }
 
-func (r *resultBuilder) Build() (CertificationResult, error) {
-	res := result{Ok: true}
+func (r *certificateBuilder) Build() (Certificate, error) {
+	res := &certificate{Ok: true}
 
 	for _, cr := range r.CheckResults {
 		if !cr.Ok {

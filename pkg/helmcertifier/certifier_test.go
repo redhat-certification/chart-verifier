@@ -21,13 +21,14 @@ package helmcertifier
 import (
 	"errors"
 	"github.com/stretchr/testify/require"
+	"helmcertifier/pkg/helmcertifier/checkregistry"
 	"testing"
 )
 
 func TestCertifier_Certify(t *testing.T) {
 	t.Run("Should return error if check does not exist", func(t *testing.T) {
 		c := &certifier{
-			registry:       NewRegistry(),
+			registry:       checkregistry.NewDefaultCheckRegistry(),
 			requiredChecks: []string{"is-helm-chart"},
 		}
 
@@ -37,9 +38,9 @@ func TestCertifier_Certify(t *testing.T) {
 	})
 
 	t.Run("Should return error if check exists and returns error", func(t *testing.T) {
-		registry := NewRegistry()
-		registry.AddCheck("is-helm-chart", func(uri string) (CheckResult, error) {
-			return CheckResult{}, errors.New("artificial error")
+		registry := checkregistry.NewDefaultCheckRegistry()
+		registry.Add("is-helm-chart", func(uri string) (checkregistry.CheckResult, error) {
+			return checkregistry.CheckResult{}, errors.New("artificial error")
 		})
 
 		c := &certifier{
@@ -52,10 +53,10 @@ func TestCertifier_Certify(t *testing.T) {
 		require.Nil(t, r)
 	})
 
-	t.Run("Check result should be negative if check exists and returns negative", func(t *testing.T) {
-		registry := NewRegistry()
-		registry.AddCheck("is-helm-chart", func(uri string) (CheckResult, error) {
-			return CheckResult{Ok: false}, nil
+	t.Run("Check certificate should be negative if check exists and returns negative", func(t *testing.T) {
+		registry := checkregistry.NewDefaultCheckRegistry()
+		registry.Add("is-helm-chart", func(uri string) (checkregistry.CheckResult, error) {
+			return checkregistry.CheckResult{Ok: false}, nil
 		})
 
 		c := &certifier{
@@ -69,10 +70,10 @@ func TestCertifier_Certify(t *testing.T) {
 		require.False(t, r.IsOk())
 	})
 
-	t.Run("Check result should be positive if check exists and returns positive", func(t *testing.T) {
-		registry := NewRegistry()
-		registry.AddCheck("is-helm-chart", func(uri string) (CheckResult, error) {
-			return CheckResult{Ok: true}, nil
+	t.Run("Check certificate should be positive if check exists and returns positive", func(t *testing.T) {
+		registry := checkregistry.NewDefaultCheckRegistry()
+		registry.Add("is-helm-chart", func(uri string) (checkregistry.CheckResult, error) {
+			return checkregistry.CheckResult{Ok: true}, nil
 		})
 
 		c := &certifier{

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 29/12/2020, 15:00 igors
+ * Copyright (C) 04/01/2021, 06:58, igors
  * This file is part of helmcertifier.
  *
  * helmcertifier is free software: you can redistribute it and/or modify
@@ -16,41 +16,10 @@
  * along with helmcertifier.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package helmcertifier
+package checks
 
-import "errors"
+import "helmcertifier/pkg/helmcertifier/checkregistry"
 
-var registry *Registry
-
-func init() {
-	registry = NewRegistry()
-}
-
-type builder struct {
-	registry *Registry
-	checks   []string
-}
-
-func (b *builder) SetRegistry(registry *Registry) CertifierBuilder {
-	b.registry = registry
-	return b
-}
-
-func (b *builder) SetChecks(checks []string) CertifierBuilder {
-	b.checks = checks
-	return b
-}
-
-func (b *builder) Build() (Certifier, error) {
-	if len(b.checks) == 0 {
-		return nil, errors.New("no checks have been required")
-	}
-
-	return &certifier{
-		registry: registry,
-	}, nil
-}
-
-func NewCertifierBuilder() CertifierBuilder {
-	return &builder{}
+func IsHelmPackage(uri string) (checkregistry.CheckResult, error) {
+	return checkregistry.CheckResult{Ok: true}, nil
 }

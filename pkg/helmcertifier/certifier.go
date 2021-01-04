@@ -18,33 +18,44 @@
 
 package helmcertifier
 
-type CheckResult struct {
-	Ok bool
-}
+import (
+	"github.com/pkg/errors"
+	"helmcertifier/pkg/helmcertifier/checkregistry"
+)
 
 type certifier struct {
-	registry       *Registry
+	registry       checkregistry.CheckRegistry
 	requiredChecks []string
 }
 
-type CertificationCheckNotFoundErr string
+type CheckNotFoundErr string
 
-func (c CertificationCheckNotFoundErr) Error() string {
-	return "certification check not found: " + string(c)
+func (e CheckNotFoundErr) Error() string {
+	return "check not found: " + string(e)
 }
 
-func (c *certifier) Certify(uri string) (CertificationResult, error) {
-	result := NewCertificationResultBuilder()
+type CheckErr string
+
+func (e CheckErr) Error() string {
+	return "check returned error: " + string(e)
+}
+
+func NewCheckErr(err error) error {
+	return errors.Wrap(err, "check returned error")
+}
+
+func (c *certifier) Certify(uri string) (Certificate, error) {
+	result := NewCertificateBuilder()
 
 	for _, name := range c.requiredChecks {
-		if checkFunc, ok := c.registry.GetCheck(name); !ok {
-			return nil, CertificationCheckNotFoundErr(name)
+		if checkFunc, ok := c.registry.Get(name); !ok {
+			return nil, CheckNotFoundErr(name)
 		} else {
 			r, err := checkFunc(uri)
 			if err != nil {
 				return nil, err
 			}
-			result.AddCheckResult(r)
+			_ = result.AddCheckResult(r)
 		}
 	}
 

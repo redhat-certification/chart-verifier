@@ -1,0 +1,62 @@
+/*
+ * Copyright (C) 29/12/2020, 15:00 igors
+ * This file is part of helmcertifier.
+ *
+ * helmcertifier is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * helmcertifier is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with helmcertifier.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package helmcertifier
+
+import (
+	"errors"
+	"helmcertifier/pkg/helmcertifier/checkregistry"
+	"helmcertifier/pkg/helmcertifier/checks"
+)
+
+var defaultRegistry checkregistry.CheckRegistry
+
+func init() {
+	defaultRegistry = checkregistry.NewDefaultCheckRegistry()
+	defaultRegistry.Add("is-helm-package", checks.IsHelmPackage)
+}
+
+type certifierBuilder struct {
+	registry checkregistry.CheckRegistry
+	checks   []string
+}
+
+func (b *certifierBuilder) SetRegistry(registry checkregistry.CheckRegistry) CertifierBuilder {
+	b.registry = registry
+	return b
+}
+
+func (b *certifierBuilder) SetChecks(checks []string) CertifierBuilder {
+	b.checks = checks
+	return b
+}
+
+func (b *certifierBuilder) Build() (Certifier, error) {
+	if len(b.checks) == 0 {
+		return nil, errors.New("no checks have been required")
+	}
+
+	return &certifier{
+		registry:       defaultRegistry,
+		requiredChecks: b.checks,
+	}, nil
+}
+
+func NewCertifierBuilder() CertifierBuilder {
+	return &certifierBuilder{}
+}

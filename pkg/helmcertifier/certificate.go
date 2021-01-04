@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 29/12/2020, 15:42 igors
+ * Copyright (C) 29/12/2020, 15:35 igors
  * This file is part of helmcertifier.
  *
  * helmcertifier is free software: you can redistribute it and/or modify
@@ -18,19 +18,10 @@
 
 package helmcertifier
 
-type CheckFunc func(uri string) (CheckResult, error)
-
-type Registry map[string]CheckFunc
-
-func NewRegistry() *Registry {
-	return &Registry{}
+type certificate struct {
+	Ok bool
 }
 
-func (r *Registry) GetCheck(name string) (CheckFunc, bool) {
-	v, ok := (*r)[name]
-	return v, ok
-}
-
-func (r *Registry) AddCheck(name string, checkFunc CheckFunc) {
-	(*r)[name] = checkFunc
+func (r *certificate) IsOk() bool {
+	return r.Ok
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 28/12/2020, 16:40 igors
+ * Copyright (C) 03/01/2021, 20:14, igors
  * This file is part of helmcertifier.
  *
  * helmcertifier is free software: you can redistribute it and/or modify
@@ -16,20 +16,19 @@
  * along with helmcertifier.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package helmcertifier
+package checkregistry
 
-import "helmcertifier/pkg/helmcertifier/checkregistry"
+type defaultCheckRegistry map[string]CheckFunc
 
-type CertifierBuilder interface {
-	SetRegistry(registry checkregistry.CheckRegistry) CertifierBuilder
-	SetChecks(checks []string) CertifierBuilder
-	Build() (Certifier, error)
+func NewDefaultCheckRegistry() CheckRegistry {
+	return &defaultCheckRegistry{}
 }
 
-type Certifier interface {
-	Certify(uri string) (Certificate, error)
+func (r *defaultCheckRegistry) Get(name string) (CheckFunc, bool) {
+	v, ok := (*r)[name]
+	return v, ok
 }
 
-type Certificate interface {
-	IsOk() bool
+func (r *defaultCheckRegistry) Add(name string, checkFunc CheckFunc) {
+	(*r)[name] = checkFunc
 }

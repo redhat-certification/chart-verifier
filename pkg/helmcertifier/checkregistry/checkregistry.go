@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 28/12/2020, 16:40 igors
+ * Copyright (C) 29/12/2020, 15:42 igors
  * This file is part of helmcertifier.
  *
  * helmcertifier is free software: you can redistribute it and/or modify
@@ -16,20 +16,15 @@
  * along with helmcertifier.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package helmcertifier
+package checkregistry
 
-import "helmcertifier/pkg/helmcertifier/checkregistry"
-
-type CertifierBuilder interface {
-	SetRegistry(registry checkregistry.CheckRegistry) CertifierBuilder
-	SetChecks(checks []string) CertifierBuilder
-	Build() (Certifier, error)
+type CheckResult struct {
+	Ok bool
 }
 
-type Certifier interface {
-	Certify(uri string) (Certificate, error)
-}
+type CheckFunc func(uri string) (CheckResult, error)
 
-type Certificate interface {
-	IsOk() bool
+type CheckRegistry interface {
+	Get(name string) (CheckFunc, bool)
+	Add(name string, checkFunc CheckFunc)
 }
