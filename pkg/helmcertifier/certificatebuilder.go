@@ -18,32 +18,34 @@
 
 package helmcertifier
 
-import "helmcertifier/pkg/helmcertifier/checkregistry"
+import (
+	"helmcertifier/pkg/helmcertifier/checks"
+)
 
 type CertificateBuilder interface {
-	AddCheckResult(checkResult checkregistry.CheckResult) CertificateBuilder
+	AddResult(result checks.Result) CertificateBuilder
 	Build() (Certificate, error)
 }
 
 type certificateBuilder struct {
-	CheckResults []checkregistry.CheckResult
+	Results []checks.Result
 }
 
 func NewCertificateBuilder() CertificateBuilder {
 	return &certificateBuilder{
-		CheckResults: []checkregistry.CheckResult{},
+		Results: []checks.Result{},
 	}
 }
 
-func (r *certificateBuilder) AddCheckResult(checkResult checkregistry.CheckResult) CertificateBuilder {
-	r.CheckResults = append(r.CheckResults, checkResult)
+func (r *certificateBuilder) AddResult(result checks.Result) CertificateBuilder {
+	r.Results = append(r.Results, result)
 	return r
 }
 
 func (r *certificateBuilder) Build() (Certificate, error) {
 	res := &certificate{Ok: true}
 
-	for _, cr := range r.CheckResults {
+	for _, cr := range r.Results {
 		if !cr.Ok {
 			res.Ok = false
 			break

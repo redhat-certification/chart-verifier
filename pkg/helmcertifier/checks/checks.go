@@ -18,8 +18,6 @@
 
 package checks
 
-import "helmcertifier/pkg/helmcertifier/checkregistry"
-
-func IsHelmPackage(uri string) (checkregistry.CheckResult, error) {
-	return checkregistry.CheckResult{Ok: true}, nil
+func IsHelmPackage(uri string) (Result, error) {
+	return Result{Ok: true}, nil
 }

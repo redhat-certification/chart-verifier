@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 29/12/2020, 15:42 igors
+ * Copyright (C) 06/01/2021, 09:40, igors
  * This file is part of helmcertifier.
  *
  * helmcertifier is free software: you can redistribute it and/or modify
@@ -16,15 +16,31 @@
  * along with helmcertifier.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package checkregistry
+package checks
 
-type CheckResult struct {
+type Result struct {
 	Ok bool
 }
 
-type CheckFunc func(uri string) (CheckResult, error)
+type CheckFunc func(uri string) (Result, error)
 
-type CheckRegistry interface {
+type Registry interface {
 	Get(name string) (CheckFunc, bool)
-	Add(name string, checkFunc CheckFunc)
+	Add(name string, checkFunc CheckFunc) Registry
+}
+
+type defaultRegistry map[string]CheckFunc
+
+func NewRegistry() Registry {
+	return &defaultRegistry{}
+}
+
+func (r *defaultRegistry) Get(name string) (CheckFunc, bool) {
+	v, ok := (*r)[name]
+	return v, ok
+}
+
+func (r *defaultRegistry) Add(name string, checkFunc CheckFunc) Registry {
+	(*r)[name] = checkFunc
+	return nil
 }

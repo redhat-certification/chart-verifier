@@ -21,66 +21,69 @@ package helmcertifier
 import (
 	"errors"
 	"github.com/stretchr/testify/require"
-	"helmcertifier/pkg/helmcertifier/checkregistry"
+	"helmcertifier/pkg/helmcertifier/checks"
 	"testing"
 )
 
 func TestCertifier_Certify(t *testing.T) {
+
+	dummyCheckName := "dummy-check"
+
+	erroredCheck := func(uri string) (checks.Result, error) {
+		return checks.Result{}, errors.New("artificial error")
+	}
+
+	negativeCheck := func(uri string) (checks.Result, error) {
+		return checks.Result{Ok: false}, nil
+	}
+
+	positiveCheck := func(uri string) (checks.Result, error) {
+		return checks.Result{Ok: true}, nil
+	}
+
+	dummyChartUri := "http://www.example.com/chart.tgz"
+
 	t.Run("Should return error if check does not exist", func(t *testing.T) {
 		c := &certifier{
-			registry:       checkregistry.NewDefaultCheckRegistry(),
-			requiredChecks: []string{"is-helm-chart"},
+			registry:       checks.NewRegistry(),
+			requiredChecks: []string{dummyCheckName},
 		}
 
-		r, err := c.Certify("http://www.example.com/chart.tgz")
+		r, err := c.Certify(dummyChartUri)
 		require.Error(t, err)
 		require.Nil(t, r)
 	})
 
 	t.Run("Should return error if check exists and returns error", func(t *testing.T) {
-		registry := checkregistry.NewDefaultCheckRegistry()
-		registry.Add("is-helm-chart", func(uri string) (checkregistry.CheckResult, error) {
-			return checkregistry.CheckResult{}, errors.New("artificial error")
-		})
-
 		c := &certifier{
-			registry:       registry,
-			requiredChecks: []string{"is-helm-chart"},
+			registry:       checks.NewRegistry().Add(dummyCheckName, erroredCheck),
+			requiredChecks: []string{dummyCheckName},
 		}
 
-		r, err := c.Certify("http://www.example.com/chart.tgz")
+		r, err := c.Certify(dummyChartUri)
 		require.Error(t, err)
 		require.Nil(t, r)
 	})
 
-	t.Run("Check certificate should be negative if check exists and returns negative", func(t *testing.T) {
-		registry := checkregistry.NewDefaultCheckRegistry()
-		registry.Add("is-helm-chart", func(uri string) (checkregistry.CheckResult, error) {
-			return checkregistry.CheckResult{Ok: false}, nil
-		})
-
+	t.Run("Result should be negative if check exists and returns negative", func(t *testing.T) {
 		c := &certifier{
-			registry:       registry,
-			requiredChecks: []string{"is-helm-chart"},
+			registry:       checks.NewRegistry().Add(dummyCheckName, negativeCheck),
+			requiredChecks: []string{dummyCheckName},
 		}
 
-		r, err := c.Certify("http://www.example.com/chart.tgz")
+		r, err := c.Certify(dummyChartUri)
 		require.NoError(t, err)
 		require.NotNil(t, r)
 		require.False(t, r.IsOk())
 	})
 
-	t.Run("Check certificate should be positive if check exists and returns positive", func(t *testing.T) {
-		registry := checkregistry.NewDefaultCheckRegistry()
-		registry.Add("is-helm-chart", func(uri string) (checkregistry.CheckResult, error) {
-			return checkregistry.CheckResult{Ok: true}, nil
-		})
-
+	t.Run("Result should be positive if check exists and returns positive", func(t *testing.T) {
 		c := &certifier{
-			registry:       registry,
-			requiredChecks: []string{"is-helm-chart"}}
+			registry:       checks.NewRegistry().Add(dummyCheckName, positiveCheck),
+			requiredChecks: []string{dummyCheckName},
+		}
 
-		r, err := c.Certify("http://www.example.com/chart.tgz")
+		r, err := c.Certify(dummyChartUri)
 		require.NoError(t, err)
 		require.NotNil(t, r)
 		require.True(t, r.IsOk())

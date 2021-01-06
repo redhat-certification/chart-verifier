@@ -20,23 +20,22 @@ package helmcertifier
 
 import (
 	"errors"
-	"helmcertifier/pkg/helmcertifier/checkregistry"
 	"helmcertifier/pkg/helmcertifier/checks"
 )
 
-var defaultRegistry checkregistry.CheckRegistry
+var defaultRegistry checks.Registry
 
 func init() {
-	defaultRegistry = checkregistry.NewDefaultCheckRegistry()
+	defaultRegistry = checks.NewRegistry()
 	defaultRegistry.Add("is-helm-package", checks.IsHelmPackage)
 }
 
 type certifierBuilder struct {
-	registry checkregistry.CheckRegistry
+	registry checks.Registry
 	checks   []string
 }
 
-func (b *certifierBuilder) SetRegistry(registry checkregistry.CheckRegistry) CertifierBuilder {
+func (b *certifierBuilder) SetRegistry(registry checks.Registry) CertifierBuilder {
 	b.registry = registry
 	return b
 }

@@ -20,13 +20,8 @@ package helmcertifier
 
 import (
 	"github.com/pkg/errors"
-	"helmcertifier/pkg/helmcertifier/checkregistry"
+	"helmcertifier/pkg/helmcertifier/checks"
 )
-
-type certifier struct {
-	registry       checkregistry.CheckRegistry
-	requiredChecks []string
-}
 
 type CheckNotFoundErr string
 
@@ -44,6 +39,11 @@ func NewCheckErr(err error) error {
 	return errors.Wrap(err, "check returned error")
 }
 
+type certifier struct {
+	registry       checks.Registry
+	requiredChecks []string
+}
+
 func (c *certifier) Certify(uri string) (Certificate, error) {
 	result := NewCertificateBuilder()
 
@@ -53,9 +53,9 @@ func (c *certifier) Certify(uri string) (Certificate, error) {
 		} else {
 			r, err := checkFunc(uri)
 			if err != nil {
-				return nil, err
+				return nil, NewCheckErr(err)
 			}
-			_ = result.AddCheckResult(r)
+			_ = result.AddResult(r)
 		}
 	}
 

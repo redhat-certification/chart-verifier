@@ -18,10 +18,12 @@
 
 package helmcertifier
 
-import "helmcertifier/pkg/helmcertifier/checkregistry"
+import (
+	"helmcertifier/pkg/helmcertifier/checks"
+)
 
 type CertifierBuilder interface {
-	SetRegistry(registry checkregistry.CheckRegistry) CertifierBuilder
+	SetRegistry(registry checks.Registry) CertifierBuilder
 	SetChecks(checks []string) CertifierBuilder
 	Build() (Certifier, error)
 }
