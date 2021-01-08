@@ -19,11 +19,14 @@
 package checks
 
 import (
+	"errors"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 )
 
 func loadChartFromUri(uri string) (*chart.Chart, error) {
+	return nil, errors.New("not implemented")
+
 	// try to parse an `uri` string into a `URL` type to decide which `loader.Load*` function to use.
 	return loader.LoadFile(uri)
 }
