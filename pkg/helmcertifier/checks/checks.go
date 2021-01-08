@@ -18,6 +18,76 @@
 
 package checks
 
-func IsHelmPackage(uri string) (Result, error) {
-	return Result{Ok: true}, nil
+import (
+	"github.com/pkg/errors"
+)
+
+func notImplemented() (Result, error) {
+	return Result{Ok: false}, errors.New("not implemented")
+}
+
+func IsHelmV3(uri string) (Result, error) {
+	c, err := loadChartFromUri(uri)
+	if err != nil {
+		return Result{}, err
+	}
+	isHelmV3 := c.Metadata.APIVersion == "v3"
+	return Result{Ok: isHelmV3}, nil
+}
+
+func HasReadme(uri string) (Result, error) {
+	c, err := loadChartFromUri(uri)
+	if err != nil {
+		return Result{}, err
+	}
+
+	hasReadme := false
+	for _, f := range c.Files {
+		if f.Name == "README.md" {
+			hasReadme = true
+			break
+		}
+	}
+
+	return Result{Ok: hasReadme}, nil
+}
+
+func ContainsTest(uri string) (Result, error) {
+	return notImplemented()
+}
+
+func ReadmeContainsValuesSchema(uri string) (Result, error) {
+	return notImplemented()
+}
+
+func KeywordsAreOpenshiftCategories(uri string) (Result, error) {
+	return notImplemented()
+}
+
+func IsCommercialChart(uri string) (Result, error) {
+	return notImplemented()
+}
+
+func IsCommunityChart(uri string) (Result, error) {
+	return notImplemented()
+}
+
+func HasMinKubeVersion(uri string) (Result, error) {
+	return notImplemented()
+}
+
+func NotContainsCRDs(uri string) (Result, error) {
+	return notImplemented()
+}
+
+func NotContainsInfraPluginsAndDrivers(uri string) (Result, error) {
+	return notImplemented()
+}
+
+func CanBeInstalledWithoutManualPreRequisites(uri string) (Result, error) {
+	return notImplemented()
+}
+
+func CanBeInstalledWithoutClusterAdminPrivileges(uri string) (Result, error) {
+	return notImplemented()
 }

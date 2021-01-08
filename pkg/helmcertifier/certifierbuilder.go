@@ -27,7 +27,7 @@ var defaultRegistry checks.Registry
 
 func init() {
 	defaultRegistry = checks.NewRegistry()
-	defaultRegistry.Add("is-helm-package", checks.IsHelmPackage)
+	defaultRegistry.Add("is-helm-package", checks.IsHelmV3)
 }
 
 type certifierBuilder struct {
