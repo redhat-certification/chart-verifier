@@ -29,15 +29,74 @@ func TestIsHelmV3(t *testing.T) {
 		uri         string
 	}
 
-	testCases := []testCase{
-		{description: "absolute path", uri: "/tmp/chart.tgz"},
+	positiveTestCases := []testCase{
+		{description: "valid tarball, absolute path", uri: "/tmp/chart-v3.tgz"},
+		{description: "valid tarball, relative path", uri: "./chart-v3.tgz"},
+		{description: "valid tarball, http", uri: "http://www.example.com/chart-v3.tgz"},
+		{description: "valid directory, absolute path", uri: "/tmp/chart-v3"},
+		{description: "valid directory, relative path", uri: "./chart-v3"},
 	}
 
-	for _, tc := range testCases {
+	for _, tc := range positiveTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			r, err := IsHelmV3(tc.uri)
 			require.NoError(t, err)
 			require.NotNil(t, r)
+		})
+	}
+
+	negativeTestCases := []testCase{
+		{description: "invalid tarball, absolute path", uri: "/tmp/chart-v2.tgz"},
+		{description: "invalid tarball, relative path", uri: "./chart-v2.tgz"},
+		{description: "invalid tarball, http", uri: "http://www.example.com/chart-v2.tgz"},
+		{description: "invalid directory, absolute path", uri: "/tmp/chart-v2"},
+		{description: "invalid directory, relative path", uri: "./chart-v2"},
+	}
+
+	for _, tc := range negativeTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			r, err := IsHelmV3(tc.uri)
+			require.Error(t, err)
+			require.Nil(t, r)
+		})
+	}
+}
+
+func TestHasReadme(t *testing.T) {
+	type testCase struct {
+		description string
+		uri         string
+	}
+
+	positiveTestCases := []testCase{
+		{description: "tarball contains README.md, absolute path", uri: "/tmp/chart-v3.tgz"},
+		{description: "tarball contains README.md, relative path", uri: "./chart-v3.tgz"},
+		{description: "tarball contains README.md, http", uri: "http://www.example.com/chart-v3"},
+		{description: "directory contains README.md, absolute path", uri: "/tmp/chart-v3"},
+		{description: "directory contains README.md, relative path", uri: "./chart-v3"},
+	}
+
+	for _, tc := range positiveTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			r, err := IsHelmV3(tc.uri)
+			require.NoError(t, err)
+			require.NotNil(t, r)
+		})
+	}
+
+	negativeTestCases := []testCase{
+		{description: "invalid tarball, absolute path", uri: "/tmp/chart-v3-no-readme.tgz"},
+		{description: "invalid tarball, relative path", uri: "./chart-v3-no-readme.tgz"},
+		{description: "invalid tarball, http", uri: "http://www.example.com/chart-v3-no-readme.tgz"},
+		{description: "invalid directory, absolute path", uri: "/tmp/chart-v3-no-readme"},
+		{description: "invalid directory, relative path", uri: "./chart-v3-no-readme"},
+	}
+
+	for _, tc := range negativeTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			r, err := IsHelmV3(tc.uri)
+			require.Error(t, err)
+			require.Nil(t, r)
 		})
 	}
 }
