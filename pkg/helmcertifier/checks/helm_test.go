@@ -32,7 +32,7 @@ func TestLoadChartFromURI(t *testing.T) {
 
 	testCases := []testCase{
 		{
-			uri:         "/tmp/chart.tgz",
+			uri:         "testchart-0.1.0.tgz",
 			description: "absolute path",
 		},
 	}
