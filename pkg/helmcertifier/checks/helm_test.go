@@ -19,11 +19,12 @@
 package checks
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
-func TestLoadChartFromUri(t *testing.T) {
+func TestLoadChartFromURI(t *testing.T) {
 	type testCase struct {
 		description string
 		uri         string
@@ -38,7 +39,7 @@ func TestLoadChartFromUri(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			c, err := loadChartFromUri(tc.uri)
+			c, err := loadChartFromURI(tc.uri)
 			require.NoError(t, err)
 			require.NotNil(t, c)
 		})

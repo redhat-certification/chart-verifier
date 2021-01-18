@@ -27,7 +27,7 @@ func notImplemented() (Result, error) {
 }
 
 func IsHelmV3(uri string) (Result, error) {
-	c, err := loadChartFromUri(uri)
+	c, err := loadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
 	}
@@ -36,7 +36,7 @@ func IsHelmV3(uri string) (Result, error) {
 }
 
 func HasReadme(uri string) (Result, error) {
-	c, err := loadChartFromUri(uri)
+	c, err := loadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
 	}
