@@ -31,7 +31,7 @@ func IsHelmV3(uri string) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	isHelmV3 := c.Metadata.APIVersion == "v3"
+	isHelmV3 := c.Metadata.APIVersion == "v2"
 	return Result{Ok: isHelmV3}, nil
 }
 
