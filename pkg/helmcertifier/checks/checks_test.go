@@ -31,7 +31,7 @@ func TestIsHelmV3(t *testing.T) {
 	}
 
 	positiveTestCases := []testCase{
-		{description: "valid tarball, absolute path", uri: "testchart-0.1.0.tgz"},
+		{description: "valid tarball", uri: "chart-0.1.0-v3.valid.tgz"},
 	}
 
 	for _, tc := range positiveTestCases {
@@ -39,28 +39,13 @@ func TestIsHelmV3(t *testing.T) {
 			r, err := IsHelmV3(tc.uri)
 			require.NoError(t, err)
 			require.NotNil(t, r)
-			require.Equal(t, true, r.Ok)
-		})
-	}
-
-	errorTestCases := []testCase{
-		{description: "invalid tarball, absolute path", uri: "/tmp/chart-v2.tgz"},
-		{description: "invalid tarball, relative path", uri: "./chart-v2.tgz"},
-		{description: "invalid tarball, http", uri: "http://www.example.com/chart-v2.tgz"},
-		{description: "invalid directory, absolute path", uri: "/tmp/chart-v2"},
-		{description: "invalid directory, relative path", uri: "./chart-v2"},
-	}
-
-	for _, tc := range errorTestCases {
-		t.Run(tc.description, func(t *testing.T) {
-			r, err := IsHelmV3(tc.uri)
-			require.Error(t, err)
-			require.NotNil(t, r)
+			require.True(t, r.Ok)
+			require.Equal(t, "API version is V2 used in Helm 3", r.Reason)
 		})
 	}
 
 	negativeTestCases := []testCase{
-		{description: "invalid tarball, relative path", uri: "helm2testchart-0.1.0.tgz"},
+		{description: "invalid tarball", uri: "chart-0.1.0-v2.invalid.tgz"},
 	}
 
 	for _, tc := range negativeTestCases {
@@ -68,7 +53,8 @@ func TestIsHelmV3(t *testing.T) {
 			r, err := IsHelmV3(tc.uri)
 			require.NoError(t, err)
 			require.NotNil(t, r)
-			require.Equal(t, false, r.Ok)
+			require.False(t, r.Ok)
+			require.Equal(t, "API version is not V2 used in Helm 3", r.Reason)
 		})
 	}
 }

@@ -32,7 +32,11 @@ func IsHelmV3(uri string) (Result, error) {
 		return Result{}, err
 	}
 	isHelmV3 := c.Metadata.APIVersion == "v2"
-	return Result{Ok: isHelmV3}, nil
+	reason := "API version is not V2 used in Helm 3"
+	if isHelmV3 {
+		reason = "API version is V2 used in Helm 3"
+	}
+	return Result{Ok: isHelmV3, Reason: reason}, nil
 }
 
 func HasReadme(uri string) (Result, error) {

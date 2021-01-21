@@ -19,7 +19,8 @@
 package checks
 
 type Result struct {
-	Ok bool
+	Ok     bool
+	Reason string
 }
 
 type CheckFunc func(uri string) (Result, error)
