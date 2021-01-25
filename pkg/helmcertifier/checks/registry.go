@@ -19,7 +19,9 @@
 package checks
 
 type Result struct {
-	Ok     bool
+	Ok bool
+	// Reason for the result value.  This is a message indicating
+	// the reason for the value of Ok became true or false.
 	Reason string
 }
 

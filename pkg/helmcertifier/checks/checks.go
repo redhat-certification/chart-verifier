@@ -22,6 +22,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+const APIVersion2 = "v2"
+const NotHelm3Reason = "API version is not V2 used in Helm 3"
+const Helm3Reason = "API version is V2 used in Helm 3"
+
 func notImplemented() (Result, error) {
 	return Result{Ok: false}, errors.New("not implemented")
 }
@@ -31,10 +35,11 @@ func IsHelmV3(uri string) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	isHelmV3 := c.Metadata.APIVersion == "v2"
-	reason := "API version is not V2 used in Helm 3"
+	isHelmV3 := c.Metadata.APIVersion == APIVersion2
+
+	reason := NotHelm3Reason
 	if isHelmV3 {
-		reason = "API version is V2 used in Helm 3"
+		reason = Helm3Reason
 	}
 	return Result{Ok: isHelmV3, Reason: reason}, nil
 }

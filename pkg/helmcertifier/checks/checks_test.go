@@ -40,7 +40,7 @@ func TestIsHelmV3(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.True(t, r.Ok)
-			require.Equal(t, "API version is V2 used in Helm 3", r.Reason)
+			require.Equal(t, Helm3Reason, r.Reason)
 		})
 	}
 
@@ -54,7 +54,7 @@ func TestIsHelmV3(t *testing.T) {
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.False(t, r.Ok)
-			require.Equal(t, "API version is not V2 used in Helm 3", r.Reason)
+			require.Equal(t, NotHelm3Reason, r.Reason)
 		})
 	}
 }
