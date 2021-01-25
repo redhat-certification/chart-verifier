@@ -19,8 +19,9 @@
 package checks
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestIsHelmV3(t *testing.T) {
@@ -30,11 +31,7 @@ func TestIsHelmV3(t *testing.T) {
 	}
 
 	positiveTestCases := []testCase{
-		{description: "valid tarball, absolute path", uri: "/tmp/chart-v3.tgz"},
-		{description: "valid tarball, relative path", uri: "./chart-v3.tgz"},
-		{description: "valid tarball, http", uri: "http://www.example.com/chart-v3.tgz"},
-		{description: "valid directory, absolute path", uri: "/tmp/chart-v3"},
-		{description: "valid directory, relative path", uri: "./chart-v3"},
+		{description: "valid tarball", uri: "chart-0.1.0-v3.valid.tgz"},
 	}
 
 	for _, tc := range positiveTestCases {
@@ -42,22 +39,22 @@ func TestIsHelmV3(t *testing.T) {
 			r, err := IsHelmV3(tc.uri)
 			require.NoError(t, err)
 			require.NotNil(t, r)
+			require.True(t, r.Ok)
+			require.Equal(t, Helm3Reason, r.Reason)
 		})
 	}
 
 	negativeTestCases := []testCase{
-		{description: "invalid tarball, absolute path", uri: "/tmp/chart-v2.tgz"},
-		{description: "invalid tarball, relative path", uri: "./chart-v2.tgz"},
-		{description: "invalid tarball, http", uri: "http://www.example.com/chart-v2.tgz"},
-		{description: "invalid directory, absolute path", uri: "/tmp/chart-v2"},
-		{description: "invalid directory, relative path", uri: "./chart-v2"},
+		{description: "invalid tarball", uri: "chart-0.1.0-v2.invalid.tgz"},
 	}
 
 	for _, tc := range negativeTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			r, err := IsHelmV3(tc.uri)
-			require.Error(t, err)
-			require.Nil(t, r)
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.False(t, r.Ok)
+			require.Equal(t, NotHelm3Reason, r.Reason)
 		})
 	}
 }

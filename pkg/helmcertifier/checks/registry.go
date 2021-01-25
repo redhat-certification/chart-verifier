@@ -20,6 +20,9 @@ package checks
 
 type Result struct {
 	Ok bool
+	// Reason for the result value.  This is a message indicating
+	// the reason for the value of Ok became true or false.
+	Reason string
 }
 
 type CheckFunc func(uri string) (Result, error)
