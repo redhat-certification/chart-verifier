@@ -21,6 +21,7 @@ package checks
 import (
 	"net/http"
 	"net/url"
+	"os"
 	"path/filepath"
 
 	"github.com/pkg/errors"
@@ -40,6 +41,10 @@ func loadChartFromRemote(url *url.URL) (*chart.Chart, error) {
 		return nil, err
 	}
 
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, ChartNotFoundErr(url.String())
+	}
+
 	return loader.LoadArchive(resp.Body)
 }
 
@@ -55,8 +60,15 @@ func loadChartFromAbsPath(path string) (*chart.Chart, error) {
 		return nil, err
 	}
 
-	// try to parse an `uri` string into a `URL` type to decide which `loader.Load*` function to use.
-	return loader.Load(chartPath)
+	c, err := loader.Load(chartPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, ChartNotFoundErr(path)
+		}
+		return nil, err
+	}
+
+	return c, nil
 }
 
 // loadChartFromURI attempts to retrieve a chart from the given uri string. It accepts "http", "https", "file" schemes,
@@ -75,4 +87,15 @@ func loadChartFromURI(uri string) (*chart.Chart, error) {
 	default:
 		return nil, errors.Errorf("scheme %q not supported", u.Scheme)
 	}
+}
+
+type ChartNotFoundErr string
+
+func (c ChartNotFoundErr) Error() string {
+	return "chart not found: " + string(c)
+}
+
+func IsChartNotFound(err error) bool {
+	_, ok := err.(ChartNotFoundErr)
+	return ok
 }

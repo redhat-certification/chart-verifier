@@ -101,6 +101,8 @@ func TestLoadChartFromURI(t *testing.T) {
 		t.Run(tc.description, func(t *testing.T) {
 			c, err := loadChartFromURI(tc.uri)
 			require.Error(t, err)
+			require.True(t, IsChartNotFound(err))
+			require.Equal(t, "chart not found: "+tc.uri, err.Error())
 			require.Nil(t, c)
 		})
 	}
