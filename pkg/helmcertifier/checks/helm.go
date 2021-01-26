@@ -19,36 +19,48 @@
 package checks
 
 import (
-	"github.com/pkg/errors"
-	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path/filepath"
 
+	"github.com/pkg/errors"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 )
 
-type HTTPChartLoader struct {
-	URL *url.URL
-}
+// loadChartFromRemote attempts to retrieve a Helm chart from the given remote url. Returns an error if the given url
+// doesn't contain the 'http' or 'https' schema, or any other error related to retrieving the contents of the chart.
+func loadChartFromRemote(url *url.URL) (*chart.Chart, error) {
+	if url.Scheme != "http" && url.Scheme != "https" {
+		return nil, errors.Errorf("only 'http' and 'https' schemes are supported, but got %q", url.Scheme)
+	}
 
-func (r HTTPChartLoader) Load() (*chart.Chart, error) {
-	resp, err := http.Get(r.URL.String())
+	resp, err := http.Get(url.String())
 	if err != nil {
 		return nil, err
 	}
-	b, err := ioutil.ReadAll(resp.Body)
+
+	return loader.LoadArchive(resp.Body)
+}
+
+// loadChartFromAbsPath attempts to retrieve a local Helm chart by resolving the maybe relative path into an absolute
+// path from the current working directory.
+func loadChartFromAbsPath(path string) (*chart.Chart, error) {
+	// although filepath.Abs() can return an error according to its signature, this won't happen (as of go 1.15)
+	// because the only invalid value it would accept is an empty string, which is internally converted into "."
+	// regardless, the error is still being caught and propagated to avoid being bitten by internal changes in the
+	// future
+	chartPath, err := filepath.Abs(path)
 	if err != nil {
 		return nil, err
 	}
 
-	return nil, errors.New(string(b))
+	// try to parse an `uri` string into a `URL` type to decide which `loader.Load*` function to use.
+	return loader.Load(chartPath)
 }
 
-func NewHTTPChartLoader(url *url.URL) loader.ChartLoader {
-	return &HTTPChartLoader{URL: url}
-}
-
+// loadChartFromURI attempts to retrieve a chart from the given uri string. It accepts "http", "https", "file" schemes,
+// and defaults to "file" if there isn't one.
 func loadChartFromURI(uri string) (*chart.Chart, error) {
 	u, err := url.Parse(uri)
 	if err != nil {
@@ -56,10 +68,11 @@ func loadChartFromURI(uri string) (*chart.Chart, error) {
 	}
 
 	switch u.Scheme {
-	case "http":
-		return NewHTTPChartLoader(u).Load()
+	case "http", "https":
+		return loadChartFromRemote(u)
+	case "file", "":
+		return loadChartFromAbsPath(u.Path)
 	default:
-		// try to parse an `uri` string into a `URL` type to decide which `loader.Load*` function to use.
-		return loader.LoadFile(u.Path)
+		return nil, errors.Errorf("scheme %q not supported", u.Scheme)
 	}
 }

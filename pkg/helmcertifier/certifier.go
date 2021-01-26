@@ -19,7 +19,6 @@
 package helmcertifier
 
 import (
-	"github.com/pkg/errors"
 	"helmcertifier/pkg/helmcertifier/checks"
 )
 
@@ -32,11 +31,11 @@ func (e CheckNotFoundErr) Error() string {
 type CheckErr string
 
 func (e CheckErr) Error() string {
-	return "check returned error: " + string(e)
+	return "check error: " + string(e)
 }
 
 func NewCheckErr(err error) error {
-	return errors.Wrap(err, "check returned error")
+	return CheckErr(err.Error())
 }
 
 type certifier struct {

@@ -43,5 +43,5 @@ func (r *defaultRegistry) Get(name string) (CheckFunc, bool) {
 
 func (r *defaultRegistry) Add(name string, checkFunc CheckFunc) Registry {
 	(*r)[name] = checkFunc
-	return nil
+	return r
 }

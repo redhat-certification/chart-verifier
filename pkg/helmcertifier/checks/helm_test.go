@@ -28,12 +28,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var chartHandler = http.NotFoundHandler()
-
 func serveCharts(ctx context.Context, addr string) {
 
 	mux := http.NewServeMux()
-	mux.Handle("/charts/", chartHandler)
+	prefix := "/charts/"
+	chartHandler := http.StripPrefix(prefix, http.FileServer(http.Dir("./")))
+	mux.Handle(prefix, chartHandler)
 
 	srv := &http.Server{
 		Addr:    addr,
@@ -59,7 +59,7 @@ func serveCharts(ctx context.Context, addr string) {
 }
 
 func TestLoadChartFromURI(t *testing.T) {
-	addr := "127.0.0.1:8090"
+	addr := "127.0.0.1:9876"
 	ctx, cancel := context.WithCancel(context.Background())
 
 	type testCase struct {

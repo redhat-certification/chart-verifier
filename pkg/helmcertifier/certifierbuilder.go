@@ -50,8 +50,12 @@ func (b *certifierBuilder) Build() (Certifier, error) {
 		return nil, errors.New("no checks have been required")
 	}
 
+	if b.registry == nil {
+		b.registry = defaultRegistry
+	}
+
 	return &certifier{
-		registry:       defaultRegistry,
+		registry:       b.registry,
 		requiredChecks: b.checks,
 	}, nil
 }
