@@ -28,6 +28,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// serveCharts attempts to create a simple HTTP server on the given addr.
 func serveCharts(ctx context.Context, addr string) {
 
 	mux := http.NewServeMux()
@@ -35,10 +36,7 @@ func serveCharts(ctx context.Context, addr string) {
 	chartHandler := http.StripPrefix(prefix, http.FileServer(http.Dir("./")))
 	mux.Handle(prefix, chartHandler)
 
-	srv := &http.Server{
-		Addr:    addr,
-		Handler: mux,
-	}
+	srv := &http.Server{Addr: addr, Handler: mux}
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -78,6 +76,17 @@ func TestLoadChartFromURI(t *testing.T) {
 		},
 	}
 
+	negativeCases := []testCase{
+		{
+			uri:         "chart-0.1.0-v3.non-existing.tgz",
+			description: "non existing file",
+		},
+		{
+			uri:         "http://" + addr + "/charts/chart-0.1.0-v3.non-existing.tgz",
+			description: "non existing remote file",
+		},
+	}
+
 	go serveCharts(ctx, addr)
 
 	for _, tc := range positiveCases {
@@ -85,6 +94,14 @@ func TestLoadChartFromURI(t *testing.T) {
 			c, err := loadChartFromURI(tc.uri)
 			require.NoError(t, err)
 			require.NotNil(t, c)
+		})
+	}
+
+	for _, tc := range negativeCases {
+		t.Run(tc.description, func(t *testing.T) {
+			c, err := loadChartFromURI(tc.uri)
+			require.Error(t, err)
+			require.Nil(t, c)
 		})
 	}
 
