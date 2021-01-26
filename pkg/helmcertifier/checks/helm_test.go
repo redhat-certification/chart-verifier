@@ -19,29 +19,93 @@
 package checks
 
 import (
+	"context"
+	"log"
+	"net/http"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
 
+// serveCharts attempts to create a simple HTTP server on the given addr.
+func serveCharts(ctx context.Context, addr string) {
+
+	mux := http.NewServeMux()
+	prefix := "/charts/"
+	chartHandler := http.StripPrefix(prefix, http.FileServer(http.Dir("./")))
+	mux.Handle(prefix, chartHandler)
+
+	srv := &http.Server{Addr: addr, Handler: mux}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
+	}()
+
+	<-ctx.Done()
+
+	ctxShutdown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer func() {
+		cancel()
+	}()
+
+	if err := srv.Shutdown(ctxShutdown); err != nil {
+		log.Fatalf("server shutdown failed: %s\n", err)
+	}
+}
+
 func TestLoadChartFromURI(t *testing.T) {
+	addr := "127.0.0.1:9876"
+	ctx, cancel := context.WithCancel(context.Background())
+
 	type testCase struct {
 		description string
 		uri         string
 	}
 
-	testCases := []testCase{
+	positiveCases := []testCase{
 		{
 			uri:         "chart-0.1.0-v3.valid.tgz",
 			description: "absolute path",
 		},
+		{
+			uri:         "http://" + addr + "/charts/chart-0.1.0-v3.valid.tgz",
+			description: "remote path, http",
+		},
 	}
 
-	for _, tc := range testCases {
+	negativeCases := []testCase{
+		{
+			uri:         "chart-0.1.0-v3.non-existing.tgz",
+			description: "non existing file",
+		},
+		{
+			uri:         "http://" + addr + "/charts/chart-0.1.0-v3.non-existing.tgz",
+			description: "non existing remote file",
+		},
+	}
+
+	go serveCharts(ctx, addr)
+
+	for _, tc := range positiveCases {
 		t.Run(tc.description, func(t *testing.T) {
 			c, err := loadChartFromURI(tc.uri)
 			require.NoError(t, err)
 			require.NotNil(t, c)
 		})
 	}
+
+	for _, tc := range negativeCases {
+		t.Run(tc.description, func(t *testing.T) {
+			c, err := loadChartFromURI(tc.uri)
+			require.Error(t, err)
+			require.True(t, IsChartNotFound(err))
+			require.Equal(t, "chart not found: "+tc.uri, err.Error())
+			require.Nil(t, c)
+		})
+	}
+
+	cancel()
 }
