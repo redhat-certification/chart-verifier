@@ -56,7 +56,7 @@ func TestCertify(t *testing.T) {
 			errBuf := bytes.NewBufferString("")
 			cmd.SetErr(errBuf)
 
-			cmd.SetArgs([]string{"-u", "/tmp/chart.tgz"})
+			cmd.SetArgs([]string{"-u", "../pkg/helmcertifier/checks/chart-0.1.0-v3.valid.tgz"})
 			require.NoError(t, cmd.Execute())
 		})
 
@@ -71,5 +71,4 @@ func TestCertify(t *testing.T) {
 			require.Error(t, cmd.Execute())
 		})
 	})
-
 }
