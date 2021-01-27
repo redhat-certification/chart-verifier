@@ -97,3 +97,38 @@ func TestHasReadme(t *testing.T) {
 		})
 	}
 }
+
+func TestContainsTest(t *testing.T) {
+	type testCase struct {
+		description string
+		uri         string
+	}
+
+	positiveTestCases := []testCase{
+		{description: "tarball contains at least one test", uri: "chart-0.1.0-v3.valid.tgz"},
+	}
+
+	for _, tc := range positiveTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			r, err := ContainsTest(tc.uri)
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.True(t, r.Ok)
+			require.Equal(t, ChartTestFilesExist, r.Reason)
+		})
+	}
+
+	negativeTestCases := []testCase{
+		{description: "tarball contains at least one test", uri: "chart-0.1.0-v3.valid.notest.tgz"},
+	}
+
+	for _, tc := range negativeTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			r, err := ContainsTest(tc.uri)
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.False(t, r.Ok)
+			require.Equal(t, ChartTestFilesDoesNotExist, r.Reason)
+		})
+	}
+}
