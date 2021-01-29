@@ -132,3 +132,38 @@ func TestContainsTest(t *testing.T) {
 		})
 	}
 }
+
+func TestHasValuesSchema(t *testing.T) {
+	type testCase struct {
+		description string
+		uri         string
+	}
+
+	positiveTestCases := []testCase{
+		{description: "chart with values", uri: "chart-0.1.0-v3.valid.tgz"},
+	}
+
+	for _, tc := range positiveTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			r, err := ContainsValuesSchema(tc.uri)
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.True(t, r.Ok)
+			require.Equal(t, ValuesSchemaFileExist, r.Reason)
+		})
+	}
+
+	negativeTestCases := []testCase{
+		{description: "chart without values", uri: "chart-0.1.0-v3.no-values-schema.tgz"},
+	}
+
+	for _, tc := range negativeTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			r, err := ContainsValuesSchema(tc.uri)
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.False(t, r.Ok)
+			require.Equal(t, ValuesSchemaFileDoesNotExist, r.Reason)
+		})
+	}
+}
