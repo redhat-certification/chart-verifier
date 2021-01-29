@@ -71,9 +71,9 @@ func loadChartFromAbsPath(path string) (*chart.Chart, error) {
 	return c, nil
 }
 
-// loadChartFromURI attempts to retrieve a chart from the given uri string. It accepts "http", "https", "file" schemes,
+// LoadChartFromURI attempts to retrieve a chart from the given uri string. It accepts "http", "https", "file" schemes,
 // and defaults to "file" if there isn't one.
-func loadChartFromURI(uri string) (*chart.Chart, error) {
+func LoadChartFromURI(uri string) (*chart.Chart, error) {
 	u, err := url.Parse(uri)
 	if err != nil {
 		return nil, err

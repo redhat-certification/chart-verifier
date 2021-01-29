@@ -12,7 +12,7 @@ The following checks are being implemented:
 |---|---
 | `is-helm-v3` | Checks whether the given `uri` is a Helm v3 chart.
 | `has-readme` | Checks whether the Helm chart contains a `README.md` file.
-| `contains-tests` | Checks whether the Helm chart contains at least one test file.
+| `contains-test` | Checks whether the Helm chart contains at least one test file.
 | `readme-contains-values-schema` | Checks whether the Helm chart `README.md` file contains a `values` schema section.
 | `keywords-are-openshift-categories` | Checks whether the Helm chart's `Chart.yaml` file includes keywords mapped to OpenShift categories.
 | `is-commercial-chart` | Checks whether the Helm chart is a Commercial chart.

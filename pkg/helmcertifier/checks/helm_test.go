@@ -20,45 +20,15 @@ package checks
 
 import (
 	"context"
-	"log"
-	"net/http"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
+
+	"helmcertifier/pkg/testutil"
 )
-
-// serveCharts attempts to create a simple HTTP server on the given addr.
-func serveCharts(ctx context.Context, addr string) {
-
-	mux := http.NewServeMux()
-	prefix := "/charts/"
-	chartHandler := http.StripPrefix(prefix, http.FileServer(http.Dir("./")))
-	mux.Handle(prefix, chartHandler)
-
-	srv := &http.Server{Addr: addr, Handler: mux}
-
-	go func() {
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen: %s\n", err)
-		}
-	}()
-
-	<-ctx.Done()
-
-	ctxShutdown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer func() {
-		cancel()
-	}()
-
-	if err := srv.Shutdown(ctxShutdown); err != nil {
-		log.Fatalf("server shutdown failed: %s\n", err)
-	}
-}
 
 func TestLoadChartFromURI(t *testing.T) {
 	addr := "127.0.0.1:9876"
-	ctx, cancel := context.WithCancel(context.Background())
 
 	type testCase struct {
 		description string
@@ -87,11 +57,12 @@ func TestLoadChartFromURI(t *testing.T) {
 		},
 	}
 
-	go serveCharts(ctx, addr)
+	ctx, cancel := context.WithCancel(context.Background())
+	go testutil.ServeCharts(ctx, addr, "./")
 
 	for _, tc := range positiveCases {
 		t.Run(tc.description, func(t *testing.T) {
-			c, err := loadChartFromURI(tc.uri)
+			c, err := LoadChartFromURI(tc.uri)
 			require.NoError(t, err)
 			require.NotNil(t, c)
 		})
@@ -99,7 +70,7 @@ func TestLoadChartFromURI(t *testing.T) {
 
 	for _, tc := range negativeCases {
 		t.Run(tc.description, func(t *testing.T) {
-			c, err := loadChartFromURI(tc.uri)
+			c, err := LoadChartFromURI(tc.uri)
 			require.Error(t, err)
 			require.True(t, IsChartNotFound(err))
 			require.Equal(t, "chart not found: "+tc.uri, err.Error())

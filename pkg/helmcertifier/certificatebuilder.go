@@ -19,38 +19,67 @@
 package helmcertifier
 
 import (
+	"errors"
+
 	"helmcertifier/pkg/helmcertifier/checks"
 )
 
 type CertificateBuilder interface {
-	AddResult(result checks.Result) CertificateBuilder
+	SetChartName(name string) CertificateBuilder
+	SetChartVersion(version string) CertificateBuilder
+	AddCheckResult(name string, result checks.Result) CertificateBuilder
 	Build() (Certificate, error)
 }
 
+type CheckResult struct {
+	checks.Result
+	Name string
+}
+
 type certificateBuilder struct {
-	Results []checks.Result
+	ChartName      string
+	ChartVersion   string
+	CheckResultMap checkResultMap
 }
 
 func NewCertificateBuilder() CertificateBuilder {
 	return &certificateBuilder{
-		Results: []checks.Result{},
+		CheckResultMap: checkResultMap{},
 	}
 }
 
-func (r *certificateBuilder) AddResult(result checks.Result) CertificateBuilder {
-	r.Results = append(r.Results, result)
+func (r *certificateBuilder) SetChartName(name string) CertificateBuilder {
+	r.ChartName = name
+	return r
+}
+
+func (r *certificateBuilder) SetChartVersion(version string) CertificateBuilder {
+	r.ChartVersion = version
+	return r
+}
+
+func (r *certificateBuilder) AddCheckResult(name string, result checks.Result) CertificateBuilder {
+	r.CheckResultMap[name] = checkResult{Ok: result.Ok, Reason: result.Reason}
 	return r
 }
 
 func (r *certificateBuilder) Build() (Certificate, error) {
-	res := &certificate{Ok: true}
+	if r.ChartName == "" {
+		return nil, errors.New("chart name must be set")
+	}
 
-	for _, cr := range r.Results {
-		if !cr.Ok {
-			res.Ok = false
+	if r.ChartVersion == "" {
+		return nil, errors.New("chart version must be set")
+	}
+
+	ok := true
+
+	for _, v := range r.CheckResultMap {
+		if !v.Ok {
+			ok = false
 			break
 		}
 	}
 
-	return res, nil
+	return newCertificate(r.ChartName, r.ChartVersion, ok, r.CheckResultMap), nil
 }

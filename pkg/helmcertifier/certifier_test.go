@@ -19,13 +19,21 @@
 package helmcertifier
 
 import (
+	"context"
 	"errors"
-	"github.com/stretchr/testify/require"
-	"helmcertifier/pkg/helmcertifier/checks"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"helmcertifier/pkg/helmcertifier/checks"
+	"helmcertifier/pkg/testutil"
 )
 
 func TestCertifier_Certify(t *testing.T) {
+
+	addr := "127.0.0.1:9876"
+	ctx, cancel := context.WithCancel(context.Background())
+	go testutil.ServeCharts(ctx, addr, "./checks/")
 
 	dummyCheckName := "dummy-check"
 
@@ -41,7 +49,7 @@ func TestCertifier_Certify(t *testing.T) {
 		return checks.Result{Ok: true}, nil
 	}
 
-	dummyChartUri := "http://www.example.com/chart.tgz"
+	validChartUri := "http://" + addr + "/charts/chart-0.1.0-v3.valid.tgz"
 
 	t.Run("Should return error if check does not exist", func(t *testing.T) {
 		c := &certifier{
@@ -49,7 +57,7 @@ func TestCertifier_Certify(t *testing.T) {
 			requiredChecks: []string{dummyCheckName},
 		}
 
-		r, err := c.Certify(dummyChartUri)
+		r, err := c.Certify(validChartUri)
 		require.Error(t, err)
 		require.Nil(t, r)
 	})
@@ -60,18 +68,19 @@ func TestCertifier_Certify(t *testing.T) {
 			requiredChecks: []string{dummyCheckName},
 		}
 
-		r, err := c.Certify(dummyChartUri)
+		r, err := c.Certify(validChartUri)
 		require.Error(t, err)
 		require.Nil(t, r)
 	})
 
 	t.Run("Result should be negative if check exists and returns negative", func(t *testing.T) {
+
 		c := &certifier{
 			registry:       checks.NewRegistry().Add(dummyCheckName, negativeCheck),
 			requiredChecks: []string{dummyCheckName},
 		}
 
-		r, err := c.Certify(dummyChartUri)
+		r, err := c.Certify(validChartUri)
 		require.NoError(t, err)
 		require.NotNil(t, r)
 		require.False(t, r.IsOk())
@@ -83,9 +92,11 @@ func TestCertifier_Certify(t *testing.T) {
 			requiredChecks: []string{dummyCheckName},
 		}
 
-		r, err := c.Certify(dummyChartUri)
+		r, err := c.Certify(validChartUri)
 		require.NoError(t, err)
 		require.NotNil(t, r)
 		require.True(t, r.IsOk())
 	})
+
+	cancel()
 }

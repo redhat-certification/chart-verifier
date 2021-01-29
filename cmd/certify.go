@@ -19,14 +19,18 @@
 package cmd
 
 import (
+	"encoding/json"
+
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
+
 	"helmcertifier/pkg/helmcertifier"
 )
 
 //goland:noinspection GoUnusedGlobalVariable
 var (
 	// allChecks contains all available checks to be executed by the program.
-	allChecks []string = []string{"is-helm-package"}
+	allChecks []string = []string{"is-helm-v3", "contains-test"}
 	// chartUri contains the chart location as informed by the user; should accept anything that Helm understands as a Chart
 	// URI.
 	chartUri string
@@ -34,6 +38,8 @@ var (
 	onlyChecks []string
 	// exceptChecks are the checks that should not be performed.
 	exceptChecks []string
+	// outputFormat contains the output format the user has specified: default, yaml or json.
+	outputFormat string
 )
 
 func buildChecks(allChecks, onlyChecks, _ []string) []string {
@@ -67,7 +73,25 @@ func NewCertifyCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			cmd.Println(result)
+
+			if outputFormat == "json" {
+				b, err := json.Marshal(result)
+				if err != nil {
+					return err
+				}
+
+				cmd.Println(string(b))
+
+			} else if outputFormat == "yaml" {
+				b, err := yaml.Marshal(result)
+				if err != nil {
+					return err
+				}
+
+				cmd.Println(string(b))
+			} else {
+				cmd.Print(result)
+			}
 
 			return nil
 		},
@@ -79,6 +103,8 @@ func NewCertifyCmd() *cobra.Command {
 	cmd.Flags().StringSliceVarP(&onlyChecks, "only", "o", nil, "only the informed checks will be performed")
 
 	cmd.Flags().StringSliceVarP(&exceptChecks, "except", "e", nil, "all available checks except those informed will be performed")
+
+	cmd.Flags().StringVarP(&outputFormat, "output", "f", "", "the output format: default, json or yaml")
 
 	return cmd
 }
