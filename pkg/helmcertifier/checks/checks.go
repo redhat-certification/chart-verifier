@@ -33,6 +33,8 @@ const (
 	ChartTestFilesDoesNotExist   = "Chart test files does not exist"
 	ValuesSchemaFileExist        = "Values schema file exist"
 	ValuesSchemaFileDoesNotExist = "Values schema file does not exist"
+	ValuesFileExist            = "Values file exist"
+	ValuesFileDoesNotExist     = "Values file does not exist"
 )
 
 func notImplemented() (Result, error) {
@@ -87,6 +89,22 @@ func ContainsTest(uri string) (Result, error) {
 
 	return r, nil
 
+}
+
+func ContainsValues(uri string) (Result, error) {
+	c, err := loadChartFromURI(uri)
+	if err != nil {
+		return Result{}, err
+	}
+
+	r := Result{Reason: ValuesFileDoesNotExist}
+
+	if len(c.Values) > 0 {
+		r.Reason = ValuesFileExist
+		r.Ok = true
+	}
+
+	return r, nil
 }
 
 func ContainsValuesSchema(uri string) (Result, error) {
