@@ -31,10 +31,12 @@ const (
 	TestTemplatePrefix           = "templates/tests/"
 	ChartTestFilesExist          = "Chart test files exist"
 	ChartTestFilesDoesNotExist   = "Chart test files does not exist"
+	MinKuberVersionSpecified     = "Minimum Kubernetes version specified"
+	MinKuberVersionNotSpecified  = "Minimum Kubernetes version not specified"
 	ValuesSchemaFileExist        = "Values schema file exist"
 	ValuesSchemaFileDoesNotExist = "Values schema file does not exist"
-	ValuesFileExist            = "Values file exist"
-	ValuesFileDoesNotExist     = "Values file does not exist"
+	ValuesFileExist              = "Values file exist"
+	ValuesFileDoesNotExist       = "Values file does not exist"
 )
 
 func notImplemented() (Result, error) {
@@ -136,7 +138,19 @@ func IsCommunityChart(uri string) (Result, error) {
 }
 
 func HasMinKubeVersion(uri string) (Result, error) {
-	return notImplemented()
+	c, err := loadChartFromURI(uri)
+	if err != nil {
+		return Result{}, err
+	}
+
+	r := Result{Reason: MinKuberVersionNotSpecified}
+
+	if c.Metadata.KubeVersion != "" {
+		r.Ok = true
+		r.Reason = MinKuberVersionSpecified
+	}
+
+	return r, nil
 }
 
 func NotContainsCRDs(uri string) (Result, error) {

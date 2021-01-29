@@ -202,3 +202,39 @@ func TestHasValues(t *testing.T) {
 		})
 	}
 }
+
+func TestHasMinKubeVersion(t *testing.T) {
+	type testCase struct {
+		description string
+		uri         string
+	}
+
+	positiveTestCases := []testCase{
+		{description: "minimum Kubernetes version specified", uri: "chart-0.1.0-v3.valid.tgz"},
+	}
+
+	for _, tc := range positiveTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			r, err := HasMinKubeVersion(tc.uri)
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.True(t, r.Ok)
+			require.Equal(t, MinKuberVersionSpecified, r.Reason)
+		})
+	}
+
+	negativeTestCases := []testCase{
+		{description: "minimum Kubernetes version not specified", uri: "chart-0.1.0-v3.without-minkubeversion.tgz"},
+	}
+
+	for _, tc := range negativeTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			r, err := HasMinKubeVersion(tc.uri)
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.False(t, r.Ok)
+			require.Equal(t, MinKuberVersionNotSpecified, r.Reason)
+		})
+	}
+
+}
