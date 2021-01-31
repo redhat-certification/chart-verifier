@@ -94,7 +94,7 @@ func ContainsTest(uri string) (Result, error) {
 }
 
 func ContainsValues(uri string) (Result, error) {
-	c, err := loadChartFromURI(uri)
+	c, err := LoadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
 	}
@@ -110,7 +110,7 @@ func ContainsValues(uri string) (Result, error) {
 }
 
 func ContainsValuesSchema(uri string) (Result, error) {
-	c, err := loadChartFromURI(uri)
+	c, err := LoadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
 	}
@@ -138,7 +138,7 @@ func IsCommunityChart(uri string) (Result, error) {
 }
 
 func HasMinKubeVersion(uri string) (Result, error) {
-	c, err := loadChartFromURI(uri)
+	c, err := LoadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
 	}
