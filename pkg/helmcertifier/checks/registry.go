@@ -31,9 +31,18 @@ type CheckFunc func(uri string) (Result, error)
 type Registry interface {
 	Get(name string) (CheckFunc, bool)
 	Add(name string, checkFunc CheckFunc) Registry
+	AllChecks() []string
 }
 
 type defaultRegistry map[string]CheckFunc
+
+func (r *defaultRegistry) AllChecks() []string {
+	allChecks := make([]string, 0)
+	for k, _ := range *r {
+		allChecks = append(allChecks, k)
+	}
+	return allChecks
+}
 
 func NewRegistry() Registry {
 	return &defaultRegistry{}

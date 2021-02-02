@@ -20,6 +20,7 @@ package helmcertifier
 
 import (
 	"errors"
+
 	"helmcertifier/pkg/helmcertifier/checks"
 )
 
@@ -29,6 +30,13 @@ func init() {
 	defaultRegistry = checks.NewRegistry()
 	defaultRegistry.Add("is-helm-v3", checks.IsHelmV3)
 	defaultRegistry.Add("contains-test", checks.ContainsTest)
+	defaultRegistry.Add("contains-values", checks.ContainsValues)
+	defaultRegistry.Add("contains-values-schema", checks.ContainsValuesSchema)
+	defaultRegistry.Add("has-minkubeversion", checks.HasMinKubeVersion)
+}
+
+func DefaultRegistry() checks.Registry {
+	return defaultRegistry
 }
 
 type certifierBuilder struct {

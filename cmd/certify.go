@@ -27,10 +27,14 @@ import (
 	"helmcertifier/pkg/helmcertifier"
 )
 
+func init() {
+	allChecks = helmcertifier.DefaultRegistry().AllChecks()
+}
+
 //goland:noinspection GoUnusedGlobalVariable
 var (
 	// allChecks contains all available checks to be executed by the program.
-	allChecks []string = []string{"is-helm-v3", "contains-test"}
+	allChecks []string
 	// chartUri contains the chart location as informed by the user; should accept anything that Helm understands as a Chart
 	// URI.
 	chartUri string

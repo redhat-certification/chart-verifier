@@ -56,14 +56,14 @@ To certify a chart against all available checks:
 > helmcertifier --uri https://www.example.com/chart.tgz
 ```
 
-To apply only the `is-helm-chart` check:
+To apply only the `is-helm-v3` check:
 
 ```text
-> helmcertifier --only is-helm-chart --uri https://www.example.com/chart.tgz
+> helmcertifier --only is-helm-v3 --uri https://www.example.com/chart.tgz
 ```
 
-To apply all checks except `is-helm-chart`:
+To apply all checks except `is-helm-v3`:
 
 ```text
-> helmcertifier --except is-helm-chart --uri https://www.example.com/chart.tgz
+> helmcertifier --except is-helm-v3 --uri https://www.example.com/chart.tgz
 ```
