@@ -37,6 +37,8 @@ const (
 	ValuesSchemaFileDoesNotExist = "Values schema file does not exist"
 	ValuesFileExist              = "Values file exist"
 	ValuesFileDoesNotExist       = "Values file does not exist"
+	ChartContainCRDs             = "Chart contain CRDs"
+	ChartDoesNotContainCRDs      = "Chart does not contain CRDs"
 )
 
 func notImplemented() (Result, error) {
@@ -153,8 +155,20 @@ func HasMinKubeVersion(uri string) (Result, error) {
 	return r, nil
 }
 
-func NotContainsCRDs(uri string) (Result, error) {
-	return notImplemented()
+func NotContainCRDs(uri string) (Result, error) {
+	c, err := LoadChartFromURI(uri)
+	if err != nil {
+		return Result{}, err
+	}
+
+	r := Result{Ok: true, Reason: ChartDoesNotContainCRDs}
+
+	if len(c.CRDObjects()) > 0 {
+		r.Ok = false
+		r.Reason = ChartContainCRDs
+	}
+
+	return r, nil
 }
 
 func NotContainsInfraPluginsAndDrivers(uri string) (Result, error) {

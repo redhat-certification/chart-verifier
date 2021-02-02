@@ -33,6 +33,7 @@ func init() {
 	defaultRegistry.Add("contains-values", checks.ContainsValues)
 	defaultRegistry.Add("contains-values-schema", checks.ContainsValuesSchema)
 	defaultRegistry.Add("has-minkubeversion", checks.HasMinKubeVersion)
+	defaultRegistry.Add("not-contains-crds", checks.NotContainCRDs)
 }
 
 func DefaultRegistry() checks.Registry {
