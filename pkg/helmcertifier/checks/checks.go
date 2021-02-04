@@ -26,6 +26,8 @@ import (
 
 const (
 	APIVersion2                  = "v2"
+	ReadmeExist                  = "Chart has README"
+	ReadmeDoesNotExist           = "Chart has not README"
 	NotHelm3Reason               = "API version is not V2 used in Helm 3"
 	Helm3Reason                  = "API version is V2 used in Helm 3"
 	TestTemplatePrefix           = "templates/tests/"
@@ -65,15 +67,15 @@ func HasReadme(uri string) (Result, error) {
 		return Result{}, err
 	}
 
-	hasReadme := false
+	r := Result{Reason: ReadmeDoesNotExist}
 	for _, f := range c.Files {
 		if f.Name == "README.md" {
-			hasReadme = true
-			break
+			r.Ok = true
+			r.Reason = ReadmeExist
 		}
 	}
 
-	return Result{Ok: hasReadme}, nil
+	return r, nil
 }
 
 func ContainsTest(uri string) (Result, error) {

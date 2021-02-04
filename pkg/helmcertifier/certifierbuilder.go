@@ -28,6 +28,7 @@ var defaultRegistry checks.Registry
 
 func init() {
 	defaultRegistry = checks.NewRegistry()
+	defaultRegistry.Add("has-readme", checks.HasReadme)
 	defaultRegistry.Add("is-helm-v3", checks.IsHelmV3)
 	defaultRegistry.Add("contains-test", checks.ContainsTest)
 	defaultRegistry.Add("contains-values", checks.ContainsValues)
