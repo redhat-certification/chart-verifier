@@ -1,28 +1,29 @@
 /*
- * Copyright (C) 08/01/2021, 01:52, igors
- * This file is part of helmcertifier.
+ * Copyright 2021 Red Hat
  *
- * helmcertifier is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * helmcertifier is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU General Public License
- * along with helmcertifier.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package checks
 
 import (
+	"helm.sh/helm/v3/pkg/chartutil"
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
+	"regexp"
 
 	"github.com/pkg/errors"
 	"helm.sh/helm/v3/pkg/chart"
@@ -71,21 +72,95 @@ func loadChartFromAbsPath(path string) (*chart.Chart, error) {
 	return c, nil
 }
 
+type ChartCache interface {
+	MakeKey(uri string) string
+	Add(uri string, chrt *chart.Chart) (ChartCacheItem, error)
+	Get(uri string) (ChartCacheItem, bool, error)
+}
+
+type ChartCacheItem struct {
+	Chart *chart.Chart
+	Path  string
+}
+
+type chartCache struct {
+	chartMap map[string]ChartCacheItem
+}
+
+func newChartCache() *chartCache {
+	return &chartCache{
+		chartMap: make(map[string]ChartCacheItem),
+	}
+}
+
+func (c *chartCache) MakeKey(uri string) string {
+	return regexp.MustCompile("[:/?.-]").ReplaceAllString(uri, "_")
+}
+
+func (c *chartCache) Get(uri string) (ChartCacheItem, bool, error) {
+	if item, ok := c.chartMap[c.MakeKey(uri)]; !ok {
+		return ChartCacheItem{}, false, nil
+	} else {
+		return item, true, nil
+	}
+}
+
+func (c *chartCache) Add(uri string, chrt *chart.Chart) (ChartCacheItem, error) {
+	userCacheDir, err := os.UserCacheDir()
+	if err != nil {
+		return ChartCacheItem{}, err
+	}
+	key := c.MakeKey(uri)
+	cacheDir := path.Join(userCacheDir, "helmcertifier")
+	chartCacheDir := path.Join(cacheDir, key)
+	cacheItem := ChartCacheItem{Chart: chrt, Path: chartCacheDir}
+	if err = chartutil.SaveDir(chrt, chartCacheDir); err != nil {
+		return ChartCacheItem{}, err
+	}
+	c.chartMap[key] = cacheItem
+	return cacheItem, nil
+}
+
+var defaultChartCache *chartCache
+
+func init() {
+	defaultChartCache = newChartCache()
+}
+
 // LoadChartFromURI attempts to retrieve a chart from the given uri string. It accepts "http", "https", "file" schemes,
 // and defaults to "file" if there isn't one.
-func LoadChartFromURI(uri string) (*chart.Chart, error) {
+func LoadChartFromURI(uri string) (*chart.Chart, string, error) {
+	var (
+		chrt *chart.Chart
+		err  error
+	)
+
+	if cached, ok, _ := defaultChartCache.Get(uri); ok {
+		return cached.Chart, cached.Path, nil
+	}
+
 	u, err := url.Parse(uri)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	switch u.Scheme {
 	case "http", "https":
-		return loadChartFromRemote(u)
+		chrt, err = loadChartFromRemote(u)
 	case "file", "":
-		return loadChartFromAbsPath(u.Path)
+		chrt, err = loadChartFromAbsPath(u.Path)
 	default:
-		return nil, errors.Errorf("scheme %q not supported", u.Scheme)
+		return nil, "", errors.Errorf("scheme %q not supported", u.Scheme)
+	}
+
+	if err != nil {
+		return nil, "", err
+	}
+
+	if cached, err := defaultChartCache.Add(uri, chrt); err != nil {
+		return nil, "", err
+	} else {
+		return cached.Chart, cached.Path, nil
 	}
 }
 

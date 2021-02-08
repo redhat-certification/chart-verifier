@@ -1,19 +1,17 @@
 /*
- * Copyright (C) 08/01/2021, 02:01, igors
- * This file is part of helmcertifier.
+ * Copyright 2021 Red Hat
  *
- * helmcertifier is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * helmcertifier is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU General Public License
- * along with helmcertifier.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package checks
@@ -268,4 +266,40 @@ func TestNotContainCRDs(t *testing.T) {
 			require.Equal(t, ChartContainCRDs, r.Reason)
 		})
 	}
+}
+
+func TestHelmLint(t *testing.T) {
+	type testCase struct {
+		description string
+		uri         string
+	}
+
+	positiveTestCases := []testCase{
+		{description: "Helm lint works for valid chart", uri: "chart-0.1.0-v3.valid.tgz"},
+	}
+
+	for _, tc := range positiveTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			r, err := HelmLint(tc.uri)
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.True(t, r.Ok)
+			require.Equal(t, HelmLintSuccessful, r.Reason)
+		})
+	}
+
+	negativeTestCases := []testCase{
+		{description: "Helm lint fails for invalid chart", uri: "chart-0.1.0-v3.without-minkubeversion.tgz"},
+	}
+
+	for _, tc := range negativeTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			r, err := HelmLint(tc.uri)
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.False(t, r.Ok)
+			require.Contains(t, r.Reason, HelmLintHasFailedPrefix)
+		})
+	}
+
 }

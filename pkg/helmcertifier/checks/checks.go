@@ -1,24 +1,25 @@
 /*
- * Copyright (C) 04/01/2021, 06:58, igors
- * This file is part of helmcertifier.
+ * Copyright 2021 Red Hat
  *
- * helmcertifier is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * helmcertifier is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * You should have received a copy of the GNU General Public License
- * along with helmcertifier.  If not, see <http://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package checks
 
 import (
+	"fmt"
+	"helm.sh/helm/v3/pkg/lint"
+	"path"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -41,6 +42,8 @@ const (
 	ValuesFileDoesNotExist       = "Values file does not exist"
 	ChartContainCRDs             = "Chart contain CRDs"
 	ChartDoesNotContainCRDs      = "Chart does not contain CRDs"
+	HelmLintSuccessful           = "Helm lint successful"
+	HelmLintHasFailedPrefix      = "Helm lint has failed: "
 )
 
 func notImplemented() (Result, error) {
@@ -48,7 +51,7 @@ func notImplemented() (Result, error) {
 }
 
 func IsHelmV3(uri string) (Result, error) {
-	c, err := LoadChartFromURI(uri)
+	c, _, err := LoadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
 	}
@@ -62,7 +65,7 @@ func IsHelmV3(uri string) (Result, error) {
 }
 
 func HasReadme(uri string) (Result, error) {
-	c, err := LoadChartFromURI(uri)
+	c, _, err := LoadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
 	}
@@ -79,7 +82,7 @@ func HasReadme(uri string) (Result, error) {
 }
 
 func ContainsTest(uri string) (Result, error) {
-	c, err := LoadChartFromURI(uri)
+	c, _, err := LoadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
 	}
@@ -98,7 +101,7 @@ func ContainsTest(uri string) (Result, error) {
 }
 
 func ContainsValues(uri string) (Result, error) {
-	c, err := LoadChartFromURI(uri)
+	c, _, err := LoadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
 	}
@@ -114,7 +117,7 @@ func ContainsValues(uri string) (Result, error) {
 }
 
 func ContainsValuesSchema(uri string) (Result, error) {
-	c, err := LoadChartFromURI(uri)
+	c, _, err := LoadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
 	}
@@ -142,7 +145,7 @@ func IsCommunityChart(uri string) (Result, error) {
 }
 
 func HasMinKubeVersion(uri string) (Result, error) {
-	c, err := LoadChartFromURI(uri)
+	c, _, err := LoadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
 	}
@@ -158,7 +161,7 @@ func HasMinKubeVersion(uri string) (Result, error) {
 }
 
 func NotContainCRDs(uri string) (Result, error) {
-	c, err := LoadChartFromURI(uri)
+	c, _, err := LoadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
 	}
@@ -170,6 +173,24 @@ func NotContainCRDs(uri string) (Result, error) {
 		r.Reason = ChartContainCRDs
 	}
 
+	return r, nil
+}
+
+func HelmLint(uri string) (Result, error) {
+	c, p, err := LoadChartFromURI(uri)
+	if err != nil {
+		return Result{}, err
+	}
+	r := Result{Ok: true, Reason: HelmLintSuccessful}
+	p = path.Join(p, c.Name())
+	linter := lint.All(p, map[string]interface{}{}, "default", false)
+	if len(linter.Messages) > 0 {
+		reason := ""
+		for _, m := range linter.Messages {
+			reason = reason + m.Error() + "\n"
+		}
+		r = Result{Ok: false, Reason: fmt.Sprintf("%s %s", HelmLintHasFailedPrefix, reason)}
+	}
 	return r, nil
 }
 
