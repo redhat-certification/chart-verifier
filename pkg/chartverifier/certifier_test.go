@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package helmcertifier
+package chartverifier
 
 import (
 	"context"
@@ -23,8 +23,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"helmcertifier/pkg/helmcertifier/checks"
-	"helmcertifier/pkg/testutil"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	"github.com/redhat-certification/chart-verifier/pkg/testutil"
 )
 
 func TestCertifier_Certify(t *testing.T) {

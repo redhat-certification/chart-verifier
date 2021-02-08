@@ -14,22 +14,32 @@
  * limitations under the License.
  */
 
-package helmcertifier
+package chartverifier
 
 import (
-	"helmcertifier/pkg/helmcertifier/checks"
+	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
-type CertifierBuilder interface {
-	SetRegistry(registry checks.Registry) CertifierBuilder
-	SetChecks(checks []string) CertifierBuilder
-	Build() (Certifier, error)
-}
+func TestCertificationBuilder(t *testing.T) {
 
-type Certifier interface {
-	Certify(uri string) (Certificate, error)
-}
+	t.Run("Should fail building certifier when requiredChecks are not set", func(t *testing.T) {
+		b := NewCertifierBuilder()
 
-type Certificate interface {
-	IsOk() bool
+		c, err := b.Build()
+		require.Error(t, err)
+		require.Nil(t, c)
+	})
+
+	t.Run("Should build certifier when requiredChecks are set", func(t *testing.T) {
+		b := NewCertifierBuilder()
+
+		c, err := b.
+			SetChecks([]string{"a", "b"}).
+			Build()
+
+		require.NoError(t, err)
+		require.NotNil(t, c)
+	})
 }

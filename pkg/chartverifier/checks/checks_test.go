@@ -289,7 +289,7 @@ func TestHelmLint(t *testing.T) {
 	}
 
 	negativeTestCases := []testCase{
-		{description: "Helm lint fails for invalid chart", uri: "chart-0.1.0-v3.without-minkubeversion.tgz"},
+		{description: "Helm lint fails for invalid chart", uri: "chart-0.1.0-v2.invalid.tgz"},
 	}
 
 	for _, tc := range negativeTestCases {

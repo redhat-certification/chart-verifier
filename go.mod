@@ -1,4 +1,4 @@
-module helmcertifier
+module github.com/redhat-certification/chart-verifier
 
 go 1.15
 

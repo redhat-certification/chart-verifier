@@ -15,7 +15,7 @@
  */
 package main
 
-import "helmcertifier/cmd"
+import "github.com/redhat-certification/chart-verifier/cmd"
 
 func main() {
 	cmd.Execute()

@@ -13,6 +13,6 @@ RUN ./hack/build.sh
 
 FROM fedora:31
 
-COPY --from=build /tmp/src/out/helmcertifier /app/helmcertifier
+COPY --from=build /tmp/src/out/chart-verifier /app/chart-verifier
 
-ENTRYPOINT ["/app/helmcertifier"]
+ENTRYPOINT ["/app/chart-verifier"]

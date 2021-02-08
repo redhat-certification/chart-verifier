@@ -17,13 +17,14 @@
 package checks
 
 import (
-	"helm.sh/helm/v3/pkg/chartutil"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
+
+	"helm.sh/helm/v3/pkg/chartutil"
 
 	"github.com/pkg/errors"
 	"helm.sh/helm/v3/pkg/chart"
@@ -111,7 +112,7 @@ func (c *chartCache) Add(uri string, chrt *chart.Chart) (ChartCacheItem, error) 
 		return ChartCacheItem{}, err
 	}
 	key := c.MakeKey(uri)
-	cacheDir := path.Join(userCacheDir, "helmcertifier")
+	cacheDir := path.Join(userCacheDir, "chart-verifier")
 	chartCacheDir := path.Join(cacheDir, key)
 	cacheItem := ChartCacheItem{Chart: chrt, Path: chartCacheDir}
 	if err = chartutil.SaveDir(chrt, chartCacheDir); err != nil {

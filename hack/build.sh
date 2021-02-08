@@ -15,4 +15,4 @@
 # limitations under the License.
 #
 
-go build -o ./out/helmcertifier main.go
+go build -o ./out/chart-verifier main.go

@@ -22,11 +22,11 @@ import (
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 
-	"helmcertifier/pkg/helmcertifier"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier"
 )
 
 func init() {
-	allChecks = helmcertifier.DefaultRegistry().AllChecks()
+	allChecks = chartverifier.DefaultRegistry().AllChecks()
 }
 
 //goland:noinspection GoUnusedGlobalVariable
@@ -51,8 +51,8 @@ func buildChecks(allChecks, onlyChecks, _ []string) []string {
 	return allChecks
 }
 
-func buildCertifier(checks []string) (helmcertifier.Certifier, error) {
-	return helmcertifier.NewCertifierBuilder().
+func buildCertifier(checks []string) (chartverifier.Certifier, error) {
+	return chartverifier.NewCertifierBuilder().
 		SetChecks(checks).
 		Build()
 }

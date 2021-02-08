@@ -1,6 +1,6 @@
-# helmcertifier
+# chart-verifier
 
-`helmcertifier` is a tool that certifies a Helm chart against a configurable list of checks; those checks can be
+`chart-verifier` is a tool that certifies a Helm chart against a configurable list of checks; those checks can be
 whitelisted or blacklisted through command line options.
 
 Each check is independent and order is not and will not be guaranteed, and its input will be informed through options in
@@ -51,19 +51,19 @@ each test.
 To certify a chart against all available checks:
 
 ```text
-> helmcertifier --uri ./chart.tgz
-> helmcertifier --uri ~/src/chart
-> helmcertifier --uri https://www.example.com/chart.tgz
+> chart-verifier --uri ./chart.tgz
+> chart-verifier --uri ~/src/chart
+> chart-verifier --uri https://www.example.com/chart.tgz
 ```
 
 To apply only the `is-helm-v3` check:
 
 ```text
-> helmcertifier --only is-helm-v3 --uri https://www.example.com/chart.tgz
+> chart-verifier --only is-helm-v3 --uri https://www.example.com/chart.tgz
 ```
 
 To apply all checks except `is-helm-v3`:
 
 ```text
-> helmcertifier --except is-helm-v3 --uri https://www.example.com/chart.tgz
+> chart-verifier --except is-helm-v3 --uri https://www.example.com/chart.tgz
 ```

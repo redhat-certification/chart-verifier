@@ -1,3 +1,3 @@
 $env:GOOS="windows"
 $env:GOARCH="amd64"
-go build -o helmcertifier.exe main.go
+go build -o chart-verifier.exe main.go

@@ -22,7 +22,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"helmcertifier/pkg/testutil"
+	"github.com/redhat-certification/chart-verifier/pkg/testutil"
 )
 
 func TestLoadChartFromURI(t *testing.T) {

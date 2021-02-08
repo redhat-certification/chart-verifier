@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package helmcertifier
+package chartverifier
 
 import (
-	"helmcertifier/pkg/helmcertifier/checks"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 )
 
 type CheckNotFoundErr string

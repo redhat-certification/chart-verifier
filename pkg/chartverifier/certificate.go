@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package helmcertifier
+package chartverifier
 
 import "strconv"
 

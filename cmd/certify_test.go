@@ -24,7 +24,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 
-	"helmcertifier/pkg/helmcertifier/checks"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 )
 
 func TestCertify(t *testing.T) {
@@ -59,7 +59,7 @@ func TestCertify(t *testing.T) {
 			errBuf := bytes.NewBufferString("")
 			cmd.SetErr(errBuf)
 
-			cmd.SetArgs([]string{"-u", "../pkg/helmcertifier/checks/chart-0.1.0-v3.non-existing.tgz"})
+			cmd.SetArgs([]string{"-u", "../pkg/chartverifier/checks/chart-0.1.0-v3.non-existing.tgz"})
 
 			err := cmd.Execute()
 			require.Error(t, err)
@@ -87,7 +87,7 @@ func TestCertify(t *testing.T) {
 			cmd.SetErr(errBuf)
 
 			cmd.SetArgs([]string{
-				"-u", "../pkg/helmcertifier/checks/chart-0.1.0-v3.valid.tgz",
+				"-u", "../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 				"--only", "is-helm-v3", // only consider a single check, perhaps more checks in the future
 			})
 			require.NoError(t, cmd.Execute())
@@ -111,7 +111,7 @@ func TestCertify(t *testing.T) {
 			cmd.SetErr(errBuf)
 
 			cmd.SetArgs([]string{
-				"-u", "../pkg/helmcertifier/checks/chart-0.1.0-v3.valid.tgz",
+				"-u", "../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 				"--only", "is-helm-v3", // only consider a single check, perhaps more checks in the future
 				"--output", "json",
 			})
@@ -149,7 +149,7 @@ func TestCertify(t *testing.T) {
 			cmd.SetErr(errBuf)
 
 			cmd.SetArgs([]string{
-				"-u", "../pkg/helmcertifier/checks/chart-0.1.0-v3.valid.tgz",
+				"-u", "../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 				"--only", "is-helm-v3", // only consider a single check, perhaps more checks in the future
 				"--output", "yaml",
 			})
