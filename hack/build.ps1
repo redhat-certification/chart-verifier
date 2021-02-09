@@ -1,3 +1,3 @@
 $env:GOOS="windows"
 $env:GOARCH="amd64"
-go build -o chart-verifier.exe main.go
+go build -o .\out\chart-verifier.exe main.go
