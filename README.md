@@ -58,39 +58,40 @@ To build `chart-verifier` locally, please execute `hack/build.sh` or its PowerSh
 To build `chart-verifier` container image, please execute `hack/build-image.sh` or its PowerShell alternative:
 
 ```text
-PS C:\Users\igors\GolandProjects\helmcertifier> .\hack\build-image.ps1
-[+] Building 42.2s (15/15) FINISHED
- => [internal] load build definition from Dockerfile                                                                                               0.0s
- => => transferring dockerfile: 283B                                                                                                               0.0s
- => [internal] load .dockerignore                                                                                                                  0.0s
- => => transferring context: 2B                                                                                                                    0.0s
- => [internal] load metadata for docker.io/library/fedora:31                                                                                       1.4s
- => [internal] load metadata for docker.io/library/golang:1.15                                                                                     1.5s
- => [internal] load build context                                                                                                                  0.6s
- => => transferring context: 43.32MB                                                                                                               0.6s
- => CACHED [stage-1 1/2] FROM docker.io/library/fedora:31@sha256:ba4fe6a3da48addb248a16e8a63599cc5ff5250827e7232d2e3038279a0e467e                  0.0s
- => [build 1/7] FROM docker.io/library/golang:1.15@sha256:2d144ad89c91d4eb516eaf8361c1f49115c5d06042683e27d3439dc6c2535cc7                         0.0s
- => CACHED [build 2/7] WORKDIR /tmp/src                                                                                                            0.0s
- => [build 3/7] COPY go.mod .                                                                                                                      0.1s
- => [build 4/7] COPY go.sum .                                                                                                                      0.0s
- => [build 5/7] RUN go mod download                                                                                                               27.8s
- => [build 6/7] COPY . .                                                                                                                           0.1s
- => [build 7/7] RUN ./hack/build.sh                                                                                                               11.6s
- => [stage-1 2/2] COPY --from=build /tmp/src/out/chart-verifier /app/chart-verifier                                                                0.2s
- => exporting to image                                                                                                                             0.2s
- => => exporting layers                                                                                                                            0.2s
- => => writing image sha256:9a57eb6b573f3878559b44ab0a8d7be350f3ccc634b3e9b8085cbc279f3a229c                                                       0.0s
- => => naming to docker.io/library/chart-verifier:9ec6e7e                                                                                          0.0s
+PS C:\Users\igors\GolandProjects\chart-verifier> .\hack\build-image.ps1
+[+] Building 13.7s (15/15) FINISHED
+ => [internal] load build definition from Dockerfile                                                                                                                                                                                                                 0.0s
+ => => transferring dockerfile: 32B                                                                                                                                                                                                                                  0.0s
+ => [internal] load .dockerignore                                                                                                                                                                                                                                    0.0s
+ => => transferring context: 2B                                                                                                                                                                                                                                      0.0s
+ => [internal] load metadata for docker.io/library/fedora:31                                                                                                                                                                                                         1.3s
+ => [internal] load metadata for docker.io/library/golang:1.15                                                                                                                                                                                                       1.5s
+ => [build 1/7] FROM docker.io/library/golang:1.15@sha256:037ea51ce8bc2cd2fe006bc82a08bf2d7c199dfa12e55d59faf1ff367efeb027                                                                                                                                           0.0s
+ => => resolve docker.io/library/golang:1.15@sha256:037ea51ce8bc2cd2fe006bc82a08bf2d7c199dfa12e55d59faf1ff367efeb027                                                                                                                                                 0.0s
+ => [internal] load build context                                                                                                                                                                                                                                    0.0s
+ => => transferring context: 4.49kB                                                                                                                                                                                                                                  0.0s
+ => [stage-1 1/2] FROM docker.io/library/fedora:31@sha256:ba4fe6a3da48addb248a16e8a63599cc5ff5250827e7232d2e3038279a0e467e                                                                                                                                           0.0s
+ => CACHED [build 2/7] WORKDIR /tmp/src                                                                                                                                                                                                                              0.0s
+ => CACHED [build 3/7] COPY go.mod .                                                                                                                                                                                                                                 0.0s
+ => CACHED [build 4/7] COPY go.sum .                                                                                                                                                                                                                                 0.0s
+ => CACHED [build 5/7] RUN go mod download                                                                                                                                                                                                                           0.0s
+ => [build 6/7] COPY . .                                                                                                                                                                                                                                             0.2s
+ => [build 7/7] RUN ./hack/build.sh                                                                                                                                                                                                                                 11.8s
+ => CACHED [stage-1 2/2] COPY --from=build /tmp/src/out/chart-verifier /app/chart-verifier                                                                                                                                                                           0.0s
+ => exporting to image                                                                                                                                                                                                                                               0.0s
+ => => exporting layers                                                                                                                                                                                                                                              0.0s
+ => => writing image sha256:9a57eb6b573f3878559b44ab0a8d7be350f3ccc634b3e9b8085cbc279f3a229c                                                                                                                                                                         0.0s
+ => => naming to quay.io/redhat-certification/chart-verifier:0d3706f
 ```
 
 The container image created by the build program is tagged with the commit ID of the working directory at the time of
-the build: `chart-verifier:9ec6e7e`.
+the build: `quay.io/redhat-certification/chart-verifier:0d3706f`.
 
-This container image can then be executed with the Docker client as `docker run -it chart-verifier:9ec6e7e certify`,
+This container image can then be executed with the Docker client as `docker run -it --rm quay.io/redhat-certification/chart-verifier:0d3706f certify`,
 like in the example below:
 
 ```text
-PS C:\Users\igors\GolandProjects\helmcertifier> docker run -it chart-verifier:9ec6e7e certify --help
+PS C:\Users\igors\GolandProjects\chart-verifier> docker run -it --rm quay.io/redhat-certification/chart-verifier:0d3706f certify --help
 Certifies a Helm chart by checking some of its characteristics
 
 Usage:
@@ -111,8 +112,7 @@ To verify a chart on the host system, the directory containing the chart should 
 https verifications, no mounting is required:
 
 ```text
-> docker run -it chart-verifier:9ec6e7e certify -u https://github.com/isutton/helmcertifier/blob/master/pk
-g/chartverifier/checks/chart-0.1.0-v3.valid.tgz?raw=true
+PS C:\Users\igors\GolandProjects\chart-verifier> docker run -it --rm quay.io/redhat-certification/chart-verifier:0d3706f certify -u https://github.com/isutton/helmcertifier/blob/master/pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz?raw=true
 chart: chart
 version: 1.16.0
 ok: true
