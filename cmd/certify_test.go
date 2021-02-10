@@ -31,7 +31,7 @@ func TestCertify(t *testing.T) {
 
 	t.Run("uri flag is required", func(t *testing.T) {
 
-		t.Run("Should fail when flag -u not given", func(t *testing.T) {
+		t.Run("Should fail when no argument is given", func(t *testing.T) {
 			cmd := NewCertifyCmd()
 			outBuf := bytes.NewBufferString("")
 			cmd.SetOut(outBuf)
@@ -41,45 +41,34 @@ func TestCertify(t *testing.T) {
 			require.Error(t, cmd.Execute())
 		})
 
-		t.Run("Should fail when flag -u is given but no value is informed", func(t *testing.T) {
+		t.Run("Should fail when chart does not exist and argument is given", func(t *testing.T) {
 			cmd := NewCertifyCmd()
 			outBuf := bytes.NewBufferString("")
 			cmd.SetOut(outBuf)
 			errBuf := bytes.NewBufferString("")
 			cmd.SetErr(errBuf)
 
-			cmd.SetArgs([]string{"-u"})
-			require.Error(t, cmd.Execute())
-		})
-
-		t.Run("Should fail when flag -u and values are given but resource does not exist", func(t *testing.T) {
-			cmd := NewCertifyCmd()
-			outBuf := bytes.NewBufferString("")
-			cmd.SetOut(outBuf)
-			errBuf := bytes.NewBufferString("")
-			cmd.SetErr(errBuf)
-
-			cmd.SetArgs([]string{"-u", "../pkg/chartverifier/checks/chart-0.1.0-v3.non-existing.tgz"})
+			cmd.SetArgs([]string{"../pkg/chartverifier/checks/chart-0.1.0-v3.non-existing.tgz"})
 
 			err := cmd.Execute()
 			require.Error(t, err)
 			require.True(t, checks.IsChartNotFound(err))
 		})
 
-		t.Run("Should fail when flag -o is given but check doesn't exist", func(t *testing.T) {
+		t.Run("Should fail when the chart does not exist for empty set of checks", func(t *testing.T) {
 			cmd := NewCertifyCmd()
 			outBuf := bytes.NewBufferString("")
 			cmd.SetOut(outBuf)
 			errBuf := bytes.NewBufferString("")
 			cmd.SetErr(errBuf)
 
-			cmd.SetArgs([]string{"-u", "/tmp/chart.tgz", "-o"})
+			cmd.SetArgs([]string{"../pkg/chartverifier/checks/chart-0.1.0-v3.non-existing.tgz", "-o"})
 			err := cmd.Execute()
 			require.Error(t, err)
 			require.False(t, checks.IsChartNotFound(err))
 		})
 
-		t.Run("Should succeed when flag -u and values are given", func(t *testing.T) {
+		t.Run("Should fail when the chart does not exist for single check", func(t *testing.T) {
 			cmd := NewCertifyCmd()
 			outBuf := bytes.NewBufferString("")
 			cmd.SetOut(outBuf)
@@ -87,8 +76,40 @@ func TestCertify(t *testing.T) {
 			cmd.SetErr(errBuf)
 
 			cmd.SetArgs([]string{
-				"-u", "../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
-				"--only", "is-helm-v3", // only consider a single check, perhaps more checks in the future
+				"-o", "is-helm-vv3",
+				"../pkg/chartverifier/checks/chart-0.1.0-v3.non-existing.tgz",
+			})
+			err := cmd.Execute()
+			require.Error(t, err)
+			require.True(t, checks.IsChartNotFound(err))
+		})
+
+		t.Run("Should fail when the chart exists but the single check does not", func(t *testing.T) {
+			cmd := NewCertifyCmd()
+			outBuf := bytes.NewBufferString("")
+			cmd.SetOut(outBuf)
+			errBuf := bytes.NewBufferString("")
+			cmd.SetErr(errBuf)
+
+			cmd.SetArgs([]string{
+				"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
+				"-o", "is-helm-vv3",
+			})
+			err := cmd.Execute()
+			require.Error(t, err)
+			require.False(t, checks.IsChartNotFound(err))
+		})
+
+		t.Run("Should succeed when the chart exists and is valid for a single check", func(t *testing.T) {
+			cmd := NewCertifyCmd()
+			outBuf := bytes.NewBufferString("")
+			cmd.SetOut(outBuf)
+			errBuf := bytes.NewBufferString("")
+			cmd.SetErr(errBuf)
+
+			cmd.SetArgs([]string{
+				"-o", "is-helm-v3",
+				"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 			})
 			require.NoError(t, cmd.Execute())
 			require.NotEmpty(t, outBuf.String())
@@ -103,7 +124,7 @@ func TestCertify(t *testing.T) {
 			require.Equal(t, expected, outBuf.String())
 		})
 
-		t.Run("Should display JSON certificate when flag --output and -u and values are given", func(t *testing.T) {
+		t.Run("Should display JSON certificate when option --output and argument values are given", func(t *testing.T) {
 			cmd := NewCertifyCmd()
 			outBuf := bytes.NewBufferString("")
 			cmd.SetOut(outBuf)
@@ -111,9 +132,9 @@ func TestCertify(t *testing.T) {
 			cmd.SetErr(errBuf)
 
 			cmd.SetArgs([]string{
-				"-u", "../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
-				"--only", "is-helm-v3", // only consider a single check, perhaps more checks in the future
+				"-o", "is-helm-v3", // only consider a single check, perhaps more checks in the future
 				"--output", "json",
+				"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 			})
 			require.NoError(t, cmd.Execute())
 			require.NotEmpty(t, outBuf.String())
@@ -141,7 +162,7 @@ func TestCertify(t *testing.T) {
 			require.Equal(t, expected, actual)
 		})
 
-		t.Run("Should display YAML certificate when flag --output and -u and values are given", func(t *testing.T) {
+		t.Run("Should display YAML certificate when option --output and argument values are given", func(t *testing.T) {
 			cmd := NewCertifyCmd()
 			outBuf := bytes.NewBufferString("")
 			cmd.SetOut(outBuf)
@@ -149,9 +170,9 @@ func TestCertify(t *testing.T) {
 			cmd.SetErr(errBuf)
 
 			cmd.SetArgs([]string{
-				"-u", "../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
-				"--only", "is-helm-v3", // only consider a single check, perhaps more checks in the future
+				"-o", "is-helm-v3", // only consider a single check, perhaps more checks in the future
 				"--output", "yaml",
+				"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 			})
 			require.NoError(t, cmd.Execute())
 			require.NotEmpty(t, outBuf.String())

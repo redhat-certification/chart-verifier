@@ -33,9 +33,6 @@ func init() {
 var (
 	// allChecks contains all available checks to be executed by the program.
 	allChecks []string
-	// chartUri contains the chart location as informed by the user; should accept anything that Helm understands as a Chart
-	// URI.
-	chartUri string
 	// onlyChecks are the checks that should be performed, after the command initialization has happened.
 	onlyChecks []string
 	// exceptChecks are the checks that should not be performed.
@@ -59,11 +56,10 @@ func buildCertifier(checks []string) (chartverifier.Certifier, error) {
 
 func NewCertifyCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "certify",
-		Args:  cobra.NoArgs,
+		Use:   "certify <chart_uri>",
+		Args:  cobra.ExactArgs(1),
 		Short: "Certifies a Helm chart by checking some of its characteristics",
 		RunE: func(cmd *cobra.Command, args []string) error {
-
 			checks := buildChecks(allChecks, onlyChecks, exceptChecks)
 
 			certifier, err := buildCertifier(checks)
@@ -71,7 +67,7 @@ func NewCertifyCmd() *cobra.Command {
 				return err
 			}
 
-			result, err := certifier.Certify(chartUri)
+			result, err := certifier.Certify(args[0])
 			if err != nil {
 				return err
 			}
@@ -98,9 +94,6 @@ func NewCertifyCmd() *cobra.Command {
 			return nil
 		},
 	}
-
-	cmd.Flags().StringVarP(&chartUri, "uri", "u", "", "uri of the Chart being certified")
-	_ = cmd.MarkFlagRequired("uri")
 
 	cmd.Flags().StringSliceVarP(&onlyChecks, "only", "o", nil, "only the informed checks will be performed")
 
