@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"github.com/pkg/errors"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -33,19 +34,45 @@ func init() {
 var (
 	// allChecks contains all available checks to be executed by the program.
 	allChecks []string
-	// onlyChecks are the checks that should be performed, after the command initialization has happened.
-	onlyChecks []string
-	// exceptChecks are the checks that should not be performed.
-	exceptChecks []string
-	// outputFormat contains the output format the user has specified: default, yaml or json.
-	outputFormat string
+	// enabledChecksFlag are the checks that should be performed, after the command initialization has happened.
+	enabledChecksFlag []string
+	// disabledChecksFlag are the checks that should not be performed.
+	disabledChecksFlag []string
+	// outputFormatFlag contains the output format the user has specified: default, yaml or json.
+	outputFormatFlag string
 )
 
-func buildChecks(allChecks, onlyChecks, _ []string) []string {
-	if onlyChecks != nil {
-		return onlyChecks
+func filterChecks(set []string, subset []string, setEnabled bool, subsetEnabled bool) ([]string, error) {
+	selected := make([]string, 0)
+	seen := map[string]bool{}
+	for _, v := range set {
+		seen[v] = setEnabled
 	}
-	return allChecks
+	for _, v := range subset {
+		if _, ok := seen[v]; !ok {
+			return nil, errors.Errorf("check %q is unknown", v)
+		}
+		seen[v] = subsetEnabled
+	}
+	for k, v := range seen {
+		if v {
+			selected = append(selected, k)
+		}
+	}
+	return selected, nil
+}
+
+func buildChecks(all, enabled, disabled []string) ([]string, error) {
+	switch {
+	case len(enabled) > 0 && len(disabled) > 0:
+		return nil, errors.New("--enable and --disable can't be used at the same time")
+	case len(enabled) > 0:
+		return filterChecks(all, enabled, false, true)
+	case len(disabled) > 0:
+		return filterChecks(all, disabled, true, false)
+	default:
+		return all, nil
+	}
 }
 
 func buildCertifier(checks []string) (chartverifier.Certifier, error) {
@@ -60,7 +87,10 @@ func NewCertifyCmd() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		Short: "Certifies a Helm chart by checking some of its characteristics",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			checks := buildChecks(allChecks, onlyChecks, exceptChecks)
+			checks, err := buildChecks(allChecks, enabledChecksFlag, disabledChecksFlag)
+			if err != nil {
+				return err
+			}
 
 			certifier, err := buildCertifier(checks)
 			if err != nil {
@@ -72,7 +102,7 @@ func NewCertifyCmd() *cobra.Command {
 				return err
 			}
 
-			if outputFormat == "json" {
+			if outputFormatFlag == "json" {
 				b, err := json.Marshal(result)
 				if err != nil {
 					return err
@@ -80,7 +110,7 @@ func NewCertifyCmd() *cobra.Command {
 
 				cmd.Println(string(b))
 
-			} else if outputFormat == "yaml" {
+			} else if outputFormatFlag == "yaml" {
 				b, err := yaml.Marshal(result)
 				if err != nil {
 					return err
@@ -95,11 +125,11 @@ func NewCertifyCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringSliceVarP(&onlyChecks, "enable", "e", nil, "only the informed checks will be enabled")
+	cmd.Flags().StringSliceVarP(&enabledChecksFlag, "enable", "e", nil, "only the informed checks will be enabled")
 
-	cmd.Flags().StringSliceVarP(&exceptChecks, "disable", "x", nil, "all checks will be enabled except the informed ones")
+	cmd.Flags().StringSliceVarP(&disabledChecksFlag, "disable", "x", nil, "all checks will be enabled except the informed ones")
 
-	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", "the output format: default, json or yaml")
+	cmd.Flags().StringVarP(&outputFormatFlag, "output", "o", "", "the output format: default, json or yaml")
 
 	return cmd
 }
