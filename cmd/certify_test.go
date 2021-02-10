@@ -76,7 +76,7 @@ func TestCertify(t *testing.T) {
 			cmd.SetErr(errBuf)
 
 			cmd.SetArgs([]string{
-				"-o", "is-helm-vv3",
+				"-e", "is-helm-vv3",
 				"../pkg/chartverifier/checks/chart-0.1.0-v3.non-existing.tgz",
 			})
 			err := cmd.Execute()
@@ -92,8 +92,8 @@ func TestCertify(t *testing.T) {
 			cmd.SetErr(errBuf)
 
 			cmd.SetArgs([]string{
+				"-e", "is-helm-vv3",
 				"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
-				"-o", "is-helm-vv3",
 			})
 			err := cmd.Execute()
 			require.Error(t, err)
@@ -108,7 +108,7 @@ func TestCertify(t *testing.T) {
 			cmd.SetErr(errBuf)
 
 			cmd.SetArgs([]string{
-				"-o", "is-helm-v3",
+				"-e", "is-helm-v3",
 				"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 			})
 			require.NoError(t, cmd.Execute())
@@ -132,8 +132,8 @@ func TestCertify(t *testing.T) {
 			cmd.SetErr(errBuf)
 
 			cmd.SetArgs([]string{
-				"-o", "is-helm-v3", // only consider a single check, perhaps more checks in the future
-				"--output", "json",
+				"-e", "is-helm-v3", // only consider a single check, perhaps more checks in the future
+				"-o", "json",
 				"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 			})
 			require.NoError(t, cmd.Execute())
@@ -170,8 +170,8 @@ func TestCertify(t *testing.T) {
 			cmd.SetErr(errBuf)
 
 			cmd.SetArgs([]string{
-				"-o", "is-helm-v3", // only consider a single check, perhaps more checks in the future
-				"--output", "yaml",
+				"-e", "is-helm-v3", // only consider a single check, perhaps more checks in the future
+				"-o", "yaml",
 				"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 			})
 			require.NoError(t, cmd.Execute())

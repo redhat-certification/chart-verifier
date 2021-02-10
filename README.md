@@ -94,17 +94,17 @@ This container image can then be executed with the Docker client as `docker run 
 like in the example below:
 
 ```text
-PS C:\Users\igors\GolandProjects\chart-verifier> docker run -it --rm quay.io/redhat-certification/chart-verifier:07e369d certify --help
+PS C:\Users\igors\GolandProjects\chart-verifier> docker run -it --rm quay.io/redhat-certification/chart-verifier:b274864 certify --help
 Certifies a Helm chart by checking some of its characteristics
 
 Usage:
-  chart-verifier certify <chart_uri> [flags]
+  chart-verifier certify <chart-uri> [flags]
 
 Flags:
-  -e, --except strings   all available checks except those informed will be performed
-  -h, --help             help for certify
-  -o, --only strings     only the informed checks will be performed
-  -f, --output string    the output format: default, json or yaml
+  -x, --disable strings   all checks will be enabled except the informed ones
+  -e, --enable strings    only the informed checks will be enabled
+  -h, --help              help for certify
+  -o, --output string     the output format: default, json or yaml
 
 Global Flags:
       --config string   config file (default is $HOME/.chart-verifier.yaml)
@@ -158,12 +158,12 @@ To certify a chart against all available checks:
 To apply only the `is-helm-v3` check:
 
 ```text
-> chart-verifier --only is-helm-v3 https://www.example.com/chart.tgz
+> chart-verifier --enable is-helm-v3 https://www.example.com/chart.tgz
 ```
 
 To apply all checks except `is-helm-v3`:
 
 ```text
-> chart-verifier --except is-helm-v3 https://www.example.com/chart.tgz
+> chart-verifier --disable is-helm-v3 https://www.example.com/chart.tgz
 ```
 

@@ -56,7 +56,7 @@ func buildCertifier(checks []string) (chartverifier.Certifier, error) {
 
 func NewCertifyCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "certify <chart_uri>",
+		Use:   "certify <chart-uri>",
 		Args:  cobra.ExactArgs(1),
 		Short: "Certifies a Helm chart by checking some of its characteristics",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -95,11 +95,11 @@ func NewCertifyCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringSliceVarP(&onlyChecks, "only", "o", nil, "only the informed checks will be performed")
+	cmd.Flags().StringSliceVarP(&onlyChecks, "enable", "e", nil, "only the informed checks will be enabled")
 
-	cmd.Flags().StringSliceVarP(&exceptChecks, "except", "e", nil, "all available checks except those informed will be performed")
+	cmd.Flags().StringSliceVarP(&exceptChecks, "disable", "x", nil, "all checks will be enabled except the informed ones")
 
-	cmd.Flags().StringVarP(&outputFormat, "output", "f", "", "the output format: default, json or yaml")
+	cmd.Flags().StringVarP(&outputFormat, "output", "o", "", "the output format: default, json or yaml")
 
 	return cmd
 }
