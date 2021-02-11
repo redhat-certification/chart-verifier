@@ -53,7 +53,12 @@ each test.
 
 ## Getting chart-verifier
 
-Available is currently available in Quay: https://quay.io/repository/redhat-certification/chart-verifier.
+Container images built from the source code are hosted in https://quay.io/repository/redhat-certification/chart-verifier
+; to download using `docker` execute the following command:
+
+```text
+docker pull quay.io/redhat-certification/chart-verifier
+```
 
 ## Building chart-verifier
 
