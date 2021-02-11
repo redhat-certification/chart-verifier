@@ -1,9 +1,9 @@
 # chart-verifier
 
-`chart-verifier` is a tool that certifies a Helm chart against a configurable list of checks; those checks can be
-whitelisted or blacklisted through command line options.
+`chart-verifier` is a tool that validates a Helm chart against a configurable list of checks; individual checks can be
+included or excluded through command line options. The default set of tests covers Red Hat’s recommendations.
 
-Each check is independent and order is not and will not be guaranteed, and its input will be informed through options in
+Each check is independent and execution order is not guaranteed. Input is provided through options in
 the command line interface; currently the only input is the required `uri` option.
 
 The following checks have been implemented:
@@ -30,10 +30,10 @@ The following checks are being implemented and/or considered:
 
 ## Architecture
 
-This tool is part of a larger process that aims to certify Helm charts, and its sole responsibility is to ingest a Helm
+This tool inspects a Helm
 chart URI (`file://`, `https?://`, etc)
-and return either a *positive* result indicating the Helm chart has passed all checks, or a *negative* result indicating
-which checks have failed and possibly propose solutions.
+and returns either a *positive* result indicating the Helm chart has passed all checks, or a *negative* result indicating
+which checks have failed and remedial actions.
 
 The application is separated in two pieces: a command line interface and a library. This is handy because the command
 line interface is specific to the user interface, and the library can be generic enough to be used to, for example,
@@ -42,9 +42,6 @@ inspect Helm chart bytes in flight.
 One positive aspect of the command line interface specificity is that its output can be tailored to the methods of
 consumption the user expects; in other words, the command line interface can be programmed in such way it can be
 represented as either *YAML* or *JSON* formats, in addition to a descriptive representation tailored to human actors.
-
-The interpretation of what is considered a certified Helm chart depends on which checks the chart has been submitted to,
-so this information should be present in the certificate as well.
 
 Primitive functions to manipulate the Helm chart should be provided, since most checks involve inspecting the contents
 of the chart itself; for example, whether a `README.md` file exists, or whether `README.md` contains the `values`'
