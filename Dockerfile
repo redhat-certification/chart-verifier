@@ -11,7 +11,7 @@ COPY . .
 
 RUN ./hack/build.sh
 
-FROM fedora:31
+FROM registry.access.redhat.com/ubi8/ubi-minimal
 
 COPY --from=build /tmp/src/out/chart-verifier /app/chart-verifier
 
