@@ -31,7 +31,8 @@ func TestCertifier_Certify(t *testing.T) {
 
 	addr := "127.0.0.1:9876"
 	ctx, cancel := context.WithCancel(context.Background())
-	go testutil.ServeCharts(ctx, addr, "./checks/")
+
+	require.NoError(t, testutil.ServeCharts(ctx, addr, "./checks/"))
 
 	dummyCheckName := "dummy-check"
 
