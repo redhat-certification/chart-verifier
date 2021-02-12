@@ -46,7 +46,7 @@ func ServeCharts(ctx context.Context, addr string, path string) error {
 	}
 
 	go func() {
-		if err := srv.Serve(ln); err != nil {
+		if err := srv.Serve(ln); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("serve: %s\n", err)
 		}
 	}()
