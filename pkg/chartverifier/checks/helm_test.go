@@ -56,7 +56,7 @@ func TestLoadChartFromURI(t *testing.T) {
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
-	go testutil.ServeCharts(ctx, addr, "./")
+	require.NoError(t, testutil.ServeCharts(ctx, addr, "./"))
 
 	for _, tc := range positiveCases {
 		t.Run(tc.description, func(t *testing.T) {
