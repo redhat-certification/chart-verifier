@@ -86,7 +86,7 @@ func NewVerifyCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "verify <chart-uri>",
 		Args:  cobra.ExactArgs(1),
-		Short: "Certifies a Helm chart by checking some of its characteristics",
+		Short: "Verifies a Helm chart by checking some of its characteristics",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			checks, err := buildChecks(allChecks, enabledChecksFlag, disabledChecksFlag)
 			if err != nil {
