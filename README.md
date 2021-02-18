@@ -92,20 +92,20 @@ PS C:\Users\igors\GolandProjects\chart-verifier> .\hack\build-image.ps1
 The container image created by the build program is tagged with the commit ID of the working directory at the time of
 the build: `quay.io/redhat-certification/chart-verifier:0d3706f`.
 
-This container image can then be executed with the Docker client as `docker run -it --rm quay.io/redhat-certification/chart-verifier:0d3706f certify`,
+This container image can then be executed with the Docker client as `docker run -it --rm quay.io/redhat-certification/chart-verifier:0d3706f verify`,
 like in the example below:
 
 ```text
-PS C:\Users\igors\GolandProjects\chart-verifier> docker run -it --rm quay.io/redhat-certification/chart-verifier:b274864 certify --help
+PS C:\Users\igors\GolandProjects\chart-verifier> docker run -it --rm quay.io/redhat-certification/chart-verifier:b274864 verify --help
 Certifies a Helm chart by checking some of its characteristics
 
 Usage:
-  chart-verifier certify <chart-uri> [flags]
+  chart-verifier verify <chart-uri> [flags]
 
 Flags:
   -x, --disable strings   all checks will be enabled except the informed ones
   -e, --enable strings    only the informed checks will be enabled
-  -h, --help              help for certify
+  -h, --help              help for verify
   -o, --output string     the output format: default, json or yaml
 
 Global Flags:
@@ -116,7 +116,7 @@ To verify a chart on the host system, the directory containing the chart should 
 https verifications, no mounting is required:
 
 ```text
-PS C:\Users\igors\GolandProjects\chart-verifier> docker run -it --rm quay.io/redhat-certification/chart-verifier:07e369d certify https://github.com/isutton/helmcertifier/blob/master/pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz?raw=true
+PS C:\Users\igors\GolandProjects\chart-verifier> docker run -it --rm quay.io/redhat-certification/chart-verifier:07e369d verify https://github.com/isutton/helmcertifier/blob/master/pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz?raw=true
 chart: chart
 version: 1.16.0
 ok: true
@@ -149,7 +149,7 @@ has-readme:
 
 ## Usage
 
-To certify a chart against all available checks:
+To verify a chart against all available checks:
 
 ```text
 > chart-verifier ./chart.tgz
