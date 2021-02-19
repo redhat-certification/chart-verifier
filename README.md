@@ -92,11 +92,40 @@ PS C:\Users\igors\GolandProjects\chart-verifier> .\hack\build-image.ps1
 The container image created by the build program is tagged with the commit ID of the working directory at the time of
 the build: `quay.io/redhat-certification/chart-verifier:0d3706f`.
 
-This container image can then be executed with the Docker client as `docker run -it --rm quay.io/redhat-certification/chart-verifier:0d3706f certify`,
-like in the example below:
+## Usage
+
+### Local Usage
+
+To certify a chart against all available checks:
 
 ```text
-PS C:\Users\igors\GolandProjects\chart-verifier> docker run -it --rm quay.io/redhat-certification/chart-verifier:b274864 certify --help
+> chart-verifier certify ./chart.tgz
+> chart-verifier certify ~/src/chart
+> chart-verifier certify https://www.example.com/chart.tgz
+```
+
+To apply only the `is-helm-v3` check:
+
+```text
+> chart-verifier certify --enable is-helm-v3 https://www.example.com/chart.tgz
+```
+
+To apply all checks except `is-helm-v3`:
+
+```text
+> chart-verifier certify --disable is-helm-v3 https://www.example.com/chart.tgz
+```
+
+### Container Usage
+
+The container image produced in 'Building chart-verifier' can then be executed with the Docker client
+as `docker run -it --rm quay.io/redhat-certification/chart-verifier:0d3706f certify`.
+
+If you haven't built a container image, you could still use the Docker client to execute the latest release available in
+Quay:
+
+```text
+> docker run -it --rm quay.io/redhat-certification/chart-verifier:latest certify --help
 Certifies a Helm chart by checking some of its characteristics
 
 Usage:
@@ -116,7 +145,7 @@ To verify a chart on the host system, the directory containing the chart should 
 https verifications, no mounting is required:
 
 ```text
-PS C:\Users\igors\GolandProjects\chart-verifier> docker run -it --rm quay.io/redhat-certification/chart-verifier:07e369d certify https://github.com/isutton/helmcertifier/blob/master/pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz?raw=true
+> docker run -it --rm quay.io/redhat-certification/chart-verifier:latest certify https://github.com/redhat-certification/chart-verifier/blob/main/pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz?raw=true
 chart: chart
 version: 1.16.0
 ok: true
@@ -146,26 +175,3 @@ has-readme:
         ok: true
         reason: Chart has README
 ```
-
-## Usage
-
-To certify a chart against all available checks:
-
-```text
-> chart-verifier ./chart.tgz
-> chart-verifier ~/src/chart
-> chart-verifier https://www.example.com/chart.tgz
-```
-
-To apply only the `is-helm-v3` check:
-
-```text
-> chart-verifier --enable is-helm-v3 https://www.example.com/chart.tgz
-```
-
-To apply all checks except `is-helm-v3`:
-
-```text
-> chart-verifier --disable is-helm-v3 https://www.example.com/chart.tgz
-```
-
