@@ -152,20 +152,20 @@ has-readme:
 To certify a chart against all available checks:
 
 ```text
-> chart-verifier ./chart.tgz
-> chart-verifier ~/src/chart
-> chart-verifier https://www.example.com/chart.tgz
+> chart-verifier certify ./chart.tgz
+> chart-verifier certify ~/src/chart
+> chart-verifier certify https://www.example.com/chart.tgz
 ```
 
 To apply only the `is-helm-v3` check:
 
 ```text
-> chart-verifier --enable is-helm-v3 https://www.example.com/chart.tgz
+> chart-verifier certify --enable is-helm-v3 https://www.example.com/chart.tgz
 ```
 
 To apply all checks except `is-helm-v3`:
 
 ```text
-> chart-verifier --disable is-helm-v3 https://www.example.com/chart.tgz
+> chart-verifier certify --disable is-helm-v3 https://www.example.com/chart.tgz
 ```
 
