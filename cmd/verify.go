@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"encoding/json"
+
 	"github.com/pkg/errors"
 
 	"github.com/spf13/cobra"
@@ -81,11 +82,11 @@ func buildCertifier(checks []string) (chartverifier.Certifier, error) {
 		Build()
 }
 
-func NewCertifyCmd() *cobra.Command {
+func NewVerifyCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "certify <chart-uri>",
+		Use:   "verify <chart-uri>",
 		Args:  cobra.ExactArgs(1),
-		Short: "Certifies a Helm chart by checking some of its characteristics",
+		Short: "Verifies a Helm chart by checking some of its characteristics",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			checks, err := buildChecks(allChecks, enabledChecksFlag, disabledChecksFlag)
 			if err != nil {
@@ -134,9 +135,9 @@ func NewCertifyCmd() *cobra.Command {
 	return cmd
 }
 
-// certifyCmd represents the lint command
-var certifyCmd = NewCertifyCmd()
+// verifyCmd represents the lint command
+var verifyCmd = NewVerifyCmd()
 
 func init() {
-	rootCmd.AddCommand(certifyCmd)
+	rootCmd.AddCommand(verifyCmd)
 }

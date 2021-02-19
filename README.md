@@ -125,16 +125,16 @@ If you haven't built a container image, you could still use the Docker client to
 Quay:
 
 ```text
-> docker run -it --rm quay.io/redhat-certification/chart-verifier:latest certify --help
-Certifies a Helm chart by checking some of its characteristics
+> docker run -it --rm quay.io/redhat-certification/chart-verifier:latest verify --help
+Verifies a Helm chart by checking some of its characteristics
 
 Usage:
-  chart-verifier certify <chart-uri> [flags]
+  chart-verifier verify <chart-uri> [flags]
 
 Flags:
   -x, --disable strings   all checks will be enabled except the informed ones
   -e, --enable strings    only the informed checks will be enabled
-  -h, --help              help for certify
+  -h, --help              help for verify
   -o, --output string     the output format: default, json or yaml
 
 Global Flags:
@@ -145,7 +145,7 @@ To verify a chart on the host system, the directory containing the chart should 
 https verifications, no mounting is required:
 
 ```text
-> docker run -it --rm quay.io/redhat-certification/chart-verifier:latest certify https://github.com/redhat-certification/chart-verifier/blob/main/pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz?raw=true
+> docker run -it --rm quay.io/redhat-certification/chart-verifier:latest verify https://github.com/redhat-certification/chart-verifier/blob/main/pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz?raw=true
 chart: chart
 version: 1.16.0
 ok: true
