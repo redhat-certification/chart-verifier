@@ -35,8 +35,49 @@ available by the program to verify the Helm Chart against; in other words, a dic
 groups and versions **distributed by default** will either be bundled within the resulting binary or available to be
 downloaded on demand for each OpenShift version.
 
-The availability of this collection of dictionaries can provide support for existing OpenShift versions as well **
-upcoming** releases, so in the case deprecation notices are present in the API server those could also be used to
+The availability of this collection of dictionaries can provide support for existing OpenShift versions as well
+**upcoming** releases, so in the case deprecation notices are present in the API server those could also be used to
 provide guidance to the Helm Chart Developer, informing which resources are deprecated and how to use more appropriate
 resources if possible.
 
+There are at least two approaches regarding the layout of the dictionaries' values mentioned above:
+
+1. A list of GVKs that are present in a default OpenShift installation, where rendered resources from a Helm chart can 
+   be matched against values present in this list, either strictly (all rendered resources must exist in this list) or
+   other heuristics enabled by the available data; in other words, a Helm chart must contain only rendered resources
+   present in this list.
+   
+   This is important to bear in mind that lists could be appended, so a chart could be checked against two different 
+   OpenShift versions.
+   
+   Another interesting point in this approach is those GVK lists also could represent subsystems, such as containing
+   only Knative APIGroup; this means that at least in theory, the Knative set together with the OpenShift set could
+   be enough to statically validate a Helm chart against a set of expected resources available in the cluster.
+   
+1. The OpenAPI V3 Schema from the default OpenShift installation, where rendered resources from a Helm chart can be 
+   matched against the available schema.
+   
+   Kubernetes and OpenShift expose through a REST interface the resources available in the cluster (which is also used
+   to collect the resources in this page: https://docs.openshift.com/container-platform/4.6/rest_api/objects/index.html)
+   .
+
+   This approach offers less ways to overlay default cluster API resources with specific API resources, unlike the 
+   former, basically due the fact that a well formed OpenAPI V3 Schema requires its dependencies to be declared; in
+   reality this means that a Knative OpenAPI V3 Schema would include, other than specific Knative resources, Kubernetes 
+   resources it depends on.
+
+   It should be observed that the validation of rendered resources using the OpenAPI V3 Schema available from OpenShift
+   would be the pretty similar if not the same same as performed by `kubectl`.
+
+Both approaches use the same authoritative data source, which makes the choice of verification a matter of the desired
+resolution, where a collection of GVKs provide only a low resolution verification and using the OpenAPI V3 Schema 
+offers a higher resolution verification.
+
+Both approaches would also use external (or embedded) artifacts containing verification data, so the verification
+could be performed for past, current and upcoming OpenShift or Kubernetes versions, increasing the tool's usefulness.
+
+# References
+
+1. `oc proxy & curl localhost:8001/openapi/v2 > openapi.json`
+1. https://stackoverflow.com/a/48804996
+1. https://github.com/go-openapi
