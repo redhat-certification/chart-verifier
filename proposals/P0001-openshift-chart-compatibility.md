@@ -76,6 +76,20 @@ offers a higher resolution verification.
 Both approaches would also use external (or embedded) artifacts containing verification data, so the verification
 could be performed for past, current and upcoming OpenShift or Kubernetes versions, increasing the tool's usefulness.
 
+# Command Line Interface
+
+The version to be matched against should be informed via the command line interface using the `--set` flag:
+
+```text
+> chart-verifier verify --enable compat --set compat.version=openshift-4.6 chart.tgz
+```
+
+To validate against multiple versions, a comma separated list could be used:
+
+```text
+> chart-verifier verify --enable compat --set compat.version=openshift-4.6,openshift-4.7 chart.tgz
+```
+
 # References
 
 1. `oc proxy & curl localhost:8001/openapi/v2 > openapi.json`
