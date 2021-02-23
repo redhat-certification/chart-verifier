@@ -78,6 +78,17 @@ could be performed for past, current and upcoming OpenShift or Kubernetes versio
 
 # Command Line Interface
 
+It is expected the command line interface to support the `--set` option, used to propagate configurations to the checks
+at runtime in the following format: `--set KEY=VALUE`, where `KEY` represents a field path, such as `compat.version`, 
+in a data-structure representing the configuration, and `VALUE` represents the value the specified configuration
+key should have, such as `openshift-4.6`.
+
+It is also expected the configuration file to have the check internal name as keys, and dictionaries as values, 
+representing the entire check configuration; those values will be interpreted by each individual check, since they're
+opaque to the main process.
+
+## Command Line Options
+
 The version to be matched against should be informed via the command line interface using the `--set` flag:
 
 ```text
@@ -88,6 +99,21 @@ To validate against multiple versions, a comma separated list could be used:
 
 ```text
 > chart-verifier verify --enable compat --set compat.version=openshift-4.6,openshift-4.7 chart.tgz
+```
+
+## Configuration
+
+The same settings stated above could be materialized in a configuration file, such as below:
+
+```yaml
+compat:
+  version: openshift-4.6,openshift-4.7
+```
+
+Then used as:
+
+```text
+> chart-verifier verify --config cv.yaml --enable compat chart.tgz
 ```
 
 # References
