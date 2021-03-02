@@ -47,6 +47,8 @@ const (
 	ChartDoesNotContainCRDs      = "Chart does not contain CRDs"
 	HelmLintSuccessful           = "Helm lint successful"
 	HelmLintHasFailedPrefix      = "Helm lint has failed: "
+	CSIObjectsExist              = "CSI objects exist"
+	CSIObjectsDoesNotExist       = "CSI objects do not exist"
 )
 
 func notImplemented() (Result, error) {
@@ -205,6 +207,29 @@ func HelmLint(uri string, _ *viper.Viper) (Result, error) {
 
 func NotContainsInfraPluginsAndDrivers(uri string, _ *viper.Viper) (Result, error) {
 	return notImplemented()
+}
+
+func NotContainCSIObjects(uri string, _ *viper.Viper) (Result, error) {
+	c, _, err := LoadChartFromURI(uri)
+	if err != nil {
+		return Result{}, err
+	}
+	r := Result{Ok: true, Reason: CSIObjectsDoesNotExist}
+	for _, f := range c.Templates {
+		if !strings.HasSuffix(f.Name, ".yaml") {
+			continue
+		}
+		for _, v := range strings.Split(string(f.Data), "\n") {
+			if strings.HasPrefix(v, "kind") {
+				if strings.TrimSpace(strings.Split(v, ":")[1]) == "CSIDriver" {
+					r.Reason = CSIObjectsExist
+					r.Ok = false
+				}
+			}
+		}
+	}
+
+	return r, nil
 }
 
 func CanBeInstalledWithoutManualPreRequisites(uri string, _ *viper.Viper) (Result, error) {

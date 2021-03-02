@@ -38,6 +38,7 @@ func init() {
 	defaultRegistry.Add("has-minkubeversion", checks.HasMinKubeVersion)
 	defaultRegistry.Add("not-contains-crds", checks.NotContainCRDs)
 	defaultRegistry.Add("helm-lint", checks.HelmLint)
+	defaultRegistry.Add("not-contain-csi-objects", checks.NotContainCSIObjects)
 }
 
 func DefaultRegistry() checks.Registry {
