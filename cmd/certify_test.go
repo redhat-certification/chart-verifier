@@ -30,7 +30,7 @@ import (
 func TestCertify(t *testing.T) {
 
 	t.Run("Should fail when no argument is given", func(t *testing.T) {
-		cmd := NewVerifyCmd()
+		cmd := NewCertifyCmd()
 		outBuf := bytes.NewBufferString("")
 		cmd.SetOut(outBuf)
 		errBuf := bytes.NewBufferString("")
@@ -40,7 +40,7 @@ func TestCertify(t *testing.T) {
 	})
 
 	t.Run("Should fail when chart does not exist and argument is given", func(t *testing.T) {
-		cmd := NewVerifyCmd()
+		cmd := NewCertifyCmd()
 		outBuf := bytes.NewBufferString("")
 		cmd.SetOut(outBuf)
 		errBuf := bytes.NewBufferString("")
@@ -54,7 +54,7 @@ func TestCertify(t *testing.T) {
 	})
 
 	t.Run("Should fail when the chart does not exist for empty set of checks", func(t *testing.T) {
-		cmd := NewVerifyCmd()
+		cmd := NewCertifyCmd()
 		outBuf := bytes.NewBufferString("")
 		cmd.SetOut(outBuf)
 		errBuf := bytes.NewBufferString("")
@@ -67,7 +67,7 @@ func TestCertify(t *testing.T) {
 	})
 
 	t.Run("Should fail when the chart does not exist for single check", func(t *testing.T) {
-		cmd := NewVerifyCmd()
+		cmd := NewCertifyCmd()
 		outBuf := bytes.NewBufferString("")
 		cmd.SetOut(outBuf)
 		errBuf := bytes.NewBufferString("")
@@ -83,7 +83,7 @@ func TestCertify(t *testing.T) {
 	})
 
 	t.Run("Should fail when the chart exists but the single check does not", func(t *testing.T) {
-		cmd := NewVerifyCmd()
+		cmd := NewCertifyCmd()
 		outBuf := bytes.NewBufferString("")
 		cmd.SetOut(outBuf)
 		errBuf := bytes.NewBufferString("")
@@ -99,7 +99,7 @@ func TestCertify(t *testing.T) {
 	})
 
 	t.Run("Should succeed when the chart exists and is valid for a single check", func(t *testing.T) {
-		cmd := NewVerifyCmd()
+		cmd := NewCertifyCmd()
 		outBuf := bytes.NewBufferString("")
 		cmd.SetOut(outBuf)
 		errBuf := bytes.NewBufferString("")
@@ -123,7 +123,7 @@ func TestCertify(t *testing.T) {
 	})
 
 	t.Run("Should display JSON certificate when option --output and argument values are given", func(t *testing.T) {
-		cmd := NewVerifyCmd()
+		cmd := NewCertifyCmd()
 		outBuf := bytes.NewBufferString("")
 		cmd.SetOut(outBuf)
 		errBuf := bytes.NewBufferString("")
@@ -161,7 +161,7 @@ func TestCertify(t *testing.T) {
 	})
 
 	t.Run("Should display YAML certificate when option --output and argument values are given", func(t *testing.T) {
-		cmd := NewVerifyCmd()
+		cmd := NewCertifyCmd()
 		outBuf := bytes.NewBufferString("")
 		cmd.SetOut(outBuf)
 		errBuf := bytes.NewBufferString("")

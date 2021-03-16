@@ -82,11 +82,11 @@ func buildCertifier(checks []string) (chartverifier.Certifier, error) {
 		Build()
 }
 
-func NewVerifyCmd() *cobra.Command {
+func NewCertifyCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "verify <chart-uri>",
+		Use:   "certify <chart-uri>",
 		Args:  cobra.ExactArgs(1),
-		Short: "Verifies a Helm chart by checking some of its characteristics",
+		Short: "Certifies a Helm chart by checking some of its characteristics",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			checks, err := buildChecks(allChecks, enabledChecksFlag, disabledChecksFlag)
 			if err != nil {
@@ -136,8 +136,8 @@ func NewVerifyCmd() *cobra.Command {
 }
 
 // verifyCmd represents the lint command
-var verifyCmd = NewVerifyCmd()
+var certifyCmd = NewCertifyCmd()
 
 func init() {
-	rootCmd.AddCommand(verifyCmd)
+	rootCmd.AddCommand(certifyCmd)
 }

@@ -90,7 +90,7 @@ PS C:\Users\igors\GolandProjects\chart-verifier> .\hack\build-image.ps1
 ```
 
 The container image created by the build program is tagged with the commit ID of the working directory at the time of
-the build: `quay.io/redhat-certification/chart-verifier:0d3706f`.
+the build: `quay.io/redhat-certification/chart-verifier:07e369d`. In this example `07e369d` is the commit-id which may change.
 
 ## Usage
 
@@ -99,9 +99,9 @@ the build: `quay.io/redhat-certification/chart-verifier:0d3706f`.
 To certify a chart against all available checks:
 
 ```text
-> chart-verifier certify ./chart.tgz
-> chart-verifier certify ~/src/chart
-> chart-verifier certify https://www.example.com/chart.tgz
+> out/chart-verifier certify ./chart.tgz
+> out/chart-verifier certify ~/src/chart
+> out/chart-verifier certify https://www.example.com/chart.tgz
 ```
 
 To apply only the `is-helm-v3` check:
@@ -119,17 +119,17 @@ To apply all checks except `is-helm-v3`:
 ### Container Usage
 
 The container image produced in 'Building chart-verifier' can then be executed with the Docker client
-as `docker run -it --rm quay.io/redhat-certification/chart-verifier:0d3706f certify`.
+as `docker run -it --rm quay.io/redhat-certification/chart-verifier:07e369d certify`.
 
 If you haven't built a container image, you could still use the Docker client to execute the latest release available in
 Quay:
 
 ```text
 > docker run -it --rm quay.io/redhat-certification/chart-verifier:latest verify --help
-Verifies a Helm chart by checking some of its characteristics
+Certifies a Helm chart by checking some of its characteristics
 
 Usage:
-  chart-verifier verify <chart-uri> [flags]
+  chart-verifier certify <chart-uri> [flags]
 
 Flags:
   -x, --disable strings   all checks will be enabled except the informed ones
