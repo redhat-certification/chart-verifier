@@ -18,6 +18,9 @@ package chartverifier
 
 import (
 	"errors"
+	"strings"
+
+	"github.com/spf13/viper"
 
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 )
@@ -26,6 +29,7 @@ var defaultRegistry checks.Registry
 
 func init() {
 	defaultRegistry = checks.NewRegistry()
+	defaultRegistry.Add("dummy", checks.Dummy)
 	defaultRegistry.Add("has-readme", checks.HasReadme)
 	defaultRegistry.Add("is-helm-v3", checks.IsHelmV3)
 	defaultRegistry.Add("contains-test", checks.ContainsTest)
@@ -41,8 +45,10 @@ func DefaultRegistry() checks.Registry {
 }
 
 type certifierBuilder struct {
-	registry checks.Registry
-	checks   []string
+	checks    []string
+	config    *viper.Viper
+	overrides []string
+	registry  checks.Registry
 }
 
 func (b *certifierBuilder) SetRegistry(registry checks.Registry) CertifierBuilder {
@@ -55,6 +61,16 @@ func (b *certifierBuilder) SetChecks(checks []string) CertifierBuilder {
 	return b
 }
 
+func (b *certifierBuilder) SetConfig(config *viper.Viper) CertifierBuilder {
+	b.config = config
+	return b
+}
+
+func (b *certifierBuilder) SetOverrides(overrides []string) CertifierBuilder {
+	b.overrides = overrides
+	return b
+}
+
 func (b *certifierBuilder) Build() (Certifier, error) {
 	if len(b.checks) == 0 {
 		return nil, errors.New("no checks have been required")
@@ -64,9 +80,20 @@ func (b *certifierBuilder) Build() (Certifier, error) {
 		b.registry = defaultRegistry
 	}
 
+	if b.config == nil {
+		b.config = viper.New()
+	}
+
+	// naively override values from the configuration
+	for _, val := range b.overrides {
+		parts := strings.Split(val, "=")
+		b.config.Set(parts[0], parts[1])
+	}
+
 	return &certifier{
 		registry:       b.registry,
 		requiredChecks: b.checks,
+		config:         b.config,
 	}, nil
 }
 

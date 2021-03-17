@@ -21,6 +21,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
@@ -36,15 +37,15 @@ func TestCertifier_Certify(t *testing.T) {
 
 	dummyCheckName := "dummy-check"
 
-	erroredCheck := func(uri string) (checks.Result, error) {
+	erroredCheck := func(uri string, _ *viper.Viper) (checks.Result, error) {
 		return checks.Result{}, errors.New("artificial error")
 	}
 
-	negativeCheck := func(uri string) (checks.Result, error) {
+	negativeCheck := func(uri string, _ *viper.Viper) (checks.Result, error) {
 		return checks.Result{Ok: false}, nil
 	}
 
-	positiveCheck := func(uri string) (checks.Result, error) {
+	positiveCheck := func(uri string, _ *viper.Viper) (checks.Result, error) {
 		return checks.Result{Ok: true}, nil
 	}
 
@@ -52,6 +53,7 @@ func TestCertifier_Certify(t *testing.T) {
 
 	t.Run("Should return error if check does not exist", func(t *testing.T) {
 		c := &certifier{
+			config:         viper.New(),
 			registry:       checks.NewRegistry(),
 			requiredChecks: []string{dummyCheckName},
 		}
@@ -63,6 +65,7 @@ func TestCertifier_Certify(t *testing.T) {
 
 	t.Run("Should return error if check exists and returns error", func(t *testing.T) {
 		c := &certifier{
+			config:         viper.New(),
 			registry:       checks.NewRegistry().Add(dummyCheckName, erroredCheck),
 			requiredChecks: []string{dummyCheckName},
 		}
@@ -75,6 +78,7 @@ func TestCertifier_Certify(t *testing.T) {
 	t.Run("Result should be negative if check exists and returns negative", func(t *testing.T) {
 
 		c := &certifier{
+			config:         viper.New(),
 			registry:       checks.NewRegistry().Add(dummyCheckName, negativeCheck),
 			requiredChecks: []string{dummyCheckName},
 		}
@@ -87,6 +91,7 @@ func TestCertifier_Certify(t *testing.T) {
 
 	t.Run("Result should be positive if check exists and returns positive", func(t *testing.T) {
 		c := &certifier{
+			config:         viper.New(),
 			registry:       checks.NewRegistry().Add(dummyCheckName, positiveCheck),
 			requiredChecks: []string{dummyCheckName},
 		}

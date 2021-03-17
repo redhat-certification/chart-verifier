@@ -18,11 +18,14 @@ package chartverifier
 
 import (
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	"github.com/spf13/viper"
 )
 
 type CertifierBuilder interface {
 	SetRegistry(registry checks.Registry) CertifierBuilder
 	SetChecks(checks []string) CertifierBuilder
+	SetConfig(config *viper.Viper) CertifierBuilder
+	SetOverrides([]string) CertifierBuilder
 	Build() (Certifier, error)
 }
 

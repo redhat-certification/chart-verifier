@@ -22,6 +22,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier"
@@ -41,6 +42,8 @@ var (
 	disabledChecksFlag []string
 	// outputFormatFlag contains the output format the user has specified: default, yaml or json.
 	outputFormatFlag string
+	// setOverridesFlag contains the overrides the user has specified through the --set flag.
+	setOverridesFlag []string
 )
 
 func filterChecks(set []string, subset []string, setEnabled bool, subsetEnabled bool) ([]string, error) {
@@ -76,13 +79,8 @@ func buildChecks(all, enabled, disabled []string) ([]string, error) {
 	}
 }
 
-func buildCertifier(checks []string) (chartverifier.Certifier, error) {
-	return chartverifier.NewCertifierBuilder().
-		SetChecks(checks).
-		Build()
-}
-
-func NewVerifyCmd() *cobra.Command {
+// NewVerifyCmd creates ...
+func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "verify <chart-uri>",
 		Args:  cobra.ExactArgs(1),
@@ -93,7 +91,13 @@ func NewVerifyCmd() *cobra.Command {
 				return err
 			}
 
-			certifier, err := buildCertifier(checks)
+			certifier, err := chartverifier.
+				NewCertifierBuilder().
+				SetChecks(checks).
+				SetConfig(config).
+				SetOverrides(setOverridesFlag).
+				Build()
+
 			if err != nil {
 				return err
 			}
@@ -132,12 +136,11 @@ func NewVerifyCmd() *cobra.Command {
 
 	cmd.Flags().StringVarP(&outputFormatFlag, "output", "o", "", "the output format: default, json or yaml")
 
+	cmd.Flags().StringSliceVarP(&setOverridesFlag, "set", "s", []string{}, "overrides a configuration, e.g: dummy.ok=false")
+
 	return cmd
 }
 
-// verifyCmd represents the lint command
-var verifyCmd = NewVerifyCmd()
-
 func init() {
-	rootCmd.AddCommand(verifyCmd)
+	rootCmd.AddCommand(NewVerifyCmd(viper.GetViper()))
 }
