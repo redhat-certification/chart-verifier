@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 
@@ -30,7 +31,7 @@ import (
 func TestCertify(t *testing.T) {
 
 	t.Run("Should fail when no argument is given", func(t *testing.T) {
-		cmd := NewVerifyCmd()
+		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
 		cmd.SetOut(outBuf)
 		errBuf := bytes.NewBufferString("")
@@ -40,7 +41,7 @@ func TestCertify(t *testing.T) {
 	})
 
 	t.Run("Should fail when chart does not exist and argument is given", func(t *testing.T) {
-		cmd := NewVerifyCmd()
+		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
 		cmd.SetOut(outBuf)
 		errBuf := bytes.NewBufferString("")
@@ -54,7 +55,7 @@ func TestCertify(t *testing.T) {
 	})
 
 	t.Run("Should fail when the chart does not exist for empty set of checks", func(t *testing.T) {
-		cmd := NewVerifyCmd()
+		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
 		cmd.SetOut(outBuf)
 		errBuf := bytes.NewBufferString("")
@@ -67,7 +68,7 @@ func TestCertify(t *testing.T) {
 	})
 
 	t.Run("Should fail when the chart does not exist for single check", func(t *testing.T) {
-		cmd := NewVerifyCmd()
+		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
 		cmd.SetOut(outBuf)
 		errBuf := bytes.NewBufferString("")
@@ -83,7 +84,7 @@ func TestCertify(t *testing.T) {
 	})
 
 	t.Run("Should fail when the chart exists but the single check does not", func(t *testing.T) {
-		cmd := NewVerifyCmd()
+		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
 		cmd.SetOut(outBuf)
 		errBuf := bytes.NewBufferString("")
@@ -99,7 +100,7 @@ func TestCertify(t *testing.T) {
 	})
 
 	t.Run("Should succeed when the chart exists and is valid for a single check", func(t *testing.T) {
-		cmd := NewVerifyCmd()
+		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
 		cmd.SetOut(outBuf)
 		errBuf := bytes.NewBufferString("")
@@ -123,7 +124,7 @@ func TestCertify(t *testing.T) {
 	})
 
 	t.Run("Should display JSON certificate when option --output and argument values are given", func(t *testing.T) {
-		cmd := NewVerifyCmd()
+		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
 		cmd.SetOut(outBuf)
 		errBuf := bytes.NewBufferString("")
@@ -161,7 +162,7 @@ func TestCertify(t *testing.T) {
 	})
 
 	t.Run("Should display YAML certificate when option --output and argument values are given", func(t *testing.T) {
-		cmd := NewVerifyCmd()
+		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
 		cmd.SetOut(outBuf)
 		errBuf := bytes.NewBufferString("")
@@ -192,6 +193,164 @@ func TestCertify(t *testing.T) {
 				"is-helm-v3": map[string]interface{}{
 					"ok":     true,
 					"reason": checks.Helm3Reason,
+				},
+			},
+		}
+		require.Equal(t, expected, actual)
+	})
+
+	t.Run("Should fail because 'dummy' check fails by default", func(t *testing.T) {
+		cmd := NewVerifyCmd(viper.New())
+		outBuf := bytes.NewBufferString("")
+		cmd.SetOut(outBuf)
+		errBuf := bytes.NewBufferString("")
+		cmd.SetErr(errBuf)
+
+		cmd.SetArgs([]string{
+			"-e", "dummy",
+			"-o", "yaml",
+			"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
+		})
+		require.NoError(t, cmd.Execute())
+		require.NotEmpty(t, outBuf.String())
+		outString := outBuf.String()
+		actual := map[string]interface{}{}
+		err := yaml.Unmarshal([]byte(outString), &actual)
+		require.NoError(t, err)
+
+		expected := map[string]interface{}{
+			"metadata": map[string]interface{}{
+				"chart": map[string]interface{}{
+					"name":    "chart",
+					"version": "1.16.0",
+				},
+			},
+			"ok": false,
+			"results": map[string]interface{}{
+				"dummy": map[string]interface{}{
+					"ok":     false,
+					"reason": "dummy.ok is set to false",
+				},
+			},
+		}
+		require.Equal(t, expected, actual)
+	})
+
+	t.Run("Should succeed when 'dummy' ok configuration is set to true through flag", func(t *testing.T) {
+		cmd := NewVerifyCmd(viper.New())
+		outBuf := bytes.NewBufferString("")
+		cmd.SetOut(outBuf)
+		errBuf := bytes.NewBufferString("")
+		cmd.SetErr(errBuf)
+
+		cmd.SetArgs([]string{
+			"-e", "dummy",
+			"-o", "yaml",
+			"--set", "dummy.ok=true",
+			"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
+		})
+		require.NoError(t, cmd.Execute())
+		require.NotEmpty(t, outBuf.String())
+
+		actual := map[string]interface{}{}
+		outString := outBuf.String()
+		err := yaml.Unmarshal([]byte(outString), &actual)
+		require.NoError(t, err)
+
+		expected := map[string]interface{}{
+			"metadata": map[string]interface{}{
+				"chart": map[string]interface{}{
+					"name":    "chart",
+					"version": "1.16.0",
+				},
+			},
+			"ok": true,
+			"results": map[string]interface{}{
+				"dummy": map[string]interface{}{
+					"ok":     true,
+					"reason": "dummy.ok is set to true",
+				},
+			},
+		}
+		require.Equal(t, expected, actual)
+	})
+
+	t.Run("Should succeed when 'dummy' ok configuration is set to true in global configuration", func(t *testing.T) {
+		config := viper.New()
+		config.Set("dummy.ok", true)
+
+		cmd := NewVerifyCmd(config)
+		outBuf := bytes.NewBufferString("")
+		cmd.SetOut(outBuf)
+		errBuf := bytes.NewBufferString("")
+		cmd.SetErr(errBuf)
+
+		cmd.SetArgs([]string{
+			"-e", "dummy",
+			"-o", "yaml",
+			"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
+		})
+		require.NoError(t, cmd.Execute())
+		require.NotEmpty(t, outBuf.String())
+
+		actual := map[string]interface{}{}
+		outString := outBuf.String()
+		err := yaml.Unmarshal([]byte(outString), &actual)
+		require.NoError(t, err)
+
+		expected := map[string]interface{}{
+			"metadata": map[string]interface{}{
+				"chart": map[string]interface{}{
+					"name":    "chart",
+					"version": "1.16.0",
+				},
+			},
+			"ok": true,
+			"results": map[string]interface{}{
+				"dummy": map[string]interface{}{
+					"ok":     true,
+					"reason": "dummy.ok is set to true",
+				},
+			},
+		}
+		require.Equal(t, expected, actual)
+	})
+
+	t.Run("Should fail when 'dummy' ok configuration is set to true in global configuration but overriden through flags", func(t *testing.T) {
+		config := viper.New()
+		config.Set("dummy.ok", true)
+		cmd := NewVerifyCmd(config)
+		outBuf := bytes.NewBufferString("")
+		cmd.SetOut(outBuf)
+		errBuf := bytes.NewBufferString("")
+		cmd.SetErr(errBuf)
+
+		cmd.SetArgs([]string{
+			"-e", "dummy",
+			"-o", "yaml",
+			"--set", "dummy.ok=false",
+			"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
+		})
+		require.NoError(t, cmd.Execute())
+		require.NotEmpty(t, outBuf.String())
+
+		actual := map[string]interface{}{}
+		outString := outBuf.String()
+		err := yaml.Unmarshal([]byte(outString), &actual)
+		require.NoError(t, err)
+
+		expected := map[string]interface{}{
+			"metadata": map[string]interface{}{
+				"chart": map[string]interface{}{
+					"name":    "chart",
+					"version": "1.16.0",
+				},
+			},
+			"ok": false,
+			"results": map[string]interface{}{
+				"dummy": map[string]interface{}{
+					"ok":     false,
+					"reason": "dummy.ok is set to false",
 				},
 			},
 		}

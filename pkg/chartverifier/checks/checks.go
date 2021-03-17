@@ -18,11 +18,14 @@ package checks
 
 import (
 	"fmt"
-	"helm.sh/helm/v3/pkg/lint"
 	"path"
+	"strconv"
 	"strings"
 
+	"helm.sh/helm/v3/pkg/lint"
+
 	"github.com/pkg/errors"
+	"github.com/spf13/viper"
 )
 
 const (
@@ -50,7 +53,13 @@ func notImplemented() (Result, error) {
 	return Result{Ok: false}, errors.New("not implemented")
 }
 
-func IsHelmV3(uri string) (Result, error) {
+func Dummy(uri string, config *viper.Viper) (Result, error) {
+	ok := config.GetBool("ok")
+	okStr := strconv.FormatBool(ok)
+	return Result{Ok: ok, Reason: "dummy.ok is set to " + okStr}, nil
+}
+
+func IsHelmV3(uri string, _ *viper.Viper) (Result, error) {
 	c, _, err := LoadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
@@ -64,7 +73,7 @@ func IsHelmV3(uri string) (Result, error) {
 	return Result{Ok: isHelmV3, Reason: reason}, nil
 }
 
-func HasReadme(uri string) (Result, error) {
+func HasReadme(uri string, _ *viper.Viper) (Result, error) {
 	c, _, err := LoadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
@@ -81,7 +90,7 @@ func HasReadme(uri string) (Result, error) {
 	return r, nil
 }
 
-func ContainsTest(uri string) (Result, error) {
+func ContainsTest(uri string, _ *viper.Viper) (Result, error) {
 	c, _, err := LoadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
@@ -100,7 +109,7 @@ func ContainsTest(uri string) (Result, error) {
 
 }
 
-func ContainsValues(uri string) (Result, error) {
+func ContainsValues(uri string, _ *viper.Viper) (Result, error) {
 	c, _, err := LoadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
@@ -116,7 +125,7 @@ func ContainsValues(uri string) (Result, error) {
 	return r, nil
 }
 
-func ContainsValuesSchema(uri string) (Result, error) {
+func ContainsValuesSchema(uri string, _ *viper.Viper) (Result, error) {
 	c, _, err := LoadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
@@ -132,19 +141,19 @@ func ContainsValuesSchema(uri string) (Result, error) {
 	return r, nil
 }
 
-func KeywordsAreOpenshiftCategories(uri string) (Result, error) {
+func KeywordsAreOpenshiftCategories(uri string, _ *viper.Viper) (Result, error) {
 	return notImplemented()
 }
 
-func IsCommercialChart(uri string) (Result, error) {
+func IsCommercialChart(uri string, _ *viper.Viper) (Result, error) {
 	return notImplemented()
 }
 
-func IsCommunityChart(uri string) (Result, error) {
+func IsCommunityChart(uri string, _ *viper.Viper) (Result, error) {
 	return notImplemented()
 }
 
-func HasMinKubeVersion(uri string) (Result, error) {
+func HasMinKubeVersion(uri string, _ *viper.Viper) (Result, error) {
 	c, _, err := LoadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
@@ -160,7 +169,7 @@ func HasMinKubeVersion(uri string) (Result, error) {
 	return r, nil
 }
 
-func NotContainCRDs(uri string) (Result, error) {
+func NotContainCRDs(uri string, _ *viper.Viper) (Result, error) {
 	c, _, err := LoadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
@@ -176,7 +185,7 @@ func NotContainCRDs(uri string) (Result, error) {
 	return r, nil
 }
 
-func HelmLint(uri string) (Result, error) {
+func HelmLint(uri string, _ *viper.Viper) (Result, error) {
 	c, p, err := LoadChartFromURI(uri)
 	if err != nil {
 		return Result{}, err
@@ -194,14 +203,14 @@ func HelmLint(uri string) (Result, error) {
 	return r, nil
 }
 
-func NotContainsInfraPluginsAndDrivers(uri string) (Result, error) {
+func NotContainsInfraPluginsAndDrivers(uri string, _ *viper.Viper) (Result, error) {
 	return notImplemented()
 }
 
-func CanBeInstalledWithoutManualPreRequisites(uri string) (Result, error) {
+func CanBeInstalledWithoutManualPreRequisites(uri string, _ *viper.Viper) (Result, error) {
 	return notImplemented()
 }
 
-func CanBeInstalledWithoutClusterAdminPrivileges(uri string) (Result, error) {
+func CanBeInstalledWithoutClusterAdminPrivileges(uri string, _ *viper.Viper) (Result, error) {
 	return notImplemented()
 }

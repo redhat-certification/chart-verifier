@@ -16,6 +16,8 @@
 
 package checks
 
+import "github.com/spf13/viper"
+
 type Result struct {
 	// Ok indicates whether the result was successful or not.
 	Ok bool
@@ -24,7 +26,7 @@ type Result struct {
 	Reason string
 }
 
-type CheckFunc func(uri string) (Result, error)
+type CheckFunc func(uri string, config *viper.Viper) (Result, error)
 
 type Registry interface {
 	Get(name string) (CheckFunc, bool)
