@@ -96,30 +96,30 @@ the build: `quay.io/redhat-certification/chart-verifier:0d3706f`.
 
 ### Local Usage
 
-To certify a chart against all available checks:
+To verify a chart against all available checks:
 
 ```text
-> chart-verifier certify ./chart.tgz
-> chart-verifier certify ~/src/chart
-> chart-verifier certify https://www.example.com/chart.tgz
+> out/chart-verifier verify ./chart.tgz
+> out/chart-verifier verify ~/src/chart
+> out/chart-verifier verify https://www.example.com/chart.tgz
 ```
 
 To apply only the `is-helm-v3` check:
 
 ```text
-> chart-verifier certify --enable is-helm-v3 https://www.example.com/chart.tgz
+> out/chart-verifier verify --enable is-helm-v3 https://www.example.com/chart.tgz
 ```
 
 To apply all checks except `is-helm-v3`:
 
 ```text
-> chart-verifier certify --disable is-helm-v3 https://www.example.com/chart.tgz
+> out/chart-verifier verify --disable is-helm-v3 https://www.example.com/chart.tgz
 ```
 
 ### Container Usage
 
 The container image produced in 'Building chart-verifier' can then be executed with the Docker client
-as `docker run -it --rm quay.io/redhat-certification/chart-verifier:0d3706f certify`.
+as `docker run -it --rm quay.io/redhat-certification/chart-verifier:0d3706f verify`.
 
 If you haven't built a container image, you could still use the Docker client to execute the latest release available in
 Quay:

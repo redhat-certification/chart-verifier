@@ -19,7 +19,6 @@ package checks
 import (
 	"fmt"
 	"path"
-	"strconv"
 	"strings"
 
 	"helm.sh/helm/v3/pkg/lint"
@@ -51,12 +50,6 @@ const (
 
 func notImplemented() (Result, error) {
 	return Result{Ok: false}, errors.New("not implemented")
-}
-
-func Dummy(uri string, config *viper.Viper) (Result, error) {
-	ok := config.GetBool("ok")
-	okStr := strconv.FormatBool(ok)
-	return Result{Ok: ok, Reason: "dummy.ok is set to " + okStr}, nil
 }
 
 func IsHelmV3(uri string, _ *viper.Viper) (Result, error) {
