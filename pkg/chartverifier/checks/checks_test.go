@@ -283,6 +283,43 @@ func TestNotContainCRDs(t *testing.T) {
 	}
 }
 
+func TestNotContainCSIObjects(t *testing.T) {
+	type testCase struct {
+		description string
+		uri         string
+	}
+
+	positiveTestCases := []testCase{
+		{description: "Not contain CSI objects", uri: "chart-0.1.0-v3.valid.tgz"},
+	}
+
+	for _, tc := range positiveTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			config := viper.New()
+			r, err := NotContainCSIObjects(tc.uri, config)
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.True(t, r.Ok)
+			require.Equal(t, CSIObjectsDoesNotExist, r.Reason)
+		})
+	}
+
+	negativeTestCases := []testCase{
+		{description: "Contain CRDs", uri: "chart-0.1.0-v3.with-csi.tgz"},
+	}
+
+	for _, tc := range negativeTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			config := viper.New()
+			r, err := NotContainCSIObjects(tc.uri, config)
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.False(t, r.Ok)
+			require.Equal(t, CSIObjectsExist, r.Reason)
+		})
+	}
+}
+
 func TestHelmLint(t *testing.T) {
 	type testCase struct {
 		description string
