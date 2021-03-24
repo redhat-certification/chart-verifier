@@ -1,6 +1,10 @@
 name: Test
 
-on: push
+on:
+    push:
+        branches: [ main ]
+    pull_request:
+        branches: [ main ]
 
 jobs:
     test:
@@ -17,4 +21,5 @@ jobs:
             -   name: Download dependencies
                 run: go mod download
             -   name: Run tests
-                run: "hack/test.sh"
+                run: make test
+
