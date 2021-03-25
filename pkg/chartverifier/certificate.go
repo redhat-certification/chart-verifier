@@ -23,12 +23,22 @@ type chartMetadata struct {
 	Version string `json:"version" yaml:"version"`
 }
 
+type runMetadata struct {
+	Version  string `json:"verifier-version" yaml:"verifier-version"`
+	ChartUri string `json:"chart-uri" yaml:"chart-uri"`
+}
+
 type metadata struct {
+	RunMetadata   runMetadata   `json:"tool" yaml:"tool"`
 	ChartMetadata chartMetadata `json:"chart" yaml:"chart"`
 }
 
-func newMetadata(name, version string) *metadata {
+func newMetadata(name, version, chartUri, toolVersion string) *metadata {
 	return &metadata{
+		RunMetadata: runMetadata{
+			ChartUri: chartUri,
+			Version:  toolVersion,
+		},
 		ChartMetadata: chartMetadata{
 			Name:    name,
 			Version: version,
@@ -49,9 +59,9 @@ type checkResult struct {
 	Reason string `json:"reason" yaml:"reason"`
 }
 
-func newCertificate(name, version string, ok bool, resultMap checkResultMap) Certificate {
+func newCertificate(name, version, chartUri, toolVersion string, ok bool, resultMap checkResultMap) Certificate {
 	return &certificate{
-		Metadata:       newMetadata(name, version),
+		Metadata:       newMetadata(name, version, chartUri, toolVersion),
 		Ok:             ok,
 		CheckResultMap: resultMap,
 	}
@@ -62,8 +72,12 @@ func (c *certificate) IsOk() bool {
 }
 
 func (c *certificate) String() string {
-	report := "chart: " + c.Metadata.ChartMetadata.Name + "\n" +
-		"version: " + c.Metadata.ChartMetadata.Version + "\n" +
+	report := "Tool:\n" +
+		"  verifier-version: " + c.Metadata.RunMetadata.Version + "\n" +
+		"  chart-uri: " + c.Metadata.RunMetadata.ChartUri + "\n" +
+		"Chart:\n" +
+		"  Name: " + c.Metadata.ChartMetadata.Name + "\n" +
+		"  version: " + c.Metadata.ChartMetadata.Version + "\n" +
 		"ok: " + strconv.FormatBool(c.Ok) + "\n" +
 		"\n"
 

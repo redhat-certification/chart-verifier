@@ -28,6 +28,10 @@ import (
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier"
 )
 
+const (
+	Version = "1.0.0"
+)
+
 func init() {
 	allChecks = chartverifier.DefaultRegistry().AllChecks()
 }
@@ -96,6 +100,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 				SetChecks(checks).
 				SetConfig(config).
 				SetOverrides(setOverridesFlag).
+				SetToolVersion(Version).
 				Build()
 
 			if err != nil {
@@ -124,6 +129,17 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 				cmd.Println(string(b))
 			} else {
 				cmd.Print(result)
+			}
+
+			reportErr := chartverifier.
+				NewReportBuilder().
+				SetCertificate(&result).
+				SetChartUri(args[0]).
+				Generate()
+
+			if reportErr != nil {
+				cmd.Println("Report failure :" + reportErr.Error())
+				return err
 			}
 
 			return nil

@@ -23,6 +23,8 @@ import (
 )
 
 type CertificateBuilder interface {
+	SetToolVersion(name string) CertificateBuilder
+	SetChartUri(name string) CertificateBuilder
 	SetChartName(name string) CertificateBuilder
 	SetChartVersion(version string) CertificateBuilder
 	AddCheckResult(name string, result checks.Result) CertificateBuilder
@@ -35,6 +37,8 @@ type CheckResult struct {
 }
 
 type certificateBuilder struct {
+	ToolVersion    string
+	ChartUri       string
 	ChartName      string
 	ChartVersion   string
 	CheckResultMap checkResultMap
@@ -44,6 +48,16 @@ func NewCertificateBuilder() CertificateBuilder {
 	return &certificateBuilder{
 		CheckResultMap: checkResultMap{},
 	}
+}
+
+func (r *certificateBuilder) SetToolVersion(version string) CertificateBuilder {
+	r.ToolVersion = version
+	return r
+}
+
+func (r *certificateBuilder) SetChartUri(uri string) CertificateBuilder {
+	r.ChartUri = uri
+	return r
 }
 
 func (r *certificateBuilder) SetChartName(name string) CertificateBuilder {
@@ -62,6 +76,7 @@ func (r *certificateBuilder) AddCheckResult(name string, result checks.Result) C
 }
 
 func (r *certificateBuilder) Build() (Certificate, error) {
+
 	if r.ChartName == "" {
 		return nil, errors.New("chart name must be set")
 	}
@@ -79,5 +94,5 @@ func (r *certificateBuilder) Build() (Certificate, error) {
 		}
 	}
 
-	return newCertificate(r.ChartName, r.ChartVersion, ok, r.CheckResultMap), nil
+	return newCertificate(r.ChartName, r.ChartVersion, r.ChartUri, r.ToolVersion, ok, r.CheckResultMap), nil
 }
