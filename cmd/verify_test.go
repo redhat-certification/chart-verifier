@@ -113,8 +113,12 @@ func TestCertify(t *testing.T) {
 		require.NoError(t, cmd.Execute())
 		require.NotEmpty(t, outBuf.String())
 
-		expected := "chart: chart\n" +
-			"version: 1.16.0\n" +
+		expected := "Tool:\n" +
+			"  verifier-version: 1.0.0\n" +
+			"  chart-uri: ../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz\n" +
+			"Chart:\n" +
+			"  Name: chart\n" +
+			"  version: 1.16.0\n" +
 			"ok: true\n" +
 			"\n" +
 			"is-helm-v3:\n" +
@@ -145,6 +149,10 @@ func TestCertify(t *testing.T) {
 
 		expected := map[string]interface{}{
 			"metadata": map[string]interface{}{
+				"tool": map[string]interface{}{
+					"verifier-version": "1.0.0",
+					"chart-uri":        "../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
+				},
 				"chart": map[string]interface{}{
 					"name":    "chart",
 					"version": "1.16.0",
@@ -183,6 +191,10 @@ func TestCertify(t *testing.T) {
 
 		expected := map[string]interface{}{
 			"metadata": map[string]interface{}{
+				"tool": map[string]interface{}{
+					"verifier-version": "1.0.0",
+					"chart-uri":        "../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
+				},
 				"chart": map[string]interface{}{
 					"name":    "chart",
 					"version": "1.16.0",
