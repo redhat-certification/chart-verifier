@@ -45,10 +45,11 @@ func DefaultRegistry() checks.Registry {
 }
 
 type certifierBuilder struct {
-	checks    []string
-	config    *viper.Viper
-	overrides []string
-	registry  checks.Registry
+	checks      []string
+	config      *viper.Viper
+	overrides   []string
+	registry    checks.Registry
+	toolVersion string
 }
 
 func (b *certifierBuilder) SetRegistry(registry checks.Registry) CertifierBuilder {
@@ -68,6 +69,11 @@ func (b *certifierBuilder) SetConfig(config *viper.Viper) CertifierBuilder {
 
 func (b *certifierBuilder) SetOverrides(overrides []string) CertifierBuilder {
 	b.overrides = overrides
+	return b
+}
+
+func (b *certifierBuilder) SetToolVersion(version string) CertifierBuilder {
+	b.toolVersion = version
 	return b
 }
 
@@ -94,6 +100,7 @@ func (b *certifierBuilder) Build() (Certifier, error) {
 		registry:       b.registry,
 		requiredChecks: b.checks,
 		config:         b.config,
+		toolVersion:    b.toolVersion,
 	}, nil
 }
 

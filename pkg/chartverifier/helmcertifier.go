@@ -26,6 +26,7 @@ type CertifierBuilder interface {
 	SetChecks(checks []string) CertifierBuilder
 	SetConfig(config *viper.Viper) CertifierBuilder
 	SetOverrides([]string) CertifierBuilder
+	SetToolVersion(string) CertifierBuilder
 	Build() (Certifier, error)
 }
 

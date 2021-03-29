@@ -41,6 +41,7 @@ type certifier struct {
 	config         *viper.Viper
 	registry       checks.Registry
 	requiredChecks []string
+	toolVersion    string
 }
 
 func (c *certifier) subConfig(name string) *viper.Viper {
@@ -60,7 +61,9 @@ func (c *certifier) Certify(uri string) (Certificate, error) {
 
 	result := NewCertificateBuilder().
 		SetChartName(chrt.Name()).
-		SetChartVersion(chrt.AppVersion())
+		SetChartVersion(chrt.AppVersion()).
+		SetToolVersion(c.toolVersion).
+		SetChartUri(uri)
 
 	for _, name := range c.requiredChecks {
 		checkFunc, ok := c.registry.Get(name)
