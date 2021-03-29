@@ -21,13 +21,13 @@ type reportBuilder struct {
 	ChartYaml   *chart.File
 }
 
-type chartYamlMetadata struct {
-	ChartYamlMetadata interface{} `json:"chart-yaml" yaml:"chart-yaml"`
+type helmChartMetadata struct {
+	HelmChartMetadata interface{} `json:"chart-metadata" yaml:"chart-metadata"`
 }
 
-func newChartYamlMetadata(data interface{}) *chartYamlMetadata {
-	return &chartYamlMetadata{
-		ChartYamlMetadata: data,
+func newHelmChartMetadata(data interface{}) *helmChartMetadata {
+	return &helmChartMetadata{
+		HelmChartMetadata: data,
 	}
 }
 
@@ -61,7 +61,7 @@ func (r *reportBuilder) Generate() error {
 		return err
 	}
 
-	reportDir := filepath.FromSlash(reportsDir + "/" + filepath.Base(r.ChartUri))
+	reportDir := filepath.FromSlash(filepath.Join(reportsDir, filepath.Base(r.ChartUri)))
 
 	if _, err = os.Stat(reportDir); !os.IsNotExist(err) {
 		os.RemoveAll(reportDir)
@@ -70,7 +70,7 @@ func (r *reportBuilder) Generate() error {
 		return err
 	}
 
-	f, err := os.Create(reportDir + "/verifier.report.yaml")
+	f, err := os.Create(filepath.Join(reportDir, "/verifier.report.yaml"))
 	if err != nil {
 		return err
 	}
@@ -83,21 +83,12 @@ func (r *reportBuilder) Generate() error {
 	f.Write(b)
 
 	c, _, err := checks.LoadChartFromURI(r.ChartUri)
-	for _, chartFile := range c.Raw {
-		if chartFile.Name == "Chart.yaml" {
-			var unmarshalledChart interface{}
-			err = yaml.Unmarshal(chartFile.Data, &unmarshalledChart)
-			if err != nil {
-				return err
-			}
-			b, err = yaml.Marshal(newChartYamlMetadata(unmarshalledChart))
-			if err != nil {
-				return err
-			}
-			f.Write(b)
-			break
-		}
+
+	b, err = yaml.Marshal(newHelmChartMetadata(c.Metadata))
+	if err != nil {
+		return err
 	}
+	f.Write(b)
 
 	f.Close()
 
