@@ -1,0 +1,16 @@
+name: 'chart-verifier'
+description: 'Run chart-verifier'
+author: 'Red Hat Certification'
+branding:
+  icon: monitor
+  color: purple
+inputs:
+  options:
+    description: "Verify options"
+    required: false
+runs:
+  using: 'docker'
+  image: '../Dockerfile'
+  args:
+  - "verify"
+  - ${{ inputs.options }}
