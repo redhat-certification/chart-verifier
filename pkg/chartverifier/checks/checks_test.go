@@ -17,6 +17,7 @@
 package checks
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -356,4 +357,66 @@ func TestHelmLint(t *testing.T) {
 		})
 	}
 
+}
+
+func TestImageCertify(t *testing.T) {
+
+	type testCase struct {
+		description string
+		uri         string
+		numErrors   int
+	}
+
+	negativeTestCases := []testCase{
+		{description: "chart-0.1.0-v3.valid.tgz check images fails", uri: "chart-0.1.0-v3.valid.tgz", numErrors: 2},
+		{description: "Helm check images fails", uri: "chart-0.1.0-v3.with-crd.tgz", numErrors: 2},
+		{description: "Helm check images fails", uri: "chart-0.1.0-v3.with-csi.tgz", numErrors: 1},
+	}
+
+	for _, tc := range negativeTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			config := viper.New()
+			r, err := ImagesAreCertified(tc.uri, config)
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.False(t, r.Ok)
+			for i := 0; i < tc.numErrors; i++ {
+				require.Contains(t, r.Reason, ImageNotCertified)
+				r.Reason = strings.Replace(r.Reason, "_replaced_", ImageNotCertified, 1)
+			}
+		})
+	}
+
+}
+
+func TestImageParsing(t *testing.T) {
+
+	type testCase struct {
+		description      string
+		image            string
+		expectedVersion  string
+		expectedRepo     string
+		expectedRegistry string
+	}
+
+	testCases := []testCase{
+		{"Single repo Default version 1", "repo", "latest", "repo", ""},
+		{"Single repo Default version 2", "repo:", "latest", "repo", ""},
+		{"Single repo with version", "repo:1.1.8", "1.1.8", "repo", ""},
+		{"Double repo with version", "repo/product:1.1.8", "1.1.8", "repo/product", ""},
+		{"Registry, double repo with version", "registry/repo/product:1.1.8", "1.1.8", "repo/product", "registry"},
+		{"Registry with port, double repo with version", "registry:8080/repo/product:1.1.8", "1.1.8", "repo/product", "registry:8080"},
+	}
+
+	for _, testCase := range testCases {
+		registries, repository, version := getImageParts(testCase.image)
+
+		require.Equal(t, repository, testCase.expectedRepo)
+		require.Equal(t, version, testCase.expectedVersion)
+		if len(registries) == 0 {
+			require.True(t, len(testCase.expectedRegistry) == 0)
+		} else {
+			require.Equal(t, registries[0], testCase.expectedRegistry)
+		}
+	}
 }

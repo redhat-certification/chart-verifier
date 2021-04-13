@@ -26,6 +26,28 @@ type Result struct {
 	Reason string
 }
 
+func NewResult(outcome bool, reason string) Result {
+	result := Result{}
+	result.Ok = outcome
+	result.Reason = reason
+	return result
+}
+
+func (r *Result) SetResult(outcome bool, reason string) Result {
+	r.Ok = outcome
+	r.Reason = reason
+	return *r
+}
+
+func (r *Result) AddResult(outcome bool, reason string) Result {
+	r.Ok = r.Ok && outcome
+	if len(r.Reason) > 0 {
+		r.Reason += "\n\t\t"
+	}
+	r.Reason += reason
+	return *r
+}
+
 type CheckFunc func(uri string, config *viper.Viper) (Result, error)
 
 type Registry interface {

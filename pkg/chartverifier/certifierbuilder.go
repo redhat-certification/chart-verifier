@@ -38,6 +38,7 @@ func init() {
 	defaultRegistry.Add("not-contains-crds", checks.NotContainCRDs)
 	defaultRegistry.Add("helm-lint", checks.HelmLint)
 	defaultRegistry.Add("not-contain-csi-objects", checks.NotContainCSIObjects)
+	defaultRegistry.Add("images-are-certified", checks.ImagesAreCertified)
 }
 
 func DefaultRegistry() checks.Registry {
