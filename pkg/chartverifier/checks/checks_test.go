@@ -329,6 +329,8 @@ func TestHelmLint(t *testing.T) {
 
 	positiveTestCases := []testCase{
 		{description: "Helm lint works for valid chart", uri: "chart-0.1.0-v3.valid.tgz"},
+		{description: "Helm lint works for chart with lint INFO message", uri: "chart-0.1.0-v2.lint-info.tgz"},
+		{description: "Helm lint works for chart with lint WARNING message", uri: "chart-0.1.0-v2.lint-warning.tgz"},
 	}
 
 	for _, tc := range positiveTestCases {
@@ -343,7 +345,7 @@ func TestHelmLint(t *testing.T) {
 	}
 
 	negativeTestCases := []testCase{
-		{description: "Helm lint fails for invalid chart", uri: "chart-0.1.0-v2.invalid.tgz"},
+		{description: "Helm lint fails for chart with lint error", uri: "chart-0.1.0-v2.lint-error.tgz"},
 	}
 
 	for _, tc := range negativeTestCases {

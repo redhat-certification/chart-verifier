@@ -22,7 +22,7 @@ import (
 	"strings"
 
 	"helm.sh/helm/v3/pkg/lint"
-
+	"helm.sh/helm/v3/pkg/lint/support"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 
@@ -190,7 +190,7 @@ func HelmLint(uri string, _ *viper.Viper) (Result, error) {
 	r := NewResult(true, HelmLintSuccessful)
 	p = path.Join(p, c.Name())
 	linter := lint.All(p, map[string]interface{}{}, "default", false)
-	if len(linter.Messages) > 0 {
+	if linter.HighestSeverity > support.WarningSev {
 		reason := ""
 		for _, m := range linter.Messages {
 			reason = reason + m.Error() + "\n"
