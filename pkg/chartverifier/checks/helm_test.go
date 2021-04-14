@@ -78,3 +78,29 @@ func TestLoadChartFromURI(t *testing.T) {
 
 	cancel()
 }
+
+func TestTemplate(t *testing.T) {
+
+	type testCase struct {
+		description string
+		uri         string
+		images      []string
+	}
+
+	TestCases := []testCase{
+		{description: "chart-0.1.0-v3.valid.tgz images ", uri: "chart-0.1.0-v3.valid.tgz", images: []string{"nginx:1.16.0", "busybox"}},
+		{description: "chart-0.1.0-v3.with-crd.tgz", uri: "chart-0.1.0-v3.with-crd.tgz", images: []string{"nginx:1.16.0", "busybox"}},
+		{description: "chart-0.1.0-v3.with-csi.tgz", uri: "chart-0.1.0-v3.with-csi.tgz", images: []string{"nginx:1.16.0"}},
+	}
+
+	for _, tc := range TestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			images, err := getImageReferences(tc.uri)
+			require.NoError(t, err)
+			require.Equal(t, len(images), len(tc.images))
+			for i := 0; i < len(tc.images); i++ {
+				require.Contains(t, images, tc.images[i])
+			}
+		})
+	}
+}

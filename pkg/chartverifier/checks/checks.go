@@ -25,6 +25,8 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
+
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/pyxis"
 )
 
 const (
@@ -48,6 +50,10 @@ const (
 	HelmLintHasFailedPrefix      = "Helm lint has failed: "
 	CSIObjectsExist              = "CSI objects exist"
 	CSIObjectsDoesNotExist       = "CSI objects do not exist"
+	NoImagesToCertify            = "No images to certify"
+	ImageCertifyFailed           = "Failed to certify images"
+	ImageCertified               = "Image is Red Hat certified"
+	ImageNotCertified            = "Image is not Red Hat certified"
 )
 
 func notImplemented() (Result, error) {
@@ -65,7 +71,7 @@ func IsHelmV3(uri string, _ *viper.Viper) (Result, error) {
 	if isHelmV3 {
 		reason = Helm3Reason
 	}
-	return Result{Ok: isHelmV3, Reason: reason}, nil
+	return NewResult(isHelmV3, reason), nil
 }
 
 func HasReadme(uri string, _ *viper.Viper) (Result, error) {
@@ -74,11 +80,10 @@ func HasReadme(uri string, _ *viper.Viper) (Result, error) {
 		return Result{}, err
 	}
 
-	r := Result{Reason: ReadmeDoesNotExist}
+	r := NewResult(false, ReadmeDoesNotExist)
 	for _, f := range c.Files {
 		if f.Name == "README.md" {
-			r.Ok = true
-			r.Reason = ReadmeExist
+			r.SetResult(true, ReadmeExist)
 		}
 	}
 
@@ -91,11 +96,11 @@ func ContainsTest(uri string, _ *viper.Viper) (Result, error) {
 		return Result{}, err
 	}
 
-	r := Result{Reason: ChartTestFilesDoesNotExist}
+	r := NewResult(false, ChartTestFilesDoesNotExist)
 	for _, f := range c.Templates {
 		if strings.HasPrefix(f.Name, TestTemplatePrefix) && strings.HasSuffix(f.Name, ".yaml") {
-			r.Reason = ChartTestFilesExist
 			r.Ok = true
+			r.SetResult(true, ChartTestFilesExist)
 			break
 		}
 	}
@@ -110,11 +115,10 @@ func ContainsValues(uri string, _ *viper.Viper) (Result, error) {
 		return Result{}, err
 	}
 
-	r := Result{Reason: ValuesFileDoesNotExist}
+	r := NewResult(false, ValuesFileDoesNotExist)
 
 	if len(c.Values) > 0 {
-		r.Reason = ValuesFileExist
-		r.Ok = true
+		r.SetResult(true, ValuesFileExist)
 	}
 
 	return r, nil
@@ -126,11 +130,10 @@ func ContainsValuesSchema(uri string, _ *viper.Viper) (Result, error) {
 		return Result{}, err
 	}
 
-	r := Result{Reason: ValuesSchemaFileDoesNotExist}
+	r := NewResult(false, ValuesSchemaFileDoesNotExist)
 
 	if len(c.Schema) > 0 {
-		r.Reason = ValuesSchemaFileExist
-		r.Ok = true
+		r.SetResult(true, ValuesSchemaFileExist)
 	}
 
 	return r, nil
@@ -151,14 +154,13 @@ func IsCommunityChart(uri string, _ *viper.Viper) (Result, error) {
 func HasMinKubeVersion(uri string, _ *viper.Viper) (Result, error) {
 	c, _, err := LoadChartFromURI(uri)
 	if err != nil {
-		return Result{}, err
+		return NewResult(false, err.Error()), err
 	}
 
-	r := Result{Reason: MinKuberVersionNotSpecified}
+	r := NewResult(false, MinKuberVersionNotSpecified)
 
 	if c.Metadata.KubeVersion != "" {
-		r.Ok = true
-		r.Reason = MinKuberVersionSpecified
+		r.SetResult(true, MinKuberVersionSpecified)
 	}
 
 	return r, nil
@@ -167,14 +169,14 @@ func HasMinKubeVersion(uri string, _ *viper.Viper) (Result, error) {
 func NotContainCRDs(uri string, _ *viper.Viper) (Result, error) {
 	c, _, err := LoadChartFromURI(uri)
 	if err != nil {
-		return Result{}, err
+		return NewResult(false, err.Error()), err
 	}
 
-	r := Result{Ok: true, Reason: ChartDoesNotContainCRDs}
+	r := NewResult(true, ChartDoesNotContainCRDs)
 
 	if len(c.CRDObjects()) > 0 {
 		r.Ok = false
-		r.Reason = ChartContainCRDs
+		r.SetResult(false, ChartContainCRDs)
 	}
 
 	return r, nil
@@ -183,9 +185,9 @@ func NotContainCRDs(uri string, _ *viper.Viper) (Result, error) {
 func HelmLint(uri string, _ *viper.Viper) (Result, error) {
 	c, p, err := LoadChartFromURI(uri)
 	if err != nil {
-		return Result{}, err
+		return NewResult(false, err.Error()), err
 	}
-	r := Result{Ok: true, Reason: HelmLintSuccessful}
+	r := NewResult(true, HelmLintSuccessful)
 	p = path.Join(p, c.Name())
 	linter := lint.All(p, map[string]interface{}{}, "default", false)
 	if len(linter.Messages) > 0 {
@@ -193,7 +195,7 @@ func HelmLint(uri string, _ *viper.Viper) (Result, error) {
 		for _, m := range linter.Messages {
 			reason = reason + m.Error() + "\n"
 		}
-		r = Result{Ok: false, Reason: fmt.Sprintf("%s %s", HelmLintHasFailedPrefix, reason)}
+		r.SetResult(false, fmt.Sprintf("%s %s", HelmLintHasFailedPrefix, reason))
 	}
 	return r, nil
 }
@@ -207,7 +209,7 @@ func NotContainCSIObjects(uri string, _ *viper.Viper) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	r := Result{Ok: true, Reason: CSIObjectsDoesNotExist}
+	r := NewResult(true, CSIObjectsDoesNotExist)
 	for _, f := range c.Templates {
 		if !strings.HasSuffix(f.Name, ".yaml") {
 			continue
@@ -215,8 +217,7 @@ func NotContainCSIObjects(uri string, _ *viper.Viper) (Result, error) {
 		for _, v := range strings.Split(string(f.Data), "\n") {
 			if strings.HasPrefix(v, "kind") {
 				if strings.TrimSpace(strings.Split(v, ":")[1]) == "CSIDriver" {
-					r.Reason = CSIObjectsExist
-					r.Ok = false
+					r.SetResult(false, CSIObjectsExist)
 				}
 			}
 		}
@@ -231,4 +232,81 @@ func CanBeInstalledWithoutManualPreRequisites(uri string, _ *viper.Viper) (Resul
 
 func CanBeInstalledWithoutClusterAdminPrivileges(uri string, _ *viper.Viper) (Result, error) {
 	return notImplemented()
+}
+
+func ImagesAreCertified(uri string, _ *viper.Viper) (Result, error) {
+
+	r := NewResult(false, "")
+
+	images, err := getImageReferences(uri)
+
+	if err != nil {
+		r.SetResult(false, fmt.Sprintf("%s : Failed to get images : %v", ImageCertifyFailed, err))
+	} else if len(images) == 0 {
+		r.SetResult(true, NoImagesToCertify)
+	} else {
+		for _, image := range images {
+
+			registries, repository, version := getImageParts(image)
+
+			if len(registries) == 0 {
+				registries, err = pyxis.GetImageRegistries(repository)
+			}
+
+			if err != nil {
+				r.AddResult(false, fmt.Sprintf("%s : %s : %v", ImageNotCertified, image, err))
+			} else if len(registries) == 0 {
+				r.AddResult(false, fmt.Sprintf("%s : %s", ImageNotCertified, image))
+			} else {
+				certified := false
+				for _, registry := range registries {
+					found, checkImageErr := pyxis.IsImageInRegistry(repository, version, registry)
+					if found {
+						err = nil
+						certified = true
+						break
+					} else if err == nil {
+						err = checkImageErr
+					}
+				}
+				if !certified {
+					if err != nil {
+						r.AddResult(false, fmt.Sprintf("%s : %s : %v", ImageNotCertified, image, err))
+					} else {
+						r.AddResult(false, fmt.Sprintf("%s : %s", ImageNotCertified, image))
+					}
+				} else {
+					r.AddResult(true, fmt.Sprintf("%s : %s", ImageCertified, image))
+				}
+			}
+		}
+	}
+
+	return r, nil
+}
+
+func getImageParts(image string) ([]string, string, string) {
+
+	imageParts := strings.Split(image, "/")
+
+	lastPart := imageParts[len(imageParts)-1]
+	lastParts := strings.Split(lastPart, ":")
+	var version string
+	if len(lastParts) > 1 && len(lastParts[1]) > 0 {
+		version = lastParts[1]
+	} else {
+		version = "latest"
+	}
+
+	imageParts[len(imageParts)-1] = lastParts[0]
+
+	var registries []string
+	var repository string
+	if len(imageParts) > 2 && len(imageParts[0]) > 1 {
+		registries = append(registries, imageParts[0])
+		repository = strings.Join(imageParts[1:], "/")
+	} else {
+		repository = strings.Join(imageParts, "/")
+	}
+	return registries, repository, version
 }

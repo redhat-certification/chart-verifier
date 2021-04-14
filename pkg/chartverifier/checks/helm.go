@@ -17,18 +17,29 @@
 package checks
 
 import (
+	"bufio"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"helm.sh/helm/v3/pkg/chartutil"
 
 	"github.com/pkg/errors"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
+
+	"helm.sh/helm/v3/pkg/action"
+	kubefake "helm.sh/helm/v3/pkg/kube/fake"
+	"helm.sh/helm/v3/pkg/storage"
+	"helm.sh/helm/v3/pkg/storage/driver"
+
+	"github.com/redhat-certification/chart-verifier/pkg/helm/actions"
 )
 
 // loadChartFromRemote attempts to retrieve a Helm chart from the given remote url. Returns an error if the given url
@@ -174,4 +185,46 @@ func (c ChartNotFoundErr) Error() string {
 func IsChartNotFound(err error) bool {
 	_, ok := err.(ChartNotFoundErr)
 	return ok
+}
+
+func getImageReferences(chartUri string) ([]string, error) {
+
+	actionConfig := &action.Configuration{
+		Releases:     nil,
+		KubeClient:   &kubefake.PrintingKubeClient{Out: ioutil.Discard},
+		Capabilities: chartutil.DefaultCapabilities,
+		Log:          func(format string, v ...interface{}) {},
+	}
+	mem := driver.NewMemory()
+	mem.SetNamespace("TestNamespace")
+	actionConfig.Releases = storage.Init(mem)
+
+	var m map[string]interface{}
+	imagesMap := make(map[string]bool)
+
+	txt, err := actions.RenderManifests("testRelease", chartUri, m, actionConfig)
+	if err != nil {
+		fmt.Printf("RenderManifests error : %v\n", err)
+	} else {
+		r := strings.NewReader(txt)
+		scanner := bufio.NewScanner(r)
+		for scanner.Scan() {
+			line := scanner.Text()
+			line = strings.ReplaceAll(line, " ", "")
+			if strings.HasPrefix(line, "image:") {
+				image := strings.Trim(strings.TrimLeft(line, "image:"), "\"")
+				if !imagesMap[image] {
+					imagesMap[image] = true
+				}
+
+			}
+		}
+	}
+
+	images := make([]string, 0, len(imagesMap))
+	for image := range imagesMap {
+		images = append(images, image)
+	}
+
+	return images, err
 }
