@@ -21,10 +21,10 @@ import (
 	"path"
 	"strings"
 
-	"helm.sh/helm/v3/pkg/lint"
-	"helm.sh/helm/v3/pkg/lint/support"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
+	"helm.sh/helm/v3/pkg/lint"
+	"helm.sh/helm/v3/pkg/lint/support"
 
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/pyxis"
 )
