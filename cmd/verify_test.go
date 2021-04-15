@@ -25,6 +25,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 )
 
@@ -113,18 +114,12 @@ func TestCertify(t *testing.T) {
 		require.NoError(t, cmd.Execute())
 		require.NotEmpty(t, outBuf.String())
 
-		expected := "Tool:\n" +
-			"  verifier-version: 1.0.0\n" +
-			"  chart-uri: ../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz\n" +
-			"Chart:\n" +
-			"  Name: chart\n" +
-			"  version: 1.16.0\n" +
-			"ok: true\n" +
-			"\n" +
-			"is-helm-v3:\n" +
-			"\tok: true\n" +
-			"\treason: " + checks.Helm3Reason + "\n"
-		require.Equal(t, expected, outBuf.String())
+		expected := "results:\n" +
+			"  - check: is-helm-v3\n" +
+			"    type: Mandatory\n" +
+			"    outcome: PASS\n" +
+			"    reason: API version is V2, used in Helm 3\n"
+		require.Contains(t, outBuf.String(), expected)
 	})
 
 	t.Run("Should display JSON certificate when option --output and argument values are given", func(t *testing.T) {
@@ -143,30 +138,14 @@ func TestCertify(t *testing.T) {
 		require.NotEmpty(t, outBuf.String())
 
 		// attempts to deserialize the command's output, expecting a json string
-		actual := map[string]interface{}{}
-		err := json.Unmarshal([]byte(outBuf.String()), &actual)
+		certificate := chartverifier.Certificate{}
+		err := json.Unmarshal([]byte(outBuf.String()), &certificate)
 		require.NoError(t, err)
-
-		expected := map[string]interface{}{
-			"metadata": map[string]interface{}{
-				"tool": map[string]interface{}{
-					"verifier-version": "1.0.0",
-					"chart-uri":        "../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
-				},
-				"chart": map[string]interface{}{
-					"name":    "chart",
-					"version": "1.16.0",
-				},
-			},
-			"ok": true,
-			"results": map[string]interface{}{
-				"is-helm-v3": map[string]interface{}{
-					"ok":     true,
-					"reason": checks.Helm3Reason,
-				},
-			},
-		}
-		require.Equal(t, expected, actual)
+		require.True(t, len(certificate.Results) == 1, "Expected only 1 result")
+		require.Equal(t, certificate.Results[0].Check, "is-helm-v3")
+		require.Equal(t, certificate.Results[0].Outcome, chartverifier.PassOutcomeType)
+		require.Equal(t, certificate.Results[0].Type, chartverifier.MandatoryCheckType)
+		require.Equal(t, certificate.Results[0].Reason, checks.Helm3Reason)
 	})
 
 	t.Run("Should display YAML certificate when option --output and argument values are given", func(t *testing.T) {
@@ -185,30 +164,15 @@ func TestCertify(t *testing.T) {
 		require.NotEmpty(t, outBuf.String())
 
 		// attempts to deserialize the command's output, expecting a json string
-		actual := map[string]interface{}{}
-		err := yaml.Unmarshal([]byte(outBuf.String()), &actual)
+		certificate := chartverifier.Certificate{}
+		err := yaml.Unmarshal([]byte(outBuf.String()), &certificate)
 		require.NoError(t, err)
+		require.True(t, len(certificate.Results) == 1, "Expected only 1 result")
+		require.Equal(t, certificate.Results[0].Check, "is-helm-v3")
+		require.Equal(t, certificate.Results[0].Outcome, chartverifier.PassOutcomeType)
+		require.Equal(t, certificate.Results[0].Type, chartverifier.MandatoryCheckType)
+		require.Equal(t, certificate.Results[0].Reason, checks.Helm3Reason)
 
-		expected := map[string]interface{}{
-			"metadata": map[string]interface{}{
-				"tool": map[string]interface{}{
-					"verifier-version": "1.0.0",
-					"chart-uri":        "../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
-				},
-				"chart": map[string]interface{}{
-					"name":    "chart",
-					"version": "1.16.0",
-				},
-			},
-			"ok": true,
-			"results": map[string]interface{}{
-				"is-helm-v3": map[string]interface{}{
-					"ok":     true,
-					"reason": checks.Helm3Reason,
-				},
-			},
-		}
-		require.Equal(t, expected, actual)
 	})
 
 }

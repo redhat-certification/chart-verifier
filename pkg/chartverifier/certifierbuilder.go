@@ -29,16 +29,16 @@ var defaultRegistry checks.Registry
 
 func init() {
 	defaultRegistry = checks.NewRegistry()
-	defaultRegistry.Add("has-readme", checks.HasReadme)
-	defaultRegistry.Add("is-helm-v3", checks.IsHelmV3)
-	defaultRegistry.Add("contains-test", checks.ContainsTest)
-	defaultRegistry.Add("contains-values", checks.ContainsValues)
-	defaultRegistry.Add("contains-values-schema", checks.ContainsValuesSchema)
-	defaultRegistry.Add("has-minkubeversion", checks.HasMinKubeVersion)
-	defaultRegistry.Add("not-contains-crds", checks.NotContainCRDs)
-	defaultRegistry.Add("helm-lint", checks.HelmLint)
-	defaultRegistry.Add("not-contain-csi-objects", checks.NotContainCSIObjects)
-	defaultRegistry.Add("images-are-certified", checks.ImagesAreCertified)
+	defaultRegistry.Add("has-readme", checks.Check{Type: MandatoryCheckType, Func: checks.HasReadme})
+	defaultRegistry.Add("is-helm-v3", checks.Check{Type: MandatoryCheckType, Func: checks.IsHelmV3})
+	defaultRegistry.Add("contains-test", checks.Check{Type: MandatoryCheckType, Func: checks.ContainsTest})
+	defaultRegistry.Add("contains-values", checks.Check{Type: MandatoryCheckType, Func: checks.ContainsValues})
+	defaultRegistry.Add("contains-values-schema", checks.Check{Type: MandatoryCheckType, Func: checks.ContainsValuesSchema})
+	defaultRegistry.Add("has-minkubeversion", checks.Check{Type: MandatoryCheckType, Func: checks.HasMinKubeVersion})
+	defaultRegistry.Add("not-contains-crds", checks.Check{Type: MandatoryCheckType, Func: checks.NotContainCRDs})
+	defaultRegistry.Add("helm-lint", checks.Check{Type: MandatoryCheckType, Func: checks.HelmLint})
+	defaultRegistry.Add("not-contain-csi-objects", checks.Check{Type: MandatoryCheckType, Func: checks.NotContainCSIObjects})
+	defaultRegistry.Add("images-are-certified", checks.Check{Type: MandatoryCheckType, Func: checks.ImagesAreCertified})
 }
 
 func DefaultRegistry() checks.Registry {

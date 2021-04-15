@@ -42,10 +42,18 @@ func (r *Result) SetResult(outcome bool, reason string) Result {
 func (r *Result) AddResult(outcome bool, reason string) Result {
 	r.Ok = r.Ok && outcome
 	if len(r.Reason) > 0 {
-		r.Reason += "\n\t\t"
+		r.Reason += "\n"
 	}
 	r.Reason += reason
 	return *r
+}
+
+type CheckType string
+
+type Check struct {
+	Name string
+	Type CheckType
+	Func CheckFunc
 }
 
 // CheckOptions contains options collected from the environment a check can
@@ -62,12 +70,12 @@ type CheckOptions struct {
 type CheckFunc func(options *CheckOptions) (Result, error)
 
 type Registry interface {
-	Get(name string) (CheckFunc, bool)
-	Add(name string, checkFunc CheckFunc) Registry
+	Get(name string) (Check, bool)
+	Add(name string, check Check) Registry
 	AllChecks() []string
 }
 
-type defaultRegistry map[string]CheckFunc
+type defaultRegistry map[string]Check
 
 func (r *defaultRegistry) AllChecks() []string {
 	allChecks := make([]string, 0)
@@ -81,12 +89,12 @@ func NewRegistry() Registry {
 	return &defaultRegistry{}
 }
 
-func (r *defaultRegistry) Get(name string) (CheckFunc, bool) {
+func (r *defaultRegistry) Get(name string) (Check, bool) {
 	v, ok := (*r)[name]
 	return v, ok
 }
 
-func (r *defaultRegistry) Add(name string, checkFunc CheckFunc) Registry {
-	(*r)[name] = checkFunc
+func (r *defaultRegistry) Add(name string, check Check) Registry {
+	(*r)[name] = check
 	return r
 }

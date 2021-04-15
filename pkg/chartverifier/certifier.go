@@ -53,7 +53,7 @@ func (c *certifier) subConfig(name string) *viper.Viper {
 	}
 }
 
-func (c *certifier) Certify(uri string) (Certificate, error) {
+func (c *certifier) Certify(uri string) (*Certificate, error) {
 
 	chrt, _, err := checks.LoadChartFromURI(uri)
 	if err != nil {
@@ -61,26 +61,26 @@ func (c *certifier) Certify(uri string) (Certificate, error) {
 	}
 
 	result := NewCertificateBuilder().
-		SetChartName(chrt.Name()).
-		SetChartVersion(chrt.AppVersion()).
 		SetToolVersion(c.toolVersion).
-		SetChartUri(uri)
+		SetChartUri(uri).
+		SetChart(chrt)
 
 	for _, name := range c.requiredChecks {
-		checkFunc, ok := c.registry.Get(name)
+		check, ok := c.registry.Get(name)
 		if !ok {
 			return nil, CheckNotFoundErr(name)
 		}
 
-		r, err := checkFunc(&checks.CheckOptions{
+		r, err := check.Func(&checks.CheckOptions{
 			URI:    uri,
 			Config: c.subConfig(name),
 			Values: c.values,
 		})
+
 		if err != nil {
 			return nil, NewCheckErr(err)
 		}
-		_ = result.AddCheckResult(name, r)
+		_ = result.AddCheck(name, check.Type, r)
 
 	}
 

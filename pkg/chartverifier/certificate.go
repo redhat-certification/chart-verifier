@@ -16,76 +16,88 @@
 
 package chartverifier
 
-import "strconv"
+import (
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	helmchart "helm.sh/helm/v3/pkg/chart"
+)
 
-type chartMetadata struct {
-	Name    string `json:"name" yaml:"name"`
-	Version string `json:"version" yaml:"version"`
+var CertificateApiVersion = "v1"
+var CertificateKind = "verify-report"
+
+type OutcomeType string
+
+const (
+	MandatoryCheckType    checks.CheckType = "Mandatory"
+	OptionalCheckType     checks.CheckType = "Optional"
+	ExperimentalCheckType checks.CheckType = "Experimental"
+
+	FailOutcomeType OutcomeType = "FAIL"
+	PassOutcomeType OutcomeType = "PASS"
+)
+
+type Certificate struct {
+	Apiversion string              `json:"apiversion" yaml:"apiversion"`
+	Kind       string              `json:"kind" yaml:"kind"`
+	Metadata   CertificateMetadata `json:"metadata" yaml:"metadata"`
+	Results    []*CheckReport      `json:"results" yaml:"results"`
 }
 
-type runMetadata struct {
-	Version  string `json:"verifier-version" yaml:"verifier-version"`
-	ChartUri string `json:"chart-uri" yaml:"chart-uri"`
+type CertificateMetadata struct {
+	ToolMetadata ToolMetadata        `json:"tool" yaml:"tool"`
+	ChartData    *helmchart.Metadata `json:"chart" yaml:"chart"`
+	Overrides    string              `json: "chart-overrides" yaml:"chart-overrides"`
 }
 
-type metadata struct {
-	RunMetadata   runMetadata   `json:"tool" yaml:"tool"`
-	ChartMetadata chartMetadata `json:"chart" yaml:"chart"`
+type ToolMetadata struct {
+	Version                    string `json:"verifier-version" yaml:"verifier-version"`
+	ChartUri                   string `json:"chart-uri" yaml:"chart-uri"`
+	Digest                     string `json:"digest" yaml:"digest"`
+	LastCertifiedTime          string `json:"lastCertifiedTime" yaml:"lastCertifiedTime"`
+	CertifiedOpenShiftVersions string `json:"certifiedOpenShiftVersions" yaml:"certifiedOpenShiftVersions"`
 }
 
-func newMetadata(name, version, chartUri, toolVersion string) *metadata {
-	return &metadata{
-		RunMetadata: runMetadata{
-			ChartUri: chartUri,
-			Version:  toolVersion,
-		},
-		ChartMetadata: chartMetadata{
-			Name:    name,
-			Version: version,
-		},
+type CheckReport struct {
+	Check   string           `json:"check" yaml:"check"`
+	Type    checks.CheckType `json:"type" yaml:"type"`
+	Outcome OutcomeType      `json:"outcome" yaml:"outcome"`
+	Reason  string           `json:"reason" yaml:"reason"`
+}
+
+func newCertificate() Certificate {
+
+	certificate := Certificate{Apiversion: CertificateApiVersion, Kind: CertificateKind}
+	certificate.Metadata = CertificateMetadata{}
+	certificate.Metadata.ToolMetadata = ToolMetadata{}
+
+	return certificate
+}
+
+func (c *Certificate) AddCheck(checkName string, checkType checks.CheckType) *CheckReport {
+	newCheck := CheckReport{}
+	newCheck.Check = checkName
+	newCheck.Type = checkType
+	newCheck.Outcome = PassOutcomeType
+	c.Results = append(c.Results, &newCheck)
+	return &newCheck
+}
+
+func (cr *CheckReport) SetResult(outcome bool, reason string) {
+	if outcome {
+		cr.Outcome = PassOutcomeType
+	} else {
+		cr.Outcome = FailOutcomeType
 	}
+	cr.Reason = reason
 }
 
-type certificate struct {
-	Ok             bool           `json:"ok" yaml:"ok"`
-	Metadata       *metadata      `json:"metadata" yaml:"metadata"`
-	CheckResultMap checkResultMap `json:"results" yaml:"results"`
-}
+func (c *Certificate) IsOk() bool {
 
-type checkResultMap map[string]checkResult
-
-type checkResult struct {
-	Ok     bool   `json:"ok" yaml:"ok"`
-	Reason string `json:"reason" yaml:"reason"`
-}
-
-func newCertificate(name, version, chartUri, toolVersion string, ok bool, resultMap checkResultMap) Certificate {
-	return &certificate{
-		Metadata:       newMetadata(name, version, chartUri, toolVersion),
-		Ok:             ok,
-		CheckResultMap: resultMap,
+	outcome := true
+	for _, check := range c.Results {
+		if check.Outcome == FailOutcomeType {
+			outcome = false
+			break
+		}
 	}
-}
-
-func (c *certificate) IsOk() bool {
-	return c.Ok
-}
-
-func (c *certificate) String() string {
-	report := "Tool:\n" +
-		"  verifier-version: " + c.Metadata.RunMetadata.Version + "\n" +
-		"  chart-uri: " + c.Metadata.RunMetadata.ChartUri + "\n" +
-		"Chart:\n" +
-		"  Name: " + c.Metadata.ChartMetadata.Name + "\n" +
-		"  version: " + c.Metadata.ChartMetadata.Version + "\n" +
-		"ok: " + strconv.FormatBool(c.Ok) + "\n" +
-		"\n"
-
-	for k, v := range c.CheckResultMap {
-		report += k + ":\n" +
-			"\tok: " + strconv.FormatBool(v.Ok) + "\n" +
-			"\treason: " + v.Reason + "\n"
-	}
-
-	return report
+	return outcome
 }
