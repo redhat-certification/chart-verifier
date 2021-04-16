@@ -235,7 +235,7 @@ func CanBeInstalledWithoutClusterAdminPrivileges(opts *CheckOptions) (Result, er
 
 func ImagesAreCertified(opts *CheckOptions) (Result, error) {
 
-	r := NewResult(false, "")
+	r := NewResult(true, "")
 
 	images, err := getImageReferences(opts.URI, opts.Values)
 
