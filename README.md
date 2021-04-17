@@ -175,3 +175,38 @@ has-readme:
         ok: true
         reason: Chart has README
 ```
+
+Here is another example for a chart on the host system using volume mount. In
+the below example, the chart is located in the current directory:
+
+```text
+> docker run -v $(pwd):/charts --rm quay.io/redhat-certification/chart-verifier:latest verify /charts/chart-0.1.0-v3.valid.tgz
+chart: chart
+version: 1.16.0
+ok: true
+
+is-helm-v3:
+        ok: true
+        reason: API version is V2 used in Helm 3
+contains-test:
+        ok: true
+        reason: Chart test files exist
+contains-values:
+        ok: true
+        reason: Values file exist
+contains-values-schema:
+        ok: true
+        reason: Values schema file exist
+has-minkubeversion:
+        ok: true
+        reason: Minimum Kubernetes version specified
+not-contains-crds:
+        ok: true
+        reason: Chart does not contain CRDs
+helm-lint:
+        ok: true
+        reason: Helm lint successful
+has-readme:
+        ok: true
+        reason: Chart has README
+```
