@@ -237,7 +237,7 @@ func ImagesAreCertified(opts *CheckOptions) (Result, error) {
 
 	r := NewResult(false, "")
 
-	images, err := getImageReferences(opts.URI)
+	images, err := getImageReferences(opts.URI, opts.Values)
 
 	if err != nil {
 		r.SetResult(false, fmt.Sprintf("%s : Failed to get images : %v", ImageCertifyFailed, err))
