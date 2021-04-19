@@ -29,16 +29,16 @@ var defaultRegistry checks.Registry
 
 func init() {
 	defaultRegistry = checks.NewRegistry()
-	defaultRegistry.Add("has-readme", checks.Check{Type: MandatoryCheckType, Func: checks.HasReadme})
-	defaultRegistry.Add("is-helm-v3", checks.Check{Type: MandatoryCheckType, Func: checks.IsHelmV3})
-	defaultRegistry.Add("contains-test", checks.Check{Type: MandatoryCheckType, Func: checks.ContainsTest})
-	defaultRegistry.Add("contains-values", checks.Check{Type: MandatoryCheckType, Func: checks.ContainsValues})
-	defaultRegistry.Add("contains-values-schema", checks.Check{Type: MandatoryCheckType, Func: checks.ContainsValuesSchema})
-	defaultRegistry.Add("has-minkubeversion", checks.Check{Type: MandatoryCheckType, Func: checks.HasMinKubeVersion})
-	defaultRegistry.Add("not-contains-crds", checks.Check{Type: MandatoryCheckType, Func: checks.NotContainCRDs})
-	defaultRegistry.Add("helm-lint", checks.Check{Type: MandatoryCheckType, Func: checks.HelmLint})
-	defaultRegistry.Add("not-contain-csi-objects", checks.Check{Type: MandatoryCheckType, Func: checks.NotContainCSIObjects})
-	defaultRegistry.Add("images-are-certified", checks.Check{Type: MandatoryCheckType, Func: checks.ImagesAreCertified})
+	defaultRegistry.Add(checks.Check{Name: "has-readme", Type: MandatoryCheckType, Func: checks.HasReadme})
+	defaultRegistry.Add(checks.Check{Name: "is-helm-v3", Type: MandatoryCheckType, Func: checks.IsHelmV3})
+	defaultRegistry.Add(checks.Check{Name: "contains-test", Type: MandatoryCheckType, Func: checks.ContainsTest})
+	defaultRegistry.Add(checks.Check{Name: "contains-values", Type: MandatoryCheckType, Func: checks.ContainsValues})
+	defaultRegistry.Add(checks.Check{Name: "contains-values-schema", Type: MandatoryCheckType, Func: checks.ContainsValuesSchema})
+	defaultRegistry.Add(checks.Check{Name: "has-minkubeversion", Type: MandatoryCheckType, Func: checks.HasMinKubeVersion})
+	defaultRegistry.Add(checks.Check{Name: "not-contains-crds", Type: MandatoryCheckType, Func: checks.NotContainCRDs})
+	defaultRegistry.Add(checks.Check{Name: "helm-lint", Type: MandatoryCheckType, Func: checks.HelmLint})
+	defaultRegistry.Add(checks.Check{Name: "not-contain-csi-objects", Type: MandatoryCheckType, Func: checks.NotContainCSIObjects})
+	defaultRegistry.Add(checks.Check{Name: "images-are-certified", Type: MandatoryCheckType, Func: checks.ImagesAreCertified})
 }
 
 func DefaultRegistry() checks.Registry {

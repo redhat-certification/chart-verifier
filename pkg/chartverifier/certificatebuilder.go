@@ -44,9 +44,9 @@ type certificateBuilder struct {
 }
 
 func NewCertificateBuilder() CertificateBuilder {
-	cB := certificateBuilder{}
-	cB.Certificate = newCertificate()
-	return &cB
+	b := certificateBuilder{}
+	b.Certificate = newCertificate()
+	return &b
 }
 
 func (r *certificateBuilder) SetToolVersion(version string) CertificateBuilder {
@@ -87,7 +87,7 @@ type fileSorter struct {
 	by    func(p1, p2 *helmchart.File) bool // Closure used in the Less method.
 }
 
-func (by By) Sort(files []*helmchart.File) {
+func (by By) sort(files []*helmchart.File) {
 	fs := &fileSorter{
 		files: files,
 		by:    by, // The Sort method's receiver is the function (closure) that defines the sort order.
@@ -118,7 +118,7 @@ func GenerateSha(rawFiles []*helmchart.File) string {
 
 	chartSha := sha256.New()
 	sortedFiles := rawFiles
-	By(name).Sort(sortedFiles)
+	By(name).sort(sortedFiles)
 	for _, chartFile := range sortedFiles {
 		chartSha.Write(chartFile.Data)
 	}

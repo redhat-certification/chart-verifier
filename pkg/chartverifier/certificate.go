@@ -31,8 +31,9 @@ const (
 	OptionalCheckType     checks.CheckType = "Optional"
 	ExperimentalCheckType checks.CheckType = "Experimental"
 
-	FailOutcomeType OutcomeType = "FAIL"
-	PassOutcomeType OutcomeType = "PASS"
+	FailOutcomeType    OutcomeType = "FAIL"
+	PassOutcomeType    OutcomeType = "PASS"
+	UnknownOutcomeType OutcomeType = "UNKNOWN"
 )
 
 type Certificate struct {
@@ -76,7 +77,7 @@ func (c *Certificate) AddCheck(checkName string, checkType checks.CheckType) *Ch
 	newCheck := CheckReport{}
 	newCheck.Check = checkName
 	newCheck.Type = checkType
-	newCheck.Outcome = PassOutcomeType
+	newCheck.Outcome = UnknownOutcomeType
 	c.Results = append(c.Results, &newCheck)
 	return &newCheck
 }
@@ -94,7 +95,7 @@ func (c *Certificate) IsOk() bool {
 
 	outcome := true
 	for _, check := range c.Results {
-		if check.Outcome == FailOutcomeType {
+		if !(check.Outcome == PassOutcomeType) {
 			outcome = false
 			break
 		}

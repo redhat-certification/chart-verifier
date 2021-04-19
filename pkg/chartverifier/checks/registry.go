@@ -71,7 +71,7 @@ type CheckFunc func(options *CheckOptions) (Result, error)
 
 type Registry interface {
 	Get(name string) (Check, bool)
-	Add(name string, check Check) Registry
+	Add(check Check) Registry
 	AllChecks() []string
 }
 
@@ -94,7 +94,7 @@ func (r *defaultRegistry) Get(name string) (Check, bool) {
 	return v, ok
 }
 
-func (r *defaultRegistry) Add(name string, check Check) Registry {
-	(*r)[name] = check
+func (r *defaultRegistry) Add(check Check) Registry {
+	(*r)[check.Name] = check
 	return r
 }
