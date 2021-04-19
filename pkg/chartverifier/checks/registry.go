@@ -48,7 +48,18 @@ func (r *Result) AddResult(outcome bool, reason string) Result {
 	return *r
 }
 
-type CheckFunc func(uri string, config *viper.Viper) (Result, error)
+// CheckOptions contains options collected from the environment a check can
+// consult to modify its behavior.
+type CheckOptions struct {
+	// URI is the location of the chart to be checked.
+	URI string
+	// Config is the configuration collected by Viper.
+	Config *viper.Viper
+	// Values contains the values informed by the user through command line options.
+	Values map[string]interface{}
+}
+
+type CheckFunc func(options *CheckOptions) (Result, error)
 
 type Registry interface {
 	Get(name string) (CheckFunc, bool)

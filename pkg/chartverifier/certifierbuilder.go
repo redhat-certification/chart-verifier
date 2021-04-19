@@ -51,6 +51,12 @@ type certifierBuilder struct {
 	overrides   []string
 	registry    checks.Registry
 	toolVersion string
+	values      map[string]interface{}
+}
+
+func (b *certifierBuilder) SetValues(vals map[string]interface{}) CertifierBuilder {
+	b.values = vals
+	return b
 }
 
 func (b *certifierBuilder) SetRegistry(registry checks.Registry) CertifierBuilder {
@@ -102,6 +108,7 @@ func (b *certifierBuilder) Build() (Certifier, error) {
 		requiredChecks: b.checks,
 		config:         b.config,
 		toolVersion:    b.toolVersion,
+		values:         b.values,
 	}, nil
 }
 

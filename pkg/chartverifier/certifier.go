@@ -42,6 +42,7 @@ type certifier struct {
 	registry       checks.Registry
 	requiredChecks []string
 	toolVersion    string
+	values         map[string]interface{}
 }
 
 func (c *certifier) subConfig(name string) *viper.Viper {
@@ -71,7 +72,11 @@ func (c *certifier) Certify(uri string) (Certificate, error) {
 			return nil, CheckNotFoundErr(name)
 		}
 
-		r, err := checkFunc(uri, c.subConfig(name))
+		r, err := checkFunc(&checks.CheckOptions{
+			URI:    uri,
+			Config: c.subConfig(name),
+			Values: c.values,
+		})
 		if err != nil {
 			return nil, NewCheckErr(err)
 		}

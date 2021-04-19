@@ -37,15 +37,15 @@ func TestCertifier_Certify(t *testing.T) {
 
 	dummyCheckName := "dummy-check"
 
-	erroredCheck := func(uri string, _ *viper.Viper) (checks.Result, error) {
+	erroredCheck := func(_ *checks.CheckOptions) (checks.Result, error) {
 		return checks.Result{}, errors.New("artificial error")
 	}
 
-	negativeCheck := func(uri string, _ *viper.Viper) (checks.Result, error) {
+	negativeCheck := func(_ *checks.CheckOptions) (checks.Result, error) {
 		return checks.Result{Ok: false}, nil
 	}
 
-	positiveCheck := func(uri string, _ *viper.Viper) (checks.Result, error) {
+	positiveCheck := func(_ *checks.CheckOptions) (checks.Result, error) {
 		return checks.Result{Ok: true}, nil
 	}
 

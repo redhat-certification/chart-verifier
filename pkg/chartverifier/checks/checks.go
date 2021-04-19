@@ -22,7 +22,6 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 	"helm.sh/helm/v3/pkg/lint"
 	"helm.sh/helm/v3/pkg/lint/support"
 
@@ -60,8 +59,8 @@ func notImplemented() (Result, error) {
 	return Result{Ok: false}, errors.New("not implemented")
 }
 
-func IsHelmV3(uri string, _ *viper.Viper) (Result, error) {
-	c, _, err := LoadChartFromURI(uri)
+func IsHelmV3(opts *CheckOptions) (Result, error) {
+	c, _, err := LoadChartFromURI(opts.URI)
 	if err != nil {
 		return Result{}, err
 	}
@@ -74,8 +73,8 @@ func IsHelmV3(uri string, _ *viper.Viper) (Result, error) {
 	return NewResult(isHelmV3, reason), nil
 }
 
-func HasReadme(uri string, _ *viper.Viper) (Result, error) {
-	c, _, err := LoadChartFromURI(uri)
+func HasReadme(opts *CheckOptions) (Result, error) {
+	c, _, err := LoadChartFromURI(opts.URI)
 	if err != nil {
 		return Result{}, err
 	}
@@ -90,8 +89,8 @@ func HasReadme(uri string, _ *viper.Viper) (Result, error) {
 	return r, nil
 }
 
-func ContainsTest(uri string, _ *viper.Viper) (Result, error) {
-	c, _, err := LoadChartFromURI(uri)
+func ContainsTest(opts *CheckOptions) (Result, error) {
+	c, _, err := LoadChartFromURI(opts.URI)
 	if err != nil {
 		return Result{}, err
 	}
@@ -109,8 +108,8 @@ func ContainsTest(uri string, _ *viper.Viper) (Result, error) {
 
 }
 
-func ContainsValues(uri string, _ *viper.Viper) (Result, error) {
-	c, _, err := LoadChartFromURI(uri)
+func ContainsValues(opts *CheckOptions) (Result, error) {
+	c, _, err := LoadChartFromURI(opts.URI)
 	if err != nil {
 		return Result{}, err
 	}
@@ -124,8 +123,8 @@ func ContainsValues(uri string, _ *viper.Viper) (Result, error) {
 	return r, nil
 }
 
-func ContainsValuesSchema(uri string, _ *viper.Viper) (Result, error) {
-	c, _, err := LoadChartFromURI(uri)
+func ContainsValuesSchema(opts *CheckOptions) (Result, error) {
+	c, _, err := LoadChartFromURI(opts.URI)
 	if err != nil {
 		return Result{}, err
 	}
@@ -139,20 +138,20 @@ func ContainsValuesSchema(uri string, _ *viper.Viper) (Result, error) {
 	return r, nil
 }
 
-func KeywordsAreOpenshiftCategories(uri string, _ *viper.Viper) (Result, error) {
+func KeywordsAreOpenshiftCategories(opts *CheckOptions) (Result, error) {
 	return notImplemented()
 }
 
-func IsCommercialChart(uri string, _ *viper.Viper) (Result, error) {
+func IsCommercialChart(opts *CheckOptions) (Result, error) {
 	return notImplemented()
 }
 
-func IsCommunityChart(uri string, _ *viper.Viper) (Result, error) {
+func IsCommunityChart(opts *CheckOptions) (Result, error) {
 	return notImplemented()
 }
 
-func HasMinKubeVersion(uri string, _ *viper.Viper) (Result, error) {
-	c, _, err := LoadChartFromURI(uri)
+func HasMinKubeVersion(opts *CheckOptions) (Result, error) {
+	c, _, err := LoadChartFromURI(opts.URI)
 	if err != nil {
 		return NewResult(false, err.Error()), err
 	}
@@ -166,8 +165,8 @@ func HasMinKubeVersion(uri string, _ *viper.Viper) (Result, error) {
 	return r, nil
 }
 
-func NotContainCRDs(uri string, _ *viper.Viper) (Result, error) {
-	c, _, err := LoadChartFromURI(uri)
+func NotContainCRDs(opts *CheckOptions) (Result, error) {
+	c, _, err := LoadChartFromURI(opts.URI)
 	if err != nil {
 		return NewResult(false, err.Error()), err
 	}
@@ -182,8 +181,8 @@ func NotContainCRDs(uri string, _ *viper.Viper) (Result, error) {
 	return r, nil
 }
 
-func HelmLint(uri string, _ *viper.Viper) (Result, error) {
-	c, p, err := LoadChartFromURI(uri)
+func HelmLint(opts *CheckOptions) (Result, error) {
+	c, p, err := LoadChartFromURI(opts.URI)
 	if err != nil {
 		return NewResult(false, err.Error()), err
 	}
@@ -200,12 +199,12 @@ func HelmLint(uri string, _ *viper.Viper) (Result, error) {
 	return r, nil
 }
 
-func NotContainsInfraPluginsAndDrivers(uri string, _ *viper.Viper) (Result, error) {
+func NotContainsInfraPluginsAndDrivers(opts *CheckOptions) (Result, error) {
 	return notImplemented()
 }
 
-func NotContainCSIObjects(uri string, _ *viper.Viper) (Result, error) {
-	c, _, err := LoadChartFromURI(uri)
+func NotContainCSIObjects(opts *CheckOptions) (Result, error) {
+	c, _, err := LoadChartFromURI(opts.URI)
 	if err != nil {
 		return Result{}, err
 	}
@@ -226,19 +225,19 @@ func NotContainCSIObjects(uri string, _ *viper.Viper) (Result, error) {
 	return r, nil
 }
 
-func CanBeInstalledWithoutManualPreRequisites(uri string, _ *viper.Viper) (Result, error) {
+func CanBeInstalledWithoutManualPreRequisites(opts *CheckOptions) (Result, error) {
 	return notImplemented()
 }
 
-func CanBeInstalledWithoutClusterAdminPrivileges(uri string, _ *viper.Viper) (Result, error) {
+func CanBeInstalledWithoutClusterAdminPrivileges(opts *CheckOptions) (Result, error) {
 	return notImplemented()
 }
 
-func ImagesAreCertified(uri string, _ *viper.Viper) (Result, error) {
+func ImagesAreCertified(opts *CheckOptions) (Result, error) {
 
 	r := NewResult(false, "")
 
-	images, err := getImageReferences(uri)
+	images, err := getImageReferences(opts.URI)
 
 	if err != nil {
 		r.SetResult(false, fmt.Sprintf("%s : Failed to get images : %v", ImageCertifyFailed, err))
