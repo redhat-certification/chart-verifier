@@ -188,7 +188,7 @@ func HelmLint(opts *CheckOptions) (Result, error) {
 	}
 	r := NewResult(true, HelmLintSuccessful)
 	p = path.Join(p, c.Name())
-	linter := lint.All(p, map[string]interface{}{}, "default", false)
+	linter := lint.All(p, opts.Values, "default", false)
 	if linter.HighestSeverity > support.WarningSev {
 		reason := ""
 		for _, m := range linter.Messages {
