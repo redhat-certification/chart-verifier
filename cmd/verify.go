@@ -135,28 +135,14 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 
 				cmd.Println(string(b))
 
-			} else if outputFormatFlag == "yaml" {
+			} else {
 				b, err := yaml.Marshal(result)
 				if err != nil {
 					return err
 				}
 
 				cmd.Println(string(b))
-			} else {
-				cmd.Print(result)
 			}
-
-			reportErr := chartverifier.
-				NewReportBuilder().
-				SetCertificate(&result).
-				SetChartUri(args[0]).
-				Generate()
-
-			if reportErr != nil {
-				cmd.Println("Report failure :" + reportErr.Error())
-				return err
-			}
-
 			return nil
 		},
 	}

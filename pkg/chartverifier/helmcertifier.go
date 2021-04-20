@@ -32,9 +32,5 @@ type CertifierBuilder interface {
 }
 
 type Certifier interface {
-	Certify(uri string) (Certificate, error)
-}
-
-type Certificate interface {
-	IsOk() bool
+	Certify(uri string) (*Certificate, error)
 }

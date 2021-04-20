@@ -17,18 +17,20 @@
 package chartverifier
 
 import (
-	"errors"
-
+	"crypto/sha256"
+	"fmt"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	helmchart "helm.sh/helm/v3/pkg/chart"
+	"sort"
+	"time"
 )
 
 type CertificateBuilder interface {
 	SetToolVersion(name string) CertificateBuilder
 	SetChartUri(name string) CertificateBuilder
-	SetChartName(name string) CertificateBuilder
-	SetChartVersion(version string) CertificateBuilder
-	AddCheckResult(name string, result checks.Result) CertificateBuilder
-	Build() (Certificate, error)
+	AddCheck(name string, checkType checks.CheckType, result checks.Result) CertificateBuilder
+	SetChart(chart *helmchart.Chart) CertificateBuilder
+	Build() (*Certificate, error)
 }
 
 type CheckResult struct {
@@ -37,62 +39,89 @@ type CheckResult struct {
 }
 
 type certificateBuilder struct {
-	ToolVersion    string
-	ChartUri       string
-	ChartName      string
-	ChartVersion   string
-	CheckResultMap checkResultMap
+	Chart       *helmchart.Chart
+	Certificate Certificate
 }
 
 func NewCertificateBuilder() CertificateBuilder {
-	return &certificateBuilder{
-		CheckResultMap: checkResultMap{},
-	}
+	b := certificateBuilder{}
+	b.Certificate = newCertificate()
+	return &b
 }
 
 func (r *certificateBuilder) SetToolVersion(version string) CertificateBuilder {
-	r.ToolVersion = version
+	r.Certificate.Metadata.ToolMetadata.Version = version
 	return r
 }
 
 func (r *certificateBuilder) SetChartUri(uri string) CertificateBuilder {
-	r.ChartUri = uri
+	r.Certificate.Metadata.ToolMetadata.ChartUri = uri
 	return r
 }
 
-func (r *certificateBuilder) SetChartName(name string) CertificateBuilder {
-	r.ChartName = name
+func (r *certificateBuilder) SetChart(chart *helmchart.Chart) CertificateBuilder {
+	r.Chart = chart
+	r.Certificate.Metadata.ChartData = chart.Metadata
 	return r
 }
 
-func (r *certificateBuilder) SetChartVersion(version string) CertificateBuilder {
-	r.ChartVersion = version
+func (r *certificateBuilder) AddCheck(name string, checkType checks.CheckType, result checks.Result) CertificateBuilder {
+	checkReport := r.Certificate.AddCheck(name, checkType)
+	checkReport.SetResult(result.Ok, result.Reason)
 	return r
 }
 
-func (r *certificateBuilder) AddCheckResult(name string, result checks.Result) CertificateBuilder {
-	r.CheckResultMap[name] = checkResult{Ok: result.Ok, Reason: result.Reason}
-	return r
+func (r *certificateBuilder) Build() (*Certificate, error) {
+
+	r.Certificate.Metadata.ToolMetadata.Digest = GenerateSha(r.Chart.Raw)
+
+	r.Certificate.Metadata.ToolMetadata.LastCertifiedTime = time.Now().String()
+
+	return &r.Certificate, nil
 }
 
-func (r *certificateBuilder) Build() (Certificate, error) {
+type By func(p1, p2 *helmchart.File) bool
 
-	if r.ChartName == "" {
-		return nil, errors.New("chart name must be set")
+type fileSorter struct {
+	files []*helmchart.File
+	by    func(p1, p2 *helmchart.File) bool // Closure used in the Less method.
+}
+
+func (by By) sort(files []*helmchart.File) {
+	fs := &fileSorter{
+		files: files,
+		by:    by, // The Sort method's receiver is the function (closure) that defines the sort order.
+	}
+	sort.Sort(fs)
+}
+
+// Len is part of sort.Interface.
+func (fs *fileSorter) Len() int {
+	return len(fs.files)
+}
+
+// Swap is part of sort.Interface.
+func (fs *fileSorter) Swap(i, j int) {
+	fs.files[i], fs.files[j] = fs.files[j], fs.files[i]
+}
+
+// Less is part of sort.Interface. It is implemented by calling the "by" closure in the sorter.
+func (fs *fileSorter) Less(i, j int) bool {
+	return fs.by(fs.files[i], fs.files[j])
+}
+
+func GenerateSha(rawFiles []*helmchart.File) string {
+
+	name := func(f1, f2 *helmchart.File) bool {
+		return f1.Name < f2.Name
 	}
 
-	if r.ChartVersion == "" {
-		return nil, errors.New("chart version must be set")
+	chartSha := sha256.New()
+	sortedFiles := rawFiles
+	By(name).sort(sortedFiles)
+	for _, chartFile := range sortedFiles {
+		chartSha.Write(chartFile.Data)
 	}
 
-	ok := true
-
-	for _, v := range r.CheckResultMap {
-		if !v.Ok {
-			ok = false
-			break
-		}
-	}
-
-	return newCertificate(r.ChartName, r.ChartVersion, r.ChartUri, r.ToolVersion, ok, r.CheckResultMap), nil
+	return fmt.Sprintf("sha256:%x", chartSha.Sum(nil))
 }
