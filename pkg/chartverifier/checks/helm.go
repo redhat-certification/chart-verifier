@@ -187,7 +187,7 @@ func IsChartNotFound(err error) bool {
 	return ok
 }
 
-func getImageReferences(chartUri string) ([]string, error) {
+func getImageReferences(chartUri string, vals map[string]interface{}) ([]string, error) {
 
 	actionConfig := &action.Configuration{
 		Releases:     nil,
@@ -199,10 +199,9 @@ func getImageReferences(chartUri string) ([]string, error) {
 	mem.SetNamespace("TestNamespace")
 	actionConfig.Releases = storage.Init(mem)
 
-	var m map[string]interface{}
 	imagesMap := make(map[string]bool)
 
-	txt, err := actions.RenderManifests("testRelease", chartUri, m, actionConfig)
+	txt, err := actions.RenderManifests("testRelease", chartUri, vals, actionConfig)
 	if err != nil {
 		fmt.Printf("RenderManifests error : %v\n", err)
 	} else {

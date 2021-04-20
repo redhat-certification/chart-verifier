@@ -23,6 +23,7 @@ import (
 
 type CertifierBuilder interface {
 	SetRegistry(registry checks.Registry) CertifierBuilder
+	SetValues(vals map[string]interface{}) CertifierBuilder
 	SetChecks(checks []string) CertifierBuilder
 	SetConfig(config *viper.Viper) CertifierBuilder
 	SetOverrides([]string) CertifierBuilder
