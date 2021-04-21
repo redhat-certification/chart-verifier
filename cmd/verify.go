@@ -155,7 +155,9 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringSliceVarP(&opts.ValueFiles, "chart-values", "f", nil, "specify values in a YAML file or a URL (can specify multiple)")
+	settings.AddFlags(cmd.Flags())
+
+	cmd.Flags().StringSliceVarP(&opts.ValueFiles, "chart-values", "F", nil, "specify values in a YAML file or a URL (can specify multiple)")
 
 	cmd.Flags().StringSliceVarP(&opts.Values, "chart-set", "S", nil, "set values for the chart (can specify multiple or separate values with commas: key1=val1,key2=val2)")
 
