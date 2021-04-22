@@ -369,22 +369,26 @@ func TestImageCertify(t *testing.T) {
 		numErrors   int
 	}
 
-	negativeTestCases := []testCase{
-		{description: "chart-0.1.0-v3.valid.tgz check images fails", uri: "chart-0.1.0-v3.valid.tgz", numErrors: 2},
+	testCases := []testCase{
+		{description: "chart-0.1.0-v3.valid.tgz check images passes", uri: "chart-0.1.0-v3.valid.tgz", numErrors: 0},
 		{description: "Helm check images fails", uri: "chart-0.1.0-v3.with-crd.tgz", numErrors: 2},
 		{description: "Helm check images fails", uri: "chart-0.1.0-v3.with-csi.tgz", numErrors: 1},
 	}
 
-	for _, tc := range negativeTestCases {
+	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
 			r, err := ImagesAreCertified(&CheckOptions{URI: tc.uri, Config: config})
 			require.NoError(t, err)
 			require.NotNil(t, r)
-			require.False(t, r.Ok)
-			for i := 0; i < tc.numErrors; i++ {
-				require.Contains(t, r.Reason, ImageNotCertified)
-				r.Reason = strings.Replace(r.Reason, "_replaced_", ImageNotCertified, 1)
+			if tc.numErrors == 0 {
+				require.True(t, r.Ok)
+			} else {
+				require.False(t, r.Ok)
+				for i := 0; i < tc.numErrors; i++ {
+					require.Contains(t, r.Reason, ImageNotCertified)
+					r.Reason = strings.Replace(r.Reason, ImageNotCertified, "_replaced_", 1)
+				}
 			}
 		})
 	}
