@@ -73,11 +73,12 @@ func (c *certifier) Certify(uri string) (*Certificate, error) {
 			return nil, CheckNotFoundErr(name)
 		}
 
+
 		r, err := check.Func(&checks.CheckOptions{
+			HelmEnvSettings: c.settings,
 			URI:    uri,
-			Config: c.subConfig(name),
-			Settings: c.settings,
 			Values: c.values,
+			ViperConfig: c.subConfig(name),
 		})
 
 		if err != nil {
