@@ -19,6 +19,7 @@ package chartverifier
 import (
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/spf13/viper"
+	helmcli "helm.sh/helm/v3/pkg/cli"
 )
 
 type CheckNotFoundErr string
@@ -41,6 +42,7 @@ type certifier struct {
 	config         *viper.Viper
 	registry       checks.Registry
 	requiredChecks []string
+	settings       *helmcli.EnvSettings
 	toolVersion    string
 	values         map[string]interface{}
 }
@@ -74,6 +76,7 @@ func (c *certifier) Certify(uri string) (*Certificate, error) {
 		r, err := check.Func(&checks.CheckOptions{
 			URI:    uri,
 			Config: c.subConfig(name),
+			Settings: c.settings,
 			Values: c.values,
 		})
 

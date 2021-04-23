@@ -112,9 +112,10 @@ func (b *certifierBuilder) Build() (Certifier, error) {
 	}
 
 	return &certifier{
+		config:         b.config,
 		registry:       b.registry,
 		requiredChecks: b.checks,
-		config:         b.config,
+		settings:       b.settings,
 		toolVersion:    b.toolVersion,
 		values:         b.values,
 	}, nil
