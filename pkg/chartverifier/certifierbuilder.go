@@ -20,6 +20,8 @@ import (
 	"errors"
 	"strings"
 
+	"helm.sh/helm/v3/pkg/cli"
+
 	"github.com/spf13/viper"
 
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
@@ -52,6 +54,12 @@ type certifierBuilder struct {
 	registry    checks.Registry
 	toolVersion string
 	values      map[string]interface{}
+	settings    *cli.EnvSettings
+}
+
+func (b *certifierBuilder) SetSettings(settings *cli.EnvSettings) CertifierBuilder {
+	b.settings = settings
+	return b
 }
 
 func (b *certifierBuilder) SetValues(vals map[string]interface{}) CertifierBuilder {

@@ -19,6 +19,7 @@ package chartverifier
 import (
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/spf13/viper"
+	"helm.sh/helm/v3/pkg/cli"
 )
 
 type CertifierBuilder interface {
@@ -28,6 +29,7 @@ type CertifierBuilder interface {
 	SetConfig(config *viper.Viper) CertifierBuilder
 	SetOverrides([]string) CertifierBuilder
 	SetToolVersion(string) CertifierBuilder
+	SetSettings(settings *cli.EnvSettings) CertifierBuilder
 	Build() (Certifier, error)
 }
 
