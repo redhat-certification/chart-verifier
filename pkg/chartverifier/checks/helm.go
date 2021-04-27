@@ -28,6 +28,8 @@ import (
 	"regexp"
 	"strings"
 
+	"gopkg.in/yaml.v3"
+
 	"helm.sh/helm/v3/pkg/chartutil"
 
 	"github.com/pkg/errors"
@@ -202,6 +204,11 @@ func getImageReferences(chartUri string, vals map[string]interface{}) ([]string,
 	imagesMap := make(map[string]bool)
 
 	txt, err := actions.RenderManifests("testRelease", chartUri, vals, actionConfig)
+
+	type ImageRef struct {
+		Ref string `yaml:"image"`
+	}
+
 	if err != nil {
 		fmt.Printf("RenderManifests error : %v\n", err)
 	} else {
@@ -209,13 +216,12 @@ func getImageReferences(chartUri string, vals map[string]interface{}) ([]string,
 		scanner := bufio.NewScanner(r)
 		for scanner.Scan() {
 			line := scanner.Text()
-			line = strings.ReplaceAll(line, " ", "")
-			if strings.HasPrefix(line, "image:") {
-				image := strings.Trim(strings.TrimLeft(line, "image:"), "\"")
-				if !imagesMap[image] {
-					imagesMap[image] = true
+			var imageRef ImageRef
+			err = yaml.Unmarshal([]byte(line), &imageRef)
+			if err == nil {
+				if len(imageRef.Ref) > 0 && !imagesMap[imageRef.Ref] {
+					imagesMap[imageRef.Ref] = true
 				}
-
 			}
 		}
 	}
