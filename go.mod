@@ -3,6 +3,8 @@ module github.com/redhat-certification/chart-verifier
 go 1.15
 
 require (
+	github.com/Masterminds/semver v1.5.0 // indirect
+	github.com/hashicorp/go-retryablehttp v0.6.8 // indirect
 	github.com/helm/chart-testing v2.4.1+incompatible // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1
