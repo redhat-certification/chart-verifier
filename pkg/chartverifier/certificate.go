@@ -50,10 +50,11 @@ type CertificateMetadata struct {
 }
 
 type ToolMetadata struct {
-	Version                    string `json:"verifier-version" yaml:"verifier-version"`
-	ChartUri                   string `json:"chart-uri" yaml:"chart-uri"`
-	Digest                     string `json:"digest" yaml:"digest"`
-	LastCertifiedTime          string `json:"lastCertifiedTime" yaml:"lastCertifiedTime"`
+	Version                string `json:"verifier-version" yaml:"verifier-version"`
+	ChartUri               string `json:"chart-uri" yaml:"chart-uri"`
+	Digest                 string `json:"digest" yaml:"digest"`
+	LastCertifiedTimestamp string `json:"lastCertifiedTimestamp" yaml:"lastCertifiedTimestamp"`
+
 	CertifiedOpenShiftVersions string `json:"certifiedOpenShiftVersions" yaml:"certifiedOpenShiftVersions"`
 }
 
