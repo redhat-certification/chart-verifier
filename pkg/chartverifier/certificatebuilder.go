@@ -19,10 +19,11 @@ package chartverifier
 import (
 	"crypto/sha256"
 	"fmt"
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
-	helmchart "helm.sh/helm/v3/pkg/chart"
 	"sort"
 	"time"
+
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	helmchart "helm.sh/helm/v3/pkg/chart"
 )
 
 type CertificateBuilder interface {
@@ -75,7 +76,7 @@ func (r *certificateBuilder) Build() (*Certificate, error) {
 
 	r.Certificate.Metadata.ToolMetadata.Digest = GenerateSha(r.Chart.Raw)
 
-	r.Certificate.Metadata.ToolMetadata.LastCertifiedTime = time.Now().String()
+	r.Certificate.Metadata.ToolMetadata.LastCertifiedTimestamp = time.Now().Format("2006-01-02T15:04:05.999999-07:00")
 
 	return &r.Certificate, nil
 }
