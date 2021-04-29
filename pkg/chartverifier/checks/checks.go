@@ -246,6 +246,7 @@ func ImagesAreCertified(opts *CheckOptions) (Result, error) {
 	} else {
 		for _, image := range images {
 
+			err = nil
 			registries, repository, version := getImageParts(image)
 
 			if len(registries) == 0 {
@@ -301,7 +302,7 @@ func getImageParts(image string) ([]string, string, string) {
 
 	var registries []string
 	var repository string
-	if len(imageParts) > 2 && len(imageParts[0]) > 1 {
+	if len(imageParts) > 1 && len(imageParts[0]) > 1 && strings.Contains(imageParts[0], ".") {
 		registries = append(registries, imageParts[0])
 		repository = strings.Join(imageParts[1:], "/")
 	} else {

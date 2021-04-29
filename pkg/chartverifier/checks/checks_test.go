@@ -410,8 +410,10 @@ func TestImageParsing(t *testing.T) {
 		{"Single repo Default version 2", "repo:", "latest", "repo", ""},
 		{"Single repo with version", "repo:1.1.8", "1.1.8", "repo", ""},
 		{"Double repo with version", "repo/product:1.1.8", "1.1.8", "repo/product", ""},
-		{"Registry, double repo with version", "registry/repo/product:1.1.8", "1.1.8", "repo/product", "registry"},
-		{"Registry with port, double repo with version", "registry:8080/repo/product:1.1.8", "1.1.8", "repo/product", "registry:8080"},
+		{"Triple repo with version", "repo/subrepo/product:1.1.8", "1.1.8", "repo/subrepo/product", ""},
+		{"Registry, single repo with version", "registry.com/product:1.1.8", "1.1.8", "product", "registry.com"},
+		{"Registry, double repo with version", "registry.com/repo/product:1.1.8", "1.1.8", "repo/product", "registry.com"},
+		{"Registry with port, double repo with version", "registry.com:8080/repo/product:1.1.8", "1.1.8", "repo/product", "registry.com:8080"},
 	}
 
 	for _, testCase := range testCases {

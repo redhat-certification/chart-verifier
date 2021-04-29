@@ -88,7 +88,8 @@ func TestTemplate(t *testing.T) {
 	}
 
 	TestCases := []testCase{
-		{description: "chart-0.1.0-v3.valid.tgz images ", uri: "chart-0.1.0-v3.valid.tgz", images: []string{"nginx:latest", "snyk/kubernetes-operator"}},
+		{description: "chart-0.1.0-v3.valid.tgz images ", uri: "chart-0.1.0-v3.valid.tgz", images: []string{"nginx:latest",
+			"snyk/kubernetes-operator", "rhscl/mongodb-36-rhel7:latest", "openshift3/ose-pod:v3.11"}},
 		{description: "chart-0.1.0-v3.with-crd.tgz", uri: "chart-0.1.0-v3.with-crd.tgz", images: []string{"nginx:1.16.0", "busybox"}},
 		{description: "chart-0.1.0-v3.with-csi.tgz", uri: "chart-0.1.0-v3.with-csi.tgz", images: []string{"nginx:1.16.0"}},
 	}
