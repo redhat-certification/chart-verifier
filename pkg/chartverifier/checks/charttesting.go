@@ -55,7 +55,7 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 	}
 
 	if cfg.Upgrade {
-		result := upgradeAndTestChartRelease(cfg, chrt, helm, kubectl)
+		result := upgradeAndTestChartFromPreviousRelease(cfg, chrt, helm, kubectl)
 		if result.Error != nil {
 			return NewResult(false, result.Error.Error()), nil
 		}
@@ -115,7 +115,7 @@ func getChartPreviousVersion(chrt *chart.Chart) (*chart.Chart, error) {
 
 }
 
-func upgradeAndTestChartRelease(
+func upgradeAndTestChartFromPreviousRelease(
 	cfg config.Configuration,
 	chrt *chart.Chart,
 	helm tool.Helm,
