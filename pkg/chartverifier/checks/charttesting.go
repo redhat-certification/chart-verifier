@@ -8,6 +8,7 @@ import (
 	"github.com/helm/chart-testing/pkg/config"
 	"github.com/helm/chart-testing/pkg/exec"
 	"github.com/helm/chart-testing/pkg/tool"
+	"github.com/helm/chart-testing/pkg/util"
 )
 
 // buildChartTestingConfiguration computes the chart testing related
@@ -53,9 +54,16 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 		return NewResult(false, err.Error()), nil
 	}
 
-	result := installAndTestChartRelease(cfg, chrt, helm, kubectl)
-	if result.Error != nil {
-		return NewResult(false, result.Error.Error()), nil
+	if cfg.Upgrade {
+		result := upgradeAndTestChartRelease(cfg, chrt, helm, kubectl)
+		if result.Error != nil {
+			return NewResult(false, result.Error.Error()), nil
+		}
+	} else {
+		result := installAndTestChartRelease(cfg, chrt, helm, kubectl)
+		if result.Error != nil {
+			return NewResult(false, result.Error.Error()), nil
+		}
 	}
 
 	return NewResult(true, ""), nil
@@ -97,6 +105,49 @@ func testRelease(
 	if err := helm.Test(release, cleanupHelmTests); err != nil {
 		return err
 	}
+	return nil
+}
+
+// getChartPreviousVersion attemtps to retrieve the previous version
+// of the given chart.
+func getChartPreviousVersion(chrt *chart.Chart) (*chart.Chart, error) {
+	return chrt, nil
+
+}
+
+func upgradeAndTestChartRelease(
+	cfg config.Configuration,
+	chrt *chart.Chart,
+	helm tool.Helm,
+	kubectl tool.Kubectl,
+) chart.TestResult {
+	result := chart.TestResult{Chart: chrt}
+
+	oldChrt, err := getChartPreviousVersion(chrt)
+	if err != nil {
+		result.Error = fmt.Errorf("skipping upgrade test of '%s' because no previous chart is available", chrt.Yaml().Name)
+		return result
+	}
+
+	breakingChangeAllowed, err := util.BreakingChangeAllowed(oldChrt.Yaml().Version, chrt.Yaml().Version)
+	if !breakingChangeAllowed {
+		result.Error = fmt.Errorf("Skipping upgrade test of '%s' because breaking changes are not allowed for chart", chrt)
+		return result
+	} else if err != nil {
+		result.Error = err
+		return result
+	}
+
+	result.Error = upgradeChart(cfg, oldChrt, chrt, helm, kubectl)
+	return result
+}
+
+func upgradeChart(
+	cfg config.Configuration,
+	oldChrt, chrt *chart.Chart,
+	helm tool.Helm,
+	kubectl tool.Kubectl,
+) error {
 	return nil
 }
 
