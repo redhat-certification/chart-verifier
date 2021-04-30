@@ -69,6 +69,9 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 	return NewResult(true, ""), nil
 }
 
+// generateInstallConfig extracts required information to install a
+// release and builds a clenup function to be used after tests are
+// executed.
 func generateInstallConfig(
 	cfg config.Configuration,
 	chrt *chart.Chart,
@@ -92,7 +95,7 @@ func generateInstallConfig(
 	return
 }
 
-// testRelease tests a chart release.
+// testRelease tests a release.
 func testRelease(
 	helm tool.Helm,
 	kubectl tool.Kubectl,
@@ -115,40 +118,91 @@ func getChartPreviousVersion(chrt *chart.Chart) (*chart.Chart, error) {
 
 }
 
+// failWithErrorMessage builds a test result with given error message
+// and args interpreted by fmt.Errorf.
+func failWithErrorMessage(chrt *chart.Chart, msg string, a ...interface{}) chart.TestResult {
+	return chart.TestResult{Chart: chrt, Error: fmt.Errorf(msg, a...)}
+}
+
+// failWithError builds a test result with given error.
+func failWithError(chrt *chart.Chart, err error) chart.TestResult {
+	return chart.TestResult{Chart: chrt, Error: err}
+}
+
+// upgradeAndTestChartFromPreviousRelease performs the whole
+// install/upgrade/test cycle from chart's previous version.
 func upgradeAndTestChartFromPreviousRelease(
 	cfg config.Configuration,
 	chrt *chart.Chart,
 	helm tool.Helm,
 	kubectl tool.Kubectl,
 ) chart.TestResult {
-	result := chart.TestResult{Chart: chrt}
-
 	oldChrt, err := getChartPreviousVersion(chrt)
 	if err != nil {
-		result.Error = fmt.Errorf("skipping upgrade test of '%s' because no previous chart is available", chrt.Yaml().Name)
-		return result
+		return failWithErrorMessage(chrt, "skipping upgrade test of '%s' because no previous chart is available", chrt.Yaml().Name)
 	}
-
 	breakingChangeAllowed, err := util.BreakingChangeAllowed(oldChrt.Yaml().Version, chrt.Yaml().Version)
 	if !breakingChangeAllowed {
-		result.Error = fmt.Errorf("Skipping upgrade test of '%s' because breaking changes are not allowed for chart", chrt)
-		return result
+		return failWithErrorMessage(chrt, "Skipping upgrade test of '%s' because breaking changes are not allowed for chart", chrt)
 	} else if err != nil {
-		result.Error = err
-		return result
+		return failWithError(chrt, err)
 	}
-
-	result.Error = upgradeChart(cfg, oldChrt, chrt, helm, kubectl)
-	return result
+	return upgradeAndTestChart(cfg, oldChrt, chrt, helm, kubectl)
 }
 
-func upgradeChart(
+// upgradeAndTestChart performs the installation of the given oldChrt,
+// and attempts to perform an upgrade from that state.
+func upgradeAndTestChart(
 	cfg config.Configuration,
 	oldChrt, chrt *chart.Chart,
 	helm tool.Helm,
 	kubectl tool.Kubectl,
-) error {
-	return nil
+) chart.TestResult {
+
+	// result contains the test result; please notice that each values
+	// file in the chart's 'ci' folder will be installed and tested
+	// and the first failure makes the test fail.
+	result := chart.TestResult{Chart: chrt}
+
+	valuesFiles := oldChrt.ValuesFilePathsForCI()
+	if len(valuesFiles) == 0 {
+		valuesFiles = append(valuesFiles, "")
+	}
+	for _, valuesFile := range valuesFiles {
+		if valuesFile != "" {
+			if cfg.SkipMissingValues && !chrt.HasCIValuesFile(valuesFile) {
+				fmt.Printf("Upgrade testing for values file '%s' skipped because a corresponding values file was not found in %s/ci", valuesFile, chrt.Path())
+				continue
+			}
+		}
+
+		// Use anonymous function. Otherwise deferred calls would pile up
+		// and be executed in reverse order after the loop.
+		fun := func() error {
+			namespace, release, releaseSelector, cleanup := generateInstallConfig(cfg, oldChrt, helm, kubectl)
+			defer cleanup()
+
+			// Install previous version of chart. If installation fails, ignore this release.
+			if err := helm.InstallWithValues(oldChrt.Path(), valuesFile, namespace, release); err != nil {
+				return fmt.Errorf("Upgrade testing for release '%s' skipped because of previous revision installation error: %w", release, err)
+			}
+			if err := testRelease(helm, kubectl, release, namespace, releaseSelector, true); err != nil {
+				return fmt.Errorf("Upgrade testing for release '%s' skipped because of previous revision testing error", release)
+			}
+
+			if err := helm.Upgrade(oldChrt.Path(), release); err != nil {
+				return err
+			}
+
+			return testRelease(helm, kubectl, release, namespace, releaseSelector, false)
+		}
+
+		if err := fun(); err != nil {
+			result.Error = err
+		}
+	}
+
+	return result
 }
 
 // installAndTestChartRelease installs and tests a chart release.
