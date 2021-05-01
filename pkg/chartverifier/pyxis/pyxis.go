@@ -43,7 +43,12 @@ type RegistriesBody struct {
 
 type PyxisRegistry struct {
 	Id           string               `json:"_id"`
+	ParsedData   ImageData            `json:"parsed_data"`
 	Repositories []RegistryRepository `json:"repositories"`
+}
+
+type ImageData struct {
+	Digest string `json:"docker_image_digest"`
 }
 
 type RegistryRepository struct {
@@ -55,6 +60,13 @@ type RegistryRepository struct {
 type RepositoryTag struct {
 	Digest string `json:"manifest_schema1_digest"`
 	Name   string `json:"name"`
+}
+
+type ImageReference struct {
+	Registries []string
+	Repository string
+	Tag        string
+	Sha        string
 }
 
 func GetImageRegistries(repository string) ([]string, error) {
@@ -92,60 +104,80 @@ func GetImageRegistries(repository string) ([]string, error) {
 	return registries, err
 }
 
-func IsImageInRegistry(repository string, version string, registry string) (bool, error) {
+func IsImageInRegistry(imageRef ImageReference) (bool, error) {
 
 	var err error
 	found := false
 
-	requestUrl := fmt.Sprintf("%s/registry/%s/repository/%s/images", pyxisBaseUrl, registry, repository)
-	req, _ := http.NewRequest("GET", requestUrl, nil)
-	queryString := req.URL.Query()
-	queryString.Add("filter", fmt.Sprintf("repositories=em=(repository==%s;registry==%s)", repository, registry))
-	req.URL.RawQuery = queryString.Encode()
-	req.Header.Set("X-API-KEY", "RedHatChartVerifier")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	var tags []string
+	var shas []string
 
-	if err == nil {
-		if resp.StatusCode == 200 {
-			defer resp.Body.Close()
-			body, _ := ioutil.ReadAll(resp.Body)
-			var registriesBody RegistriesBody
-			json.Unmarshal(body, &registriesBody)
+Loops:
+	for _, registry := range imageRef.Registries {
 
-			if len(registriesBody.PyxisRegistries) > 0 {
-				var tags []string
-				found = false
-				for _, reg := range registriesBody.PyxisRegistries {
-					for _, repo := range reg.Repositories {
-						if repo.Repository == repository && repo.Registry == registry {
-							for _, tag := range repo.Tags {
-								if tag.Name == version {
-									found = true
-									break
-								} else {
-									tags = append(tags, tag.Name)
+		requestUrl := fmt.Sprintf("%s/registry/%s/repository/%s/images", pyxisBaseUrl, registry, imageRef.Repository)
+		req, _ := http.NewRequest("GET", requestUrl, nil)
+		queryString := req.URL.Query()
+		queryString.Add("filter", fmt.Sprintf("repositories=em=(repository==%s;registry==%s)", imageRef.Repository, registry))
+		req.URL.RawQuery = queryString.Encode()
+		req.Header.Set("X-API-KEY", "RedHatChartVerifier")
+		client := &http.Client{}
+		resp, reqErr := client.Do(req)
+
+		if reqErr == nil {
+			if resp.StatusCode == 200 {
+				defer resp.Body.Close()
+				body, _ := ioutil.ReadAll(resp.Body)
+				var registriesBody RegistriesBody
+				json.Unmarshal(body, &registriesBody)
+
+				if len(registriesBody.PyxisRegistries) > 0 {
+					found = false
+					for _, reg := range registriesBody.PyxisRegistries {
+						if len(imageRef.Sha) > 0 {
+							if imageRef.Sha == reg.ParsedData.Digest {
+								found = true
+								err = nil
+								continue Loops
+							} else {
+								shas = append(shas, reg.ParsedData.Digest)
+							}
+						} else {
+							for _, repo := range reg.Repositories {
+								if repo.Repository == imageRef.Repository && repo.Registry == registry {
+									if len(imageRef.Sha) == 0 {
+										for _, tag := range repo.Tags {
+											if tag.Name == imageRef.Tag {
+												found = true
+												err = nil
+												continue Loops
+											} else {
+												tags = append(tags, tag.Name)
+											}
+										}
+									}
 								}
 							}
 						}
-						if found {
-							break
-						}
 					}
-					if found {
-						break
-					}
-				}
-				if !found {
-					err = errors.New(fmt.Sprintf("Version %s not found. Found : %s", version, strings.Join(tags, ", ")))
+				} else {
+					err = errors.New(fmt.Sprintf("No images found for Registry/Repository: %s/%s", registry, imageRef.Repository))
 				}
 			} else {
-				err = errors.New(fmt.Sprintf("Registry not found: %s", registry))
+				err = errors.New(fmt.Sprintf("Bad response code %d from pyxis request : %s", resp.StatusCode, requestUrl))
 			}
 		} else {
-			err = errors.New(fmt.Sprintf("Bad response code %d from pyxis request : %s", resp.StatusCode, requestUrl))
+			err = reqErr
 		}
 	}
-
+	if !found {
+		if err == nil {
+			if len(imageRef.Sha) > 0 {
+				err = errors.New(fmt.Sprintf("Digest %s not found. Found : %s", imageRef.Sha, strings.Join(shas, ", ")))
+			} else {
+				err = errors.New(fmt.Sprintf("Tag %s not found. Found : %s", imageRef.Tag, strings.Join(tags, ", ")))
+			}
+		}
+	}
 	return found, err
 }

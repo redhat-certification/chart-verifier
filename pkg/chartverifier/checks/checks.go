@@ -240,38 +240,28 @@ func ImagesAreCertified(opts *CheckOptions) (Result, error) {
 	images, err := getImageReferences(opts.URI, opts.Values)
 
 	if err != nil {
-		r.SetResult(false, fmt.Sprintf("%s : Failed to get images : %v", ImageCertifyFailed, err))
+		r.SetResult(false, fmt.Sprintf("%s : Failed to get images, error running helm template : %v", ImageCertifyFailed, err))
 	} else if len(images) == 0 {
 		r.SetResult(true, NoImagesToCertify)
 	} else {
 		for _, image := range images {
 
 			err = nil
-			registries, repository, version := getImageParts(image)
+			imageRef := parseImageReference(image)
 
-			if len(registries) == 0 {
-				registries, err = pyxis.GetImageRegistries(repository)
+			if len(imageRef.Registries) == 0 {
+				imageRef.Registries, err = pyxis.GetImageRegistries(imageRef.Repository)
 			}
 
 			if err != nil {
 				r.AddResult(false, fmt.Sprintf("%s : %s : %v", ImageNotCertified, image, err))
-			} else if len(registries) == 0 {
+			} else if len(imageRef.Registries) == 0 {
 				r.AddResult(false, fmt.Sprintf("%s : %s", ImageNotCertified, image))
 			} else {
-				certified := false
-				for _, registry := range registries {
-					found, checkImageErr := pyxis.IsImageInRegistry(repository, version, registry)
-					if found {
-						err = nil
-						certified = true
-						break
-					} else if err == nil {
-						err = checkImageErr
-					}
-				}
+				certified, checkImageErr := pyxis.IsImageInRegistry(imageRef)
 				if !certified {
-					if err != nil {
-						r.AddResult(false, fmt.Sprintf("%s : %s : %v", ImageNotCertified, image, err))
+					if checkImageErr != nil {
+						r.AddResult(false, fmt.Sprintf("%s : %s : %v", ImageNotCertified, image, checkImageErr))
 					} else {
 						r.AddResult(false, fmt.Sprintf("%s : %s", ImageNotCertified, image))
 					}
@@ -285,28 +275,34 @@ func ImagesAreCertified(opts *CheckOptions) (Result, error) {
 	return r, nil
 }
 
-func getImageParts(image string) ([]string, string, string) {
+func parseImageReference(image string) pyxis.ImageReference {
 
+	imageRef := pyxis.ImageReference{}
 	imageParts := strings.Split(image, "/")
 
 	lastPart := imageParts[len(imageParts)-1]
-	lastParts := strings.Split(lastPart, ":")
-	var version string
-	if len(lastParts) > 1 && len(lastParts[1]) > 0 {
-		version = lastParts[1]
+	var lastParts []string
+	if strings.Contains(lastPart, "@sha") {
+		lastParts = strings.Split(lastPart, "@")
+		imageRef.Sha = lastParts[1]
 	} else {
-		version = "latest"
+		lastParts = strings.Split(lastPart, ":")
+		if len(lastParts) > 1 && len(lastParts[1]) > 0 {
+			imageRef.Tag = lastParts[1]
+		} else {
+			imageRef.Tag = "latest"
+		}
 	}
 
 	imageParts[len(imageParts)-1] = lastParts[0]
 
-	var registries []string
-	var repository string
 	if len(imageParts) > 1 && len(imageParts[0]) > 1 && strings.Contains(imageParts[0], ".") {
-		registries = append(registries, imageParts[0])
-		repository = strings.Join(imageParts[1:], "/")
+		imageRef.Registries = append(imageRef.Registries, imageParts[0])
+		imageRef.Repository = strings.Join(imageParts[1:], "/")
 	} else {
-		repository = strings.Join(imageParts, "/")
+		imageRef.Repository = strings.Join(imageParts, "/")
 	}
-	return registries, repository, version
+
+	return imageRef
+
 }
