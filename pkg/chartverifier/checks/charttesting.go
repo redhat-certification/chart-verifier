@@ -26,6 +26,10 @@ func buildChartTestingConfiguration(opts *CheckOptions) config.Configuration {
 		HelmExtraArgs:     opts.ViperConfig.GetString("helmExtraArgs"),
 	}
 
+	if len(cfg.BuildId) == 0 {
+		cfg.BuildId = "build-" + util.RandomString(6)
+	}
+
 	if len(cfg.ReleaseLabel) == 0 {
 		cfg.ReleaseLabel = "app.kubernetes.io/instance"
 	}
