@@ -16,14 +16,36 @@ func TestChartTesting(t *testing.T) {
 
 	testCases := []testCase{
 		{
+			config:      map[string]interface{}{},
+			description: "with chart-testing defaults",
+			uri:         "chart-0.1.0-v3.valid.tgz",
+		},
+		{
 			config: map[string]interface{}{
-				"buildId":           "[BUILD_ID]",
-				"upgrade":           true,
-				"skipMissingValues": true,
-				"namespace":         "default",
-				"releaseLabel":      "app.kubernetes.io/instance",
+				"upgrade": true,
 			},
-			description: "valid tarball",
+			description: "override chart-testing upgrade",
+			uri:         "chart-0.1.0-v3.valid.tgz",
+		},
+		{
+			config: map[string]interface{}{
+				"skipMissingValues": true,
+			},
+			description: "override chart-testing upgrade",
+			uri:         "chart-0.1.0-v3.valid.tgz",
+		},
+		{
+			config: map[string]interface{}{
+				"namespace": "ct-test-namespace",
+			},
+			description: "override chart-testing namespace",
+			uri:         "chart-0.1.0-v3.valid.tgz",
+		},
+		{
+			config: map[string]interface{}{
+				"releaseLabel": "chart-verifier-app.kubernetes.io/instance",
+			},
+			description: "override chart-testing releaseLabel",
 			uri:         "chart-0.1.0-v3.valid.tgz",
 		},
 	}
