@@ -74,7 +74,24 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 	}
 
 	if cfg.Upgrade {
-		result := upgradeAndTestChartFromPreviousRelease(cfg, chrt, helm, kubectl)
+		oldChrt, err := getChartPreviousVersion(chrt)
+		if err != nil {
+			return NewResult(
+					false,
+					fmt.Sprintf("skipping upgrade test of '%s' because no previous chart is available", chrt.Yaml().Name)),
+				nil
+		}
+		breakingChangeAllowed, err := util.BreakingChangeAllowed(oldChrt.Yaml().Version, chrt.Yaml().Version)
+		if !breakingChangeAllowed {
+			return NewResult(
+					false,
+					fmt.Sprintf("Skipping upgrade test of '%s' because breaking changes are not allowed for chart", chrt)),
+				nil
+		} else if err != nil {
+			return NewResult(false, err.Error()), nil
+		}
+		result := upgradeAndTestChart(cfg, oldChrt, chrt, helm, kubectl)
+
 		if result.Error != nil {
 			return NewResult(false, result.Error.Error()), nil
 		}
