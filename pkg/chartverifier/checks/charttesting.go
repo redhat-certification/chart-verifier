@@ -138,38 +138,6 @@ func getChartPreviousVersion(chrt *chart.Chart) (*chart.Chart, error) {
 	return chrt, nil
 }
 
-// failWithErrorMessage builds a test result with given error message
-// and args interpreted by fmt.Errorf.
-func failWithErrorMessage(chrt *chart.Chart, msg string, a ...interface{}) chart.TestResult {
-	return chart.TestResult{Chart: chrt, Error: fmt.Errorf(msg, a...)}
-}
-
-// failWithError builds a test result with given error.
-func failWithError(chrt *chart.Chart, err error) chart.TestResult {
-	return chart.TestResult{Chart: chrt, Error: err}
-}
-
-// upgradeAndTestChartFromPreviousRelease performs the whole
-// install/upgrade/test cycle from chart's previous version.
-func upgradeAndTestChartFromPreviousRelease(
-	cfg config.Configuration,
-	chrt *chart.Chart,
-	helm tool.Helm,
-	kubectl tool.Kubectl,
-) chart.TestResult {
-	oldChrt, err := getChartPreviousVersion(chrt)
-	if err != nil {
-		return failWithErrorMessage(chrt, "skipping upgrade test of '%s' because no previous chart is available", chrt.Yaml().Name)
-	}
-	breakingChangeAllowed, err := util.BreakingChangeAllowed(oldChrt.Yaml().Version, chrt.Yaml().Version)
-	if !breakingChangeAllowed {
-		return failWithErrorMessage(chrt, "Skipping upgrade test of '%s' because breaking changes are not allowed for chart", chrt)
-	} else if err != nil {
-		return failWithError(chrt, err)
-	}
-	return upgradeAndTestChart(cfg, oldChrt, chrt, helm, kubectl)
-}
-
 // upgradeAndTestChart performs the installation of the given oldChrt,
 // and attempts to perform an upgrade from that state.
 func upgradeAndTestChart(
