@@ -175,6 +175,8 @@ func upgradeAndTestChart(
 	for _, valuesFile := range valuesFiles {
 		if valuesFile != "" {
 			if cfg.SkipMissingValues && !chrt.HasCIValuesFile(valuesFile) {
+				// TODO: do not assume STDOUT here; instead a writer
+				//       should be given to be written to.
 				fmt.Printf("Upgrade testing for values file '%s' skipped because a corresponding values file was not found in %s/ci", valuesFile, chrt.Path())
 				continue
 			}
@@ -216,6 +218,9 @@ func installAndTestChartRelease(
 	helm tool.Helm,
 	kubectl tool.Kubectl,
 ) chart.TestResult {
+
+	// TODO: do not assume STDOUT here; instead a writer
+	//       should be given to be written to.
 	fmt.Printf("Installing chart '%s'...\n", chrt)
 	valuesFiles := chrt.ValuesFilePathsForCI()
 
@@ -228,6 +233,8 @@ func installAndTestChartRelease(
 
 	for _, valuesFile := range valuesFiles {
 		if valuesFile != "" {
+			// TODO: do not assume STDOUT here; instead a writer
+			//       should be given to be written to.
 			fmt.Printf("\nInstalling chart with values file '%s'...\n\n", valuesFile)
 		}
 
