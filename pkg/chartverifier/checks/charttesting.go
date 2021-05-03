@@ -35,13 +35,28 @@ func buildChartTestingConfiguration(opts *CheckOptions) config.Configuration {
 	}
 
 	if len(cfg.Namespace) == 0 {
+		// Namespace() returns "default" unless has been overriden
+		// through environment variables.
 		cfg.Namespace = opts.HelmEnvSettings.Namespace()
 	}
 
 	return cfg
 }
 
+// ChartTesting partially integrates the chart-testing project in chart-verifier.
+//
+// Unfortunately it wasn't easy as initially expect to integrate
+// chart-testing as a lib in the project, including the main
+// orchestration logic. The ChartTesting function is the
+// interpretation the main logic chart-testing carries, and other
+// functions used in this context were also ported from
+// chart-verifier.
+//
+// Helm and kubectl are requirements in the system executing the check
+// in order to orchestrate the install, upgrade and chart testing
+// phases.
 func ChartTesting(opts *CheckOptions) (Result, error) {
+
 	cfg := buildChartTestingConfiguration(opts)
 	procExec := exec.NewProcessExecutor(cfg.Debug)
 	extraArgs := strings.Fields(cfg.HelmExtraArgs)
@@ -118,8 +133,9 @@ func testRelease(
 // getChartPreviousVersion attemtps to retrieve the previous version
 // of the given chart.
 func getChartPreviousVersion(chrt *chart.Chart) (*chart.Chart, error) {
+	// TODO: decide which sources do we consider when searching for a
+	//       previous version's candidate
 	return chrt, nil
-
 }
 
 // failWithErrorMessage builds a test result with given error message
@@ -251,6 +267,7 @@ func installAndTestChartRelease(
 		}
 
 		if err := fun(); err != nil {
+			// fail fast approach; could be changed to best effort.
 			result.Error = err
 			break
 		}
