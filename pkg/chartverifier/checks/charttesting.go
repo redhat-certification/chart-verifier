@@ -189,6 +189,7 @@ func upgradeAndTestChart(
 
 		if err := fun(); err != nil {
 			result.Error = err
+			break
 		}
 	}
 
