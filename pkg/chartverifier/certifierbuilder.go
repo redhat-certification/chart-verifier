@@ -107,6 +107,10 @@ func (b *certifierBuilder) Build() (Certifier, error) {
 		b.config = viper.New()
 	}
 
+	if b.settings == nil {
+		b.settings = cli.New()
+	}
+
 	// naively override values from the configuration
 	for _, val := range b.overrides {
 		parts := strings.Split(val, "=")

@@ -23,6 +23,7 @@ import (
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
+	"helm.sh/helm/v3/pkg/cli"
 
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/pkg/testutil"
@@ -53,6 +54,7 @@ func TestCertifier_Certify(t *testing.T) {
 
 	t.Run("Should return error if check does not exist", func(t *testing.T) {
 		c := &certifier{
+			settings:       cli.New(),
 			config:         viper.New(),
 			registry:       checks.NewRegistry(),
 			requiredChecks: []string{dummyCheckName},
@@ -65,6 +67,7 @@ func TestCertifier_Certify(t *testing.T) {
 
 	t.Run("Should return error if check exists and returns error", func(t *testing.T) {
 		c := &certifier{
+			settings:       cli.New(),
 			config:         viper.New(),
 			registry:       checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: erroredCheck}),
 			requiredChecks: []string{dummyCheckName},
@@ -78,6 +81,7 @@ func TestCertifier_Certify(t *testing.T) {
 	t.Run("Result should be negative if check exists and returns negative", func(t *testing.T) {
 
 		c := &certifier{
+			settings:       cli.New(),
 			config:         viper.New(),
 			registry:       checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: negativeCheck}),
 			requiredChecks: []string{dummyCheckName},
@@ -91,6 +95,7 @@ func TestCertifier_Certify(t *testing.T) {
 
 	t.Run("Result should be positive if check exists and returns positive", func(t *testing.T) {
 		c := &certifier{
+			settings:       cli.New(),
 			config:         viper.New(),
 			registry:       checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
 			requiredChecks: []string{dummyCheckName},
