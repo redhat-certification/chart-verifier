@@ -217,8 +217,8 @@ func getImageReferences(chartUri string, vals map[string]interface{}) ([]string,
 		for scanner.Scan() {
 			line := scanner.Text()
 			var imageRef ImageRef
-			err = yaml.Unmarshal([]byte(line), &imageRef)
-			if err == nil {
+			yamlErr := yaml.Unmarshal([]byte(line), &imageRef)
+			if yamlErr == nil {
 				if len(imageRef.Ref) > 0 && !imagesMap[imageRef.Ref] {
 					imagesMap[imageRef.Ref] = true
 				}
