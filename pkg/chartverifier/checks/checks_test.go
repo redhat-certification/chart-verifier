@@ -17,6 +17,7 @@
 package checks
 
 import (
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/pyxis"
 	"strings"
 	"testing"
 
@@ -367,12 +368,13 @@ func TestImageCertify(t *testing.T) {
 		description string
 		uri         string
 		numErrors   int
+		numPasses   int
 	}
 
 	testCases := []testCase{
-		{description: "chart-0.1.0-v3.valid.tgz check images passes", uri: "chart-0.1.0-v3.valid.tgz", numErrors: 0},
-		{description: "Helm check images fails", uri: "chart-0.1.0-v3.with-crd.tgz", numErrors: 2},
-		{description: "Helm check images fails", uri: "chart-0.1.0-v3.with-csi.tgz", numErrors: 1},
+		{description: "chart-0.1.0-v3.valid.tgz check images passes", uri: "chart-0.1.0-v3.valid.tgz", numErrors: 0, numPasses: 6},
+		{description: "Helm check images fails", uri: "chart-0.1.0-v3.with-crd.tgz", numErrors: 2, numPasses: 0},
+		{description: "Helm check images fails", uri: "chart-0.1.0-v3.with-csi.tgz", numErrors: 1, numPasses: 0},
 	}
 
 	for _, tc := range testCases {
@@ -389,6 +391,14 @@ func TestImageCertify(t *testing.T) {
 					require.Contains(t, r.Reason, ImageNotCertified)
 					r.Reason = strings.Replace(r.Reason, ImageNotCertified, "_replaced_", 1)
 				}
+				require.False(t, strings.Contains(r.Reason, ImageNotCertified))
+			}
+			if tc.numPasses > 0 {
+				for i := 0; i < tc.numPasses; i++ {
+					require.Contains(t, r.Reason, ImageCertified)
+					r.Reason = strings.Replace(r.Reason, ImageCertified, "_replaced_", 1)
+				}
+				require.False(t, strings.Contains(r.Reason, ImageCertified))
 			}
 		})
 	}
@@ -400,31 +410,26 @@ func TestImageParsing(t *testing.T) {
 	type testCase struct {
 		description      string
 		image            string
-		expectedVersion  string
-		expectedRepo     string
-		expectedRegistry string
+		expectedImageRef *pyxis.ImageReference
 	}
 
 	testCases := []testCase{
-		{"Single repo Default version 1", "repo", "latest", "repo", ""},
-		{"Single repo Default version 2", "repo:", "latest", "repo", ""},
-		{"Single repo with version", "repo:1.1.8", "1.1.8", "repo", ""},
-		{"Double repo with version", "repo/product:1.1.8", "1.1.8", "repo/product", ""},
-		{"Triple repo with version", "repo/subrepo/product:1.1.8", "1.1.8", "repo/subrepo/product", ""},
-		{"Registry, single repo with version", "registry.com/product:1.1.8", "1.1.8", "product", "registry.com"},
-		{"Registry, double repo with version", "registry.com/repo/product:1.1.8", "1.1.8", "repo/product", "registry.com"},
-		{"Registry with port, double repo with version", "registry.com:8080/repo/product:1.1.8", "1.1.8", "repo/product", "registry.com:8080"},
+		{"Single repo Default version 1", "repo", &pyxis.ImageReference{[]string(nil), "repo", "latest", ""}},
+		{"Single repo Default version 2", "repo:", &pyxis.ImageReference{[]string(nil), "repo", "latest", ""}},
+		{"Single repo with version", "repo:1.1.8", &pyxis.ImageReference{[]string(nil), "repo", "1.1.8", ""}},
+		{"Double repo with version", "repo/product:1.1.8", &pyxis.ImageReference{[]string(nil), "repo/product", "1.1.8", ""}},
+		{"Triple repo with version", "repo/subrepo/product:1.1.8", &pyxis.ImageReference{[]string(nil), "repo/subrepo/product", "1.1.8", ""}},
+		{"Registry, single repo with version", "registry.com/product:1.1.8", &pyxis.ImageReference{[]string{"registry.com"}, "product", "1.1.8", ""}},
+		{"Registry, double repo with version", "registry.com/repo/product:1.1.8", &pyxis.ImageReference{[]string{"registry.com"}, "repo/product", "1.1.8", ""}},
+		{"Registry with port, double repo with version", "registry.com:8080/repo/product:1.1.8", &pyxis.ImageReference{[]string{"registry.com:8080"}, "repo/product", "1.1.8", ""}},
+		{"Single repo Sha256", "repo@sha256:12345", &pyxis.ImageReference{[]string(nil), "repo", "", "sha256:12345"}},
+		{"Single repo Sha128", "repo@sha128:12345", &pyxis.ImageReference{[]string(nil), "repo", "", "sha128:12345"}},
 	}
 
 	for _, testCase := range testCases {
-		registries, repository, version := getImageParts(testCase.image)
-
-		require.Equal(t, repository, testCase.expectedRepo)
-		require.Equal(t, version, testCase.expectedVersion)
-		if len(registries) == 0 {
-			require.True(t, len(testCase.expectedRegistry) == 0)
-		} else {
-			require.Equal(t, registries[0], testCase.expectedRegistry)
-		}
+		t.Run(testCase.description, func(t *testing.T) {
+			imageRef := parseImageReference(testCase.image)
+			require.Equal(t, *testCase.expectedImageRef, imageRef)
+		})
 	}
 }
