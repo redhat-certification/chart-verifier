@@ -53,6 +53,7 @@ const (
 	ImageCertifyFailed           = "Failed to certify images"
 	ImageCertified               = "Image is Red Hat certified"
 	ImageNotCertified            = "Image is not Red Hat certified"
+	ChartTestingSuccess          = "Chart tests have passed"
 )
 
 func notImplemented() (Result, error) {

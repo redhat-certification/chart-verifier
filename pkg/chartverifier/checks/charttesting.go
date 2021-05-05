@@ -102,7 +102,7 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 		}
 	}
 
-	return NewResult(true, ""), nil
+	return NewResult(true, ChartTestingSuccess), nil
 }
 
 // generateInstallConfig extracts required information to install a
