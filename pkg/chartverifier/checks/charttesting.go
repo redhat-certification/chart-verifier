@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/helm/chart-testing/pkg/chart"
-	"github.com/helm/chart-testing/pkg/config"
-	"github.com/helm/chart-testing/pkg/exec"
-	"github.com/helm/chart-testing/pkg/tool"
-	"github.com/helm/chart-testing/pkg/util"
+	"github.com/helm/chart-testing/v3/pkg/chart"
+	"github.com/helm/chart-testing/v3/pkg/config"
+	"github.com/helm/chart-testing/v3/pkg/exec"
+	"github.com/helm/chart-testing/v3/pkg/tool"
+	"github.com/helm/chart-testing/v3/pkg/util"
 )
 
 // buildChartTestingConfiguration computes the chart testing related
@@ -119,12 +119,12 @@ func generateInstallConfig(
 		release, _ = chrt.CreateInstallParams(cfg.BuildId)
 		releaseSelector = fmt.Sprintf("%s=%s", cfg.ReleaseLabel, release)
 		cleanup = func() {
-			helm.DeleteRelease(release)
+			helm.DeleteRelease(namespace, release)
 		}
 	} else {
 		release, namespace = chrt.CreateInstallParams(cfg.BuildId)
 		cleanup = func() {
-			helm.DeleteRelease(release)
+			helm.DeleteRelease(namespace, release)
 			kubectl.DeleteNamespace(namespace)
 		}
 	}
@@ -141,7 +141,7 @@ func testRelease(
 	if err := kubectl.WaitForDeployments(namespace, releaseSelector); err != nil {
 		return err
 	}
-	if err := helm.Test(release, cleanupHelmTests); err != nil {
+	if err := helm.Test(namespace, release); err != nil {
 		return err
 	}
 	return nil
@@ -197,7 +197,7 @@ func upgradeAndTestChart(
 				return fmt.Errorf("Upgrade testing for release '%s' skipped because of previous revision testing error", release)
 			}
 
-			if err := helm.Upgrade(oldChrt.Path(), release); err != nil {
+			if err := helm.Upgrade(oldChrt.Path(), namespace, release); err != nil {
 				return err
 			}
 

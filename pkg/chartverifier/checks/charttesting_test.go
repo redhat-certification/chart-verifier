@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
+	"helm.sh/helm/v3/pkg/cli"
 )
 
 func TestChartTesting(t *testing.T) {
