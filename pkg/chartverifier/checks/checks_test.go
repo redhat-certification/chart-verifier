@@ -223,11 +223,11 @@ func TestHasMinKubeVersion(t *testing.T) {
 	for _, tc := range positiveTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := HasMinKubeVersion(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := HasKubeVersion(&CheckOptions{URI: tc.uri, Config: config})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.True(t, r.Ok)
-			require.Equal(t, MinKuberVersionSpecified, r.Reason)
+			require.Equal(t, KuberVersionSpecified, r.Reason)
 		})
 	}
 
@@ -238,11 +238,11 @@ func TestHasMinKubeVersion(t *testing.T) {
 	for _, tc := range negativeTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := HasMinKubeVersion(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := HasKubeVersion(&CheckOptions{URI: tc.uri, Config: config})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.False(t, r.Ok)
-			require.Equal(t, MinKuberVersionNotSpecified, r.Reason)
+			require.Equal(t, KuberVersionNotSpecified, r.Reason)
 		})
 	}
 

@@ -34,7 +34,7 @@ func init() {
 	defaultRegistry.Add(checks.Check{Name: "contains-test", Type: MandatoryCheckType, Func: checks.ContainsTest})
 	defaultRegistry.Add(checks.Check{Name: "contains-values", Type: MandatoryCheckType, Func: checks.ContainsValues})
 	defaultRegistry.Add(checks.Check{Name: "contains-values-schema", Type: MandatoryCheckType, Func: checks.ContainsValuesSchema})
-	defaultRegistry.Add(checks.Check{Name: "has-minkubeversion", Type: MandatoryCheckType, Func: checks.HasMinKubeVersion})
+	defaultRegistry.Add(checks.Check{Name: "has-kubeversion", Type: MandatoryCheckType, Func: checks.HasKubeVersion})
 	defaultRegistry.Add(checks.Check{Name: "not-contains-crds", Type: MandatoryCheckType, Func: checks.NotContainCRDs})
 	defaultRegistry.Add(checks.Check{Name: "helm-lint", Type: MandatoryCheckType, Func: checks.HelmLint})
 	defaultRegistry.Add(checks.Check{Name: "not-contain-csi-objects", Type: MandatoryCheckType, Func: checks.NotContainCSIObjects})
