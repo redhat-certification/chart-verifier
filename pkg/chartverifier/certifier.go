@@ -73,16 +73,15 @@ func (c *certifier) Certify(uri string) (*Certificate, error) {
 			return nil, CheckNotFoundErr(name)
 		}
 
-
-		r, err := check.Func(&checks.CheckOptions{
+		r, checkErr := check.Func(&checks.CheckOptions{
 			HelmEnvSettings: c.settings,
 			URI:    uri,
 			Values: c.values,
 			ViperConfig: c.subConfig(name),
 		})
 
-		if err != nil {
-			return nil, NewCheckErr(err)
+		if checkErr != nil {
+			return nil, NewCheckErr(checkErr)
 		}
 		_ = result.AddCheck(name, check.Type, r)
 
