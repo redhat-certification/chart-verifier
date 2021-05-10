@@ -69,7 +69,10 @@ func (c *certifier) Certify(uri string) (*Certificate, error) {
 
 	osVersion, err := oc.GetVersion()
 	if err != nil {
-		return nil, fmt.Errorf("could not get Openshift version: %w", err)
+		// NOTE(isutton): oc or a suitable kubeconfig might not be
+		//                available, so for now we leave it as "N/A"
+		//                instead of raising an error.
+		osVersion = "N/A"
 	}
 
 	result := NewCertificateBuilder().
