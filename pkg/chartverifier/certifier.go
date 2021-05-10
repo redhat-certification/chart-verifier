@@ -17,7 +17,11 @@
 package chartverifier
 
 import (
+	"fmt"
+
+	"github.com/helm/chart-testing/v3/pkg/exec"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	"github.com/redhat-certification/chart-verifier/pkg/tool"
 	"github.com/spf13/viper"
 	helmcli "helm.sh/helm/v3/pkg/cli"
 )
@@ -62,10 +66,19 @@ func (c *certifier) Certify(uri string) (*Certificate, error) {
 		return nil, err
 	}
 
+	procExec := exec.NewProcessExecutor(c.settings.Debug)
+	oc := tool.NewOc(procExec)
+
+	osVersion, err := oc.GetVersion()
+	if err != nil {
+		return nil, fmt.Errorf("could not get Openshift version: %w", err)
+	}
+
 	result := NewCertificateBuilder().
 		SetToolVersion(c.toolVersion).
 		SetChartUri(uri).
-		SetChart(chrt)
+		SetChart(chrt).
+		SetCertifiedOpenShiftVersion(osVersion)
 
 	for _, name := range c.requiredChecks {
 		check, ok := c.registry.Get(name)
@@ -75,9 +88,9 @@ func (c *certifier) Certify(uri string) (*Certificate, error) {
 
 		r, checkErr := check.Func(&checks.CheckOptions{
 			HelmEnvSettings: c.settings,
-			URI:    uri,
-			Values: c.values,
-			ViperConfig: c.subConfig(name),
+			URI:             uri,
+			Values:          c.values,
+			ViperConfig:     c.subConfig(name),
 		})
 
 		if checkErr != nil {
