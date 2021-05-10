@@ -221,9 +221,9 @@ func installAndTestChartRelease(
 	kubectl tool.Kubectl,
 ) chart.TestResult {
 
-	// TODO: do not assume STDOUT here; instead a writer
-	//       should be given to be written to.
-	fmt.Printf("Installing chart '%s'...\n", chrt)
+	// valuesFiles contains all the configurations that should be
+	// executed; in other words, it performs a test matrix between
+	// values files and tests.
 	valuesFiles := chrt.ValuesFilePathsForCI()
 
 	// Test with defaults if no values files are specified.
@@ -234,11 +234,6 @@ func installAndTestChartRelease(
 	result := chart.TestResult{Chart: chrt}
 
 	for _, valuesFile := range valuesFiles {
-		if valuesFile != "" {
-			// TODO: do not assume STDOUT here; instead a writer
-			//       should be given to be written to.
-			fmt.Printf("\nInstalling chart with values file '%s'...\n\n", valuesFile)
-		}
 
 		// Use anonymous function. Otherwise deferred calls would pile up
 		// and be executed in reverse order after the loop.

@@ -17,8 +17,6 @@
 package chartverifier
 
 import (
-	"fmt"
-
 	"github.com/helm/chart-testing/v3/pkg/exec"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/pkg/tool"
