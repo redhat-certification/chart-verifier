@@ -21,3 +21,6 @@ test:
 	 go test -v ./...
 
 
+.PHONY: build-image
+build-image:
+	hack/build-image.sh
