@@ -17,8 +17,11 @@
 package chartverifier
 
 import (
+	"github.com/helm/chart-testing/v3/pkg/exec"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	"github.com/redhat-certification/chart-verifier/pkg/tool"
 	"github.com/spf13/viper"
+	helmcli "helm.sh/helm/v3/pkg/cli"
 )
 
 type CheckNotFoundErr string
@@ -41,6 +44,7 @@ type certifier struct {
 	config         *viper.Viper
 	registry       checks.Registry
 	requiredChecks []string
+	settings       *helmcli.EnvSettings
 	toolVersion    string
 	values         map[string]interface{}
 }
@@ -60,10 +64,22 @@ func (c *certifier) Certify(uri string) (*Certificate, error) {
 		return nil, err
 	}
 
+	procExec := exec.NewProcessExecutor(c.settings.Debug)
+	oc := tool.NewOc(procExec)
+
+	osVersion, err := oc.GetVersion()
+	if err != nil {
+		// NOTE(isutton): oc or a suitable kubeconfig might not be
+		//                available, so for now we leave it as "N/A"
+		//                instead of raising an error.
+		osVersion = "N/A"
+	}
+
 	result := NewCertificateBuilder().
 		SetToolVersion(c.toolVersion).
 		SetChartUri(uri).
-		SetChart(chrt)
+		SetChart(chrt).
+		SetCertifiedOpenShiftVersion(osVersion)
 
 	for _, name := range c.requiredChecks {
 		check, ok := c.registry.Get(name)
@@ -71,14 +87,15 @@ func (c *certifier) Certify(uri string) (*Certificate, error) {
 			return nil, CheckNotFoundErr(name)
 		}
 
-		r, err := check.Func(&checks.CheckOptions{
-			URI:    uri,
-			Config: c.subConfig(name),
-			Values: c.values,
+		r, checkErr := check.Func(&checks.CheckOptions{
+			HelmEnvSettings: c.settings,
+			URI:             uri,
+			Values:          c.values,
+			ViperConfig:     c.subConfig(name),
 		})
 
-		if err != nil {
-			return nil, NewCheckErr(err)
+		if checkErr != nil {
+			return nil, NewCheckErr(checkErr)
 		}
 		_ = result.AddCheck(name, check.Type, r)
 

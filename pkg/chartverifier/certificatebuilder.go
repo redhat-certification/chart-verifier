@@ -31,6 +31,7 @@ type CertificateBuilder interface {
 	SetChartUri(name string) CertificateBuilder
 	AddCheck(name string, checkType checks.CheckType, result checks.Result) CertificateBuilder
 	SetChart(chart *helmchart.Chart) CertificateBuilder
+	SetCertifiedOpenShiftVersion(version string) CertificateBuilder
 	Build() (*Certificate, error)
 }
 
@@ -48,6 +49,11 @@ func NewCertificateBuilder() CertificateBuilder {
 	b := certificateBuilder{}
 	b.Certificate = newCertificate()
 	return &b
+}
+
+func (r *certificateBuilder) SetCertifiedOpenShiftVersion(version string) CertificateBuilder {
+	r.Certificate.Metadata.ToolMetadata.CertifiedOpenShiftVersions = version
+	return r
 }
 
 func (r *certificateBuilder) SetToolVersion(version string) CertificateBuilder {

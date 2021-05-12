@@ -18,7 +18,6 @@ package checks
 
 import (
 	"fmt"
-	"path"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -53,6 +52,7 @@ const (
 	ImageCertifyFailed           = "Failed to certify images"
 	ImageCertified               = "Image is Red Hat certified"
 	ImageNotCertified            = "Image is not Red Hat certified"
+	ChartTestingSuccess          = "Chart tests have passed"
 )
 
 func notImplemented() (Result, error) {
@@ -182,12 +182,11 @@ func NotContainCRDs(opts *CheckOptions) (Result, error) {
 }
 
 func HelmLint(opts *CheckOptions) (Result, error) {
-	c, p, err := LoadChartFromURI(opts.URI)
+	_, p, err := LoadChartFromURI(opts.URI)
 	if err != nil {
 		return NewResult(false, err.Error()), err
 	}
 	r := NewResult(true, HelmLintSuccessful)
-	p = path.Join(p, c.Name())
 	linter := lint.All(p, opts.Values, "default", false)
 	if linter.HighestSeverity > support.WarningSev {
 		reason := ""

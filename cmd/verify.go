@@ -87,11 +87,19 @@ func buildChecks(all, enabled, disabled []string) ([]string, error) {
 // settings comes from Helm, to extract the same configuration values Helm uses.
 var settings = cli.New()
 
+type verifyOptions struct {
+	ValueFiles []string
+	Values     []string
+}
+
 // NewVerifyCmd creates ...
 func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 
 	// opts contains command line options extracted from the environment.
 	opts := &values.Options{}
+
+	// verifyOpts contains this specific command options.
+	verifyOpts := &verifyOptions{}
 
 	cmd := &cobra.Command{
 		Use:   "verify <chart-uri>",
@@ -114,7 +122,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 				SetValues(vals).
 				SetChecks(checks).
 				SetConfig(config).
-				SetOverrides(setOverridesFlag).
+				SetOverrides(verifyOpts.Values).
 				SetToolVersion(Version).
 				Build()
 
@@ -147,13 +155,15 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringSliceVarP(&opts.ValueFiles, "chart-values", "f", nil, "specify values in a YAML file or a URL (can specify multiple)")
+	settings.AddFlags(cmd.Flags())
+
+	cmd.Flags().StringSliceVarP(&opts.ValueFiles, "chart-values", "F", nil, "specify values in a YAML file or a URL (can specify multiple)")
 
 	cmd.Flags().StringSliceVarP(&opts.Values, "chart-set", "S", nil, "set values for the chart (can specify multiple or separate values with commas: key1=val1,key2=val2)")
 
 	cmd.Flags().StringSliceVarP(&opts.StringValues, "chart-set-string", "X", nil, "set STRING values for the chart (can specify multiple or separate values with commas: key1=val1,key2=val2)")
 
-	cmd.Flags().StringSliceVarP(&opts.FileValues, "chart-set-file", "F", nil, "set values from respective files specified via the command line (can specify multiple or separate values with commas: key1=path1,key2=path2)")
+	cmd.Flags().StringSliceVarP(&opts.FileValues, "chart-set-file", "G", nil, "set values from respective files specified via the command line (can specify multiple or separate values with commas: key1=path1,key2=path2)")
 
 	cmd.Flags().StringSliceVarP(&enabledChecksFlag, "enable", "e", nil, "only the informed checks will be enabled")
 
@@ -161,7 +171,9 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 
 	cmd.Flags().StringVarP(&outputFormatFlag, "output", "o", "", "the output format: default, json or yaml")
 
-	cmd.Flags().StringSliceVarP(&setOverridesFlag, "set", "s", []string{}, "overrides a configuration, e.g: dummy.ok=false")
+	cmd.Flags().StringSliceVarP(&verifyOpts.Values, "set", "s", []string{}, "overrides a configuration, e.g: dummy.ok=false")
+
+	cmd.Flags().StringSliceVarP(&verifyOpts.ValueFiles, "set-values", "f", nil, "specify application and check configuration values in a YAML file or a URL (can specify multiple)")
 
 	return cmd
 }

@@ -124,10 +124,10 @@ func (c *chartCache) Add(uri string, chrt *chart.Chart) (ChartCacheItem, error) 
 	if err != nil {
 		return ChartCacheItem{}, err
 	}
-	key := c.MakeKey(uri)
 	cacheDir := path.Join(userCacheDir, "chart-verifier")
+	key := c.MakeKey(uri)
 	chartCacheDir := path.Join(cacheDir, key)
-	cacheItem := ChartCacheItem{Chart: chrt, Path: chartCacheDir}
+	cacheItem := ChartCacheItem{Chart: chrt, Path: path.Join(chartCacheDir, chrt.Name())}
 	if err = chartutil.SaveDir(chrt, chartCacheDir); err != nil {
 		return ChartCacheItem{}, err
 	}

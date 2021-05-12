@@ -23,6 +23,7 @@ import (
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
+	"helm.sh/helm/v3/pkg/cli"
 )
 
 func TestIsHelmV3(t *testing.T) {
@@ -37,8 +38,9 @@ func TestIsHelmV3(t *testing.T) {
 
 	for _, tc := range positiveTestCases {
 		config := viper.New()
+		settings := cli.New()
 		t.Run(tc.description, func(t *testing.T) {
-			r, err := IsHelmV3(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := IsHelmV3(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: settings})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.True(t, r.Ok)
@@ -53,7 +55,7 @@ func TestIsHelmV3(t *testing.T) {
 	for _, tc := range negativeTestCases {
 		config := viper.New()
 		t.Run(tc.description, func(t *testing.T) {
-			r, err := IsHelmV3(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := IsHelmV3(&CheckOptions{URI: tc.uri, ViperConfig: config})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.False(t, r.Ok)
@@ -75,7 +77,7 @@ func TestHasReadme(t *testing.T) {
 	for _, tc := range positiveTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := HasReadme(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := HasReadme(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.True(t, r.Ok)
@@ -90,7 +92,7 @@ func TestHasReadme(t *testing.T) {
 	for _, tc := range negativeTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := HasReadme(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := HasReadme(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.False(t, r.Ok)
@@ -112,7 +114,7 @@ func TestContainsTest(t *testing.T) {
 	for _, tc := range positiveTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := ContainsTest(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := ContainsTest(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.True(t, r.Ok)
@@ -127,7 +129,7 @@ func TestContainsTest(t *testing.T) {
 	for _, tc := range negativeTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := ContainsTest(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := ContainsTest(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.False(t, r.Ok)
@@ -149,7 +151,7 @@ func TestHasValuesSchema(t *testing.T) {
 	for _, tc := range positiveTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := ContainsValuesSchema(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := ContainsValuesSchema(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.True(t, r.Ok)
@@ -164,7 +166,7 @@ func TestHasValuesSchema(t *testing.T) {
 	for _, tc := range negativeTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := ContainsValuesSchema(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := ContainsValuesSchema(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.False(t, r.Ok)
@@ -186,7 +188,7 @@ func TestHasValues(t *testing.T) {
 	for _, tc := range positiveTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := ContainsValues(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := ContainsValues(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.True(t, r.Ok)
@@ -201,7 +203,7 @@ func TestHasValues(t *testing.T) {
 	for _, tc := range negativeTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := ContainsValues(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := ContainsValues(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.False(t, r.Ok)
@@ -223,7 +225,7 @@ func TestHasMinKubeVersion(t *testing.T) {
 	for _, tc := range positiveTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := HasKubeVersion(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := HasKubeVersion(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.True(t, r.Ok)
@@ -238,7 +240,7 @@ func TestHasMinKubeVersion(t *testing.T) {
 	for _, tc := range negativeTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := HasKubeVersion(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := HasKubeVersion(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.False(t, r.Ok)
@@ -261,7 +263,7 @@ func TestNotContainCRDs(t *testing.T) {
 	for _, tc := range positiveTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := NotContainCRDs(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := NotContainCRDs(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.True(t, r.Ok)
@@ -276,7 +278,7 @@ func TestNotContainCRDs(t *testing.T) {
 	for _, tc := range negativeTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := NotContainCRDs(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := NotContainCRDs(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.False(t, r.Ok)
@@ -298,7 +300,7 @@ func TestNotContainCSIObjects(t *testing.T) {
 	for _, tc := range positiveTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := NotContainCSIObjects(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := NotContainCSIObjects(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.True(t, r.Ok)
@@ -313,7 +315,7 @@ func TestNotContainCSIObjects(t *testing.T) {
 	for _, tc := range negativeTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := NotContainCSIObjects(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := NotContainCSIObjects(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.False(t, r.Ok)
@@ -337,7 +339,7 @@ func TestHelmLint(t *testing.T) {
 	for _, tc := range positiveTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := HelmLint(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := HelmLint(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.True(t, r.Ok)
@@ -352,7 +354,7 @@ func TestHelmLint(t *testing.T) {
 	for _, tc := range negativeTestCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := HelmLint(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := HelmLint(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.False(t, r.Ok)
@@ -380,7 +382,7 @@ func TestImageCertify(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := ImagesAreCertified(&CheckOptions{URI: tc.uri, Config: config})
+			r, err := ImagesAreCertified(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			if tc.numErrors == 0 {

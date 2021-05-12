@@ -16,7 +16,10 @@
 
 package checks
 
-import "github.com/spf13/viper"
+import (
+	"github.com/spf13/viper"
+	helmcli "helm.sh/helm/v3/pkg/cli"
+)
 
 type Result struct {
 	// Ok indicates whether the result was successful or not.
@@ -61,10 +64,12 @@ type Check struct {
 type CheckOptions struct {
 	// URI is the location of the chart to be checked.
 	URI string
-	// Config is the configuration collected by Viper.
-	Config *viper.Viper
+	// ViperConfig is the configuration collected by Viper.
+	ViperConfig *viper.Viper
 	// Values contains the values informed by the user through command line options.
 	Values map[string]interface{}
+	// HelmEnvSettings contains the Helm related environment settings.
+	HelmEnvSettings *helmcli.EnvSettings
 }
 
 type CheckFunc func(options *CheckOptions) (Result, error)
