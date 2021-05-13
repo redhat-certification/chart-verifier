@@ -19,10 +19,16 @@ RUN go mod download
 
 COPY . .
 
+RUN ./hack/get-oc.sh
+
+RUN ./hack/get-helm.sh
+
 RUN ./hack/build.sh
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal
 
 COPY --from=build /tmp/src/out/chart-verifier /app/chart-verifier
+
+COPY --from=build /usr/local/bin/* /usr/local/bin/
 
 ENTRYPOINT ["/app/chart-verifier"]
