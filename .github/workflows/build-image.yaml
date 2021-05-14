@@ -1,0 +1,23 @@
+name: Build image
+
+on:
+  push:
+    branches: [chart-verifier-107]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - uses: redhat-actions/buildah-build@v2
+        with:
+          image: chart-verifier
+          tags: v1 ${{ github.sha }}
+          dockerfiles: |
+            ./Dockerfile
