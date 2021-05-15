@@ -81,10 +81,11 @@ func TestCertifier_Certify(t *testing.T) {
 	t.Run("Result should be negative if check exists and returns negative", func(t *testing.T) {
 
 		c := &certifier{
-			settings:       cli.New(),
-			config:         viper.New(),
-			registry:       checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: negativeCheck}),
-			requiredChecks: []string{dummyCheckName},
+			settings:         cli.New(),
+			config:           viper.New(),
+			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: negativeCheck}),
+			requiredChecks:   []string{dummyCheckName},
+			openshiftVersion: "4.9",
 		}
 
 		r, err := c.Certify(validChartUri)
@@ -95,10 +96,11 @@ func TestCertifier_Certify(t *testing.T) {
 
 	t.Run("Result should be positive if check exists and returns positive", func(t *testing.T) {
 		c := &certifier{
-			settings:       cli.New(),
-			config:         viper.New(),
-			registry:       checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
-			requiredChecks: []string{dummyCheckName},
+			settings:         cli.New(),
+			config:           viper.New(),
+			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
+			requiredChecks:   []string{dummyCheckName},
+			openshiftVersion: "4.9",
 		}
 
 		r, err := c.Certify(validChartUri)

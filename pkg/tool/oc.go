@@ -19,9 +19,9 @@ func NewOc(exec exec.ProcessExecutor) Oc {
 
 const osVersionKey = "openshiftVersion"
 
-func (o Oc) GetVersion() (string, error) {
+func (o Oc) GetVersion(ov string) (string, error) {
 	rawOutput, err := o.exec.RunProcessAndCaptureOutput("oc", "version", "-o", "yaml")
-	if err != nil {
+	if err != nil && ov == "" {
 		return "", err
 	}
 	out := map[string]interface{}{}
@@ -32,7 +32,10 @@ func (o Oc) GetVersion() (string, error) {
 
 	version := out[osVersionKey]
 	if version == nil {
-		return "", fmt.Errorf("%q not found in 'oc version' output", osVersionKey)
+		if ov != "" {
+			return ov, nil
+		}
+		return "", fmt.Errorf("%q not found in 'oc version' output.  And the 'openshift-version' flag has not set.", osVersionKey)
 	}
 
 	v, ok := version.(string)

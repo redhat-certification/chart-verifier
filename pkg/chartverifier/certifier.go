@@ -36,17 +36,26 @@ func (e CheckErr) Error() string {
 	return "check error: " + string(e)
 }
 
+type OpenShiftVersionErr struct {
+	msg string
+}
+
+func (e OpenShiftVersionErr) Error() string {
+	return "Missing OpenShift version. " + string(e.msg)
+}
+
 func NewCheckErr(err error) error {
 	return CheckErr(err.Error())
 }
 
 type certifier struct {
-	config         *viper.Viper
-	registry       checks.Registry
-	requiredChecks []string
-	settings       *helmcli.EnvSettings
-	toolVersion    string
-	values         map[string]interface{}
+	config           *viper.Viper
+	registry         checks.Registry
+	requiredChecks   []string
+	settings         *helmcli.EnvSettings
+	toolVersion      string
+	openshiftVersion string
+	values           map[string]interface{}
 }
 
 func (c *certifier) subConfig(name string) *viper.Viper {
@@ -67,12 +76,9 @@ func (c *certifier) Certify(uri string) (*Certificate, error) {
 	procExec := exec.NewProcessExecutor(c.settings.Debug)
 	oc := tool.NewOc(procExec)
 
-	osVersion, err := oc.GetVersion()
+	osVersion, err := oc.GetVersion(c.openshiftVersion)
 	if err != nil {
-		// NOTE(isutton): oc or a suitable kubeconfig might not be
-		//                available, so for now we leave it as "N/A"
-		//                instead of raising an error.
-		osVersion = "N/A"
+		return nil, OpenShiftVersionErr{err.Error()}
 	}
 
 	result := NewCertificateBuilder().
