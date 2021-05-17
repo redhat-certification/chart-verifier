@@ -46,7 +46,7 @@ type Certificate struct {
 type CertificateMetadata struct {
 	ToolMetadata ToolMetadata        `json:"tool" yaml:"tool"`
 	ChartData    *helmchart.Metadata `json:"chart" yaml:"chart"`
-	Overrides    string              `json: "chart-overrides" yaml:"chart-overrides"`
+	Overrides    string              `json:"chart-overrides" yaml:"chart-overrides"`
 }
 
 type ToolMetadata struct {

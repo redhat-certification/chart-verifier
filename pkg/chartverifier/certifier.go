@@ -17,6 +17,7 @@
 package chartverifier
 
 import (
+	"github.com/Masterminds/semver"
 	"github.com/helm/chart-testing/v3/pkg/exec"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/pkg/tool"
@@ -36,17 +37,30 @@ func (e CheckErr) Error() string {
 	return "check error: " + string(e)
 }
 
+type OpenShiftVersionErr string
+
+func (e OpenShiftVersionErr) Error() string {
+	return "Missing OpenShift version. " + string(e) + " And the 'openshift-version' flag has not set."
+}
+
+type OpenShiftSemVerErr string
+
+func (e OpenShiftSemVerErr) Error() string {
+	return "OpenShift version is not following SemVer spec. " + string(e)
+}
+
 func NewCheckErr(err error) error {
 	return CheckErr(err.Error())
 }
 
 type certifier struct {
-	config         *viper.Viper
-	registry       checks.Registry
-	requiredChecks []string
-	settings       *helmcli.EnvSettings
-	toolVersion    string
-	values         map[string]interface{}
+	config           *viper.Viper
+	registry         checks.Registry
+	requiredChecks   []string
+	settings         *helmcli.EnvSettings
+	toolVersion      string
+	openshiftVersion string
+	values           map[string]interface{}
 }
 
 func (c *certifier) subConfig(name string) *viper.Viper {
@@ -68,12 +82,13 @@ func (c *certifier) Certify(uri string) (*Certificate, error) {
 	oc := tool.NewOc(procExec)
 
 	osVersion, err := oc.GetVersion()
-	if err != nil {
-		// NOTE(isutton): oc or a suitable kubeconfig might not be
-		//                available, so for now we leave it as "N/A"
-		//                instead of raising an error.
-		osVersion = "N/A"
+	if err != nil && c.openshiftVersion == "" {
+		return nil, OpenShiftVersionErr(err.Error())
 	}
+	if _, err := semver.NewVersion(c.openshiftVersion); err != nil {
+		return nil, OpenShiftSemVerErr(err.Error())
+	}
+	osVersion = c.openshiftVersion
 
 	result := NewCertificateBuilder().
 		SetToolVersion(c.toolVersion).

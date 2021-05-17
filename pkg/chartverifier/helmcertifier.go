@@ -29,6 +29,7 @@ type CertifierBuilder interface {
 	SetConfig(config *viper.Viper) CertifierBuilder
 	SetOverrides([]string) CertifierBuilder
 	SetToolVersion(string) CertifierBuilder
+	SetOpenShiftVersion(string) CertifierBuilder
 	SetSettings(settings *cli.EnvSettings) CertifierBuilder
 	Build() (Certifier, error)
 }

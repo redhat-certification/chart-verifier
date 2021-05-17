@@ -50,13 +50,14 @@ func DefaultRegistry() checks.Registry {
 }
 
 type certifierBuilder struct {
-	checks      []string
-	config      *viper.Viper
-	overrides   []string
-	registry    checks.Registry
-	toolVersion string
-	values      map[string]interface{}
-	settings    *cli.EnvSettings
+	checks           []string
+	config           *viper.Viper
+	overrides        []string
+	registry         checks.Registry
+	toolVersion      string
+	openshiftVersion string
+	values           map[string]interface{}
+	settings         *cli.EnvSettings
 }
 
 func (b *certifierBuilder) SetSettings(settings *cli.EnvSettings) CertifierBuilder {
@@ -94,6 +95,11 @@ func (b *certifierBuilder) SetToolVersion(version string) CertifierBuilder {
 	return b
 }
 
+func (b *certifierBuilder) SetOpenShiftVersion(version string) CertifierBuilder {
+	b.openshiftVersion = version
+	return b
+}
+
 func (b *certifierBuilder) Build() (Certifier, error) {
 	if len(b.checks) == 0 {
 		return nil, errors.New("no checks have been required")
@@ -118,12 +124,13 @@ func (b *certifierBuilder) Build() (Certifier, error) {
 	}
 
 	return &certifier{
-		config:         b.config,
-		registry:       b.registry,
-		requiredChecks: b.checks,
-		settings:       b.settings,
-		toolVersion:    b.toolVersion,
-		values:         b.values,
+		config:           b.config,
+		registry:         b.registry,
+		requiredChecks:   b.checks,
+		settings:         b.settings,
+		toolVersion:      b.toolVersion,
+		openshiftVersion: b.openshiftVersion,
+		values:           b.values,
 	}, nil
 }
 

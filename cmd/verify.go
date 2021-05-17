@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"encoding/json"
+
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
 	"helm.sh/helm/v3/pkg/getter"
@@ -49,6 +50,8 @@ var (
 	outputFormatFlag string
 	// setOverridesFlag contains the overrides the user has specified through the --set flag.
 	setOverridesFlag []string
+	// openshiftVersionFlag set the value of `certifiedOpenShiftVersions` in the report
+	openshiftVersionFlag string
 )
 
 func filterChecks(set []string, subset []string, setEnabled bool, subsetEnabled bool) ([]string, error) {
@@ -124,6 +127,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 				SetConfig(config).
 				SetOverrides(verifyOpts.Values).
 				SetToolVersion(Version).
+				SetOpenShiftVersion(openshiftVersionFlag).
 				Build()
 
 			if err != nil {
@@ -174,6 +178,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 	cmd.Flags().StringSliceVarP(&verifyOpts.Values, "set", "s", []string{}, "overrides a configuration, e.g: dummy.ok=false")
 
 	cmd.Flags().StringSliceVarP(&verifyOpts.ValueFiles, "set-values", "f", nil, "specify application and check configuration values in a YAML file or a URL (can specify multiple)")
+	cmd.Flags().StringVarP(&openshiftVersionFlag, "openshift-version", "V", "", "version of OpenShift used in the cluster")
 
 	return cmd
 }
