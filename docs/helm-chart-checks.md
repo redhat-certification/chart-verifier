@@ -75,7 +75,6 @@ This section provides help on the basic usage of Helm chart checks with the podm
   The output is similar to the following example:
   ```
   Verifies a Helm chart by checking some of its characteristics
-  Verifies a Helm chart by checking some of its characteristics
 
   Usage:
     chart-verifier verify <chart-uri> [flags]
