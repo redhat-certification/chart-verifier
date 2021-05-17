@@ -4,7 +4,7 @@ OpenShift Helm Charts repository hosts Helm Charts that are available by default
 
 The submission process of a Helm Chart for Red Hat Helm Repository and Certification has been documented on the [Red Hat Helm Repository](https://github.com/openshift-helm-charts/charts). Please note the instructions mentioned on the repository before submitting a chart.
 
-The follow options are available for submitting a Chart for inclusion in Red Hat Helm Repository and Certification: 
+The following options are available for submitting a Chart for inclusion in Red Hat Helm Repository and Certification: 
 
 | Option                                       | Description                                                                                                             |
 |----------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
@@ -14,7 +14,7 @@ The follow options are available for submitting a Chart for inclusion in Red Hat
 
 > **_NOTE:_**  A verifier report is an integral part of the submission process. With the options that do not require a report, a report will be generated as part of the submission process.
 
-If the Pull Request fails, an exception process will be started if the report contains one or more failures or has missing tests. If the report can be submitted without a chart, the report should be run against the chart in the corresponding final location. The verifier will record the `chart-uri` specified during the report run and, in the absence of a submitted chart, the `chart-uri` would be used for the publication.
+An exception process starts if the Pull request fails, if the report contains one or more failures, or has missing tests. If you submit the report without a chart, run the report against the chart in the corresponding final location. Then, the verifier records the `chart-uri` specified during the report run, and in the absence of a submitted chart, you can use the `chart-uri` for publication.
 
 If the report is to be submitted with a chart, it must be run against the same. This is because the submission process does not have access to the values and the report generated would include failures.
 
