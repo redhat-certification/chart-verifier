@@ -57,58 +57,80 @@ To perform the tasks related to Helm chart checks, run the following commands:
 
 - Runs all the available checks for the chart using a `uri`.
 
- ```ruby
- $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify <chart-uri>
- ```
+  ```
+   $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify <chart-uri>
+   ```
 - Runs all the checks available locally on your system for the chart, from the same directory as the chart.
 
- ```ruby
- $ docker run -v $(pwd):/charts --rm quay.io/redhat-certification/chart-verifier verify /charts/<chart>
- ```
+  ```
+  $ docker run -v $(pwd):/charts --rm quay.io/redhat-certification/chart-verifier verify /charts/<chart>
+  ```
+
 - Gets the list of options for the `verify` command.
 
- ```ruby
- $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify help
- ```
- The output is similar to the following example:
- ```ruby
- $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify help`
+  ```
+  $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify --help
+  ```
+ 
+  The output is similar to the following example:
 
- Verifies a Helm chart by checking some of its characteristics
+  ```
+  $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify --help`
 
- Usage:
- chart-verifier verify <chart-uri> [flags]
+  Verifies a Helm chart by checking some of its characteristics
 
- Flags:
-   -S, --chart-set strings          set values for the chart (can specify multiple or separate values with commas:     key1=val1,key2=val2)
-   -F, --chart-set-file strings     set values from respective files specified via the command line (can specify multiple or  separate values with commas: key1=path1,key2=path2)
-   -X, --chart-set-string strings   set STRING values for the chart (can specify multiple or separate values with commas: key1=val1,key2=val2)
-   -f, --chart-values strings       specify values in a YAML file or a URL (can specify multiple)
-   -x, --disable strings            all checks will be enabled except the informed ones
-   -e, --enable strings             only the informed checks will be enabled
-   -h, --help                       help for verify
-   -o, --output string              the output format: default, json or yaml
-   -s, --set strings                overrides a configuration, e.g: dummy.ok=false
+  Usage:
+    chart-verifier verify <chart-uri> [flags]
 
- Global Flags:
-       --config string   config file (default is $HOME/.chart-verifier.yaml)
+  Flags:
+    -S, --chart-set strings           set values for the chart (can specify multiple or separate values with commas: key1=val1,key2=val2)
+    -G, --chart-set-file strings      set values from respective files specified via the command line (can specify multiple or separate values with commas: key1=path1,key2=path2)
+    -X, --chart-set-string strings    set STRING values for the chart (can specify multiple or separate values with commas: key1=val1,key2=val2)
+    -F, --chart-values strings        specify values in a YAML file or a URL (can specify multiple)
+        --debug                       enable verbose output
+    -x, --disable strings             all checks will be enabled except the informed ones
+    -e, --enable strings              only the informed checks will be enabled
+    -h, --help                        help for verify
+        --kube-apiserver string       the address and the port for the Kubernetes API server
+        --kube-as-group stringArray   group to impersonate for the operation, this flag can be repeated to specify multiple groups.
+        --kube-as-user string         username to impersonate for the operation
+        --kube-ca-file string         the certificate authority file for the Kubernetes API server connection
+        --kube-context string         name of the kubeconfig context to use
+        --kube-token string           bearer token used for authentication
+        --kubeconfig string           path to the kubeconfig file
+    -n, --namespace string            namespace scope for this request
+    -V, --openshift-version string    set the value of certifiedOpenShiftVersions in the report
+    -o, --output string               the output format: default, json or yaml
+        --registry-config string      path to the registry config file (default "/home/baiju/.config/helm/registry.json")
+        --repository-cache string     path to the file containing cached repository indexes (default "/home/baiju/.cache/helm/repository")
+        --repository-config string    path to the file containing repository names and URLs (default "/home/baiju/.config/helm/repositories.yaml")
+    -s, --set strings                 overrides a configuration, e.g: dummy.ok=false
+    -f, --set-values strings          specify application and check configuration values in a YAML file or a URL (can specify multiple)
+
+  Global Flags:
+        --config string   config file (default is $HOME/.chart-verifier.yaml)
+  ```
+
 - Runs a subset of the checks.
 
- ```ruby
- $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify -e images-are-certified,helm-lint
- ```
+  ```
+  $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify -e images-are-certified,helm-lint
+  ```
+
 - Runs all the checks except a subset.
 
- ```ruby
- $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify -x images-are-certified,helm-lint
- ```
+  ```
+  $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify -x images-are-certified,helm-lint
+  ```
+
 - Provides chart-override values.
 
- ```ruby
- $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify -S default.port=8080 images-are-certified,helm-lint
- ```
+  ```
+  $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify -S default.port=8080 images-are-certified,helm-lint
+  ```
+
 - Provides chart-override values in a file.
 
- ```ruby
- $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify -F overrides.yaml images-are-certified,helm-lint
- ```
+  ```
+  $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify -F overrides.yaml images-are-certified,helm-lint
+  ```
