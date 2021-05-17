@@ -36,12 +36,10 @@ func (e CheckErr) Error() string {
 	return "check error: " + string(e)
 }
 
-type OpenShiftVersionErr struct {
-	msg string
-}
+type OpenShiftVersionErr string
 
 func (e OpenShiftVersionErr) Error() string {
-	return "Missing OpenShift version. " + string(e.msg) + " And the 'openshift-version' flag has not set."
+	return "Missing OpenShift version. " + string(e) + " And the 'openshift-version' flag has not set."
 }
 
 func NewCheckErr(err error) error {
@@ -77,13 +75,10 @@ func (c *certifier) Certify(uri string) (*Certificate, error) {
 	oc := tool.NewOc(procExec)
 
 	osVersion, err := oc.GetVersion()
-	if err != nil {
-		if c.openshiftVersion != "" {
-			osVersion = c.openshiftVersion
-		} else {
-			return nil, OpenShiftVersionErr{err.Error()}
-		}
+	if err != nil && c.openshiftVersion == "" {
+		return nil, OpenShiftVersionErr(err.Error())
 	}
+	osVersion = c.openshiftVersion
 
 	result := NewCertificateBuilder().
 		SetToolVersion(c.toolVersion).
