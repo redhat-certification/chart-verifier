@@ -41,7 +41,7 @@ type OpenShiftVersionErr struct {
 }
 
 func (e OpenShiftVersionErr) Error() string {
-	return "Missing OpenShift version. " + string(e.msg)
+	return "Missing OpenShift version. " + string(e.msg) + " And the 'openshift-version' flag has not set."
 }
 
 func NewCheckErr(err error) error {
@@ -76,9 +76,13 @@ func (c *certifier) Certify(uri string) (*Certificate, error) {
 	procExec := exec.NewProcessExecutor(c.settings.Debug)
 	oc := tool.NewOc(procExec)
 
-	osVersion, err := oc.GetVersion(c.openshiftVersion)
+	osVersion, err := oc.GetVersion()
 	if err != nil {
-		return nil, OpenShiftVersionErr{err.Error()}
+		if c.openshiftVersion != "" {
+			osVersion = c.openshiftVersion
+		} else {
+			return nil, OpenShiftVersionErr{err.Error()}
+		}
 	}
 
 	result := NewCertificateBuilder().
