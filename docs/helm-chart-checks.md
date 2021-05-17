@@ -56,30 +56,25 @@ This section provides help on the basic usage of Helm chart checks with the podm
 - Red Hat OpenShift Container Platform cluster.
 
 ### Procedure
-To perform the tasks related to Helm chart checks, run the following commands:
 
-- Runs all the available checks for the chart using a `uri`.
-
-  ```
-   $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify <chart-uri>
-   ```
-- Runs all the checks available locally on your system for the chart, from the same directory as the chart.
+- Run all the available checks for the chart using a `uri`:
 
   ```
-  $ docker run -v $(pwd):/charts --rm quay.io/redhat-certification/chart-verifier verify /charts/<chart>
+  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify <chart-uri>
   ```
+- Run all the checks available locally on your system for the chart, from the same directory as the chart:
 
-- Gets the list of options for the `verify` command.
+  ```
+  $ podman run -v $(pwd):/charts --rm quay.io/redhat-certification/chart-verifier verify /charts/<chart>
+  ```
+- Get the list of options for the `verify` command:
 
   ```
-  $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify --help
+  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify help
   ```
- 
   The output is similar to the following example:
-
   ```
-  $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify --help`
-
+  Verifies a Helm chart by checking some of its characteristics
   Verifies a Helm chart by checking some of its characteristics
 
   Usage:
@@ -113,27 +108,23 @@ To perform the tasks related to Helm chart checks, run the following commands:
   Global Flags:
         --config string   config file (default is $HOME/.chart-verifier.yaml)
   ```
-
-- Runs a subset of the checks.
-
-  ```
-  $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify -e images-are-certified,helm-lint
-  ```
-
-- Runs all the checks except a subset.
+- Run a subset of the checks:
 
   ```
-  $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify -x images-are-certified,helm-lint
+  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -e images-are-certified,helm-lint
   ```
-
-- Provides chart-override values.
-
-  ```
-  $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify -S default.port=8080 images-are-certified,helm-lint
-  ```
-
-- Provides chart-override values in a file.
+- Run all the checks except a subset:
 
   ```
-  $ docker run -it --rm quay.io/redhat-certification/chart-verifier verify -F overrides.yaml images-are-certified,helm-lint
+  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -x images-are-certified,helm-lint
+  ```
+- Provide chart-override values:
+
+  ```
+  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -S default.port=8080 images-are-certified,helm-lint
+  ```
+- Provide chart-override values in a file:
+
+  ```
+  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -F overrides.yaml images-are-certified,helm-lint
   ```
