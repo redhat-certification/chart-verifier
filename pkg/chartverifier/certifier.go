@@ -40,7 +40,7 @@ func (e CheckErr) Error() string {
 type OpenShiftVersionErr string
 
 func (e OpenShiftVersionErr) Error() string {
-	return "Missing OpenShift version. " + string(e) + " And the 'openshift-version' flag has not set."
+	return "Missing OpenShift version. " + string(e) + ". And the 'openshift-version' flag has not set."
 }
 
 type OpenShiftSemVerErr string
@@ -71,6 +71,18 @@ func (c *certifier) subConfig(name string) *viper.Viper {
 	}
 }
 
+func getVersion(sysVersion, userVersion string, err error) (string, error) {
+	osVersion := sysVersion
+	if err != nil {
+		if userVersion == "" {
+			return "", err
+		} else {
+			osVersion = userVersion
+		}
+	}
+	return osVersion, nil
+}
+
 func (c *certifier) Certify(uri string) (*Certificate, error) {
 
 	chrt, _, err := checks.LoadChartFromURI(uri)
@@ -82,12 +94,9 @@ func (c *certifier) Certify(uri string) (*Certificate, error) {
 	oc := tool.NewOc(procExec)
 
 	osVersion, err := oc.GetVersion()
+	osVersion, err = getVersion(osVersion, c.openshiftVersion, err)
 	if err != nil {
-		if c.openshiftVersion == "" {
-			return nil, OpenShiftVersionErr(err.Error())
-		} else {
-			osVersion = c.openshiftVersion
-		}
+		return nil, OpenShiftVersionErr(err.Error())
 	}
 
 	if _, err := semver.NewVersion(osVersion); err != nil {

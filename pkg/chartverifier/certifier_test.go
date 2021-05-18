@@ -111,3 +111,31 @@ func TestCertifier_Certify(t *testing.T) {
 
 	cancel()
 }
+
+func TestGetVersion(t *testing.T) {
+	t.Run("oc version error and wrong user input", func(t *testing.T) {
+		errIn := errors.New("error")
+		v, err := getVersion("", "NaN", errIn)
+		require.NoError(t, err)
+		require.Equal(t, "NaN", v)
+	})
+
+	t.Run("oc version error and correct user input", func(t *testing.T) {
+		errIn := errors.New("error")
+		v, err := getVersion("", "4.6.7", errIn)
+		require.NoError(t, err)
+		require.Equal(t, "4.6.7", v)
+	})
+
+	t.Run("oc version and wrong user input", func(t *testing.T) {
+		v, err := getVersion("4.6.7", "NaN", nil)
+		require.NoError(t, err)
+		require.Equal(t, "4.6.7", v)
+	})
+
+	t.Run("oc version and correct user input", func(t *testing.T) {
+		v, err := getVersion("4.6.7", "5.9.1", nil)
+		require.NoError(t, err)
+		require.Equal(t, "4.6.7", v)
+	})
+}
