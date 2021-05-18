@@ -15,7 +15,7 @@ The chart-verifier tool adds annotations to a generated report, for example:
 |---|---
 | verifier-version  | The version of the chart-verifier which generated the report.
 | chart-uri         | The location of the chart specified to the chart-verifier. For report only submissions this must be the public url of the chart.
-| digest            | sha:256 value of the chart from which the report was generated. When submitting a report this value must match the value generated as part of the submisison process.
+| digest            | sha:256 value of the chart from which the report was generated. When submitting a report this value must match the value generated as part of the submission process.
 | lastCertifiedTime | The time when the report was generated.
 | certifiedOpenShiftVersions | The version of OCP that `chart-testing` check was performed on. If the role of the logged in user prevents this from being accessed, the value must be specified using the ```--openshift-version``` flag.    
 

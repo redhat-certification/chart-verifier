@@ -96,6 +96,8 @@ Requires any images referenced in a chart to be Red Hat Certified.
       not found the check fails.
 - If the check fails use the point fo failure to determine how to address the issue. 
 
+For information on certifying images see: [Red Hat container certification](https://connect.redhat.com/partner-with-us/red-hat-container-certification)
+
 ### `chart-testing`
 
 Chart testing runs the equivalant of `helm install ...` followed by `helm test...`. Try to run these independantly of 
@@ -114,7 +116,7 @@ Submission will fail if any [mandatory checks](./helm-chart-checks.md#default-se
 
 Regenerate the report running all tests and ensure they all pass.
 
-If a check is failing and you are unsure as to why see [Trouble shooting check failures](./helm-chart-troubleshooting.md#trouble-shooting-check-failures)
+If a check is failing and you are unsure as to why see [Trouble shooting check failures](#troubleshooting-check-failures)
 
 ### The digest in the report does not match the digest calculated for the submitted chart.
 
