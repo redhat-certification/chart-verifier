@@ -82,13 +82,17 @@ func (c *certifier) Certify(uri string) (*Certificate, error) {
 	oc := tool.NewOc(procExec)
 
 	osVersion, err := oc.GetVersion()
-	if err != nil && c.openshiftVersion == "" {
-		return nil, OpenShiftVersionErr(err.Error())
+	if err != nil {
+		if c.openshiftVersion == "" {
+			return nil, OpenShiftVersionErr(err.Error())
+		} else {
+			osVersion = c.openshiftVersion
+		}
 	}
-	if _, err := semver.NewVersion(c.openshiftVersion); err != nil {
+
+	if _, err := semver.NewVersion(osVersion); err != nil {
 		return nil, OpenShiftSemVerErr(err.Error())
 	}
-	osVersion = c.openshiftVersion
 
 	result := NewCertificateBuilder().
 		SetToolVersion(c.toolVersion).
