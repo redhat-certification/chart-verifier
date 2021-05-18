@@ -138,4 +138,12 @@ func TestGetVersion(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, "4.6.7", v)
 	})
+
+	t.Run("oc version error and empty user input", func(t *testing.T) {
+		errIn := errors.New("error")
+		v, err := getVersion("", "", errIn)
+		require.Error(t, err)
+		require.Equal(t, "", v)
+	})
+
 }
