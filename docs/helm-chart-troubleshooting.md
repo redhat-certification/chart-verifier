@@ -1,16 +1,24 @@
-## Trouble shooting check failures
+# Troubleshooting
 
-- [is-helm-v3](#is-helm-v3)
-- [has-readme](#has-readme)
-- [contains-test](#contains-test)
-- [has-kubeversion](#has-kubeversion)
-- [contains-values](#contains-values)
-- [contains-values-schema](#contains-values-schema)  
-- [not-contains-crds](#not-contains-crds)  
-- [not-contain-csi-objects](#not-contain-csi-objects)  
-- [helm-lint](#helm-lint)  
-- [images-are-certified](#images-are-certified)
-- [chart-testing](#chart-testing)
+- [Check failures](#troubleshooting-check-failures)
+  - [is-helm-v3](#is-helm-v3)
+  - [has-readme](#has-readme)
+  - [contains-test](#contains-test)
+  - [has-kubeversion](#has-kubeversion)
+  - [contains-values](#contains-values)
+  - [contains-values-schema](#contains-values-schema)  
+  - [not-contains-crds](#not-contains-crds)  
+  - [not-contain-csi-objects](#not-contain-csi-objects)  
+  - [helm-lint](#helm-lint)  
+  - [images-are-certified](#images-are-certified)
+  - [chart-testing](#chart-testing)
+- [Report related submission failures](#report-related-submission-failures)   
+  - [One or more mandatory checks have failed or are missing from the report.](#one-or-more-mandatory-checks-have-failed-or-are-missing-from-the-report.)
+  - [The digest in the report does not match the digest calculated for the submitted chart.](#the-digest-in-the-report-does-not-match-the-digest-calculated-for-the-submitted-chart)
+  - [The certifiedOpenShiftVersions annotation does not contain a valid value.](#the-certifiedOpenShiftVersions-annotation-does-not-contain-a-valid-value)
+  - [The chart uri is not a valid url](#the-chart-uri-is-not-a-valid-url)
+    
+## Troubleshooting check failures
 
 ### `is-helm-v3`
 
@@ -88,11 +96,51 @@ Requires any images referenced in a chart to be Red Hat Certified.
       not found the check fails.
 - If the check fails use the point fo failure to determine how to address the issue. 
 
-## `chart-testing`
+For information on certifying images see: [Red Hat container certification](https://connect.redhat.com/partner-with-us/red-hat-container-certification)
+
+### `chart-testing`
 
 Chart testing runs the equivalant of `helm install ...` followed by `helm test...`. Try to run these independantly of 
 the chart-verifier and make a note of any flags or overrides that must be set for them both to work. Ensure these 
-values are set using chart-verifier flags when generating a report. 
+values are set using chart-verifier flags when generating a report.
 
 Also note that if chart-verifier flags are required for the chart-verifier chart-testing check to pass 
 a verifier report must be included in the chart submission.
+
+
+## Report related submission failures
+
+### One or more mandatory checks have failed or are missing from the report.
+
+Submission will fail if any [mandatory checks](./helm-chart-checks.md#default-set-of-checks-for-a-helm-chart) indicate failure or are absent from the report.
+
+Regenerate the report running all tests and ensure they all pass.
+
+If a check is failing and you are unsure as to why see [Trouble shooting check failures](#troubleshooting-check-failures)
+
+### The digest in the report does not match the digest calculated for the submitted chart.
+
+Common causes:
+
+- The chart was updated after the report was generated.
+- The Report was generated against a different form to the chart submitted.
+    - For example report was generated from the chart source but the chart tarball was used for submission.
+
+For more information see [Verifier added annotations](./helm-chart-annotations.md#verifier-added-annotations)
+
+### The certifiedOpenShiftVersions annotation does not contain a valid value.
+
+This annotation must contain a current or recent OpenShift version. It is generally set by the chart-testing check
+but this can fail if the role of the user who generated report does not have the required access.
+
+For more information see [Verifier added annotations](./helm-chart-annotations.md#verifier-added-annotations)
+
+
+## The chart uri is not a valid url.
+
+For a report only submission the report must include a valid url for the chart.
+
+For more information see [error-with-the-chart-url-when-submitting-report](https://github.com/openshift-helm-charts/charts/blob/main/docs/README.md#error-with-the-chart-url-when-submitting-report)
+
+For more information see [Verifier added annotations](./helm-chart-annotations.md#verifier-added-annotations)
+   
