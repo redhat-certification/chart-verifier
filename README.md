@@ -1,4 +1,4 @@
-# **chart-verifier**: Rules based tool to certify Helm Charts
+# **chart-verifier**: Rules based tool to certify Helm charts
 
 The **chart-verifier** CLI tool allows you to validate the Helm chart against a configurable list of checks. The tool ensures that the Helm charts include the associated metadata and formatting, and are distribution ready.
 
@@ -8,22 +8,19 @@ The input is provided through the command-line interface, with the only required
 
 The tool provides the following features:
 
--   Helm chart Verification: Verifies if a Helm chart is compliant with a certain set of independent checks with no particular execution order.
--   Red Hat Certified chart validation: Verifies the Helm chart's readiness for being certified and submitted in the Red Hat Helm Repository.    
--   Report generation: Generates a verification report in the YAML format.    
+-   Helm chart verification: Verifies if a Helm chart is compliant with a certain set of independent checks with no particular execution order.
+-   Red Hat Certified chart validation: Verifies the Helm chart's readiness for being certified and submitted in the OpenShift Helm Repository.    
+-   Report generation: Generates a verification report in a YAML format.    
 -   Customizable checks: Defines the checks you wish to execute during the verification process.
 
-For further information:
+For more information see:
 
-[The command line interface and checks performed.](docs/helm-chart-checks.md)
+- [The command line interface and checks performed.](docs/helm-chart-checks.md)
+- [Annotations in the report, tool and submitter provided.](docs/helm-chart-checks.md)
+- [Introduction to the submission process.](docs/helm-chart-submission.md)
+- [Checks are failing? Try the trouble shooting guide.](docs/helm-chart-troubleshooting.md)
 
-[Annotations in the report, tool and submitter provided.](docs/helm-chart-checks.md)
+For Developer specific information see:
 
-[Introduction to the submission process.](docs/helm-chart-submission.md)
-
-[Checks are failing? Try the trouble shooting guide.](docs/helm-chart-troubleshooting.md)
-
-For Developers:
-
-[Additional info for developers.](docs/helm-chart-devlopers.md)
+- [Additional information for developers.](docs/helm-chart-devlopers.md)
 

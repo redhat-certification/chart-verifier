@@ -29,9 +29,9 @@ docker pull quay.io/redhat-certification/chart-verifier
 
 ## Building chart-verifier
 
-To build `chart-verifier` locally, please execute `hack/build.sh` or its PowerShell alternative.
+To build `chart-verifier` locally, execute `hack/build.sh` or its PowerShell alternative.
 
-To build `chart-verifier` container image, please execute `hack/build-image.sh` or its PowerShell alternative:
+To build `chart-verifier` container image, execute `hack/build-image.sh` or its PowerShell alternative:
 
 ```text
 PS C:\Users\igors\GolandProjects\chart-verifier> .\hack\build-image.ps1
