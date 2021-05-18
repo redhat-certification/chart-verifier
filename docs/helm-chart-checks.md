@@ -127,3 +127,43 @@ This section provides help on the basic usage of Helm chart checks with the podm
   ```
   $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -F overrides.yaml images-are-certified,helm-lint
   ```
+
+## Chart Testing
+
+### Cluster Config
+
+Configuration of the `chart-testing` check can be achieved through the `--set` command line option, which in addition of configuring `chart-verifier` itself, can set check's configuration values.
+    ```text
+    $ chart-verifier                                                 \
+        verify                                                       \
+        --enable chart-testing                                       \
+        --set chartTesting.buildId=${BUILD_ID}                       \
+        --set chartTesting.upgrade=true                              \
+        --set chartTesting.skipMissingValues=true                    \
+        --set chartTesting.namespace=${NAMESPACE}                    \
+        --set chartTesting.releaseLabel="app.kubernetes.io/instance" \
+        some-chart.tgz
+    ```
+
+### Override values
+
+If the chart requires overrides values, these can be set using through the `--chart-set` command line options:
+
+```
+    -S, --chart-set strings           set values for the chart (can specify multiple or separate values with commas: key1=val1,key2=val2)
+    -G, --chart-set-file strings      set values from respective files specified via the command line (can specify multiple or separate values with commas: key1=path1,key2=path2)
+    -X, --chart-set-string strings    set STRING values for the chart (can specify multiple or separate values with commas: key1=val1,key2=val2)
+    -F, --chart-values strings        specify values in a YAML file or a URL (can specify multiple)
+```
+
+### Check processing
+
+The `chart-testing` check performs the following actions, keeping the semantics provided by [github.com/helm/chart-testing](https://github.com/helm/chart-testing):
+1. Install: the chart being verified will be installed in the available OpenShift cluster utilizing the same semantics client-go uses to find the current context: 
+    1. `--kubeconfig flag`
+    1. `KUBECONFIG` environment variable 
+    1. `$HOME/.kube/config`. 
+1. Test: once a release is installed for the chart being verified, performs the same actions as helm test would, which installing all chart resources containing the "helm.sh/hook": test annotation.
+
+The check will be considered successful when the chart's installation and tests are all successful.
+
