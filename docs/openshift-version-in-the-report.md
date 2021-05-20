@@ -52,13 +52,13 @@ subjects:
 ```
 
 You can replace the name of the ServiceAccount and its namespace values in the
-above example. Note: Instead of a service account, the [subject could be a user
+above example.  Note: Instead of a service account, the [subject could be a user
 or group][subject].
 
 If giving the role mentioned above is not feasible, alternatively, you can
-specify the OpenShift version as a command-line flag in the chart-verifier
-tool. You can use the `--openshift-version` flag to specify the version. Here is
-an example:
+specify the OpenShift version as a command-line flag in the chart-verifier tool.
+You can use the `--openshift-version` flag to specify the version.  Here is an
+example:
 
 ```
 $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify --openshift-version=4.9.2 <chart-uri>
