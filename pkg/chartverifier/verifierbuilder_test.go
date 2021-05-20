@@ -24,16 +24,16 @@ import (
 
 func TestCertificationBuilder(t *testing.T) {
 
-	t.Run("Should fail building certifier when requiredChecks are not set", func(t *testing.T) {
-		b := NewCertifierBuilder()
+	t.Run("Should fail building verifier when requiredChecks are not set", func(t *testing.T) {
+		b := NewVerifierBuilder()
 
 		c, err := b.Build()
 		require.Error(t, err)
 		require.Nil(t, c)
 	})
 
-	t.Run("Should build certifier when requiredChecks are set", func(t *testing.T) {
-		b := NewCertifierBuilder()
+	t.Run("Should build verifier when requiredChecks are set", func(t *testing.T) {
+		b := NewVerifierBuilder()
 
 		c, err := b.
 			SetChecks([]string{"a", "b"}).

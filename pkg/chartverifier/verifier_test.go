@@ -41,7 +41,18 @@ func (v *ocVersionWithoutError) getVersion(debug bool) (string, error) {
 	return "4.9.7", nil
 }
 
-func TestCertifier_Certify(t *testing.T) {
+func (c *Report) isOk() bool {
+	outcome := true
+	for _, check := range c.Results {
+		if !(check.Outcome == PassOutcomeType) {
+			outcome = false
+			break
+		}
+	}
+	return outcome
+}
+
+func TestVerifier_Verify(t *testing.T) {
 
 	addr := "127.0.0.1:9876"
 	ctx, cancel := context.WithCancel(context.Background())
@@ -68,7 +79,7 @@ func TestCertifier_Certify(t *testing.T) {
 	verocVersionError := &ocVersionError{}
 
 	t.Run("Should return error if check does not exist", func(t *testing.T) {
-		c := &certifier{
+		c := &verifier{
 			settings:       cli.New(),
 			config:         viper.New(),
 			registry:       checks.NewRegistry(),
@@ -76,13 +87,13 @@ func TestCertifier_Certify(t *testing.T) {
 			version:        verocVersionWithoutError,
 		}
 
-		r, err := c.Certify(validChartUri)
+		r, err := c.Verify(validChartUri)
 		require.Error(t, err)
 		require.Nil(t, r)
 	})
 
 	t.Run("Should return error if check exists and returns error", func(t *testing.T) {
-		c := &certifier{
+		c := &verifier{
 			settings:       cli.New(),
 			config:         viper.New(),
 			registry:       checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: erroredCheck}),
@@ -90,14 +101,14 @@ func TestCertifier_Certify(t *testing.T) {
 			version:        verocVersionWithoutError,
 		}
 
-		r, err := c.Certify(validChartUri)
+		r, err := c.Verify(validChartUri)
 		require.Error(t, err)
 		require.Nil(t, r)
 	})
 
 	t.Run("Result should be negative if check exists and returns negative", func(t *testing.T) {
 
-		c := &certifier{
+		c := &verifier{
 			settings:         cli.New(),
 			config:           viper.New(),
 			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: negativeCheck}),
@@ -106,14 +117,14 @@ func TestCertifier_Certify(t *testing.T) {
 			version:          verocVersionWithoutError,
 		}
 
-		r, err := c.Certify(validChartUri)
+		r, err := c.Verify(validChartUri)
 		require.NoError(t, err)
 		require.NotNil(t, r)
-		require.False(t, r.IsOk())
+		require.False(t, r.isOk())
 	})
 
 	t.Run("Result should be positive if check exists and returns positive", func(t *testing.T) {
-		c := &certifier{
+		c := &verifier{
 			settings:         cli.New(),
 			config:           viper.New(),
 			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
@@ -122,14 +133,14 @@ func TestCertifier_Certify(t *testing.T) {
 			version:          verocVersionWithoutError,
 		}
 
-		r, err := c.Certify(validChartUri)
+		r, err := c.Verify(validChartUri)
 		require.NoError(t, err)
 		require.NotNil(t, r)
-		require.True(t, r.IsOk())
+		require.True(t, r.isOk())
 	})
 
 	t.Run("oc version error and wrong user input", func(t *testing.T) {
-		c := &certifier{
+		c := &verifier{
 			settings:         cli.New(),
 			config:           viper.New(),
 			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
@@ -137,13 +148,13 @@ func TestCertifier_Certify(t *testing.T) {
 			openshiftVersion: "NaN",
 			version:          verocVersionError,
 		}
-		r, err := c.Certify(validChartUri)
+		r, err := c.Verify(validChartUri)
 		require.Error(t, err)
 		require.Nil(t, r)
 	})
 
 	t.Run("oc version error and correct user input", func(t *testing.T) {
-		c := &certifier{
+		c := &verifier{
 			settings:         cli.New(),
 			config:           viper.New(),
 			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
@@ -152,15 +163,15 @@ func TestCertifier_Certify(t *testing.T) {
 			version:          verocVersionError,
 		}
 
-		r, err := c.Certify(validChartUri)
+		r, err := c.Verify(validChartUri)
 		require.NoError(t, err)
 		require.NotNil(t, r)
-		require.True(t, r.IsOk())
+		require.True(t, r.isOk())
 		require.Equal(t, "4.9.7", r.Metadata.ToolMetadata.CertifiedOpenShiftVersions)
 	})
 
 	t.Run("oc version and wrong user input", func(t *testing.T) {
-		c := &certifier{
+		c := &verifier{
 			settings:         cli.New(),
 			config:           viper.New(),
 			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
@@ -169,15 +180,15 @@ func TestCertifier_Certify(t *testing.T) {
 			version:          verocVersionWithoutError,
 		}
 
-		r, err := c.Certify(validChartUri)
+		r, err := c.Verify(validChartUri)
 		require.NoError(t, err)
 		require.NotNil(t, r)
-		require.True(t, r.IsOk())
+		require.True(t, r.isOk())
 		require.Equal(t, "4.9.7", r.Metadata.ToolMetadata.CertifiedOpenShiftVersions)
 	})
 
 	t.Run("oc version and correct user input", func(t *testing.T) {
-		c := &certifier{
+		c := &verifier{
 			settings:         cli.New(),
 			config:           viper.New(),
 			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
@@ -186,15 +197,15 @@ func TestCertifier_Certify(t *testing.T) {
 			version:          verocVersionWithoutError,
 		}
 
-		r, err := c.Certify(validChartUri)
+		r, err := c.Verify(validChartUri)
 		require.NoError(t, err)
 		require.NotNil(t, r)
-		require.True(t, r.IsOk())
+		require.True(t, r.isOk())
 		require.Equal(t, "4.9.7", r.Metadata.ToolMetadata.CertifiedOpenShiftVersions)
 	})
 
 	t.Run("oc version error and empty user input", func(t *testing.T) {
-		c := &certifier{
+		c := &verifier{
 			settings:         cli.New(),
 			config:           viper.New(),
 			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
@@ -203,7 +214,7 @@ func TestCertifier_Certify(t *testing.T) {
 			version:          verocVersionError,
 		}
 
-		r, err := c.Certify(validChartUri)
+		r, err := c.Verify(validChartUri)
 		require.Error(t, err)
 		require.Nil(t, r)
 	})

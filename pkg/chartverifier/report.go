@@ -21,8 +21,8 @@ import (
 	helmchart "helm.sh/helm/v3/pkg/chart"
 )
 
-var CertificateApiVersion = "v1"
-var CertificateKind = "verify-report"
+var ReportApiVersion = "v1"
+var ReportKind = "verify-report"
 
 type OutcomeType string
 
@@ -36,14 +36,14 @@ const (
 	UnknownOutcomeType OutcomeType = "UNKNOWN"
 )
 
-type Certificate struct {
-	Apiversion string              `json:"apiversion" yaml:"apiversion"`
-	Kind       string              `json:"kind" yaml:"kind"`
-	Metadata   CertificateMetadata `json:"metadata" yaml:"metadata"`
-	Results    []*CheckReport      `json:"results" yaml:"results"`
+type Report struct {
+	Apiversion string         `json:"apiversion" yaml:"apiversion"`
+	Kind       string         `json:"kind" yaml:"kind"`
+	Metadata   ReportMetadata `json:"metadata" yaml:"metadata"`
+	Results    []*CheckReport `json:"results" yaml:"results"`
 }
 
-type CertificateMetadata struct {
+type ReportMetadata struct {
 	ToolMetadata ToolMetadata        `json:"tool" yaml:"tool"`
 	ChartData    *helmchart.Metadata `json:"chart" yaml:"chart"`
 	Overrides    string              `json:"chart-overrides" yaml:"chart-overrides"`
@@ -65,16 +65,16 @@ type CheckReport struct {
 	Reason  string           `json:"reason" yaml:"reason"`
 }
 
-func newCertificate() Certificate {
+func newReport() Report {
 
-	certificate := Certificate{Apiversion: CertificateApiVersion, Kind: CertificateKind}
-	certificate.Metadata = CertificateMetadata{}
-	certificate.Metadata.ToolMetadata = ToolMetadata{}
+	report := Report{Apiversion: ReportApiVersion, Kind: ReportKind}
+	report.Metadata = ReportMetadata{}
+	report.Metadata.ToolMetadata = ToolMetadata{}
 
-	return certificate
+	return report
 }
 
-func (c *Certificate) AddCheck(checkName string, checkType checks.CheckType) *CheckReport {
+func (c *Report) AddCheck(checkName string, checkType checks.CheckType) *CheckReport {
 	newCheck := CheckReport{}
 	newCheck.Check = checkName
 	newCheck.Type = checkType
@@ -90,16 +90,4 @@ func (cr *CheckReport) SetResult(outcome bool, reason string) {
 		cr.Outcome = FailOutcomeType
 	}
 	cr.Reason = reason
-}
-
-func (c *Certificate) IsOk() bool {
-
-	outcome := true
-	for _, check := range c.Results {
-		if !(check.Outcome == PassOutcomeType) {
-			outcome = false
-			break
-		}
-	}
-	return outcome
 }

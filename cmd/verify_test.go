@@ -140,7 +140,7 @@ func TestCertify(t *testing.T) {
 		require.NotEmpty(t, outBuf.String())
 
 		// attempts to deserialize the command's output, expecting a json string
-		certificate := chartverifier.Certificate{}
+		certificate := chartverifier.Report{}
 		err := json.Unmarshal([]byte(outBuf.String()), &certificate)
 		require.NoError(t, err)
 		require.True(t, len(certificate.Results) == 1, "Expected only 1 result")
@@ -167,7 +167,7 @@ func TestCertify(t *testing.T) {
 		require.NotEmpty(t, outBuf.String())
 
 		// attempts to deserialize the command's output, expecting a json string
-		certificate := chartverifier.Certificate{}
+		certificate := chartverifier.Report{}
 		err := yaml.Unmarshal([]byte(outBuf.String()), &certificate)
 		require.NoError(t, err)
 		require.True(t, len(certificate.Results) == 1, "Expected only 1 result")

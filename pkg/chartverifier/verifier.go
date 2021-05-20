@@ -58,7 +58,7 @@ type Versioner interface {
 	getVersion(debug bool) (string, error)
 }
 
-type certifier struct {
+type verifier struct {
 	config           *viper.Viper
 	registry         checks.Registry
 	requiredChecks   []string
@@ -69,7 +69,7 @@ type certifier struct {
 	version          Versioner
 }
 
-func (c *certifier) subConfig(name string) *viper.Viper {
+func (c *verifier) subConfig(name string) *viper.Viper {
 	if sub := c.config.Sub(name); sub == nil {
 		return viper.New()
 	} else {
@@ -89,7 +89,7 @@ func (ver *version) getVersion(debug bool) (string, error) {
 	return oc.GetVersion()
 }
 
-func (c *certifier) Certify(uri string) (*Certificate, error) {
+func (c *verifier) Verify(uri string) (*Report, error) {
 
 	chrt, _, err := checks.LoadChartFromURI(uri)
 	if err != nil {
@@ -118,7 +118,7 @@ func (c *certifier) Certify(uri string) (*Certificate, error) {
 	}
 	// osVersion is guaranteed to a valid value from here onwards.
 
-	result := NewCertificateBuilder().
+	result := NewReportBuilder().
 		SetToolVersion(c.toolVersion).
 		SetChartUri(uri).
 		SetChart(chrt).

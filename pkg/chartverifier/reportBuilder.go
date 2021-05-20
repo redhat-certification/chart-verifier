@@ -26,13 +26,13 @@ import (
 	helmchart "helm.sh/helm/v3/pkg/chart"
 )
 
-type CertificateBuilder interface {
-	SetToolVersion(name string) CertificateBuilder
-	SetChartUri(name string) CertificateBuilder
-	AddCheck(name string, checkType checks.CheckType, result checks.Result) CertificateBuilder
-	SetChart(chart *helmchart.Chart) CertificateBuilder
-	SetCertifiedOpenShiftVersion(version string) CertificateBuilder
-	Build() (*Certificate, error)
+type ReportBuilder interface {
+	SetToolVersion(name string) ReportBuilder
+	SetChartUri(name string) ReportBuilder
+	AddCheck(name string, checkType checks.CheckType, result checks.Result) ReportBuilder
+	SetChart(chart *helmchart.Chart) ReportBuilder
+	SetCertifiedOpenShiftVersion(version string) ReportBuilder
+	Build() (*Report, error)
 }
 
 type CheckResult struct {
@@ -40,51 +40,51 @@ type CheckResult struct {
 	Name string
 }
 
-type certificateBuilder struct {
-	Chart       *helmchart.Chart
-	Certificate Certificate
+type reportBuilder struct {
+	Chart  *helmchart.Chart
+	Report Report
 }
 
-func NewCertificateBuilder() CertificateBuilder {
-	b := certificateBuilder{}
-	b.Certificate = newCertificate()
+func NewReportBuilder() ReportBuilder {
+	b := reportBuilder{}
+	b.Report = newReport()
 	return &b
 }
 
-func (r *certificateBuilder) SetCertifiedOpenShiftVersion(version string) CertificateBuilder {
-	r.Certificate.Metadata.ToolMetadata.CertifiedOpenShiftVersions = version
+func (r *reportBuilder) SetCertifiedOpenShiftVersion(version string) ReportBuilder {
+	r.Report.Metadata.ToolMetadata.CertifiedOpenShiftVersions = version
 	return r
 }
 
-func (r *certificateBuilder) SetToolVersion(version string) CertificateBuilder {
-	r.Certificate.Metadata.ToolMetadata.Version = version
+func (r *reportBuilder) SetToolVersion(version string) ReportBuilder {
+	r.Report.Metadata.ToolMetadata.Version = version
 	return r
 }
 
-func (r *certificateBuilder) SetChartUri(uri string) CertificateBuilder {
-	r.Certificate.Metadata.ToolMetadata.ChartUri = uri
+func (r *reportBuilder) SetChartUri(uri string) ReportBuilder {
+	r.Report.Metadata.ToolMetadata.ChartUri = uri
 	return r
 }
 
-func (r *certificateBuilder) SetChart(chart *helmchart.Chart) CertificateBuilder {
+func (r *reportBuilder) SetChart(chart *helmchart.Chart) ReportBuilder {
 	r.Chart = chart
-	r.Certificate.Metadata.ChartData = chart.Metadata
+	r.Report.Metadata.ChartData = chart.Metadata
 	return r
 }
 
-func (r *certificateBuilder) AddCheck(name string, checkType checks.CheckType, result checks.Result) CertificateBuilder {
-	checkReport := r.Certificate.AddCheck(name, checkType)
+func (r *reportBuilder) AddCheck(name string, checkType checks.CheckType, result checks.Result) ReportBuilder {
+	checkReport := r.Report.AddCheck(name, checkType)
 	checkReport.SetResult(result.Ok, result.Reason)
 	return r
 }
 
-func (r *certificateBuilder) Build() (*Certificate, error) {
+func (r *reportBuilder) Build() (*Report, error) {
 
-	r.Certificate.Metadata.ToolMetadata.Digest = GenerateSha(r.Chart.Raw)
+	r.Report.Metadata.ToolMetadata.Digest = GenerateSha(r.Chart.Raw)
 
-	r.Certificate.Metadata.ToolMetadata.LastCertifiedTimestamp = time.Now().Format("2006-01-02T15:04:05.999999-07:00")
+	r.Report.Metadata.ToolMetadata.LastCertifiedTimestamp = time.Now().Format("2006-01-02T15:04:05.999999-07:00")
 
-	return &r.Certificate, nil
+	return &r.Report, nil
 }
 
 type By func(p1, p2 *helmchart.File) bool
