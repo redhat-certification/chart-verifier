@@ -122,7 +122,7 @@ func (b *certifierBuilder) Build() (Certifier, error) {
 		parts := strings.Split(val, "=")
 		b.config.Set(parts[0], parts[1])
 	}
-
+	ver := &version{}
 	return &certifier{
 		config:           b.config,
 		registry:         b.registry,
@@ -131,6 +131,7 @@ func (b *certifierBuilder) Build() (Certifier, error) {
 		toolVersion:      b.toolVersion,
 		openshiftVersion: b.openshiftVersion,
 		values:           b.values,
+		version:          ver,
 	}, nil
 }
 

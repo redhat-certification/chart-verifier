@@ -40,7 +40,7 @@ func (e CheckErr) Error() string {
 type OpenShiftVersionErr string
 
 func (e OpenShiftVersionErr) Error() string {
-	return "Missing OpenShift version. " + string(e) + " And the 'openshift-version' flag has not set."
+	return "Missing OpenShift version. " + string(e) + ". And the 'openshift-version' flag has not set."
 }
 
 type OpenShiftSemVerErr string
@@ -53,6 +53,11 @@ func NewCheckErr(err error) error {
 	return CheckErr(err.Error())
 }
 
+// Versioner provides OpenShift version
+type Versioner interface {
+	getVersion(debug bool) (string, error)
+}
+
 type certifier struct {
 	config           *viper.Viper
 	registry         checks.Registry
@@ -61,6 +66,7 @@ type certifier struct {
 	toolVersion      string
 	openshiftVersion string
 	values           map[string]interface{}
+	version          Versioner
 }
 
 func (c *certifier) subConfig(name string) *viper.Viper {
@@ -71,6 +77,18 @@ func (c *certifier) subConfig(name string) *viper.Viper {
 	}
 }
 
+type version struct{}
+
+func (ver *version) getVersion(debug bool) (string, error) {
+
+	procExec := exec.NewProcessExecutor(debug)
+	oc := tool.NewOc(procExec)
+
+	// oc.GetVersion() returns an error both in case the oc command can't be executed and
+	// the value for the OpenShift version key not present.
+	return oc.GetVersion()
+}
+
 func (c *certifier) Certify(uri string) (*Certificate, error) {
 
 	chrt, _, err := checks.LoadChartFromURI(uri)
@@ -78,17 +96,27 @@ func (c *certifier) Certify(uri string) (*Certificate, error) {
 		return nil, err
 	}
 
-	procExec := exec.NewProcessExecutor(c.settings.Debug)
-	oc := tool.NewOc(procExec)
+	// oc.GetVersion() returns an error both in case the oc command can't be executed and
+	// the value for the OpenShift version key not present.
+	osVersion, getVersionErr := c.version.getVersion(c.settings.Debug)
 
-	osVersion, err := oc.GetVersion()
-	if err != nil && c.openshiftVersion == "" {
-		return nil, OpenShiftVersionErr(err.Error())
+	// From this point on, an error is set and osVersion is empty.
+	if getVersionErr != nil && c.openshiftVersion != "" {
+		osVersion = c.openshiftVersion
 	}
-	if _, err := semver.NewVersion(c.openshiftVersion); err != nil {
+
+	// osVersion is empty only if an error happened and a default value
+	// informed by the user hasn't been informed.
+	if osVersion == "" {
+		return nil, OpenShiftVersionErr(getVersionErr.Error())
+	}
+
+	// osVersion is guaranteed to have a value, not yet validated as a
+	// semver value.
+	if _, err := semver.NewVersion(osVersion); err != nil {
 		return nil, OpenShiftSemVerErr(err.Error())
 	}
-	osVersion = c.openshiftVersion
+	// osVersion is guaranteed to a valid value from here onwards.
 
 	result := NewCertificateBuilder().
 		SetToolVersion(c.toolVersion).
