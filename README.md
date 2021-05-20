@@ -19,6 +19,7 @@ For more information see:
 - [Annotations in the report, tool and submitter provided.](docs/helm-chart-annotations.md)
 - [Introduction to the submission process.](docs/helm-chart-submission.md)
 - [Problems with the report? Try the trouble shooting guide.](docs/helm-chart-troubleshooting.md)
+- [OpenShift Version in the Report](docs/openshift-version-in-the-report.md)
 
 For Developer specific information see:
 
