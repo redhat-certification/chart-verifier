@@ -22,5 +22,4 @@ For more information see:
 
 For Developer specific information see:
 
-- [Additional information for developers.](docs/helm-chart-devlopers.md)
-
+- [Additional information for developers.](docs/helm-chart-developer.md)

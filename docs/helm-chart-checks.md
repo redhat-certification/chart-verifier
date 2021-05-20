@@ -36,14 +36,14 @@ The following table lists the default set of checks with details including the n
 | `has-kubeversion` | Mandatory | Checks that the `Chart.yaml` file of the Helm chart includes the `kubeVersion` field.
 | `contains-values-schema` | Mandatory | Checks that the Helm chart contains a JSON schema file (`values.schema.json`) to validate the `values.yaml` file in the chart.
 | `not-contains-crds` | Mandatory | Checks that the Helm chart does not include custom resource definitions (CRDs).
-| `not-contain-csi-objects` | Mandatory | Checks that the Helm chart does not include Container Storage Interface (CSI)[¹](https://gist.github.com/Srivaralakshmi/eb3c9bf1d65ec297035f4a8d26057620#-for-more-information-on-csi-see-container-storage-interface) objects.
+| `not-contain-csi-objects` | Mandatory | Checks that the Helm chart does not include Container Storage Interface (CSI) objects.
 | `images-are-certified` | Mandatory | Checks that the images referenced by the Helm chart are Red Hat-certified.
 | `helm-lint` | Mandatory | Checks that the chart is well formed by running the `helm lint` command.
 | `chart-testing` | Mandatory | Installs the chart and verifies it on a Red Hat OpenShift Container Platform cluster.
-| `contains-values` | Mandatory | Checks that the Helm chart contains the `values`[²](https://gist.github.com/Srivaralakshmi/eb3c9bf1d65ec297035f4a8d26057620#-for-more-information-on-the-values-file-see-values-and-best-practices-for-using-values) file.
+| `contains-values` | Mandatory | Checks that the Helm chart contains the `values`[¹](https://github.com/redhat-certification/chart-verifier/blob/main/docs/helm-chart-checks.md#for-more-information-on-the-values-file-see-values-and-best-practices-for-using-values) file.
 
 #
-###### For more information on the `values` file, see [`values`](https://helm.sh/docs/chart_template_guide/values_files/) and [Best Practices for using values](https://helm.sh/docs/chart_best_practices/values/).
+###### ¹ For more information on the `values` file, see [`values`](https://helm.sh/docs/chart_template_guide/values_files/) and [Best Practices for using values](https://helm.sh/docs/chart_best_practices/values/).
 
 ## Using the podman or docker command for Helm chart checks
 This section provides help on the basic usage of Helm chart checks with the podman or docker command.
@@ -158,11 +158,10 @@ If the chart requires overrides values, these can be set using through the `--ch
 ### Check processing
 
 The `chart-testing` check performs the following actions, keeping the semantics provided by [github.com/helm/chart-testing](https://github.com/helm/chart-testing):
-1. Install: the chart being verified will be installed in the available OpenShift cluster utilizing the same semantics client-go uses to find the current context: 
+1. Install: the chart being verified will be installed in the available OpenShift cluster utilizing the same semantics client-go uses to find the current context:
     1. `--kubeconfig flag`
-    1. `KUBECONFIG` environment variable 
-    1. `$HOME/.kube/config`. 
+    1. `KUBECONFIG` environment variable
+    1. `$HOME/.kube/config`.
 1. Test: once a release is installed for the chart being verified, performs the same actions as helm test would, which installing all chart resources containing the "helm.sh/hook": test annotation.
 
 The check will be considered successful when the chart's installation and tests are all successful.
-
