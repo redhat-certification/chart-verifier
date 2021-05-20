@@ -29,6 +29,18 @@ import (
 	"github.com/redhat-certification/chart-verifier/pkg/testutil"
 )
 
+type ocVersionError struct{}
+
+func (v *ocVersionError) getVersion(debug bool) (string, error) {
+	return "", errors.New("error")
+}
+
+type ocVersionWithoutError struct{}
+
+func (v *ocVersionWithoutError) getVersion(debug bool) (string, error) {
+	return "4.9.7", nil
+}
+
 func TestCertifier_Certify(t *testing.T) {
 
 	addr := "127.0.0.1:9876"
@@ -52,12 +64,16 @@ func TestCertifier_Certify(t *testing.T) {
 
 	validChartUri := "http://" + addr + "/charts/chart-0.1.0-v3.valid.tgz"
 
+	verocVersionWithoutError := &ocVersionWithoutError{}
+	verocVersionError := &ocVersionError{}
+
 	t.Run("Should return error if check does not exist", func(t *testing.T) {
 		c := &certifier{
 			settings:       cli.New(),
 			config:         viper.New(),
 			registry:       checks.NewRegistry(),
 			requiredChecks: []string{dummyCheckName},
+			version:        verocVersionWithoutError,
 		}
 
 		r, err := c.Certify(validChartUri)
@@ -71,6 +87,7 @@ func TestCertifier_Certify(t *testing.T) {
 			config:         viper.New(),
 			registry:       checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: erroredCheck}),
 			requiredChecks: []string{dummyCheckName},
+			version:        verocVersionWithoutError,
 		}
 
 		r, err := c.Certify(validChartUri)
@@ -86,6 +103,7 @@ func TestCertifier_Certify(t *testing.T) {
 			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: negativeCheck}),
 			requiredChecks:   []string{dummyCheckName},
 			openshiftVersion: "4.9",
+			version:          verocVersionWithoutError,
 		}
 
 		r, err := c.Certify(validChartUri)
@@ -101,6 +119,7 @@ func TestCertifier_Certify(t *testing.T) {
 			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
 			requiredChecks:   []string{dummyCheckName},
 			openshiftVersion: "4.9",
+			version:          verocVersionWithoutError,
 		}
 
 		r, err := c.Certify(validChartUri)
@@ -109,41 +128,85 @@ func TestCertifier_Certify(t *testing.T) {
 		require.True(t, r.IsOk())
 	})
 
-	cancel()
-}
-
-func TestGetVersion(t *testing.T) {
 	t.Run("oc version error and wrong user input", func(t *testing.T) {
-		errIn := errors.New("error")
-		v, err := getVersion("", "NaN", errIn)
-		require.NoError(t, err)
-		require.Equal(t, "NaN", v)
+		c := &certifier{
+			settings:         cli.New(),
+			config:           viper.New(),
+			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
+			requiredChecks:   []string{dummyCheckName},
+			openshiftVersion: "NaN",
+			version:          verocVersionError,
+		}
+		r, err := c.Certify(validChartUri)
+		require.Error(t, err)
+		require.Nil(t, r)
 	})
 
 	t.Run("oc version error and correct user input", func(t *testing.T) {
-		errIn := errors.New("error")
-		v, err := getVersion("", "4.6.7", errIn)
+		c := &certifier{
+			settings:         cli.New(),
+			config:           viper.New(),
+			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
+			requiredChecks:   []string{dummyCheckName},
+			openshiftVersion: "4.9.7",
+			version:          verocVersionError,
+		}
+
+		r, err := c.Certify(validChartUri)
 		require.NoError(t, err)
-		require.Equal(t, "4.6.7", v)
+		require.NotNil(t, r)
+		require.True(t, r.IsOk())
+		require.Equal(t, "4.9.7", r.Metadata.ToolMetadata.CertifiedOpenShiftVersions)
 	})
 
 	t.Run("oc version and wrong user input", func(t *testing.T) {
-		v, err := getVersion("4.6.7", "NaN", nil)
+		c := &certifier{
+			settings:         cli.New(),
+			config:           viper.New(),
+			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
+			requiredChecks:   []string{dummyCheckName},
+			openshiftVersion: "NaN",
+			version:          verocVersionWithoutError,
+		}
+
+		r, err := c.Certify(validChartUri)
 		require.NoError(t, err)
-		require.Equal(t, "4.6.7", v)
+		require.NotNil(t, r)
+		require.True(t, r.IsOk())
+		require.Equal(t, "4.9.7", r.Metadata.ToolMetadata.CertifiedOpenShiftVersions)
 	})
 
 	t.Run("oc version and correct user input", func(t *testing.T) {
-		v, err := getVersion("4.6.7", "5.9.1", nil)
+		c := &certifier{
+			settings:         cli.New(),
+			config:           viper.New(),
+			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
+			requiredChecks:   []string{dummyCheckName},
+			openshiftVersion: "5.6.8",
+			version:          verocVersionWithoutError,
+		}
+
+		r, err := c.Certify(validChartUri)
 		require.NoError(t, err)
-		require.Equal(t, "4.6.7", v)
+		require.NotNil(t, r)
+		require.True(t, r.IsOk())
+		require.Equal(t, "4.9.7", r.Metadata.ToolMetadata.CertifiedOpenShiftVersions)
 	})
 
 	t.Run("oc version error and empty user input", func(t *testing.T) {
-		errIn := errors.New("error")
-		v, err := getVersion("", "", errIn)
+		c := &certifier{
+			settings:         cli.New(),
+			config:           viper.New(),
+			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
+			requiredChecks:   []string{dummyCheckName},
+			openshiftVersion: "",
+			version:          verocVersionError,
+		}
+
+		r, err := c.Certify(validChartUri)
 		require.Error(t, err)
-		require.Equal(t, "", v)
+		require.Nil(t, r)
 	})
 
+	cancel()
 }
