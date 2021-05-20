@@ -40,7 +40,7 @@ The following table lists the default set of checks with details including the n
 | `images-are-certified` | Mandatory | Checks that the images referenced by the Helm chart are Red Hat-certified.
 | `helm-lint` | Mandatory | Checks that the chart is well formed by running the `helm lint` command.
 | `chart-testing` | Mandatory | Installs the chart and verifies it on a Red Hat OpenShift Container Platform cluster.
-| `contains-values` | Mandatory | Checks that the Helm chart contains the `values`[¹](https://github.com/redhat-certification/chart-verifier/blob/main/docs/helm-chart-checks.md#for-more-information-on-the-values-file-see-values-and-best-practices-for-using-values) file.
+| `contains-values` | Mandatory | Checks that the Helm chart contains the `values`[¹](https://github.com/redhat-certification/chart-verifier/blob/main/docs/helm-chart-checks.md#-for-more-information-on-the-values-file-see-values-and-best-practices-for-using-values) file.
 
 #
 ###### ¹ For more information on the `values` file, see [`values`](https://helm.sh/docs/chart_template_guide/values_files/) and [Best Practices for using values](https://helm.sh/docs/chart_best_practices/values/).
