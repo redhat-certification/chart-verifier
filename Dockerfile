@@ -12,17 +12,15 @@ FROM quay.io/redhat-certification/golang:1.15 as build
 
 WORKDIR /tmp/src
 
+COPY ./hack/get-*.sh ./hack/
+RUN ./hack/get-helm.sh
+RUN ./hack/get-oc.sh
+
 COPY go.mod .
 COPY go.sum .
-
 RUN go mod download
 
 COPY . .
-
-RUN ./hack/get-oc.sh
-
-RUN ./hack/get-helm.sh
-
 RUN ./hack/build.sh
 
 FROM registry.access.redhat.com/ubi8/ubi-minimal
