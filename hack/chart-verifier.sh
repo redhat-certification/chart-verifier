@@ -62,9 +62,9 @@ case "$1" in
         CHART_GUEST_BASEDIR="/charts"
         CHART_HOST_BASEDIR=$(dirname $(realpath "$CHART_TO_VERIFY"))
         CHART_NAME=$(basename "$CHART_TO_VERIFY")
+        CHART_TO_VERIFY="${CHART_GUEST_BASEDIR}/${CHART_NAME}"
 
         EXTRA_ARGS="${EXTRA_ARGS} -v ${CHART_HOST_BASEDIR}/${CHART_NAME}:${CHART_GUEST_BASEDIR}/${CHART_NAME}"
-        CHART_TO_VERIFY="${CHART_GUEST_BASEDIR}/${CHART_NAME}"
         ;;
 esac
 
