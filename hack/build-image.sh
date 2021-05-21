@@ -15,5 +15,25 @@
 # limitations under the License.
 #
 
+# CONTAINER_RUNTIME contains the program to use, either podman or
+# docker. If not informed, will find either in the path.
+for cr in podman docker; do
+  [ -z "$CONTAINER_RUNTIME" ] && $cr --help >/dev/null 2>&1 && CONTAINER_RUNTIME=$cr
+done;
+
 COMMIT_ID=$(git rev-parse --short HEAD)
-docker build --progress=plain -t quay.io/redhat-certification/chart-verifier:"$COMMIT_ID" .
+
+EXTRA_ARGS=""
+
+case "$CONTAINER_RUNTIME" in
+    *docker)
+        EXTRA_ARGS="${EXTRA_ARGS} --progress=plain"
+        ;;
+esac
+
+if [[ "$(uname -a)" =~ Linux.*WSL.*Linux && "$CONTAINER_RUNTIME" =~ podman ]]; then
+    # systemd and journald are not available in WSL.
+    EXTRA_ARGS="${EXTRA_ARGS} --log-level=error --cgroup-manager=cgroupfs --events-backend=none"
+fi
+
+"$CONTAINER_RUNTIME" build $EXTRA_ARGS -t quay.io/redhat-certification/chart-verifier:"$COMMIT_ID" .
