@@ -139,12 +139,14 @@ func TestVerifier_Verify(t *testing.T) {
 		require.True(t, r.isOk())
 	})
 
+	chartTestingCheckName := "chart-testing"
+
 	t.Run("oc version error and wrong user input", func(t *testing.T) {
 		c := &verifier{
 			settings:         cli.New(),
 			config:           viper.New(),
-			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
-			requiredChecks:   []string{dummyCheckName},
+			registry:         checks.NewRegistry().Add(checks.Check{Name: chartTestingCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
+			requiredChecks:   []string{chartTestingCheckName},
 			openshiftVersion: "NaN",
 			version:          verocVersionError,
 		}
@@ -157,8 +159,8 @@ func TestVerifier_Verify(t *testing.T) {
 		c := &verifier{
 			settings:         cli.New(),
 			config:           viper.New(),
-			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
-			requiredChecks:   []string{dummyCheckName},
+			registry:         checks.NewRegistry().Add(checks.Check{Name: chartTestingCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
+			requiredChecks:   []string{chartTestingCheckName},
 			openshiftVersion: "4.9.7",
 			version:          verocVersionError,
 		}
@@ -174,8 +176,8 @@ func TestVerifier_Verify(t *testing.T) {
 		c := &verifier{
 			settings:         cli.New(),
 			config:           viper.New(),
-			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
-			requiredChecks:   []string{dummyCheckName},
+			registry:         checks.NewRegistry().Add(checks.Check{Name: chartTestingCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
+			requiredChecks:   []string{chartTestingCheckName},
 			openshiftVersion: "NaN",
 			version:          verocVersionWithoutError,
 		}
@@ -191,8 +193,8 @@ func TestVerifier_Verify(t *testing.T) {
 		c := &verifier{
 			settings:         cli.New(),
 			config:           viper.New(),
-			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
-			requiredChecks:   []string{dummyCheckName},
+			registry:         checks.NewRegistry().Add(checks.Check{Name: chartTestingCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
+			requiredChecks:   []string{chartTestingCheckName},
 			openshiftVersion: "5.6.8",
 			version:          verocVersionWithoutError,
 		}
@@ -208,8 +210,8 @@ func TestVerifier_Verify(t *testing.T) {
 		c := &verifier{
 			settings:         cli.New(),
 			config:           viper.New(),
-			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
-			requiredChecks:   []string{dummyCheckName},
+			registry:         checks.NewRegistry().Add(checks.Check{Name: chartTestingCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
+			requiredChecks:   []string{chartTestingCheckName},
 			openshiftVersion: "",
 			version:          verocVersionError,
 		}
@@ -217,6 +219,36 @@ func TestVerifier_Verify(t *testing.T) {
 		r, err := c.Verify(validChartUri)
 		require.Error(t, err)
 		require.Nil(t, r)
+	})
+
+	t.Run("dummy-check oc version error and wrong user input", func(t *testing.T) {
+		c := &verifier{
+			settings:         cli.New(),
+			config:           viper.New(),
+			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
+			requiredChecks:   []string{dummyCheckName},
+			openshiftVersion: "NaN",
+			version:          verocVersionError,
+		}
+		r, err := c.Verify(validChartUri)
+		require.Error(t, err)
+		require.Nil(t, r)
+	})
+
+	t.Run("dummy-check oc version error and empty user input", func(t *testing.T) {
+		c := &verifier{
+			settings:         cli.New(),
+			config:           viper.New(),
+			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
+			requiredChecks:   []string{dummyCheckName},
+			openshiftVersion: "",
+			version:          verocVersionError,
+		}
+		r, err := c.Verify(validChartUri)
+		require.NoError(t, err)
+		require.NotNil(t, r)
+		require.True(t, r.isOk())
+		require.Equal(t, "", r.Metadata.ToolMetadata.CertifiedOpenShiftVersions)
 	})
 
 	cancel()

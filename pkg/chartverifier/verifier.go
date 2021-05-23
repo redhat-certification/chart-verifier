@@ -96,35 +96,16 @@ func (c *verifier) Verify(uri string) (*Report, error) {
 		return nil, err
 	}
 
-	// oc.GetVersion() returns an error both in case the oc command can't be executed and
-	// the value for the OpenShift version key not present.
-	osVersion, getVersionErr := c.version.getVersion(c.settings.Debug)
-
-	// From this point on, an error is set and osVersion is empty.
-	if getVersionErr != nil && c.openshiftVersion != "" {
-		osVersion = c.openshiftVersion
-	}
-
-	// osVersion is empty only if an error happened and a default value
-	// informed by the user hasn't been informed.
-	if osVersion == "" {
-		return nil, OpenShiftVersionErr(getVersionErr.Error())
-	}
-
-	// osVersion is guaranteed to have a value, not yet validated as a
-	// semver value.
-	if _, err := semver.NewVersion(osVersion); err != nil {
-		return nil, OpenShiftSemVerErr(err.Error())
-	}
-	// osVersion is guaranteed to a valid value from here onwards.
-
 	result := NewReportBuilder().
 		SetToolVersion(c.toolVersion).
 		SetChartUri(uri).
-		SetChart(chrt).
-		SetCertifiedOpenShiftVersion(osVersion)
+		SetChart(chrt)
 
+	chartTestingEnabled := false
 	for _, name := range c.requiredChecks {
+		if name == "chart-testing" {
+			chartTestingEnabled = true
+		}
 		check, ok := c.registry.Get(name)
 		if !ok {
 			return nil, CheckNotFoundErr(name)
@@ -144,5 +125,27 @@ func (c *verifier) Verify(uri string) (*Report, error) {
 
 	}
 
-	return result.Build()
+	// oc.GetVersion() returns an error both in case the oc command can't be executed and
+	// the value for the OpenShift version key not present.
+	osVersion, getVersionErr := c.version.getVersion(c.settings.Debug)
+
+	// From this point on, an error is set and osVersion is empty.
+	if getVersionErr != nil && c.openshiftVersion != "" {
+		osVersion = c.openshiftVersion
+	}
+
+	// osVersion is empty only if an error happened and a default value
+	// informed by the user hasn't been informed.
+	if osVersion == "" && chartTestingEnabled == true {
+		return nil, OpenShiftVersionErr(getVersionErr.Error())
+	}
+
+	// osVersion is guaranteed to have a value, not yet validated as a
+	// semver value.
+	if _, err := semver.NewVersion(osVersion); err != nil && osVersion != "" {
+		return nil, OpenShiftSemVerErr(err.Error())
+	}
+	// osVersion is guaranteed to a valid value from here onwards.
+
+	return result.SetCertifiedOpenShiftVersion(osVersion).Build()
 }
