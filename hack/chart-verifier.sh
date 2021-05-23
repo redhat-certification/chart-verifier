@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -x
-
 # KUBECONFIG is either the value the user has configured in the
 # environment or the default location `kubectl` uses.
 KUBECONFIG="${KUBECONFIG:-${HOME}/.kube/config}"
