@@ -22,18 +22,18 @@ import (
 	"helm.sh/helm/v3/pkg/cli"
 )
 
-type CertifierBuilder interface {
-	SetRegistry(registry checks.Registry) CertifierBuilder
-	SetValues(vals map[string]interface{}) CertifierBuilder
-	SetChecks(checks []string) CertifierBuilder
-	SetConfig(config *viper.Viper) CertifierBuilder
-	SetOverrides([]string) CertifierBuilder
-	SetToolVersion(string) CertifierBuilder
-	SetOpenShiftVersion(string) CertifierBuilder
-	SetSettings(settings *cli.EnvSettings) CertifierBuilder
-	Build() (Certifier, error)
+type VerifierBuilder interface {
+	SetRegistry(registry checks.Registry) VerifierBuilder
+	SetValues(vals map[string]interface{}) VerifierBuilder
+	SetChecks(checks []string) VerifierBuilder
+	SetConfig(config *viper.Viper) VerifierBuilder
+	SetOverrides([]string) VerifierBuilder
+	SetToolVersion(string) VerifierBuilder
+	SetOpenShiftVersion(string) VerifierBuilder
+	SetSettings(settings *cli.EnvSettings) VerifierBuilder
+	Build() (Vertifier, error)
 }
 
-type Certifier interface {
-	Certify(uri string) (*Certificate, error)
+type Vertifier interface {
+	Verify(uri string) (*Report, error)
 }

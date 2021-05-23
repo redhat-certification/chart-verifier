@@ -120,8 +120,8 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 				return err
 			}
 
-			certifier, err := chartverifier.
-				NewCertifierBuilder().
+			verifier, err := chartverifier.
+				NewVerifierBuilder().
 				SetValues(vals).
 				SetChecks(checks).
 				SetConfig(config).
@@ -134,7 +134,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 				return err
 			}
 
-			result, err := certifier.Certify(args[0])
+			result, err := verifier.Verify(args[0])
 			if err != nil {
 				return err
 			}

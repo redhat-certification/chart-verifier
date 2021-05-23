@@ -49,7 +49,7 @@ func DefaultRegistry() checks.Registry {
 	return defaultRegistry
 }
 
-type certifierBuilder struct {
+type verifierBuilder struct {
 	checks           []string
 	config           *viper.Viper
 	overrides        []string
@@ -60,47 +60,47 @@ type certifierBuilder struct {
 	settings         *cli.EnvSettings
 }
 
-func (b *certifierBuilder) SetSettings(settings *cli.EnvSettings) CertifierBuilder {
+func (b *verifierBuilder) SetSettings(settings *cli.EnvSettings) VerifierBuilder {
 	b.settings = settings
 	return b
 }
 
-func (b *certifierBuilder) SetValues(vals map[string]interface{}) CertifierBuilder {
+func (b *verifierBuilder) SetValues(vals map[string]interface{}) VerifierBuilder {
 	b.values = vals
 	return b
 }
 
-func (b *certifierBuilder) SetRegistry(registry checks.Registry) CertifierBuilder {
+func (b *verifierBuilder) SetRegistry(registry checks.Registry) VerifierBuilder {
 	b.registry = registry
 	return b
 }
 
-func (b *certifierBuilder) SetChecks(checks []string) CertifierBuilder {
+func (b *verifierBuilder) SetChecks(checks []string) VerifierBuilder {
 	b.checks = checks
 	return b
 }
 
-func (b *certifierBuilder) SetConfig(config *viper.Viper) CertifierBuilder {
+func (b *verifierBuilder) SetConfig(config *viper.Viper) VerifierBuilder {
 	b.config = config
 	return b
 }
 
-func (b *certifierBuilder) SetOverrides(overrides []string) CertifierBuilder {
+func (b *verifierBuilder) SetOverrides(overrides []string) VerifierBuilder {
 	b.overrides = overrides
 	return b
 }
 
-func (b *certifierBuilder) SetToolVersion(version string) CertifierBuilder {
+func (b *verifierBuilder) SetToolVersion(version string) VerifierBuilder {
 	b.toolVersion = version
 	return b
 }
 
-func (b *certifierBuilder) SetOpenShiftVersion(version string) CertifierBuilder {
+func (b *verifierBuilder) SetOpenShiftVersion(version string) VerifierBuilder {
 	b.openshiftVersion = version
 	return b
 }
 
-func (b *certifierBuilder) Build() (Certifier, error) {
+func (b *verifierBuilder) Build() (Vertifier, error) {
 	if len(b.checks) == 0 {
 		return nil, errors.New("no checks have been required")
 	}
@@ -123,7 +123,7 @@ func (b *certifierBuilder) Build() (Certifier, error) {
 		b.config.Set(parts[0], parts[1])
 	}
 	ver := &version{}
-	return &certifier{
+	return &verifier{
 		config:           b.config,
 		registry:         b.registry,
 		requiredChecks:   b.checks,
@@ -135,6 +135,6 @@ func (b *certifierBuilder) Build() (Certifier, error) {
 	}, nil
 }
 
-func NewCertifierBuilder() CertifierBuilder {
-	return &certifierBuilder{}
+func NewVerifierBuilder() VerifierBuilder {
+	return &verifierBuilder{}
 }
