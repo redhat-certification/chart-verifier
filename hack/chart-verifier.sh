@@ -24,7 +24,7 @@ fi
 
 # "[-o <openshiftVersion] <chart>"
 
-PARSED_ARGUMENTS=$(getopt -a -o "o:h" --long "openshift-version,help" -- "$@" 2>/dev/null)
+PARSED_ARGUMENTS=$(getopt -a -o "V:h" --long "openshift-version,help" -- "$@" 2>/dev/null)
 [ $? -eq 0 ] || {
     PARSED_ARGUMENTS="--help"
 }
@@ -34,7 +34,7 @@ eval set -- "${PARSED_ARGUMENTS}"
 while true; do
     case "$1" in
         -h|--help)
-            echo "$0 [-o <openshiftVersion>] <chart>"
+            echo "$0 [-V|--openshift-version <openshiftVersion>] <chart>"
             exit 0
             ;;
         -o|--openshift-version)
