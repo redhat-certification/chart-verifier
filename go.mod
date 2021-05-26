@@ -6,6 +6,7 @@ require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/hashicorp/go-retryablehttp v0.6.8 // indirect
 	github.com/helm/chart-testing/v3 v3.3.1
+	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.1.1
