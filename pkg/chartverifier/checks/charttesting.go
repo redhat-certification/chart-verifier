@@ -2,13 +2,19 @@ package checks
 
 import (
 	"fmt"
+	"io/fs"
+	"io/ioutil"
+	"os"
+	"path"
 	"strings"
 
 	"github.com/helm/chart-testing/v3/pkg/chart"
 	"github.com/helm/chart-testing/v3/pkg/config"
 	"github.com/helm/chart-testing/v3/pkg/exec"
 	"github.com/helm/chart-testing/v3/pkg/util"
+	"github.com/imdario/mergo"
 	"github.com/redhat-certification/chart-verifier/pkg/tool"
+	"gopkg.in/yaml.v3"
 )
 
 // buildChartTestingConfiguration computes the chart testing related
@@ -96,7 +102,7 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 			return NewResult(false, result.Error.Error()), nil
 		}
 	} else {
-		result := installAndTestChartRelease(cfg, chrt, helm, kubectl)
+		result := installAndTestChartRelease(cfg, chrt, helm, kubectl, opts.Values)
 		if result.Error != nil {
 			return NewResult(false, result.Error.Error()), nil
 		}
@@ -213,12 +219,75 @@ func upgradeAndTestChart(
 	return result
 }
 
+// readObjectFromYamlFile unmarshals the given filename and returns an object with its contents.
+func readObjectFromYamlFile(filename string) (map[string]interface{}, error) {
+	objBytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, fmt.Errorf("reading values file: %w", err)
+	}
+
+	var obj map[string]interface{}
+	err = yaml.Unmarshal(objBytes, &obj)
+	if err != nil {
+		return nil, fmt.Errorf("unmarshalling values file contents: %w", err)
+	}
+
+	return obj, nil
+}
+
+// writeObjectToTempYamlFile writes the given obj into a temporary file.
+//
+// It is responsibility of the caller to discard the file when finished using it.
+func writeObjectToTempYamlFile(obj map[string]interface{}) (string, error) {
+	objBytes, err := yaml.Marshal(obj)
+	if err != nil {
+		return "", fmt.Errorf("marshalling values file new contents: %w", err)
+	}
+
+	tempDirName, err := ioutil.TempDir(os.TempDir(), "chart-testing-*")
+	if err != nil {
+		return "", fmt.Errorf("creating temporary directory: %w", err)
+	}
+
+	filename := path.Join(tempDirName, "values.yaml")
+
+	err = ioutil.WriteFile(filename, objBytes, fs.ModeExclusive)
+	if err != nil {
+		return "", fmt.Errorf("writing values file new contents: %w", err)
+	}
+
+	return filename, nil
+}
+
+// applyExtraValues applies the extra values provided into the given filename (a YAML file) and materializes its
+// contents in the file returned by the function.
+func applyExtraValues(filename string, extraValues map[string]interface{}) (string, error) {
+
+	obj, err := readObjectFromYamlFile(filename)
+	if err != nil {
+		return "", fmt.Errorf("reading values file: %w", err)
+	}
+
+	err = mergo.MergeWithOverwrite(obj, extraValues)
+	if err != nil {
+		return "", fmt.Errorf("merging extra values: %w", err)
+	}
+
+	newValuesFile, err := writeObjectToTempYamlFile(obj)
+	if err != nil {
+		return "", fmt.Errorf("writing object to temporary location: %w", err)
+	}
+
+	return newValuesFile, nil
+}
+
 // installAndTestChartRelease installs and tests a chart release.
 func installAndTestChartRelease(
 	cfg config.Configuration,
 	chrt *chart.Chart,
 	helm tool.Helm,
 	kubectl tool.Kubectl,
+	extraValues map[string]interface{},
 ) chart.TestResult {
 
 	// valuesFiles contains all the configurations that should be
@@ -235,13 +304,21 @@ func installAndTestChartRelease(
 
 	for _, valuesFile := range valuesFiles {
 
+		newValuesFile, err := applyExtraValues(valuesFile, extraValues)
+		if err != nil {
+			result.Error = fmt.Errorf("applying extra values: %w", err)
+		}
+		defer func() {
+			os.Remove(newValuesFile)
+		}()
+
 		// Use anonymous function. Otherwise deferred calls would pile up
 		// and be executed in reverse order after the loop.
 		fun := func() error {
 			namespace, release, releaseSelector, cleanup := generateInstallConfig(cfg, chrt, helm, kubectl)
 			defer cleanup()
 
-			if err := helm.InstallWithValues(chrt.Path(), valuesFile, namespace, release); err != nil {
+			if err := helm.InstallWithValues(chrt.Path(), newValuesFile, namespace, release); err != nil {
 				return err
 			}
 			return testRelease(helm, kubectl, release, namespace, releaseSelector, false)
