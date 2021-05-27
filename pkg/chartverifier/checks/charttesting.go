@@ -2,7 +2,6 @@ package checks
 
 import (
 	"fmt"
-	"io/fs"
 	"io/ioutil"
 	"os"
 	"path"
@@ -251,7 +250,7 @@ func writeObjectToTempYamlFile(obj map[string]interface{}) (filename string, cle
 
 	filename = path.Join(tempDir, "values.yaml")
 
-	err = ioutil.WriteFile(filename, objBytes, fs.ModeExclusive)
+	err = ioutil.WriteFile(filename, objBytes, 0644)
 	if err != nil {
 		return "", nil, fmt.Errorf("writing values file new contents: %w", err)
 	}
