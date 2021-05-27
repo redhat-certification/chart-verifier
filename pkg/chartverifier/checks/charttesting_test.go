@@ -1,74 +1,79 @@
 package checks
 
 import (
+	"fmt"
+	"path"
+	"path/filepath"
+	"runtime"
 	"testing"
 
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
-	"helm.sh/helm/v3/pkg/cli"
 )
 
+// absPathFromSourceFileLocation returns the absolute path of a file or directory under the current source file's
+// location.
+func absPathFromSourceFileLocation(name string) (string, error) {
+	_, filename, _, ok := runtime.Caller(1)
+	if !ok {
+		panic("couldn't get current path")
+	}
+    filename, err := filepath.Abs(filename)
+    if err != nil {
+        return "", fmt.Errorf("retrieving current source file's location: %w", err)
+    }
+    dirname := path.Dir(filename)
+    return filepath.Join(dirname, name), nil
+}
+
 func TestChartTesting(t *testing.T) {
+
 	type testCase struct {
-		config      map[string]interface{}
 		description string
-		uri         string
+		opts        CheckOptions
 	}
 
-	testCases := []testCase{
-		{
-			config:      map[string]interface{}{},
-			description: "with chart-testing defaults",
-			uri:         "chart-0.1.0-v3.valid.tgz",
-		},
-		{
-			config: map[string]interface{}{
-				"upgrade": true,
-			},
-			description: "override chart-testing upgrade",
-			uri:         "chart-0.1.0-v3.valid.tgz",
-		},
-		{
-			config: map[string]interface{}{
-				"skipMissingValues": true,
-			},
-			description: "override chart-testing upgrade",
-			uri:         "chart-0.1.0-v3.valid.tgz",
-		},
-		{
-			config: map[string]interface{}{
-				"namespace": "ct-test-namespace",
-			},
-			description: "override chart-testing namespace",
-			uri:         "chart-0.1.0-v3.valid.tgz",
-		},
-		{
-			config: map[string]interface{}{
-				"releaseLabel": "chart-verifier-app.kubernetes.io/instance",
-			},
-			description: "override chart-testing releaseLabel",
-			uri:         "chart-0.1.0-v3.valid.tgz",
-		},
-	}
+    chartUri, err := absPathFromSourceFileLocation("chart-0.1.0-v3.valid.tgz")
+    if err != nil {
+        t.Error(err)
+    }
 
-	for _, tc := range testCases {
-		config := viper.New()
-		settings := cli.New()
-
-		_ = config.MergeConfigMap(tc.config)
-
-		t.Run(tc.description, func(t *testing.T) {
-			t.Skip()
-			r, err := ChartTesting(
-				&CheckOptions{
-					URI:             tc.uri,
-					ViperConfig:     config,
-					HelmEnvSettings: settings,
+	positiveTestCases := []testCase{
+		{
+			description: "with license=true value override",
+			opts: CheckOptions{
+				URI: chartUri,
+				Values: map[string]interface{}{
+					"license": true,
 				},
-			)
+			},
+		},
+	}
+
+	for _, tc := range positiveTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			r, err := ChartTesting(&tc.opts)
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.True(t, r.Ok)
+		})
+	}
+
+	negativeTestCases := []testCase{
+		{
+			description: "with chart-testing defaults",
+			opts: CheckOptions{
+				URI: chartUri,
+				Values: map[string]interface{}{},
+			},
+		},
+	}
+
+	for _, tc := range negativeTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			r, err := ChartTesting(&tc.opts)
+			require.Error(t, err)
+			require.NotNil(t, r)
+			require.False(t, r.Ok)
 		})
 	}
 }
