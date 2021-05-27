@@ -16,10 +16,10 @@ The tool provides the following features:
 For more information see:
 
 - [The command line interface and checks performed.](docs/helm-chart-checks.md)
-- [Annotations in the report, tool and submitter provided.](docs/helm-chart-annotations.md)
+- [Annotations in the report,  chart-verifier CLI tool, and submitter provided.](docs/helm-chart-annotations.md)
 - [Introduction to the submission process.](docs/helm-chart-submission.md)
-- [Problems with the report? Try the trouble shooting guide.](docs/helm-chart-troubleshooting.md)
+- [Troubleshooting check failures.](docs/helm-chart-troubleshooting.md)
 
-For Developer specific information see:
+For developer specific information, see:
 
 - [Additional information for developers.](docs/helm-chart-developer.md)
