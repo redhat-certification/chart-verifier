@@ -1,6 +1,9 @@
 package tool
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/helm/chart-testing/v3/pkg/exec"
 	"github.com/helm/chart-testing/v3/pkg/tool"
 )
@@ -27,9 +30,12 @@ func (h Helm) InstallWithValues(chart string, valuesFile string, namespace strin
 		values = []string{"--values", valuesFile}
 	}
 
-	if _, err := h.RunProcessAndCaptureOutput("helm", "install", release, chart, "--namespace", namespace,
-		"--wait", values, h.extraArgs); err != nil {
-		return err
+	helmInstallArgs := []string{"install", release, chart, "--namespace", namespace, "--wait"}
+	helmInstallArgs = append(helmInstallArgs, values...)
+	helmInstallArgs = append(helmInstallArgs, h.extraArgs...)
+
+	if _, err := h.RunProcessAndCaptureOutput("helm", helmInstallArgs); err != nil {
+		return fmt.Errorf("executing helm with args %q: %w", strings.Join(helmInstallArgs, " "), err)
 	}
 
 	return nil
