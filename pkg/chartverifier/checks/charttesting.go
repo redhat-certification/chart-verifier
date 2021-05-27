@@ -235,10 +235,10 @@ func readObjectFromYamlFile(filename string) (map[string]interface{}, error) {
 	return obj, nil
 }
 
-// writeObjectToTempYamlFile writes the given obj into a temporary file.
+// writeObjectToTempYamlFile writes the given obj into a temporary file and returns its location, 
 //
 // It is responsibility of the caller to discard the file when finished using it.
-func writeObjectToTempYamlFile(obj map[string]interface{}) (string, func(), error) {
+func writeObjectToTempYamlFile(obj map[string]interface{}) (filename string, cleanupFunc func(), err error) {
 	objBytes, err := yaml.Marshal(obj)
 	if err != nil {
 		return "", nil, fmt.Errorf("marshalling values file new contents: %w", err)
@@ -249,18 +249,18 @@ func writeObjectToTempYamlFile(obj map[string]interface{}) (string, func(), erro
 		return "", nil, fmt.Errorf("creating temporary directory: %w", err)
 	}
 
-	filename := path.Join(tempDir, "values.yaml")
+	filename = path.Join(tempDir, "values.yaml")
 
 	err = ioutil.WriteFile(filename, objBytes, fs.ModeExclusive)
 	if err != nil {
 		return "", nil, fmt.Errorf("writing values file new contents: %w", err)
 	}
 
-	cleanTempDir := func() {
+	cleanupFunc = func() {
 		os.RemoveAll(tempDir)
 	}
 
-	return filename, cleanTempDir, nil
+	return filename, cleanupFunc, nil
 }
 
 // newTempValuesFileWithOverrides applies the extra values provided into the given filename (a YAML file) and materializes its
