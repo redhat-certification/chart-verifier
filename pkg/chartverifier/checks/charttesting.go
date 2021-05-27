@@ -322,7 +322,7 @@ func installAndTestChartRelease(
 		// and be executed in reverse order after the loop.
 		fun := func() error {
 
-			tempValuesFile, tmpValuesFileCleanup, err := newTempValuesFileWithOverrides(valuesFile, valuesOverrides)
+			tmpValuesFile, tmpValuesFileCleanup, err := newTempValuesFileWithOverrides(valuesFile, valuesOverrides)
 			if err != nil {
 				// it is required this operation to succeed, otherwise there are no guarantees the values informed using
 				// `--chart-set` are propagated to the installation process, so the process breaks here.
@@ -333,7 +333,7 @@ func installAndTestChartRelease(
 			namespace, release, releaseSelector, releaseCleanup := generateInstallConfig(cfg, chrt, helm, kubectl)
 			defer releaseCleanup()
 
-			if err := helm.InstallWithValues(chrt.Path(), tempValuesFile, namespace, release); err != nil {
+			if err := helm.InstallWithValues(chrt.Path(), tmpValuesFile, namespace, release); err != nil {
 				return err
 			}
 			return testRelease(helm, kubectl, release, namespace, releaseSelector, false)
