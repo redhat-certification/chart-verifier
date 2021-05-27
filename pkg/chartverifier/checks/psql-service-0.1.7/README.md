@@ -1,0 +1,1 @@
+Helm chart for psql 10 certified image

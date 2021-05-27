@@ -1,0 +1,59 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "required": [
+      "image",
+      "k8Project",
+      "config"
+    ],
+    "properties": {
+      "image": {
+        "type": "object",
+        "required": [
+          "name",
+          "repository",
+          "pullPolicy"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9-_]+$"
+          },
+          "repository": {
+            "type": "string",
+            "pattern": "^[a-z0-9-_./]+$"
+          },
+          "pullPolicy": {
+            "type": "string",
+            "pattern": "^(Always|Never|IfNotPresent)$"
+          }
+        }
+      },
+      "k8Project": {
+        "type": "string",
+        "pattern": "^[a-z0-9-_]+$"
+      },
+      "config": {
+        "type": "object",
+        "required": [
+          "postgresUser",
+          "postgresPassword",
+          "postgresDatabase"
+        ],
+        "properties": {
+          "postgresUser": {
+            "type": "string",
+            "pattern": "^[a-z0-9-_]+$"
+          },
+          "postgresPassword": {
+            "type": "string",
+            "pattern": "^[a-z0-9-_]+$"
+          },
+          "postgresDatabase": {
+            "type": "string",
+            "pattern": "^[a-z0-9-_]+$"
+          }
+        }
+      }     
+    }   
+  }
