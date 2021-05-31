@@ -37,11 +37,11 @@ func (h Helm) InstallWithValues(chart string, valuesFile string, namespace strin
 	if stdoutCapture, err := h.RunProcessAndCaptureOutput("helm", helmArgs); err != nil {
 		// augments the resulting error with the contents captured from Stdout, in the following format:
 		//
-		// executing helm with args 'helm install ...': <process error> (output follows)
+		// executing helm with args 'helm install ...': <process error>
 		// ---
 		// <stdout capture>
-		return fmt.Errorf("executing helm with args %q: %w (output follows)\n---\n%s",
-			strings.Join(helmArgs, " "), err, stdoutCapture)
+		_ = stdoutCapture
+		return fmt.Errorf("executing helm with args %q: %w", strings.Join(helmArgs, " "), err)
 	}
 
 	return nil
