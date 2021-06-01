@@ -40,8 +40,10 @@ func (h Helm) InstallWithValues(chart string, valuesFile string, namespace strin
 		// executing helm with args 'helm install ...': <process error>
 		// ---
 		// <stdout capture>
-		_ = stdoutCapture
-		return fmt.Errorf("executing helm with args %q: %w", strings.Join(helmArgs, " "), err)
+        if stdoutCapture == "" {
+            return fmt.Errorf("executing helm with args %q: %w", strings.Join(helmArgs, " "), err)
+        }
+        return fmt.Errorf("executing helm with args %q: %w\n---\n%s", strings.Join(helmArgs, " "), err, stdoutCapture)
 	}
 
 	return nil
