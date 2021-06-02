@@ -94,6 +94,17 @@ func TestChartTesting(t *testing.T) {
 				HelmEnvSettings: cli.New(),
 			},
 		},
+		{
+			// the chart being used in this test forces the rendered resources to have an empty namespace field, which
+			// is invalid and can't be overriden using helm's namespace option.
+			description: "empty values should fail",
+			opts: CheckOptions{
+				URI:             chartUri,
+				Values:          map[string]interface{}{},
+				ViperConfig:     viper.New(),
+				HelmEnvSettings: cli.New(),
+			},
+		},
 	}
 
 	for _, tc := range negativeTestCases {
