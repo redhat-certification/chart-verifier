@@ -2,6 +2,7 @@ package checks
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
@@ -39,6 +40,10 @@ func lookPath(programs ...string) error {
 }
 
 func TestChartTesting(t *testing.T) {
+	if os.Getenv("CHART_VERIFIER_ENABLE_CLUSTER_TESTING") == "" {
+		t.Skip("CHART_VERIFIER_ENABLE_CLUSTER_TESTING not set, skipping in cluster tests")
+	}
+
 	if err := lookPath("helm", "kubectl"); err != nil {
 		t.Skip(err.Error())
 	}
