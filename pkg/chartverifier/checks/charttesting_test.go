@@ -58,6 +58,7 @@ func TestChartTesting(t *testing.T) {
 			r, err := ChartTesting(&tc.opts)
 			require.NoError(t, err)
 			require.NotNil(t, r)
+			require.Equal(t, ChartTestingSuccess, r.Reason)
 			require.True(t, r.Ok)
 		})
 	}
