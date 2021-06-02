@@ -234,7 +234,7 @@ func readObjectFromYamlFile(filename string) (map[string]interface{}, error) {
 	return obj, nil
 }
 
-// writeObjectToTempYamlFile writes the given obj into a temporary file and returns its location, 
+// writeObjectToTempYamlFile writes the given obj into a temporary file and returns its location,
 //
 // It is responsibility of the caller to discard the file when finished using it.
 func writeObjectToTempYamlFile(obj map[string]interface{}) (filename string, cleanupFunc func(), err error) {
@@ -272,7 +272,7 @@ func newTempValuesFileWithOverrides(filename string, valuesOverrides map[string]
 	var obj map[string]interface{}
 
 	if filename != "" {
-        // in the case a filename is provided, read its contents and merge any available values override.
+		// in the case a filename is provided, read its contents and merge any available values override.
 		obj, err := readObjectFromYamlFile(filename)
 		if err != nil {
 			return "", nil, fmt.Errorf("reading values file: %w", err)
