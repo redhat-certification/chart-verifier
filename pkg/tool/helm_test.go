@@ -10,19 +10,19 @@ import (
 )
 
 func temporarilyToggleEnv(name string) (untoggleFn func(), err error) {
-    originalValue := os.Getenv(name)
-    err = os.Unsetenv(name)
-    untoggleFn = func() {
-        os.Setenv(name, originalValue)
-    }
-    return
+	originalValue := os.Getenv(name)
+	err = os.Unsetenv(name)
+	untoggleFn = func() {
+		os.Setenv(name, originalValue)
+	}
+	return
 }
 
 func TestInstallWithValues(t *testing.T) {
 	t.Run("helm not available in path", func(t *testing.T) {
-        untogglePathEnv, err := temporarilyToggleEnv("PATH")
-        require.NoError(t, err)
-        defer untogglePathEnv()
+		untogglePathEnv, err := temporarilyToggleEnv("PATH")
+		require.NoError(t, err)
+		defer untogglePathEnv()
 
 		// arrange
 		valuesFile := ""
@@ -46,22 +46,23 @@ func TestInstallWithValues(t *testing.T) {
 
 	t.Run("helm failure should include content streamed to both Stderr and Stdout", func(t *testing.T) {
 		// arrange
+		chrt := "non-existing-chart.tgz"
+		release := "non-existing-release"
+		valuesFile := ""
+		namespace := "default"
+		expectedErrorMessage := fmt.Sprintf(
+			"executing helm with args \"install %s %s --namespace %s --wait\": "+
+				"Error running process: exit status 1\n---\nError: failed to download \"%s\" (hint: running `helm repo update` may help)",
+			release, chrt, namespace, chrt)
 		processExecutor := exec.NewProcessExecutor(false)
 		extraArgs := []string{}
 		h := NewHelm(processExecutor, extraArgs)
 
 		// act
-		chrt := "non-existing-chart.tgz"
-		release := "non-existing-release"
-		valuesFile := ""
-		namespace := "default"
 		err := h.InstallWithValues(chrt, valuesFile, namespace, release)
 
-		// assert
+        // assert
 		require.Error(t, err)
-		require.Equal(
-			t, "executing helm with args \"install non-existing-release non-existing-chart.tgz --namespace default --wait\": "+
-				"Error running process: exit status 1\n--\nError: failed to download \"non-existing-chart.tgz\" (hint: running `helm repo update` may help)",
-			err.Error())
+		require.Equal(t, expectedErrorMessage, err.Error())
 	})
 }

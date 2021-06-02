@@ -24,6 +24,26 @@ func NewHelm(exec exec.ProcessExecutor, extraArgs []string) Helm {
 	}
 }
 
+func (h Helm) RunProcessAndCaptureOutput(executable string, execArgs ...interface{}) (string, error) {
+	return h.RunProcessInDirAndCaptureOutput("", executable, execArgs)
+}
+
+func (h Helm) RunProcessInDirAndCaptureOutput(workingDirectory string, executable string, execArgs ...interface{}) (string, error) {
+	cmd, err := h.CreateProcess(executable, execArgs...)
+	if err != nil {
+		return "", err
+	}
+
+	cmd.Dir = workingDirectory
+	bytes, err := cmd.CombinedOutput()
+	capturedOutput := strings.TrimSpace(string(bytes))
+
+	if err != nil {
+		return capturedOutput, fmt.Errorf("Error running process: %w", err)
+	}
+	return capturedOutput, nil
+}
+
 func (h Helm) InstallWithValues(chart string, valuesFile string, namespace string, release string) error {
 	var values []string
 	if valuesFile != "" {
@@ -34,16 +54,17 @@ func (h Helm) InstallWithValues(chart string, valuesFile string, namespace strin
 	helmArgs = append(helmArgs, values...)
 	helmArgs = append(helmArgs, h.extraArgs...)
 
-	if stdoutCapture, err := h.RunProcessAndCaptureOutput("helm", helmArgs); err != nil {
+	if outputCapture, err := h.RunProcessAndCaptureOutput("helm", helmArgs); err != nil {
 		// augments the resulting error with the contents captured from Stdout, in the following format:
 		//
 		// executing helm with args 'helm install ...': <process error>
 		// ---
 		// <stdout capture>
-        if stdoutCapture == "" {
-            return fmt.Errorf("executing helm with args %q: %w", strings.Join(helmArgs, " "), err)
-        }
-        return fmt.Errorf("executing helm with args %q: %w\n---\n%s", strings.Join(helmArgs, " "), err, stdoutCapture)
+		if len(outputCapture) == 0 {
+			return fmt.Errorf("executing helm with args %q: %w", strings.Join(helmArgs, " "), err)
+		}
+
+		return fmt.Errorf("executing helm with args %q: %w\n---\n%s", strings.Join(helmArgs, " "), err, outputCapture)
 	}
 
 	return nil
