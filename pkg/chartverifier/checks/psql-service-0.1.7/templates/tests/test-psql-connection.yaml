@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ .Release.Name }}-credentials-test"
+  #namespace: {{ .Values.k8Project }}
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  #serviceAccount: {{ .Values.serviceAccount }}
+  containers:
+    - name: {{ .Release.Name }}-credentials-test
+      image: '{{ .Values.image.repository }}{{ .Values.image.name }}:{{ .Values.image.tag }}'
+      imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+      env:
+        - name: POSTGRESQL_USER
+          value: {{ .Values.config.postgresUser }}
+        - name: PGPASSWORD
+          value: {{ .Values.config.postgresPassword }}
+        - name: POSTGRESQL_DATABASE
+          value: {{ .Values.config.postgresDatabase }}
+      command:
+        - /bin/bash
+        - -ec
+        - |
+          psql -d $POSTGRESQL_DATABASE -h psql -p $PSQL_SERVICE_PORT -U $POSTGRESQL_USER -c "select 1"
+  restartPolicy: Never

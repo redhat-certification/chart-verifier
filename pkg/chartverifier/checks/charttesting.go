@@ -2,13 +2,18 @@ package checks
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path"
 	"strings"
 
 	"github.com/helm/chart-testing/v3/pkg/chart"
 	"github.com/helm/chart-testing/v3/pkg/config"
 	"github.com/helm/chart-testing/v3/pkg/exec"
 	"github.com/helm/chart-testing/v3/pkg/util"
+	"github.com/imdario/mergo"
 	"github.com/redhat-certification/chart-verifier/pkg/tool"
+	"gopkg.in/yaml.v3"
 )
 
 // buildChartTestingConfiguration computes the chart testing related
@@ -96,7 +101,7 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 			return NewResult(false, result.Error.Error()), nil
 		}
 	} else {
-		result := installAndTestChartRelease(cfg, chrt, helm, kubectl)
+		result := installAndTestChartRelease(cfg, chrt, helm, kubectl, opts.Values)
 		if result.Error != nil {
 			return NewResult(false, result.Error.Error()), nil
 		}
@@ -213,12 +218,90 @@ func upgradeAndTestChart(
 	return result
 }
 
+// readObjectFromYamlFile unmarshals the given filename and returns an object with its contents.
+func readObjectFromYamlFile(filename string) (map[string]interface{}, error) {
+	objBytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, fmt.Errorf("reading values file: %w", err)
+	}
+
+	var obj map[string]interface{}
+	err = yaml.Unmarshal(objBytes, &obj)
+	if err != nil {
+		return nil, fmt.Errorf("unmarshalling values file contents: %w", err)
+	}
+
+	return obj, nil
+}
+
+// writeObjectToTempYamlFile writes the given obj into a temporary file and returns its location,
+//
+// It is responsibility of the caller to discard the file when finished using it.
+func writeObjectToTempYamlFile(obj map[string]interface{}) (filename string, cleanupFunc func(), err error) {
+	objBytes, err := yaml.Marshal(obj)
+	if err != nil {
+		return "", nil, fmt.Errorf("marshalling values file new contents: %w", err)
+	}
+
+	tempDir, err := ioutil.TempDir(os.TempDir(), "chart-testing-*")
+	if err != nil {
+		return "", nil, fmt.Errorf("creating temporary directory: %w", err)
+	}
+
+	filename = path.Join(tempDir, "values.yaml")
+
+	err = ioutil.WriteFile(filename, objBytes, 0644)
+	if err != nil {
+		return "", nil, fmt.Errorf("writing values file new contents: %w", err)
+	}
+
+	cleanupFunc = func() {
+		os.RemoveAll(tempDir)
+	}
+
+	return filename, cleanupFunc, nil
+}
+
+// newTempValuesFileWithOverrides applies the extra values provided into the given filename (a YAML file) and materializes its
+// contents in the file returned by the function.
+//
+// In the case the given filename is an empty string, it indicates that only the valueOverrides contents will be
+// materialized into the temporary file to be merged by `helm` when processing the chart.
+func newTempValuesFileWithOverrides(filename string, valuesOverrides map[string]interface{}) (string, func(), error) {
+
+	var obj map[string]interface{}
+
+	if filename != "" {
+		// in the case a filename is provided, read its contents and merge any available values override.
+		obj, err := readObjectFromYamlFile(filename)
+		if err != nil {
+			return "", nil, fmt.Errorf("reading values file: %w", err)
+		}
+
+		err = mergo.MergeWithOverwrite(obj, valuesOverrides)
+		if err != nil {
+			return "", nil, fmt.Errorf("merging extra values: %w", err)
+		}
+
+	} else {
+		obj = valuesOverrides
+	}
+
+	newValuesFile, clean, err := writeObjectToTempYamlFile(obj)
+	if err != nil {
+		return "", nil, fmt.Errorf("writing object to temporary location: %w", err)
+	}
+
+	return newValuesFile, clean, nil
+}
+
 // installAndTestChartRelease installs and tests a chart release.
 func installAndTestChartRelease(
 	cfg config.Configuration,
 	chrt *chart.Chart,
 	helm tool.Helm,
 	kubectl tool.Kubectl,
+	valuesOverrides map[string]interface{},
 ) chart.TestResult {
 
 	// valuesFiles contains all the configurations that should be
@@ -238,10 +321,19 @@ func installAndTestChartRelease(
 		// Use anonymous function. Otherwise deferred calls would pile up
 		// and be executed in reverse order after the loop.
 		fun := func() error {
-			namespace, release, releaseSelector, cleanup := generateInstallConfig(cfg, chrt, helm, kubectl)
-			defer cleanup()
 
-			if err := helm.InstallWithValues(chrt.Path(), valuesFile, namespace, release); err != nil {
+			tmpValuesFile, tmpValuesFileCleanup, err := newTempValuesFileWithOverrides(valuesFile, valuesOverrides)
+			if err != nil {
+				// it is required this operation to succeed, otherwise there are no guarantees the values informed using
+				// `--chart-set` are propagated to the installation process, so the process breaks here.
+				return fmt.Errorf("creating temporary values file: %w", err)
+			}
+			defer tmpValuesFileCleanup()
+
+			namespace, release, releaseSelector, releaseCleanup := generateInstallConfig(cfg, chrt, helm, kubectl)
+			defer releaseCleanup()
+
+			if err := helm.InstallWithValues(chrt.Path(), tmpValuesFile, namespace, release); err != nil {
 				return err
 			}
 			return testRelease(helm, kubectl, release, namespace, releaseSelector, false)
