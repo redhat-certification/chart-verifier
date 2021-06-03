@@ -1,13 +1,13 @@
 package checks
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
 	"runtime"
-	"errors"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -119,18 +119,12 @@ func TestChartTesting(t *testing.T) {
 	}
 }
 
-type ocVersionError struct{}
-
-func (v ocVersionError) getVersion() (string, error) {
+var getVersionError = func() (string, error) {
 	return "", errors.New("error")
 }
 
-type ocVersionWithoutError struct {
-	Version string
-}
-
-func (v ocVersionWithoutError) getVersion() (string, error) {
-	return v.Version, nil
+var getVersionGood = func() (string, error) {
+	return "4.7.9", nil
 }
 
 type testAnnotationHolder struct {
@@ -159,25 +153,25 @@ func TestVersionSetting(t *testing.T) {
 		{
 			description: "oc.Version returns 4.7.9",
 			holder:      &testAnnotationHolder{},
-			versioner:   ocVersionWithoutError{Version: "4.7.9"},
+			versioner:   getVersionGood,
 			version:     "4.7.9",
 		},
 		{
 			description: "oc.Version returns error, flag set to 4.7.8",
 			holder:      &testAnnotationHolder{CertifiedOpenShiftVersionFlag: "4.7.8"},
-			versioner:   ocVersionError{},
+			versioner:   getVersionError,
 			version:     "4.7.8",
 		},
 		{
 			description: "oc.Version returns semantic error, flag set to fourseveneight",
 			holder:      &testAnnotationHolder{CertifiedOpenShiftVersionFlag: "fourseveneight"},
-			versioner:   ocVersionError{},
+			versioner:   getVersionError,
 			error:       "OpenShift version is not following SemVer spec. Invalid Semantic Version",
 		},
 		{
 			description: "oc.Version returns error, flag not set",
 			holder:      &testAnnotationHolder{},
-			versioner:   ocVersionError{},
+			versioner:   getVersionError,
 			error:       "Missing OpenShift version. error. And the 'openshift-version' flag has not set.",
 		},
 	}
@@ -186,7 +180,7 @@ func TestVersionSetting(t *testing.T) {
 
 		t.Run(tc.description, func(t *testing.T) {
 
-			err := setOCVersion(&CheckOptions{AnnotationHolder: tc.holder}, tc.versioner)
+			err := setOCVersion(tc.holder, tc.versioner)
 
 			if len(tc.error) > 0 {
 				require.Error(t, err)

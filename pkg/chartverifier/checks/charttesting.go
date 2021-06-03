@@ -18,13 +18,9 @@ import (
 )
 
 // Versioner provides OpenShift version
-type Versioner interface {
-	getVersion() (string, error)
-}
+type Versioner func() (string, error)
 
-type version struct{}
-
-func (ver *version) getVersion() (string, error) {
+var getVersion = func() (string, error) {
 
 	procExec := exec.NewProcessExecutor(false)
 	oc := tool.NewOc(procExec)
@@ -137,7 +133,7 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 		}
 	}
 
-	if versionError := setOCVersion(opts, &version{}); versionError != nil {
+	if versionError := setOCVersion(opts.AnnotationHolder, getVersion); versionError != nil {
 		return NewResult(false, versionError.Error()), nil
 	}
 
@@ -383,31 +379,31 @@ func installAndTestChartRelease(
 	return result
 }
 
-func setOCVersion(opts *CheckOptions, versioner Versioner) error {
+func setOCVersion(holder AnnotationHolder, versioner Versioner) error {
 	// oc.GetVersion() returns an error both in case the oc command can't be executed and
 	// the value for the OpenShift version key not present.
-	osVersion, getVersionErr := versioner.getVersion()
+	osVersion, getVersionErr := versioner()
 
 	// From this point on, an error is set and osVersion is empty.
-	if getVersionErr != nil && opts.AnnotationHolder.GetCertifiedOpenShiftVersionFlag() != "" {
-		osVersion = opts.AnnotationHolder.GetCertifiedOpenShiftVersionFlag()
+	if getVersionErr != nil && holder.GetCertifiedOpenShiftVersionFlag() != "" {
+		osVersion = holder.GetCertifiedOpenShiftVersionFlag()
 	}
 
 	// osVersion is empty only if an error happened and a default value
 	// informed by the user hasn't been informed.
 	if osVersion == "" {
-		opts.AnnotationHolder.SetCertifiedOpenShiftVersion("N/A")
+		holder.SetCertifiedOpenShiftVersion("N/A")
 		return OpenShiftVersionErr(getVersionErr.Error())
 	}
 
 	// osVersion is guaranteed to have a value, not yet validated as a
 	// semver value.
 	if _, err := semver.NewVersion(osVersion); err != nil {
-		opts.AnnotationHolder.SetCertifiedOpenShiftVersion("N/A")
+		holder.SetCertifiedOpenShiftVersion("N/A")
 		return OpenShiftSemVerErr(err.Error())
 	}
 
-	opts.AnnotationHolder.SetCertifiedOpenShiftVersion(osVersion)
+	holder.SetCertifiedOpenShiftVersion(osVersion)
 
 	return nil
 }

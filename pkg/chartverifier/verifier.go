@@ -38,11 +38,6 @@ func NewCheckErr(err error) error {
 	return CheckErr(err.Error())
 }
 
-// Versioner provides OpenShift version
-type Versioner interface {
-	getVersion(debug bool) (string, error)
-}
-
 type AnnotationHolder struct {
 	Holder                        ReportBuilder
 	CertifiedOpenShiftVersionFlag string
