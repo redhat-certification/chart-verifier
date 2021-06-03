@@ -61,7 +61,7 @@ func TestInstallWithValues(t *testing.T) {
 		// act
 		err := h.InstallWithValues(chrt, valuesFile, namespace, release)
 
-        // assert
+		// assert
 		require.Error(t, err)
 		require.Equal(t, expectedErrorMessage, err.Error())
 	})
