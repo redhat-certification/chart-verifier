@@ -89,7 +89,7 @@ func TestTemplate(t *testing.T) {
 
 	TestCases := []testCase{
 		{description: "chart-0.1.0-v3.valid.tgz images ", uri: "chart-0.1.0-v3.valid.tgz", images: []string{"nginx:latest",
-			"snyk/kubernetes-operator", "rhscl/mongodb-36-rhel7:latest", "openshift3/ose-pod:v3.11",
+			"snyk/kubernetes-operator", "rhscl/mongodb-36-rhel7:latest", "openshift3/ose-pod:v3.11.439",
 			"docker.io/ibmcom/ibmcloud-object-storage-driver@sha256:b6ec40ca7300bf9e2d0e7b9ff4272258f50d2d6ff9db766207f4a4281b2e33a1",
 			"docker.io/ibmcom/ibmcloud-object-storage-plugin@sha256:0c361f70133a5aae4ac3cbbc250322f8dee2e71da734b818621033179508ce6f"}},
 		{description: "chart-0.1.0-v3.with-crd.tgz", uri: "chart-0.1.0-v3.with-crd.tgz", images: []string{"nginx:1.16.0", "busybox"}},
