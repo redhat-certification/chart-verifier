@@ -2,9 +2,7 @@ package tool
 
 import (
 	"fmt"
-	"strings"
 
-	"github.com/helm/chart-testing/v3/pkg/exec"
 	"github.com/helm/chart-testing/v3/pkg/tool"
 )
 
@@ -12,20 +10,16 @@ import (
 // to silence output being streamed to Stdout.
 type Helm struct {
 	tool.Helm
-	exec.ProcessExecutor
+	ProcessExecutor
 	extraArgs []string
 }
 
-func NewHelm(exec exec.ProcessExecutor, extraArgs []string) Helm {
+func NewHelm(exec ProcessExecutor, extraArgs []string) Helm {
 	return Helm{
-		tool.NewHelm(exec, extraArgs),
+		tool.NewHelm(exec.ProcessExecutor, extraArgs),
 		exec,
 		extraArgs,
 	}
-}
-
-func (h Helm) RunProcessAndCaptureOutput(executable string, execArgs ...interface{}) (string, error) {
-	return h.RunProcessInDirAndCaptureOutput("", executable, execArgs...)
 }
 
 func toStringArray(args []interface{}) []string {
@@ -42,38 +36,6 @@ func toInterfaceArray(args []string) []interface{} {
 		argsCopy[i] = a
 	}
 	return argsCopy
-}
-
-// RunProcessInDirAndCaptureOutput overrides exec.ProcessExecutor's and inject the command line and any streamed content
-// to either Stdout or Stderr into the returned error, if any.
-func (h Helm) RunProcessInDirAndCaptureOutput(
-    workingDirectory string,
-    executable string,
-    execArgs ...interface{},
-) (string, error) {
-	cmd, err := h.CreateProcess(executable, execArgs...)
-	if err != nil {
-		return "", err
-	}
-
-	cmd.Dir = workingDirectory
-	bytes, err := cmd.CombinedOutput()
-	capturedOutput := strings.TrimSpace(string(bytes))
-
-	execArgsCopy := toStringArray(execArgs)
-	execArgsStr := strings.Join(execArgsCopy, " ")
-
-	if err != nil {
-		if len(capturedOutput) == 0 {
-			return "", fmt.Errorf(
-                "Error running process: executing %s with args %q: %w",
-                executable, execArgsStr, err)
-		}
-		return capturedOutput, fmt.Errorf(
-            "Error running process: executing %s with args %q: %w\n---\n%s",
-            executable, execArgsStr, err, capturedOutput)
-	}
-	return capturedOutput, nil
 }
 
 // InstallWithValues overrides chart-testing's tool.Helm method to execute the modified RunProcessAndCaptureOutput

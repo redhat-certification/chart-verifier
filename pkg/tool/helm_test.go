@@ -5,7 +5,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/helm/chart-testing/v3/pkg/exec"
 	"github.com/stretchr/testify/require"
 )
 
@@ -33,7 +32,7 @@ func TestInstallWithValues(t *testing.T) {
 			"Error running process: executing helm with args \"install %s %s --namespace %s --wait\": "+
 				"exec: \"helm\": executable file not found in $PATH",
 			release, chrt, namespace)
-		h := NewHelm(exec.NewProcessExecutor(false), []string{})
+		h := NewHelm(NewProcessExecutor(false), []string{})
 
 		// act
 		// for this test, none of the arguments matter si
@@ -54,7 +53,7 @@ func TestInstallWithValues(t *testing.T) {
 			"Error running process: executing helm with args \"install %s %s --namespace %s --wait\": "+
 				"exit status 1\n---\nError: failed to download \"%s\" (hint: running `helm repo update` may help)",
 			release, chrt, namespace, chrt)
-		processExecutor := exec.NewProcessExecutor(false)
+		processExecutor := NewProcessExecutor(false)
 		extraArgs := []string{}
 		h := NewHelm(processExecutor, extraArgs)
 
