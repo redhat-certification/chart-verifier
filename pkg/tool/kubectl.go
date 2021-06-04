@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/helm/chart-testing/v3/pkg/exec"
 	"github.com/helm/chart-testing/v3/pkg/tool"
 )
 
@@ -12,12 +11,12 @@ import (
 // chart-testing to silence output being streamed to Stdout.
 type Kubectl struct {
 	tool.Kubectl
-	exec.ProcessExecutor
+	ProcessExecutor
 }
 
-func NewKubectl(exec exec.ProcessExecutor) Kubectl {
+func NewKubectl(exec ProcessExecutor) Kubectl {
 	return Kubectl{
-		tool.NewKubectl(exec),
+		tool.NewKubectl(exec.ProcessExecutor),
 		exec,
 	}
 }

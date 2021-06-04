@@ -18,7 +18,6 @@ package chartverifier
 
 import (
 	"github.com/Masterminds/semver"
-	"github.com/helm/chart-testing/v3/pkg/exec"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/pkg/tool"
 	"github.com/spf13/viper"
@@ -81,7 +80,7 @@ type version struct{}
 
 func (ver *version) getVersion(debug bool) (string, error) {
 
-	procExec := exec.NewProcessExecutor(debug)
+	procExec := tool.NewProcessExecutor(debug)
 	oc := tool.NewOc(procExec)
 
 	// oc.GetVersion() returns an error both in case the oc command can't be executed and
