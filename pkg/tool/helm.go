@@ -23,7 +23,7 @@ func NewHelm(exec ProcessExecutor, extraArgs []string) Helm {
 }
 
 func toStringArray(args []interface{}) []string {
-    copy := make([]string, len(args))
+	copy := make([]string, len(args))
 	for i, a := range args {
 		copy[i] = fmt.Sprint(a)
 	}
@@ -31,7 +31,7 @@ func toStringArray(args []interface{}) []string {
 }
 
 func toInterfaceArray(args []string) []interface{} {
-    copy := make([]interface{}, len(args))
+	copy := make([]interface{}, len(args))
 	for i, a := range args {
 		copy[i] = a
 	}
@@ -48,7 +48,7 @@ func (h Helm) InstallWithValues(chart string, valuesFile string, namespace strin
 
 	helmArgs := []interface{}{"install", release, chart, "--namespace", namespace, "--wait"}
 	helmArgs = append(helmArgs, values...)
-	helmArgs = append(helmArgs,  toInterfaceArray(h.extraArgs)...)
+	helmArgs = append(helmArgs, toInterfaceArray(h.extraArgs)...)
 
 	_, err := h.RunProcessAndCaptureOutput("helm", helmArgs...)
 	return err

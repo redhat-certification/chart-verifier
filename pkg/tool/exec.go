@@ -7,14 +7,14 @@ import (
 	"github.com/helm/chart-testing/v3/pkg/exec"
 )
 
-type ProcessExecutor struct{
-    exec.ProcessExecutor
+type ProcessExecutor struct {
+	exec.ProcessExecutor
 }
 
 func NewProcessExecutor(debug bool) ProcessExecutor {
-    return ProcessExecutor{
-        exec.NewProcessExecutor(debug),
-    }
+	return ProcessExecutor{
+		exec.NewProcessExecutor(debug),
+	}
 }
 
 func (p ProcessExecutor) RunProcessAndCaptureOutput(executable string, execArgs ...interface{}) (string, error) {
@@ -24,9 +24,9 @@ func (p ProcessExecutor) RunProcessAndCaptureOutput(executable string, execArgs 
 // RunProcessInDirAndCaptureOutput overrides exec.ProcessExecutor's and inject the command line and any streamed content
 // to either Stdout or Stderr into the returned error, if any.
 func (p ProcessExecutor) RunProcessInDirAndCaptureOutput(
-    workingDirectory string,
-    executable string,
-    execArgs ...interface{},
+	workingDirectory string,
+	executable string,
+	execArgs ...interface{},
 ) (string, error) {
 	cmd, err := p.CreateProcess(executable, execArgs...)
 	if err != nil {
@@ -43,12 +43,12 @@ func (p ProcessExecutor) RunProcessInDirAndCaptureOutput(
 	if err != nil {
 		if len(capturedOutput) == 0 {
 			return "", fmt.Errorf(
-                "Error running process: executing %s with args %q: %w",
-                executable, execArgsStr, err)
+				"Error running process: executing %s with args %q: %w",
+				executable, execArgsStr, err)
 		}
 		return capturedOutput, fmt.Errorf(
-            "Error running process: executing %s with args %q: %w\n---\n%s",
-            executable, execArgsStr, err, capturedOutput)
+			"Error running process: executing %s with args %q: %w\n---\n%s",
+			executable, execArgsStr, err, capturedOutput)
 	}
 	return capturedOutput, nil
 }
