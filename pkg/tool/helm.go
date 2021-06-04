@@ -23,19 +23,19 @@ func NewHelm(exec ProcessExecutor, extraArgs []string) Helm {
 }
 
 func toStringArray(args []interface{}) []string {
-    argsCopy := make([]string, len(args))
+    copy := make([]string, len(args))
 	for i, a := range args {
-		argsCopy[i] = fmt.Sprint(a)
+		copy[i] = fmt.Sprint(a)
 	}
-	return argsCopy
+	return copy
 }
 
 func toInterfaceArray(args []string) []interface{} {
-    argsCopy := make([]interface{}, len(args))
+    copy := make([]interface{}, len(args))
 	for i, a := range args {
-		argsCopy[i] = a
+		copy[i] = a
 	}
-	return argsCopy
+	return copy
 }
 
 // InstallWithValues overrides chart-testing's tool.Helm method to execute the modified RunProcessAndCaptureOutput
