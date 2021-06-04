@@ -30,8 +30,8 @@ func TestInstallWithValues(t *testing.T) {
 		release := "non-existing-release"
 		namespace := "default"
 		expectedErrorMessage := fmt.Sprintf(
-			"executing helm with args \"install %s %s --namespace %s --wait\": "+
-				"Error running process: exec: \"helm\": executable file not found in $PATH",
+			"Error running process: executing helm with args \"install %s %s --namespace %s --wait\": "+
+				"exec: \"helm\": executable file not found in $PATH",
 			release, chrt, namespace)
 		h := NewHelm(exec.NewProcessExecutor(false), []string{})
 
@@ -51,8 +51,8 @@ func TestInstallWithValues(t *testing.T) {
 		valuesFile := ""
 		namespace := "default"
 		expectedErrorMessage := fmt.Sprintf(
-			"executing helm with args \"install %s %s --namespace %s --wait\": "+
-				"Error running process: exit status 1\n---\nError: failed to download \"%s\" (hint: running `helm repo update` may help)",
+			"Error running process: executing helm with args \"install %s %s --namespace %s --wait\": "+
+				"exit status 1\n---\nError: failed to download \"%s\" (hint: running `helm repo update` may help)",
 			release, chrt, namespace, chrt)
 		processExecutor := exec.NewProcessExecutor(false)
 		extraArgs := []string{}

@@ -25,10 +25,32 @@ func NewHelm(exec exec.ProcessExecutor, extraArgs []string) Helm {
 }
 
 func (h Helm) RunProcessAndCaptureOutput(executable string, execArgs ...interface{}) (string, error) {
-	return h.RunProcessInDirAndCaptureOutput("", executable, execArgs)
+	return h.RunProcessInDirAndCaptureOutput("", executable, execArgs...)
 }
 
-func (h Helm) RunProcessInDirAndCaptureOutput(workingDirectory string, executable string, execArgs ...interface{}) (string, error) {
+func toStringArray(args []interface{}) []string {
+    argsCopy := make([]string, len(args))
+	for i, a := range args {
+		argsCopy[i] = fmt.Sprint(a)
+	}
+	return argsCopy
+}
+
+func toInterfaceArray(args []string) []interface{} {
+    argsCopy := make([]interface{}, len(args))
+	for i, a := range args {
+		argsCopy[i] = a
+	}
+	return argsCopy
+}
+
+// RunProcessInDirAndCaptureOutput overrides exec.ProcessExecutor's and inject the command line and any streamed content
+// to either Stdout or Stderr into the returned error, if any.
+func (h Helm) RunProcessInDirAndCaptureOutput(
+    workingDirectory string,
+    executable string,
+    execArgs ...interface{},
+) (string, error) {
 	cmd, err := h.CreateProcess(executable, execArgs...)
 	if err != nil {
 		return "", err
@@ -38,36 +60,36 @@ func (h Helm) RunProcessInDirAndCaptureOutput(workingDirectory string, executabl
 	bytes, err := cmd.CombinedOutput()
 	capturedOutput := strings.TrimSpace(string(bytes))
 
+	execArgsCopy := toStringArray(execArgs)
+	execArgsStr := strings.Join(execArgsCopy, " ")
+
 	if err != nil {
-		return capturedOutput, fmt.Errorf("Error running process: %w", err)
+		if len(capturedOutput) == 0 {
+			return "", fmt.Errorf(
+                "Error running process: executing %s with args %q: %w",
+                executable, execArgsStr, err)
+		}
+		return capturedOutput, fmt.Errorf(
+            "Error running process: executing %s with args %q: %w\n---\n%s",
+            executable, execArgsStr, err, capturedOutput)
 	}
 	return capturedOutput, nil
 }
 
+// InstallWithValues overrides chart-testing's tool.Helm method to execute the modified RunProcessAndCaptureOutput
+// method.
 func (h Helm) InstallWithValues(chart string, valuesFile string, namespace string, release string) error {
-	var values []string
+	var values []interface{}
 	if valuesFile != "" {
-		values = []string{"--values", valuesFile}
+		values = []interface{}{"--values", valuesFile}
 	}
 
-	helmArgs := []string{"install", release, chart, "--namespace", namespace, "--wait"}
+	helmArgs := []interface{}{"install", release, chart, "--namespace", namespace, "--wait"}
 	helmArgs = append(helmArgs, values...)
-	helmArgs = append(helmArgs, h.extraArgs...)
+	helmArgs = append(helmArgs,  toInterfaceArray(h.extraArgs)...)
 
-	if outputCapture, err := h.RunProcessAndCaptureOutput("helm", helmArgs); err != nil {
-		// augments the resulting error with the contents captured from Stdout, in the following format:
-		//
-		// executing helm with args 'helm install ...': <process error>
-		// ---
-		// <stdout capture>
-		if len(outputCapture) == 0 {
-			return fmt.Errorf("executing helm with args %q: %w", strings.Join(helmArgs, " "), err)
-		}
-
-		return fmt.Errorf("executing helm with args %q: %w\n---\n%s", strings.Join(helmArgs, " "), err, outputCapture)
-	}
-
-	return nil
+	_, err := h.RunProcessAndCaptureOutput("helm", helmArgs...)
+	return err
 }
 
 func (h Helm) Test(namespace string, release string) error {
