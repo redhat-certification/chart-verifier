@@ -119,11 +119,11 @@ func TestChartTesting(t *testing.T) {
 	}
 }
 
-var getVersionError = func() (string, error) {
+func getVersionError() (string, error) {
 	return "", errors.New("error")
 }
 
-var getVersionGood = func() (string, error) {
+func getVersionGood() (string, error) {
 	return "4.7.9", nil
 }
 

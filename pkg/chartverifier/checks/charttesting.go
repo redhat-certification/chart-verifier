@@ -20,7 +20,7 @@ import (
 // Versioner provides OpenShift version
 type Versioner func() (string, error)
 
-var getVersion = func() (string, error) {
+func getVersion() (string, error) {
 
 	procExec := exec.NewProcessExecutor(false)
 	oc := tool.NewOc(procExec)
