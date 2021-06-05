@@ -73,7 +73,6 @@ esac
 $CONTAINER_RUNTIME                   \
     run --rm -i                      \
     -e KUBECONFIG=/.kube/config      \
-    -e PATH=/usr/local/bin           \
     $EXTRA_ARGS                      \
     -v "${KUBECONFIG}":/.kube/config \
     "${CHART_VERIFIER_IMAGE}"        \
