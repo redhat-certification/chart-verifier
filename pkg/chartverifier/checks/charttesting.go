@@ -21,7 +21,7 @@ type Versioner func() (string, error)
 
 func getVersion() (string, error) {
 
-	procExec := exec.NewProcessExecutor(false)
+	procExec := tool.NewProcessExecutor(false)
 	oc := tool.NewOc(procExec)
 
 	// oc.GetVersion() returns an error both in case the oc command can't be executed and
