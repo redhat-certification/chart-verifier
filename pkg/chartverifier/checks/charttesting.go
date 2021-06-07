@@ -10,7 +10,6 @@ import (
 	"github.com/Masterminds/semver"
 	"github.com/helm/chart-testing/v3/pkg/chart"
 	"github.com/helm/chart-testing/v3/pkg/config"
-	"github.com/helm/chart-testing/v3/pkg/exec"
 	"github.com/helm/chart-testing/v3/pkg/util"
 	"github.com/imdario/mergo"
 	"github.com/redhat-certification/chart-verifier/pkg/tool"
@@ -89,7 +88,7 @@ func buildChartTestingConfiguration(opts *CheckOptions) config.Configuration {
 func ChartTesting(opts *CheckOptions) (Result, error) {
 
 	cfg := buildChartTestingConfiguration(opts)
-	procExec := exec.NewProcessExecutor(cfg.Debug)
+	procExec := tool.NewProcessExecutor(cfg.Debug)
 	extraArgs := strings.Fields(cfg.HelmExtraArgs)
 	helm := tool.NewHelm(procExec, extraArgs)
 	kubectl := tool.NewKubectl(procExec)

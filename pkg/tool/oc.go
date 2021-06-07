@@ -3,17 +3,16 @@ package tool
 import (
 	"fmt"
 
-	"github.com/helm/chart-testing/v3/pkg/exec"
 	"gopkg.in/yaml.v3"
 )
 
 type Oc struct {
-	exec exec.ProcessExecutor
+	ProcessExecutor
 }
 
-func NewOc(exec exec.ProcessExecutor) Oc {
+func NewOc(exec ProcessExecutor) Oc {
 	return Oc{
-		exec: exec,
+		ProcessExecutor: exec,
 	}
 }
 
@@ -31,7 +30,7 @@ var kubeOpenShiftVersionMap map[string]string = map[string]string{
 }
 
 func (o Oc) GetVersion() (string, error) {
-	rawOutput, err := o.exec.RunProcessAndCaptureOutput("oc", "version", "-o", "yaml")
+	rawOutput, err := o.RunProcessAndCaptureOutput("oc", "version", "-o", "yaml")
 	if err != nil {
 		return "", err
 	}
