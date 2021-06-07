@@ -42,7 +42,7 @@ func (o Oc) GetVersion() (string, error) {
 	// Relying on Kubernetes version can be replaced after fixing this issue:
 	// https://bugzilla.redhat.com/show_bug.cgi?id=1850656
 	kubeServerVersion := out[osVersionKey].(map[string]interface{})
-	kubeVersion := fmt.Sprintf("%v.%v", kubeServerVersion["major"], kubeServerVersion["minor"])
+	kubeVersion := fmt.Sprintf("%s.%s", kubeServerVersion["major"], kubeServerVersion["minor"])
 	osVersion, ok := kubeOpenShiftVersionMap[kubeVersion]
 	if !ok {
 		return "", fmt.Errorf("Internal error: %q not found in Kubernetes-OpenShift version map", kubeVersion)
