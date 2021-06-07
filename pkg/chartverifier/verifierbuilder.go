@@ -122,7 +122,6 @@ func (b *verifierBuilder) Build() (Vertifier, error) {
 		parts := strings.Split(val, "=")
 		b.config.Set(parts[0], parts[1])
 	}
-	ver := &version{}
 	return &verifier{
 		config:           b.config,
 		registry:         b.registry,
@@ -131,7 +130,6 @@ func (b *verifierBuilder) Build() (Vertifier, error) {
 		toolVersion:      b.toolVersion,
 		openshiftVersion: b.openshiftVersion,
 		values:           b.values,
-		version:          ver,
 	}, nil
 }
 

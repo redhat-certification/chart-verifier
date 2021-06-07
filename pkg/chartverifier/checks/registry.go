@@ -51,6 +51,11 @@ func (r *Result) AddResult(outcome bool, reason string) Result {
 	return *r
 }
 
+type AnnotationHolder interface {
+	SetCertifiedOpenShiftVersion(version string)
+	GetCertifiedOpenShiftVersionFlag() string
+}
+
 type CheckType string
 
 type Check struct {
@@ -70,6 +75,8 @@ type CheckOptions struct {
 	Values map[string]interface{}
 	// HelmEnvSettings contains the Helm related environment settings.
 	HelmEnvSettings *helmcli.EnvSettings
+	// AnnotationHolder provides and API to set the OpenShift Version
+	AnnotationHolder AnnotationHolder
 }
 
 type CheckFunc func(options *CheckOptions) (Result, error)

@@ -7,6 +7,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/Masterminds/semver"
 	"github.com/helm/chart-testing/v3/pkg/chart"
 	"github.com/helm/chart-testing/v3/pkg/config"
 	"github.com/helm/chart-testing/v3/pkg/util"
@@ -14,6 +15,31 @@ import (
 	"github.com/redhat-certification/chart-verifier/pkg/tool"
 	"gopkg.in/yaml.v3"
 )
+
+// Versioner provides OpenShift version
+type Versioner func() (string, error)
+
+func getVersion() (string, error) {
+
+	procExec := tool.NewProcessExecutor(false)
+	oc := tool.NewOc(procExec)
+
+	// oc.GetVersion() returns an error both in case the oc command can't be executed and
+	// the value for the OpenShift version key not present.
+	return oc.GetVersion()
+}
+
+type OpenShiftVersionErr string
+
+func (e OpenShiftVersionErr) Error() string {
+	return "Missing OpenShift version. " + string(e) + ". And the 'openshift-version' flag has not set."
+}
+
+type OpenShiftSemVerErr string
+
+func (e OpenShiftSemVerErr) Error() string {
+	return "OpenShift version is not following SemVer spec. " + string(e)
+}
 
 // buildChartTestingConfiguration computes the chart testing related
 // configuration from the given check options.
@@ -104,6 +130,10 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 		if result.Error != nil {
 			return NewResult(false, result.Error.Error()), nil
 		}
+	}
+
+	if versionError := setOCVersion(opts.AnnotationHolder, getVersion); versionError != nil {
+		return NewResult(false, versionError.Error()), nil
 	}
 
 	return NewResult(true, ChartTestingSuccess), nil
@@ -346,4 +376,33 @@ func installAndTestChartRelease(
 	}
 
 	return result
+}
+
+func setOCVersion(holder AnnotationHolder, versioner Versioner) error {
+	// oc.GetVersion() returns an error both in case the oc command can't be executed and
+	// the value for the OpenShift version key not present.
+	osVersion, getVersionErr := versioner()
+
+	// From this point on, an error is set and osVersion is empty.
+	if getVersionErr != nil && holder.GetCertifiedOpenShiftVersionFlag() != "" {
+		osVersion = holder.GetCertifiedOpenShiftVersionFlag()
+	}
+
+	// osVersion is empty only if an error happened and a default value
+	// informed by the user hasn't been informed.
+	if osVersion == "" {
+		holder.SetCertifiedOpenShiftVersion("N/A")
+		return OpenShiftVersionErr(getVersionErr.Error())
+	}
+
+	// osVersion is guaranteed to have a value, not yet validated as a
+	// semver value.
+	if _, err := semver.NewVersion(osVersion); err != nil {
+		holder.SetCertifiedOpenShiftVersion("N/A")
+		return OpenShiftSemVerErr(err.Error())
+	}
+
+	holder.SetCertifiedOpenShiftVersion(osVersion)
+
+	return nil
 }

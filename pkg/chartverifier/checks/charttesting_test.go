@@ -1,6 +1,7 @@
 package checks
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -116,4 +117,81 @@ func TestChartTesting(t *testing.T) {
 			require.Contains(t, r.Reason, "executing helm with args")
 		})
 	}
+}
+
+func getVersionError() (string, error) {
+	return "", errors.New("error")
+}
+
+func getVersionGood() (string, error) {
+	return "4.7.9", nil
+}
+
+type testAnnotationHolder struct {
+	OpenShiftVersion              string
+	CertifiedOpenShiftVersionFlag string
+}
+
+func (holder *testAnnotationHolder) SetCertifiedOpenShiftVersion(version string) {
+	holder.OpenShiftVersion = version
+}
+
+func (holder *testAnnotationHolder) GetCertifiedOpenShiftVersionFlag() string {
+	return holder.CertifiedOpenShiftVersionFlag
+}
+
+func TestVersionSetting(t *testing.T) {
+	type testCase struct {
+		description string
+		holder      *testAnnotationHolder
+		versioner   Versioner
+		version     string
+		error       string
+	}
+
+	testCases := []testCase{
+		{
+			description: "oc.Version returns 4.7.9",
+			holder:      &testAnnotationHolder{},
+			versioner:   getVersionGood,
+			version:     "4.7.9",
+		},
+		{
+			description: "oc.Version returns error, flag set to 4.7.8",
+			holder:      &testAnnotationHolder{CertifiedOpenShiftVersionFlag: "4.7.8"},
+			versioner:   getVersionError,
+			version:     "4.7.8",
+		},
+		{
+			description: "oc.Version returns semantic error, flag set to fourseveneight",
+			holder:      &testAnnotationHolder{CertifiedOpenShiftVersionFlag: "fourseveneight"},
+			versioner:   getVersionError,
+			error:       "OpenShift version is not following SemVer spec. Invalid Semantic Version",
+		},
+		{
+			description: "oc.Version returns error, flag not set",
+			holder:      &testAnnotationHolder{},
+			versioner:   getVersionError,
+			error:       "Missing OpenShift version. error. And the 'openshift-version' flag has not set.",
+		},
+	}
+
+	for _, tc := range testCases {
+
+		t.Run(tc.description, func(t *testing.T) {
+
+			err := setOCVersion(tc.holder, tc.versioner)
+
+			if len(tc.error) > 0 {
+				require.Error(t, err)
+				require.Equal(t, tc.error, err.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.version, tc.holder.OpenShiftVersion)
+			}
+
+		})
+
+	}
+
 }

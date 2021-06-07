@@ -17,9 +17,7 @@
 package chartverifier
 
 import (
-	"github.com/Masterminds/semver"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
-	"github.com/redhat-certification/chart-verifier/pkg/tool"
 	"github.com/spf13/viper"
 	helmcli "helm.sh/helm/v3/pkg/cli"
 )
@@ -36,25 +34,21 @@ func (e CheckErr) Error() string {
 	return "check error: " + string(e)
 }
 
-type OpenShiftVersionErr string
-
-func (e OpenShiftVersionErr) Error() string {
-	return "Missing OpenShift version. " + string(e) + ". And the 'openshift-version' flag has not set."
-}
-
-type OpenShiftSemVerErr string
-
-func (e OpenShiftSemVerErr) Error() string {
-	return "OpenShift version is not following SemVer spec. " + string(e)
-}
-
 func NewCheckErr(err error) error {
 	return CheckErr(err.Error())
 }
 
-// Versioner provides OpenShift version
-type Versioner interface {
-	getVersion(debug bool) (string, error)
+type AnnotationHolder struct {
+	Holder                        ReportBuilder
+	CertifiedOpenShiftVersionFlag string
+}
+
+func (holder *AnnotationHolder) SetCertifiedOpenShiftVersion(version string) {
+	holder.Holder.SetCertifiedOpenShiftVersion(version)
+}
+
+func (holder *AnnotationHolder) GetCertifiedOpenShiftVersionFlag() string {
+	return holder.CertifiedOpenShiftVersionFlag
 }
 
 type verifier struct {
@@ -65,7 +59,6 @@ type verifier struct {
 	toolVersion      string
 	openshiftVersion string
 	values           map[string]interface{}
-	version          Versioner
 }
 
 func (c *verifier) subConfig(name string) *viper.Viper {
@@ -76,18 +69,6 @@ func (c *verifier) subConfig(name string) *viper.Viper {
 	}
 }
 
-type version struct{}
-
-func (ver *version) getVersion(debug bool) (string, error) {
-
-	procExec := tool.NewProcessExecutor(debug)
-	oc := tool.NewOc(procExec)
-
-	// oc.GetVersion() returns an error both in case the oc command can't be executed and
-	// the value for the OpenShift version key not present.
-	return oc.GetVersion()
-}
-
 func (c *verifier) Verify(uri string) (*Report, error) {
 
 	chrt, _, err := checks.LoadChartFromURI(uri)
@@ -95,33 +76,10 @@ func (c *verifier) Verify(uri string) (*Report, error) {
 		return nil, err
 	}
 
-	// oc.GetVersion() returns an error both in case the oc command can't be executed and
-	// the value for the OpenShift version key not present.
-	osVersion, getVersionErr := c.version.getVersion(c.settings.Debug)
-
-	// From this point on, an error is set and osVersion is empty.
-	if getVersionErr != nil && c.openshiftVersion != "" {
-		osVersion = c.openshiftVersion
-	}
-
-	// osVersion is empty only if an error happened and a default value
-	// informed by the user hasn't been informed.
-	if osVersion == "" {
-		return nil, OpenShiftVersionErr(getVersionErr.Error())
-	}
-
-	// osVersion is guaranteed to have a value, not yet validated as a
-	// semver value.
-	if _, err := semver.NewVersion(osVersion); err != nil {
-		return nil, OpenShiftSemVerErr(err.Error())
-	}
-	// osVersion is guaranteed to a valid value from here onwards.
-
 	result := NewReportBuilder().
 		SetToolVersion(c.toolVersion).
 		SetChartUri(uri).
-		SetChart(chrt).
-		SetCertifiedOpenShiftVersion(osVersion)
+		SetChart(chrt)
 
 	for _, name := range c.requiredChecks {
 		check, ok := c.registry.Get(name)
@@ -129,11 +87,15 @@ func (c *verifier) Verify(uri string) (*Report, error) {
 			return nil, CheckNotFoundErr(name)
 		}
 
+		holder := AnnotationHolder{Holder: result,
+			CertifiedOpenShiftVersionFlag: c.openshiftVersion}
+
 		r, checkErr := check.Func(&checks.CheckOptions{
-			HelmEnvSettings: c.settings,
-			URI:             uri,
-			Values:          c.values,
-			ViperConfig:     c.subConfig(name),
+			HelmEnvSettings:  c.settings,
+			URI:              uri,
+			Values:           c.values,
+			ViperConfig:      c.subConfig(name),
+			AnnotationHolder: &holder,
 		})
 
 		if checkErr != nil {
