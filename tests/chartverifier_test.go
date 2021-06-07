@@ -38,11 +38,12 @@ func TestChartVerifierSh(t *testing.T) {
 		shPath, err := absPathFromSourceFileLocation("../hack/chart-verifier.sh")
 		require.NoError(t, err)
 
-		pkgPath, err := absPathFromSourceFileLocation("../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz")
+		pkgPath, err := absPathFromSourceFileLocation("../pkg/chartverifier/checks/psql-service-0.1.7")
 		require.NoError(t, err)
 
 		args := []interface{}{
-			"-V", "4.9",
+			"-V", "4.8",
+			"--chart-set", "k8Project=default",
 			pkgPath,
 		}
 
@@ -52,11 +53,9 @@ func TestChartVerifierSh(t *testing.T) {
 		require.NoError(t, err)
 		require.NotEmpty(t, cmdOutput)
 
-		expected := "results:\n" +
-			"  - check: is-helm-v3\n" +
+		expected := "- check: is-helm-v3\n" +
 			"    type: Mandatory\n" +
-			"    outcome: PASS\n" +
-			"    reason: API version is V2, used in Helm 3\n"
+			"    outcome: PASS\n"
 
 		require.Contains(t, cmdOutput, expected)
 	})

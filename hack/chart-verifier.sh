@@ -24,12 +24,14 @@ fi
 
 # "[-o <openshiftVersion] <chart>"
 
-PARSED_ARGUMENTS=$(getopt -a -o "V:h" --long "openshift-version,help" -- "$@" 2>/dev/null)
+PARSED_ARGUMENTS=$(getopt -a -o "S:V:h" --long "chart-set:,openshift-version:,help" -- "$@" 2>/dev/null)
 [ $? -eq 0 ] || {
     PARSED_ARGUMENTS="--help"
 }
 
 eval set -- "${PARSED_ARGUMENTS}"
+
+VERIFY_ARGS=""
 
 while true; do
     case "$1" in
@@ -37,16 +39,24 @@ while true; do
             echo "$0 [-V|--openshift-version <openshiftVersion>] <chart>"
             exit 0
             ;;
-        -o|--openshift-version)
+        -V|--openshift-version)
             shift
-            OPENSHIFT_VERSION="--openshift-version=$1"
+            V=$1
+            shift
+            OPENSHIFT_VERSION="--openshift-version=${V}"
+            ;;
+        -S|--chart-set)
+            FLAG=$1
+            shift
+            VALUE=$1
+            shift
+            VERIFY_ARGS="${VERIFY_ARGS} $FLAG=$VALUE"
             ;;
         --)
             shift
             break
             ;;
     esac
-    shift
 done
 
 [ -z "$1" ] && {
@@ -70,10 +80,10 @@ case "$1" in
 esac
 
 # Execute the command.
-$CONTAINER_RUNTIME                   \
-    run --rm -i                      \
-    -e KUBECONFIG=/.kube/config      \
-    $EXTRA_ARGS                      \
-    -v "${KUBECONFIG}":/.kube/config \
-    "${CHART_VERIFIER_IMAGE}"        \
-    verify ${OPENSHIFT_VERSION} ${CHART_TO_VERIFY}
+$CONTAINER_RUNTIME                     \
+    run --rm -i                        \
+    -e KUBECONFIG=/.kube/config        \
+    $EXTRA_ARGS                        \
+    -v "${KUBECONFIG}":/.kube/config:z \
+    "${CHART_VERIFIER_IMAGE}"          \
+    verify ${OPENSHIFT_VERSION} ${VERIFY_ARGS} ${CHART_TO_VERIFY}
