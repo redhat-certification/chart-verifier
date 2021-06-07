@@ -7,12 +7,12 @@ import (
 )
 
 type Oc struct {
-	ProcessExecutor
+	ProcessExecutorer
 }
 
-func NewOc(exec ProcessExecutor) Oc {
+func NewOc(exec ProcessExecutorer) Oc {
 	return Oc{
-		ProcessExecutor: exec,
+		ProcessExecutorer: exec,
 	}
 }
 
