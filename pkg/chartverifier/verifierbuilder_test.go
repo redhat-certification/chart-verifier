@@ -17,6 +17,7 @@
 package chartverifier
 
 import (
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -36,7 +37,7 @@ func TestCertificationBuilder(t *testing.T) {
 		b := NewVerifierBuilder()
 
 		c, err := b.
-			SetChecks([]string{"a", "b"}).
+			SetChecks([]checks.CheckName{"a", "b"}).
 			Build()
 
 		require.NoError(t, err)

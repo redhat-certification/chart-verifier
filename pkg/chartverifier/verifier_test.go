@@ -47,7 +47,7 @@ func TestVerifier_Verify(t *testing.T) {
 
 	require.NoError(t, testutil.ServeCharts(ctx, addr, "./checks/"))
 
-	dummyCheckName := "dummy-check"
+	var dummyCheckName checks.CheckName = "dummy-check"
 
 	erroredCheck := func(_ *checks.CheckOptions) (checks.Result, error) {
 		return checks.Result{}, errors.New("artificial error")
@@ -68,7 +68,7 @@ func TestVerifier_Verify(t *testing.T) {
 			settings:       cli.New(),
 			config:         viper.New(),
 			registry:       checks.NewRegistry(),
-			requiredChecks: []string{dummyCheckName},
+			requiredChecks: []checks.CheckName{dummyCheckName},
 		}
 
 		r, err := c.Verify(validChartUri)
@@ -80,8 +80,8 @@ func TestVerifier_Verify(t *testing.T) {
 		c := &verifier{
 			settings:       cli.New(),
 			config:         viper.New(),
-			registry:       checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: erroredCheck}),
-			requiredChecks: []string{dummyCheckName},
+			registry:       checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: checks.MandatoryCheckType, Func: erroredCheck}),
+			requiredChecks: []checks.CheckName{dummyCheckName},
 		}
 
 		r, err := c.Verify(validChartUri)
@@ -94,8 +94,8 @@ func TestVerifier_Verify(t *testing.T) {
 		c := &verifier{
 			settings:         cli.New(),
 			config:           viper.New(),
-			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: negativeCheck}),
-			requiredChecks:   []string{dummyCheckName},
+			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: checks.MandatoryCheckType, Func: negativeCheck}),
+			requiredChecks:   []checks.CheckName{dummyCheckName},
 			openshiftVersion: "4.9",
 		}
 
@@ -109,8 +109,8 @@ func TestVerifier_Verify(t *testing.T) {
 		c := &verifier{
 			settings:       cli.New(),
 			config:         viper.New(),
-			registry:       checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
-			requiredChecks: []string{dummyCheckName},
+			registry:       checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: checks.MandatoryCheckType, Func: positiveCheck}),
+			requiredChecks: []checks.CheckName{dummyCheckName},
 		}
 
 		r, err := c.Verify(validChartUri)

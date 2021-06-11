@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
@@ -41,7 +42,7 @@ func init() {
 //goland:noinspection GoUnusedGlobalVariable
 var (
 	// allChecks contains all available checks to be executed by the program.
-	allChecks []string
+	allChecks []checks.CheckName
 	// enabledChecksFlag are the checks that should be performed, after the command initialization has happened.
 	enabledChecksFlag []string
 	// disabledChecksFlag are the checks that should not be performed.
@@ -54,27 +55,27 @@ var (
 	openshiftVersionFlag string
 )
 
-func filterChecks(set []string, subset []string, setEnabled bool, subsetEnabled bool) ([]string, error) {
-	selected := make([]string, 0)
-	seen := map[string]bool{}
+func filterChecks(set []checks.CheckName, subset []string, setEnabled bool, subsetEnabled bool) ([]checks.CheckName, error) {
+	selected := make([]checks.CheckName, 0)
+	seen := map[checks.CheckName]bool{}
 	for _, v := range set {
 		seen[v] = setEnabled
 	}
 	for _, v := range subset {
-		if _, ok := seen[v]; !ok {
+		if _, ok := seen[checks.CheckName(v)]; !ok {
 			return nil, errors.Errorf("check %q is unknown", v)
 		}
-		seen[v] = subsetEnabled
+		seen[checks.CheckName(v)] = subsetEnabled
 	}
 	for k, v := range seen {
 		if v {
-			selected = append(selected, k)
+			selected = append(selected, checks.CheckName(k))
 		}
 	}
 	return selected, nil
 }
 
-func buildChecks(all, enabled, disabled []string) ([]string, error) {
+func buildChecks(all []checks.CheckName, enabled, disabled []string) ([]checks.CheckName, error) {
 	switch {
 	case len(enabled) > 0 && len(disabled) > 0:
 		return nil, errors.New("--enable and --disable can't be used at the same time")

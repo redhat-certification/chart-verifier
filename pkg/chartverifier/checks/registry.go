@@ -56,10 +56,32 @@ type AnnotationHolder interface {
 	GetCertifiedOpenShiftVersionFlag() string
 }
 
+type CheckName string
+
+const (
+	HasReadmeName            CheckName = "has-readme"
+	IsHelmV3Name             CheckName = "is-helm-v3"
+	ContainsTestName         CheckName = "contains-test"
+	ContainsValuesName       CheckName = "contains-values"
+	ContainsValuesSchemaName CheckName = "contains-values-schema"
+	HasKubeversionName       CheckName = "has-kubeversion"
+	NotContainsCRDsName      CheckName = "not-contains-crds"
+	HelmLintName             CheckName = "helm-lint"
+	NotContainCsiObjectsName CheckName = "not-contain-csi-objects"
+	ImagesAreCertifiedName   CheckName = "images-are-certified"
+	ChartTestingName         CheckName = "chart-testing"
+)
+
 type CheckType string
 
+const (
+	MandatoryCheckType    CheckType = "Mandatory"
+	OptionalCheckType     CheckType = "Optional"
+	ExperimentalCheckType CheckType = "Experimental"
+)
+
 type Check struct {
-	Name string
+	Name CheckName
 	Type CheckType
 	Func CheckFunc
 }
@@ -82,15 +104,39 @@ type CheckOptions struct {
 type CheckFunc func(options *CheckOptions) (Result, error)
 
 type Registry interface {
-	Get(name string) (Check, bool)
+	Get(name CheckName) (Check, bool)
 	Add(check Check) Registry
-	AllChecks() []string
+	AllChecks() []CheckName
 }
 
-type defaultRegistry map[string]Check
+type defaultRegistry map[CheckName]Check
 
-func (r *defaultRegistry) AllChecks() []string {
-	allChecks := make([]string, 0)
+type CheckVersion struct {
+	Name    CheckName
+	Version string
+}
+
+var ChecksMap map[CheckVersion]Check
+
+func init() {
+
+	ChecksMap = make(map[CheckVersion]Check)
+
+	ChecksMap[CheckVersion{Name: HasReadmeName, Version: "1.0"}] = Check{Name: HasReadmeName, Func: HasReadme}
+	ChecksMap[CheckVersion{Name: IsHelmV3Name, Version: "1.0"}] = Check{Name: IsHelmV3Name, Func: IsHelmV3}
+	ChecksMap[CheckVersion{Name: ContainsTestName, Version: "1.0"}] = Check{Name: ContainsTestName, Func: ContainsTest}
+	ChecksMap[CheckVersion{Name: ContainsValuesName, Version: "1.0"}] = Check{Name: ContainsValuesName, Func: ContainsValues}
+	ChecksMap[CheckVersion{Name: ContainsValuesSchemaName, Version: "1.0"}] = Check{Name: ContainsValuesSchemaName, Func: ContainsValuesSchema}
+	ChecksMap[CheckVersion{Name: HasKubeversionName, Version: "1.0"}] = Check{Name: HasKubeversionName, Func: IsHelmV3}
+	ChecksMap[CheckVersion{Name: NotContainsCRDsName, Version: "1.0"}] = Check{Name: NotContainsCRDsName, Func: NotContainCRDs}
+	ChecksMap[CheckVersion{Name: HelmLintName, Version: "1.0"}] = Check{Name: HelmLintName, Func: HelmLint}
+	ChecksMap[CheckVersion{Name: NotContainCsiObjectsName, Version: "1.0"}] = Check{Name: NotContainCsiObjectsName, Func: NotContainCSIObjects}
+	ChecksMap[CheckVersion{Name: ImagesAreCertifiedName, Version: "1.0"}] = Check{Name: ImagesAreCertifiedName, Func: ImagesAreCertified}
+	ChecksMap[CheckVersion{Name: ChartTestingName, Version: "1.0"}] = Check{Name: ChartTestingName, Func: ChartTesting}
+}
+
+func (r *defaultRegistry) AllChecks() []CheckName {
+	allChecks := make([]CheckName, 0)
 	for k, _ := range *r {
 		allChecks = append(allChecks, k)
 	}
@@ -101,7 +147,7 @@ func NewRegistry() Registry {
 	return &defaultRegistry{}
 }
 
-func (r *defaultRegistry) Get(name string) (Check, bool) {
+func (r *defaultRegistry) Get(name CheckName) (Check, bool) {
 	v, ok := (*r)[name]
 	return v, ok
 }
