@@ -43,8 +43,9 @@ type CheckResult struct {
 }
 
 type reportBuilder struct {
-	Chart  *helmchart.Chart
-	Report Report
+	Chart      *helmchart.Chart
+	Report     Report
+	OCPVersion string
 }
 
 func NewReportBuilder() ReportBuilder {
@@ -54,7 +55,7 @@ func NewReportBuilder() ReportBuilder {
 }
 
 func (r *reportBuilder) SetCertifiedOpenShiftVersion(version string) ReportBuilder {
-	r.Report.Metadata.ToolMetadata.CertifiedOpenShiftVersions = version
+	r.OCPVersion = version
 	return r
 }
 
@@ -93,6 +94,12 @@ func (r *reportBuilder) Build() (*Report, error) {
 			r.Report.Metadata.ToolMetadata.Digest = GenerateSha(r.Chart.Raw)
 		case profiles.LastCertifiedTimestampAnnotation:
 			r.Report.Metadata.ToolMetadata.LastCertifiedTimestamp = time.Now().Format("2006-01-02T15:04:05.999999-07:00")
+		case profiles.OCPVersionAnnotation:
+			if len(r.OCPVersion) == 0 {
+				r.Report.Metadata.ToolMetadata.CertifiedOpenShiftVersions = "N/A"
+			} else {
+				r.Report.Metadata.ToolMetadata.CertifiedOpenShiftVersions = r.OCPVersion
+			}
 		}
 	}
 	return &r.Report, nil
