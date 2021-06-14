@@ -131,17 +131,33 @@ This section provides help on the basic usage of Helm chart checks with the podm
 
 ### Cluster Config
 
-Configuration of the `chart-testing` check can be achieved through the `--set` command line option, which in addition of configuring `chart-verifier` itself, can set check's configuration values.
+Configuration of the `chart-testing` check can be achieved in one of two ways: 
+
+1. Through the `--set` command line option, which in addition of configuring `chart-verifier` itself, can set check's configuration values.
     ```text
     $ chart-verifier                                                 \
         verify                                                       \
         --enable chart-testing                                       \
-        --set chartTesting.buildId=${BUILD_ID}                       \
-        --set chartTesting.upgrade=true                              \
-        --set chartTesting.skipMissingValues=true                    \
-        --set chartTesting.namespace=${NAMESPACE}                    \
-        --set chartTesting.releaseLabel="app.kubernetes.io/instance" \
+        --set chart-testing.buildId=${BUILD_ID}                       \
+        --set chart-testing.upgrade=true                              \
+        --set chart-testing.skipMissingValues=true                    \
+        --set chart-testing.namespace=${NAMESPACE}                    \
+        --set chart-testing.releaseLabel="app.kubernetes.io/instance" \
         some-chart.tgz
+    ```
+1. Through the `--set-values` command line option, where a YAML file can be used to configure the check. For example for a config.yaml file content:
+   ```text
+    chart-testing:
+        buildId: <BUILD_ID>
+        upgrade: true
+        skipMissingValues: true
+        namespace: <NAMESPACE>
+        releaseLabel: "app.kubernetes.io/instance"
+    ```
+
+    Once the file is persisted, a chart can be verified:
+    ```text
+    $ chart-verifier verify --enable chartTesting --set-values config.yaml some-chart.tgz
     ```
 
 ### Override values
