@@ -157,7 +157,7 @@ Configuration of the `chart-testing` check can be achieved in one of two ways:
 
     Once the file is persisted, a chart can be verified:
     ```text
-    $ chart-verifier verify --enable chartTesting --set-values config.yaml some-chart.tgz
+    $ chart-verifier verify --enable chart-testing --set-values config.yaml some-chart.tgz
     ```
 
 ### Override values
