@@ -25,7 +25,7 @@ import (
 type VerifierBuilder interface {
 	SetRegistry(registry checks.Registry) VerifierBuilder
 	SetValues(vals map[string]interface{}) VerifierBuilder
-	SetChecks(checks []checks.CheckName) VerifierBuilder
+	SetChecks(checks map[checks.CheckName]checks.Check) VerifierBuilder
 	SetConfig(config *viper.Viper) VerifierBuilder
 	SetOverrides([]string) VerifierBuilder
 	SetToolVersion(string) VerifierBuilder

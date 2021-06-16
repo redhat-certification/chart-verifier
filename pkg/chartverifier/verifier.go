@@ -54,7 +54,7 @@ func (holder *AnnotationHolder) GetCertifiedOpenShiftVersionFlag() string {
 type verifier struct {
 	config           *viper.Viper
 	registry         checks.Registry
-	requiredChecks   []checks.CheckName
+	requiredChecks   []checks.Check
 	settings         *helmcli.EnvSettings
 	toolVersion      string
 	profileName      string
@@ -83,12 +83,11 @@ func (c *verifier) Verify(uri string) (*Report, error) {
 		SetChart(chrt).
 		SetProfile(profileName)
 
-	for _, name := range c.requiredChecks {
-		check, ok := c.registry.Get(name)
-		if !ok {
-			return nil, CheckNotFoundErr(name)
-		}
+	for _, check := range c.requiredChecks {
 
+		if check.Func == nil {
+			return nil, CheckNotFoundErr(check.CheckId.Name)
+		}
 		holder := AnnotationHolder{Holder: result,
 			CertifiedOpenShiftVersionFlag: c.openshiftVersion}
 
@@ -96,14 +95,14 @@ func (c *verifier) Verify(uri string) (*Report, error) {
 			HelmEnvSettings:  c.settings,
 			URI:              uri,
 			Values:           c.values,
-			ViperConfig:      c.subConfig(string(name)),
+			ViperConfig:      c.subConfig(string(check.CheckId.Name)),
 			AnnotationHolder: &holder,
 		})
 
 		if checkErr != nil {
 			return nil, NewCheckErr(checkErr)
 		}
-		_ = result.AddCheck(name, check.Type, r)
+		_ = result.AddCheck(check.CheckId.Name, check.Type, r)
 
 	}
 

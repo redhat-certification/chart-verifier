@@ -12,18 +12,18 @@ func getDefaultProfile(msg string) *Profile {
 
 	profile.Annotations = []Annotation{DigestAnnotation, OCPVersionAnnotation, LastCertifiedTimestampAnnotation}
 
-	profile.Checks = []*Check{
-		{Name: checks.HasReadmeName, Type: checks.MandatoryCheckType, Version: "1.0"},
-		{Name: checks.IsHelmV3Name, Type: checks.MandatoryCheckType, Version: "1.0"},
-		{Name: checks.ContainsTestName, Type: checks.MandatoryCheckType, Version: "1.0"},
-		{Name: checks.ContainsValuesName, Type: checks.MandatoryCheckType, Version: "1.0"},
-		{Name: checks.ContainsValuesName, Type: checks.MandatoryCheckType, Version: "1.0"},
-		{Name: checks.HasKubeversionName, Type: checks.MandatoryCheckType, Version: "1.0"},
-		{Name: checks.NotContainsCRDsName, Type: checks.MandatoryCheckType, Version: "1.0"},
-		{Name: checks.HelmLintName, Type: checks.MandatoryCheckType, Version: "1.0"},
-		{Name: checks.NotContainCsiObjectsName, Type: checks.MandatoryCheckType, Version: "1.0"},
-		{Name: checks.ImagesAreCertifiedName, Type: checks.MandatoryCheckType, Version: "1.0"},
-		{Name: checks.ChartTestingName, Type: checks.MandatoryCheckType, Version: "1.0"},
+	profile.Checks = []*ProfileCheck{
+		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.HasReadmeName), Type: checks.MandatoryCheckType},
+		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.IsHelmV3Name), Type: checks.MandatoryCheckType},
+		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ContainsTestName), Type: checks.MandatoryCheckType},
+		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ContainsValuesName), Type: checks.MandatoryCheckType},
+		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ContainsValuesName), Type: checks.MandatoryCheckType},
+		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.HasKubeversionName), Type: checks.MandatoryCheckType},
+		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.NotContainsCRDsName), Type: checks.MandatoryCheckType},
+		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.HelmLintName), Type: checks.MandatoryCheckType},
+		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.NotContainCsiObjectsName), Type: checks.MandatoryCheckType},
+		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ImagesAreCertifiedName), Type: checks.MandatoryCheckType},
+		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ChartTestingName), Type: checks.MandatoryCheckType},
 	}
 
 	return &profile

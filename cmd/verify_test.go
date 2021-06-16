@@ -183,10 +183,12 @@ func TestCertify(t *testing.T) {
 func TestBuildChecks(t *testing.T) {
 	t.Run("Should fail when enabledChecks and disabledChecks have more than one item at the same time", func(t *testing.T) {
 		var (
-			all      = []checks.CheckName{"a", "b", "c"}
+			all      = make(map[checks.CheckName]checks.Check)
 			enabled  = []string{"a"}
 			disabled = []string{"b"}
 		)
+		all["a"] = checks.Check{CheckId: checks.CheckId{Name: "a"}}
+		all["b"] = checks.Check{CheckId: checks.CheckId{Name: "b"}}
 		selected, err := buildChecks(all, enabled, disabled)
 		require.Error(t, err)
 		require.Nil(t, selected)
@@ -194,10 +196,13 @@ func TestBuildChecks(t *testing.T) {
 
 	t.Run("Should fail when enabled check is unknown", func(t *testing.T) {
 		var (
-			all      = []checks.CheckName{"a", "b", "c"}
+			all      = make(map[checks.CheckName]checks.Check)
 			disabled = []string{}
 			enabled  = []string{"d"}
 		)
+		all["a"] = checks.Check{CheckId: checks.CheckId{Name: "a"}}
+		all["b"] = checks.Check{CheckId: checks.CheckId{Name: "b"}}
+		all["c"] = checks.Check{CheckId: checks.CheckId{Name: "c"}}
 		selected, err := buildChecks(all, enabled, disabled)
 		require.Error(t, err)
 		require.Nil(t, selected)
@@ -205,10 +210,13 @@ func TestBuildChecks(t *testing.T) {
 
 	t.Run("Should fail when disabled check is unknown", func(t *testing.T) {
 		var (
-			all      = []checks.CheckName{"a", "b", "c"}
+			all      = make(map[checks.CheckName]checks.Check)
 			disabled = []string{"e"}
 			enabled  = []string{}
 		)
+		all["a"] = checks.Check{CheckId: checks.CheckId{Name: "a"}}
+		all["b"] = checks.Check{CheckId: checks.CheckId{Name: "b"}}
+		all["c"] = checks.Check{CheckId: checks.CheckId{Name: "c"}}
 		selected, err := buildChecks(all, enabled, disabled)
 		require.Error(t, err)
 		require.Nil(t, selected)
@@ -218,8 +226,11 @@ func TestBuildChecks(t *testing.T) {
 		var (
 			enabled  = []string{}
 			disabled = []string{}
-			all      = []checks.CheckName{"a", "b", "c"}
+			all      = make(map[checks.CheckName]checks.Check)
 		)
+		all["a"] = checks.Check{CheckId: checks.CheckId{Name: "a"}}
+		all["b"] = checks.Check{CheckId: checks.CheckId{Name: "b"}}
+		all["c"] = checks.Check{CheckId: checks.CheckId{Name: "c"}}
 		selected, err := buildChecks(all, enabled, disabled)
 		require.NoError(t, err)
 		require.Equal(t, selected, all)

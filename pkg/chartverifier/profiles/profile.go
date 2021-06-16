@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 )
 
@@ -19,17 +20,16 @@ const (
 )
 
 type Profile struct {
-	Apiversion  string       `json:"apiversion" yaml:"apiversion"`
-	Kind        string       `json:"kind" yaml:"kind"`
-	Name        string       `json:"name" yaml:"name"`
-	Annotations []Annotation `json:"annotations" yaml:"annotations"`
-	Checks      []*Check     `json:"checks" yaml:"checks"`
+	Apiversion  string          `json:"apiversion" yaml:"apiversion"`
+	Kind        string          `json:"kind" yaml:"kind"`
+	Name        string          `json:"name" yaml:"name"`
+	Annotations []Annotation    `json:"annotations" yaml:"annotations"`
+	Checks      []*ProfileCheck `json:"checks" yaml:"checks"`
 }
 
-type Check struct {
-	Name    checks.CheckName `json:"name" yaml:"name"`
-	Type    checks.CheckType `json:"type" yaml:"type"`
-	Version string           `json:"version" yaml:"version"`
+type ProfileCheck struct {
+	Name string           `json:"name" yaml:"name"`
+	Type checks.CheckType `json:"type" yaml:"type"`
 }
 
 var profile *Profile
@@ -77,4 +77,22 @@ func getProfileFileName() (string, error) {
 
 	// To be update when multiple profiles are supported
 	return filepath.Join(filepath.Dir(fn), "profile-1.0.0.yaml"), nil
+}
+
+func (profile *Profile) FilterChecks(allChecks map[checks.CheckId]checks.Check) map[checks.CheckName]checks.Check {
+
+	filteredChecks := make(map[checks.CheckName]checks.Check)
+
+	for _, check := range profile.Checks {
+		splitter := regexp.MustCompile(`/`)
+		splitCheck := splitter.Split(check.Name, -1)
+		checkIndex := checks.CheckId{Name: checks.CheckName(splitCheck[1]), Version: checks.Version(splitCheck[0])}
+		if newCheck, ok := allChecks[checkIndex]; ok {
+			newCheck.Type = check.Type
+			filteredChecks[checkIndex.Name] = newCheck
+		}
+	}
+
+	return filteredChecks
+
 }

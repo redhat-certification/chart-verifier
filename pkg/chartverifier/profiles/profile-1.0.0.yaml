@@ -6,36 +6,25 @@ annotations:
   - "OCPVersion"
   - "LastCertifiedTimestamp"
 checks:
-    - name: is-helm-v3
+    - name: v1.0/has-readme
       type: Mandatory
-      version: 1.0
-    - name: has-readme
+    - name: v1.0/is-helm-v3
       type: Mandatory
-      version: 1.0
-    - name: contains-test
+    - name: v1.0/contains-test
       type: Mandatory
-      version: 1.0
-    - name: contains-values
+    - name: v1.0/contains-values
       type: Mandatory
-      version: 1.0
-    - name: contains-values-schema
+    - name: v1.0/contains-values-schema
       type: Mandatory
-      version: 1.0
-    - name: has-kubeversion
+    - name: v1.0/has-kubeversion
       type: Mandatory
-      version: 1.0
-    - name: not-contains-crds
+    - name: v1.0/not-contains-crds
       type: Mandatory
-      version: 1.0
-    - name: helm-lint
+    - name: v1.0/helm-lint
       type: Mandatory
-      version: 1.0
-    - name: not-contain-csi-objects
+    - name: v1.0/not-contain-csi-objects
       type: Mandatory
-      version: 1.0
-    - name: images-are-certified
+    - name: v1.0/images-are-certified
       type: Mandatory
-      version: 1.0
-    - name: chart-testing
+    - name: v1.0/chart-testing
       type: Mandatory
-      version: 1.0

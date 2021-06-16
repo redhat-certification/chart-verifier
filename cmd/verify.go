@@ -19,6 +19,7 @@ package cmd
 import (
 	"encoding/json"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
@@ -36,13 +37,14 @@ import (
 var Version = "1.0.0"
 
 func init() {
-	allChecks = chartverifier.DefaultRegistry().AllChecks()
+	registryChecks := chartverifier.DefaultRegistry().AllChecks()
+	allChecks = profiles.GetProfile().FilterChecks(registryChecks)
 }
 
 //goland:noinspection GoUnusedGlobalVariable
 var (
 	// allChecks contains all available checks to be executed by the program.
-	allChecks []checks.CheckName
+	allChecks map[checks.CheckName]checks.Check
 	// enabledChecksFlag are the checks that should be performed, after the command initialization has happened.
 	enabledChecksFlag []string
 	// disabledChecksFlag are the checks that should not be performed.
@@ -55,11 +57,11 @@ var (
 	openshiftVersionFlag string
 )
 
-func filterChecks(set []checks.CheckName, subset []string, setEnabled bool, subsetEnabled bool) ([]checks.CheckName, error) {
-	selected := make([]checks.CheckName, 0)
+func filterChecks(set map[checks.CheckName]checks.Check, subset []string, setEnabled bool, subsetEnabled bool) (map[checks.CheckName]checks.Check, error) {
+	selected := make(map[checks.CheckName]checks.Check, 0)
 	seen := map[checks.CheckName]bool{}
-	for _, v := range set {
-		seen[v] = setEnabled
+	for k, _ := range set {
+		seen[k] = setEnabled
 	}
 	for _, v := range subset {
 		if _, ok := seen[checks.CheckName(v)]; !ok {
@@ -69,13 +71,13 @@ func filterChecks(set []checks.CheckName, subset []string, setEnabled bool, subs
 	}
 	for k, v := range seen {
 		if v {
-			selected = append(selected, checks.CheckName(k))
+			selected[k] = set[k]
 		}
 	}
 	return selected, nil
 }
 
-func buildChecks(all []checks.CheckName, enabled, disabled []string) ([]checks.CheckName, error) {
+func buildChecks(all map[checks.CheckName]checks.Check, enabled, disabled []string) (map[checks.CheckName]checks.Check, error) {
 	switch {
 	case len(enabled) > 0 && len(disabled) > 0:
 		return nil, errors.New("--enable and --disable can't be used at the same time")

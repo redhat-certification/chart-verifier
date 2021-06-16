@@ -36,8 +36,12 @@ func TestCertificationBuilder(t *testing.T) {
 	t.Run("Should build verifier when requiredChecks are set", func(t *testing.T) {
 		b := NewVerifierBuilder()
 
+		checkMap := make(map[checks.CheckName]checks.Check)
+		checkMap["a"] = checks.Check{CheckId: checks.CheckId{Name: "a"}}
+		checkMap["b"] = checks.Check{CheckId: checks.CheckId{Name: "b"}}
+
 		c, err := b.
-			SetChecks([]checks.CheckName{"a", "b"}).
+			SetChecks(checkMap).
 			Build()
 
 		require.NoError(t, err)
