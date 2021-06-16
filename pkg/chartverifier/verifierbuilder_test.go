@@ -18,6 +18,8 @@ package chartverifier
 
 import (
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
+	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -46,5 +48,11 @@ func TestCertificationBuilder(t *testing.T) {
 
 		require.NoError(t, err)
 		require.NotNil(t, c)
+	})
+
+	t.Run("Verifier should include all checks in a profile", func(t *testing.T) {
+		defaultRegistry = DefaultRegistry()
+		filteredChecks := profiles.GetProfile().FilterChecks(defaultRegistry.AllChecks())
+		assert.Equal(t, len(profiles.GetProfile().Checks), len(filteredChecks), "Checks mismatch : %d in profile, %d after filtering",len(profiles.GetProfile().Checks),len(filteredChecks))
 	})
 }
