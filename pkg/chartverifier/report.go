@@ -47,7 +47,7 @@ type ReportMetadata struct {
 
 type ToolMetadata struct {
 	Version                    string `json:"verifier-version" yaml:"verifier-version"`
-	Profile                    string `json:"profile-name" yaml:"profile-name"`
+	Profile                    string `json:"profileName" yaml:"profileName"`
 	ChartUri                   string `json:"chart-uri" yaml:"chart-uri"`
 	Digest                     string `json:"digest,omitempty" yaml:"digest,omitempty"`
 	LastCertifiedTimestamp     string `json:"lastCertifiedTimestamp,omitempty" yaml:"lastCertifiedTimestamp,omitempty"`

@@ -19,6 +19,7 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -183,12 +184,13 @@ func TestCertify(t *testing.T) {
 func TestBuildChecks(t *testing.T) {
 	t.Run("Should fail when enabledChecks and disabledChecks have more than one item at the same time", func(t *testing.T) {
 		var (
-			all      = make(map[checks.CheckName]checks.Check)
-			enabled  = []string{"a"}
-			disabled = []string{"b"}
+			all      = make(checks.DefaultRegistry)
+			enabled  = []string{string(checks.HasReadmeName)}
+			disabled = []string{string(checks.ChartTestingName)}
 		)
-		all["a"] = checks.Check{CheckId: checks.CheckId{Name: "a"}}
-		all["b"] = checks.Check{CheckId: checks.CheckId{Name: "b"}}
+		all.Add(checks.HasReadmeName, "v1.0", nil)
+		all.Add(checks.ChartTestingName, "v1.0", nil)
+		all.Add(checks.ContainsTestName, "v1.0", nil)
 		selected, err := buildChecks(all, enabled, disabled)
 		require.Error(t, err)
 		require.Nil(t, selected)
@@ -196,13 +198,13 @@ func TestBuildChecks(t *testing.T) {
 
 	t.Run("Should fail when enabled check is unknown", func(t *testing.T) {
 		var (
-			all      = make(map[checks.CheckName]checks.Check)
+			all      = make(checks.DefaultRegistry)
 			disabled = []string{}
 			enabled  = []string{"d"}
 		)
-		all["a"] = checks.Check{CheckId: checks.CheckId{Name: "a"}}
-		all["b"] = checks.Check{CheckId: checks.CheckId{Name: "b"}}
-		all["c"] = checks.Check{CheckId: checks.CheckId{Name: "c"}}
+		all.Add(checks.HasReadmeName, "v1.0", nil)
+		all.Add(checks.ChartTestingName, "v1.0", nil)
+		all.Add(checks.ContainsTestName, "v1.0", nil)
 		selected, err := buildChecks(all, enabled, disabled)
 		require.Error(t, err)
 		require.Nil(t, selected)
@@ -210,13 +212,13 @@ func TestBuildChecks(t *testing.T) {
 
 	t.Run("Should fail when disabled check is unknown", func(t *testing.T) {
 		var (
-			all      = make(map[checks.CheckName]checks.Check)
+			all      = make(checks.DefaultRegistry)
 			disabled = []string{"e"}
 			enabled  = []string{}
 		)
-		all["a"] = checks.Check{CheckId: checks.CheckId{Name: "a"}}
-		all["b"] = checks.Check{CheckId: checks.CheckId{Name: "b"}}
-		all["c"] = checks.Check{CheckId: checks.CheckId{Name: "c"}}
+		all.Add(checks.HasReadmeName, "v1.0", checks.HasReadme)
+		all.Add(checks.ChartTestingName, "v1.0", checks.ChartTesting)
+		all.Add(checks.ContainsTestName, "v1.0", checks.ContainsTest)
 		selected, err := buildChecks(all, enabled, disabled)
 		require.Error(t, err)
 		require.Nil(t, selected)
@@ -226,14 +228,17 @@ func TestBuildChecks(t *testing.T) {
 		var (
 			enabled  = []string{}
 			disabled = []string{}
-			all      = make(map[checks.CheckName]checks.Check)
+			all      = make(checks.DefaultRegistry)
 		)
-		all["a"] = checks.Check{CheckId: checks.CheckId{Name: "a"}}
-		all["b"] = checks.Check{CheckId: checks.CheckId{Name: "b"}}
-		all["c"] = checks.Check{CheckId: checks.CheckId{Name: "c"}}
+		all.Add(checks.HasReadmeName, "v1.0", nil)
+		all.Add(checks.ChartTestingName, "v1.0", nil)
+		all.Add(checks.ContainsTestName, "v1.0", nil)
 		selected, err := buildChecks(all, enabled, disabled)
 		require.NoError(t, err)
-		require.Equal(t, selected, all)
+		for k, _ := range all {
+			_, ok := selected[k.Name]
+			require.True(t, ok, fmt.Sprintf("Missing Check: %s", k.Name))
+		}
 	})
 
 }

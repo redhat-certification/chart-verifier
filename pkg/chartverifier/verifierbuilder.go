@@ -53,8 +53,10 @@ func DefaultRegistry() checks.Registry {
 	return defaultRegistry
 }
 
+type FilteredRegistry map[checks.CheckName]checks.Check
+
 type verifierBuilder struct {
-	checks           map[checks.CheckName]checks.Check
+	checks           FilteredRegistry
 	config           *viper.Viper
 	overrides        []string
 	registry         checks.Registry
@@ -79,7 +81,7 @@ func (b *verifierBuilder) SetRegistry(registry checks.Registry) VerifierBuilder 
 	return b
 }
 
-func (b *verifierBuilder) SetChecks(checks map[checks.CheckName]checks.Check) VerifierBuilder {
+func (b *verifierBuilder) SetChecks(checks FilteredRegistry) VerifierBuilder {
 	b.checks = checks
 	return b
 }

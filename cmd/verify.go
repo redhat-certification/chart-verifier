@@ -37,14 +37,13 @@ import (
 var Version = "1.0.0"
 
 func init() {
-	registryChecks := chartverifier.DefaultRegistry().AllChecks()
-	allChecks = profiles.GetProfile().FilterChecks(registryChecks)
+	allChecks = chartverifier.DefaultRegistry().AllChecks()
 }
 
 //goland:noinspection GoUnusedGlobalVariable
 var (
 	// allChecks contains all available checks to be executed by the program.
-	allChecks map[checks.CheckName]checks.Check
+	allChecks checks.DefaultRegistry
 	// enabledChecksFlag are the checks that should be performed, after the command initialization has happened.
 	enabledChecksFlag []string
 	// disabledChecksFlag are the checks that should not be performed.
@@ -57,8 +56,9 @@ var (
 	openshiftVersionFlag string
 )
 
-func filterChecks(set map[checks.CheckName]checks.Check, subset []string, setEnabled bool, subsetEnabled bool) (map[checks.CheckName]checks.Check, error) {
-	selected := make(map[checks.CheckName]checks.Check, 0)
+func filterChecks(set profiles.FilteredRegistry, subset []string, setEnabled bool, subsetEnabled bool) (chartverifier.FilteredRegistry, error) {
+
+	selected := make(chartverifier.FilteredRegistry, 0)
 	seen := map[checks.CheckName]bool{}
 	for k, _ := range set {
 		seen[k] = setEnabled
@@ -77,16 +77,17 @@ func filterChecks(set map[checks.CheckName]checks.Check, subset []string, setEna
 	return selected, nil
 }
 
-func buildChecks(all map[checks.CheckName]checks.Check, enabled, disabled []string) (map[checks.CheckName]checks.Check, error) {
+func buildChecks(all checks.DefaultRegistry, enabled, disabled []string) (chartverifier.FilteredRegistry, error) {
+	profileChecks := profiles.GetProfile().FilterChecks(all)
 	switch {
 	case len(enabled) > 0 && len(disabled) > 0:
 		return nil, errors.New("--enable and --disable can't be used at the same time")
 	case len(enabled) > 0:
-		return filterChecks(all, enabled, false, true)
+		return filterChecks(profileChecks, enabled, false, true)
 	case len(disabled) > 0:
-		return filterChecks(all, disabled, true, false)
+		return filterChecks(profileChecks, disabled, true, false)
 	default:
-		return all, nil
+		return chartverifier.FilteredRegistry(profileChecks), nil
 	}
 }
 

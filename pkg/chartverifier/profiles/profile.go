@@ -32,6 +32,8 @@ type ProfileCheck struct {
 	Type checks.CheckType `json:"type" yaml:"type"`
 }
 
+type FilteredRegistry map[checks.CheckName]checks.Check
+
 var profile *Profile
 
 func GetProfile() *Profile {
@@ -79,7 +81,7 @@ func getProfileFileName() (string, error) {
 	return filepath.Join(filepath.Dir(fn), "profile-1.0.0.yaml"), nil
 }
 
-func (profile *Profile) FilterChecks(allChecks map[checks.CheckId]checks.Check) map[checks.CheckName]checks.Check {
+func (profile *Profile) FilterChecks(registry checks.DefaultRegistry) FilteredRegistry {
 
 	filteredChecks := make(map[checks.CheckName]checks.Check)
 
@@ -87,7 +89,7 @@ func (profile *Profile) FilterChecks(allChecks map[checks.CheckId]checks.Check) 
 		splitter := regexp.MustCompile(`/`)
 		splitCheck := splitter.Split(check.Name, -1)
 		checkIndex := checks.CheckId{Name: checks.CheckName(splitCheck[1]), Version: checks.Version(splitCheck[0])}
-		if newCheck, ok := allChecks[checkIndex]; ok {
+		if newCheck, ok := registry[checkIndex]; ok {
 			newCheck.Type = check.Type
 			filteredChecks[checkIndex.Name] = newCheck
 		}

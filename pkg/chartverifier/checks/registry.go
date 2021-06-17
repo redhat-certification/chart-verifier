@@ -110,25 +110,25 @@ type CheckFunc func(options *CheckOptions) (Result, error)
 type Registry interface {
 	Get(id CheckId) (Check, bool)
 	Add(name CheckName, version Version, checkFunc CheckFunc) Registry
-	AllChecks() map[CheckId]Check
+	AllChecks() DefaultRegistry
 }
 
-type defaultRegistry map[CheckId]Check
+type DefaultRegistry map[CheckId]Check
 
-func (r *defaultRegistry) AllChecks() map[CheckId]Check {
+func (r *DefaultRegistry) AllChecks() DefaultRegistry {
 	return *r
 }
 
 func NewRegistry() Registry {
-	return &defaultRegistry{}
+	return &DefaultRegistry{}
 }
 
-func (r *defaultRegistry) Get(id CheckId) (Check, bool) {
+func (r *DefaultRegistry) Get(id CheckId) (Check, bool) {
 	v, ok := (*r)[id]
 	return v, ok
 }
 
-func (r *defaultRegistry) Add(name CheckName, version Version, checkFunc CheckFunc) Registry {
+func (r *DefaultRegistry) Add(name CheckName, version Version, checkFunc CheckFunc) Registry {
 
 	check := Check{CheckId: CheckId{Name: name, Version: version}, Func: checkFunc}
 	(*r)[check.CheckId] = check

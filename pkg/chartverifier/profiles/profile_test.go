@@ -68,7 +68,7 @@ func TestProfileFilter(t *testing.T) {
 	defaultRegistry.Add("BadIsHelmV3Name", "v1.0", checks.IsHelmV3)
 	defaultRegistry.Add("BadContainsTestName", "v1.o", checks.ContainsTest)
 
-	expectedChecks := make(map[checks.CheckName]checks.Check)
+	expectedChecks := FilteredRegistry{}
 	expectedChecks[checks.HasReadmeName] = checks.Check{CheckId: checks.CheckId{Name: checks.HasReadmeName, Version: "v1.0"}, Type: checks.MandatoryCheckType, Func: checks.HasReadme}
 	expectedChecks[checks.IsHelmV3Name] = checks.Check{CheckId: checks.CheckId{Name: checks.IsHelmV3Name, Version: "v1.0"}, Type: checks.MandatoryCheckType, Func: checks.IsHelmV3}
 	expectedChecks[checks.ContainsTestName] = checks.Check{CheckId: checks.CheckId{Name: checks.ContainsTestName, Version: "v1.0"}, Type: checks.MandatoryCheckType, Func: checks.ContainsTest}
@@ -76,7 +76,7 @@ func TestProfileFilter(t *testing.T) {
 
 	t.Run("Checks filtered using profile subset", func(t *testing.T) {
 		filteredChecks := GetProfile().FilterChecks(defaultRegistry.AllChecks())
-		compareCheckMaps(t, expectedChecks, filteredChecks)
+		CompareCheckMaps(t, expectedChecks, filteredChecks)
 	})
 
 	defaultRegistry.Add(checks.ContainsValuesSchemaName, "v1.0", checks.ContainsValuesSchema)
@@ -97,12 +97,12 @@ func TestProfileFilter(t *testing.T) {
 
 	t.Run("Checks filtered using profile - full set", func(t *testing.T) {
 		filteredChecks := GetProfile().FilterChecks(defaultRegistry.AllChecks())
-		compareCheckMaps(t, expectedChecks, filteredChecks)
+		CompareCheckMaps(t, expectedChecks, filteredChecks)
 	})
 
 }
 
-func compareCheckMaps(t *testing.T, expectedChecks, filteredChecks map[checks.CheckName]checks.Check) {
+func CompareCheckMaps(t *testing.T, expectedChecks, filteredChecks FilteredRegistry) {
 
 	assert.Equal(t, len(expectedChecks), len(filteredChecks), fmt.Sprintf("Expected map length : %d does not match returned mao length : %d", len(expectedChecks), len(filteredChecks)))
 	for k, v := range filteredChecks {
