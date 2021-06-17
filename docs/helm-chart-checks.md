@@ -131,9 +131,9 @@ This section provides help on the basic usage of Helm chart checks with the podm
 
 ### Cluster Config
 
-Configuration of the `chart-testing` check can be achieved in one of two ways: 
+You can configure the chart-testing check by performing one of the following steps:
 
-1. Through the `--set` command line option, which in addition of configuring `chart-verifier` itself, can set check's configuration values.
+* Option 1: Through the `--set` command line option:
     ```text
     $ chart-verifier                                                 \
         verify                                                       \
@@ -145,7 +145,7 @@ Configuration of the `chart-testing` check can be achieved in one of two ways:
         --set chart-testing.releaseLabel="app.kubernetes.io/instance" \
         some-chart.tgz
     ```
-1. Through the `--set-values` command line option, where a YAML file can be used to configure the check. For example for a config.yaml file content:
+* Option 2: Create a YAML file (config.yaml) similar to the following example:
    ```text
     chart-testing:
         buildId: <BUILD_ID>
@@ -155,7 +155,7 @@ Configuration of the `chart-testing` check can be achieved in one of two ways:
         releaseLabel: "app.kubernetes.io/instance"
     ```
 
-    Once the file is persisted, a chart can be verified:
+    Specify the file using the `--set-values` command line option:
     ```text
     $ chart-verifier verify --enable chart-testing --set-values config.yaml some-chart.tgz
     ```
