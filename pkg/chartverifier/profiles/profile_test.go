@@ -21,7 +21,7 @@ func TestProfile(t *testing.T) {
 
 	testProfile.Annotations = []Annotation{DigestAnnotation, OCPVersionAnnotation, LastCertifiedTimestampAnnotation}
 
-	testProfile.Checks = []*ProfileCheck{
+	testProfile.Checks = []*Check{
 		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.HasReadmeName), Type: checks.MandatoryCheckType},
 		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.IsHelmV3Name), Type: checks.MandatoryCheckType},
 		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ContainsTestName), Type: checks.MandatoryCheckType},

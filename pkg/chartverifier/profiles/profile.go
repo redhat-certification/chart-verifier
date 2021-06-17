@@ -20,14 +20,14 @@ const (
 )
 
 type Profile struct {
-	Apiversion  string          `json:"apiversion" yaml:"apiversion"`
-	Kind        string          `json:"kind" yaml:"kind"`
-	Name        string          `json:"name" yaml:"name"`
-	Annotations []Annotation    `json:"annotations" yaml:"annotations"`
-	Checks      []*ProfileCheck `json:"checks" yaml:"checks"`
+	Apiversion  string       `json:"apiversion" yaml:"apiversion"`
+	Kind        string       `json:"kind" yaml:"kind"`
+	Name        string       `json:"name" yaml:"name"`
+	Annotations []Annotation `json:"annotations" yaml:"annotations"`
+	Checks      []*Check     `json:"checks" yaml:"checks"`
 }
 
-type ProfileCheck struct {
+type Check struct {
 	Name string           `json:"name" yaml:"name"`
 	Type checks.CheckType `json:"type" yaml:"type"`
 }

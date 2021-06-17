@@ -18,7 +18,7 @@ package chartverifier
 
 import (
 	"errors"
-	"fmt"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 	"strings"
 
 	"helm.sh/helm/v3/pkg/cli"
@@ -29,9 +29,6 @@ import (
 )
 
 var defaultRegistry checks.Registry
-var profileName string
-
-var initError []string
 
 func init() {
 	defaultRegistry = checks.NewRegistry()
@@ -111,10 +108,6 @@ func (b *verifierBuilder) Build() (Vertifier, error) {
 		return nil, errors.New("no checks have been required")
 	}
 
-	if len(initError) > 0 {
-		return nil, errors.New(fmt.Sprintf("Error processing profile %s : %v", profileName, initError))
-	}
-
 	if b.registry == nil {
 		b.registry = defaultRegistry
 	}
@@ -138,6 +131,8 @@ func (b *verifierBuilder) Build() (Vertifier, error) {
 	for _, check := range b.checks {
 		requiredChecks = append(requiredChecks, check)
 	}
+
+	profileName := profiles.GetProfile().Name
 
 	return &verifier{
 		config:           b.config,

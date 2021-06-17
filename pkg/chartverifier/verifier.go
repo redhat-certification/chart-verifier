@@ -81,7 +81,7 @@ func (c *verifier) Verify(uri string) (*Report, error) {
 		SetToolVersion(c.toolVersion).
 		SetChartUri(uri).
 		SetChart(chrt).
-		SetProfile(profileName)
+		SetProfile(c.profileName)
 
 	for _, check := range c.requiredChecks {
 
