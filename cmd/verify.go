@@ -78,7 +78,7 @@ func filterChecks(set profiles.FilteredRegistry, subset []string, setEnabled boo
 }
 
 func buildChecks(all checks.DefaultRegistry, enabled, disabled []string) (chartverifier.FilteredRegistry, error) {
-	profileChecks := profiles.GetProfile().FilterChecks(all)
+	profileChecks := profiles.Get().FilterChecks(all)
 	switch {
 	case len(enabled) > 0 && len(disabled) > 0:
 		return nil, errors.New("--enable and --disable can't be used at the same time")

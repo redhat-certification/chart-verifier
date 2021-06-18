@@ -36,7 +36,7 @@ type FilteredRegistry map[checks.CheckName]checks.Check
 
 var profile *Profile
 
-func GetProfile() *Profile {
+func Get() *Profile {
 
 	if profile != nil {
 		return profile

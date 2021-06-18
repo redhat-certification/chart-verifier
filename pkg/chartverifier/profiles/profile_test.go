@@ -13,31 +13,12 @@ import (
 
 func TestProfile(t *testing.T) {
 
-	testProfile := Profile{}
-
-	testProfile.Apiversion = "v1"
-	testProfile.Kind = "verifier-profile"
+	testProfile := getDefaultProfile("test")
 	testProfile.Name = "profile-1.0.0"
 
-	testProfile.Annotations = []Annotation{DigestAnnotation, OCPVersionAnnotation, LastCertifiedTimestampAnnotation}
-
-	testProfile.Checks = []*Check{
-		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.HasReadmeName), Type: checks.MandatoryCheckType},
-		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.IsHelmV3Name), Type: checks.MandatoryCheckType},
-		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ContainsTestName), Type: checks.MandatoryCheckType},
-		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ContainsValuesName), Type: checks.MandatoryCheckType},
-		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ContainsValuesSchemaName), Type: checks.MandatoryCheckType},
-		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.HasKubeversionName), Type: checks.MandatoryCheckType},
-		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.NotContainsCRDsName), Type: checks.MandatoryCheckType},
-		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.HelmLintName), Type: checks.MandatoryCheckType},
-		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.NotContainCsiObjectsName), Type: checks.MandatoryCheckType},
-		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ImagesAreCertifiedName), Type: checks.MandatoryCheckType},
-		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ChartTestingName), Type: checks.MandatoryCheckType},
-	}
-
 	t.Run("Profile read from disk should match test profile", func(t *testing.T) {
-		diskProfile := GetProfile()
-		assert.True(t, cmp.Equal(diskProfile, &testProfile), "profiles do not match")
+		diskProfile := Get()
+		assert.True(t, cmp.Equal(diskProfile, testProfile), "profiles do not match")
 
 	})
 
@@ -75,7 +56,7 @@ func TestProfileFilter(t *testing.T) {
 	expectedChecks[checks.ContainsValuesName] = checks.Check{CheckId: checks.CheckId{Name: checks.ContainsValuesName, Version: "v1.0"}, Type: checks.MandatoryCheckType, Func: checks.ContainsValues}
 
 	t.Run("Checks filtered using profile subset", func(t *testing.T) {
-		filteredChecks := GetProfile().FilterChecks(defaultRegistry.AllChecks())
+		filteredChecks := Get().FilterChecks(defaultRegistry.AllChecks())
 		CompareCheckMaps(t, expectedChecks, filteredChecks)
 	})
 
@@ -96,7 +77,7 @@ func TestProfileFilter(t *testing.T) {
 	expectedChecks[checks.ChartTestingName] = checks.Check{CheckId: checks.CheckId{Name: checks.ChartTestingName, Version: "v1.0"}, Type: checks.MandatoryCheckType, Func: checks.ChartTesting}
 
 	t.Run("Checks filtered using profile - full set", func(t *testing.T) {
-		filteredChecks := GetProfile().FilterChecks(defaultRegistry.AllChecks())
+		filteredChecks := Get().FilterChecks(defaultRegistry.AllChecks())
 		CompareCheckMaps(t, expectedChecks, filteredChecks)
 	})
 

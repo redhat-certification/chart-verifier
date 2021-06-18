@@ -8,6 +8,9 @@ import (
 func getDefaultProfile(msg string) *Profile {
 	profile := Profile{}
 
+	profile.Apiversion = "v1"
+	profile.Kind = "verifier-profile"
+
 	profile.Name = fmt.Sprintf("default-profile : %s", msg)
 
 	profile.Annotations = []Annotation{DigestAnnotation, OCPVersionAnnotation, LastCertifiedTimestampAnnotation}
@@ -17,7 +20,7 @@ func getDefaultProfile(msg string) *Profile {
 		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.IsHelmV3Name), Type: checks.MandatoryCheckType},
 		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ContainsTestName), Type: checks.MandatoryCheckType},
 		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ContainsValuesName), Type: checks.MandatoryCheckType},
-		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ContainsValuesName), Type: checks.MandatoryCheckType},
+		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ContainsValuesSchemaName), Type: checks.MandatoryCheckType},
 		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.HasKubeversionName), Type: checks.MandatoryCheckType},
 		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.NotContainsCRDsName), Type: checks.MandatoryCheckType},
 		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.HelmLintName), Type: checks.MandatoryCheckType},
@@ -25,6 +28,8 @@ func getDefaultProfile(msg string) *Profile {
 		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ImagesAreCertifiedName), Type: checks.MandatoryCheckType},
 		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ChartTestingName), Type: checks.MandatoryCheckType},
 	}
+
+	profile.Name = fmt.Sprintf("default-profile : %s", msg)
 
 	return &profile
 }

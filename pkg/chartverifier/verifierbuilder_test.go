@@ -52,7 +52,7 @@ func TestCertificationBuilder(t *testing.T) {
 
 	t.Run("Verifier should include all checks in a profile", func(t *testing.T) {
 		defaultRegistry = DefaultRegistry()
-		filteredChecks := profiles.GetProfile().FilterChecks(defaultRegistry.AllChecks())
-		assert.Equal(t, len(profiles.GetProfile().Checks), len(filteredChecks), "Checks mismatch : %d in profile, %d after filtering", len(profiles.GetProfile().Checks), len(filteredChecks))
+		filteredChecks := profiles.Get().FilterChecks(defaultRegistry.AllChecks())
+		assert.Equal(t, len(profiles.Get().Checks), len(filteredChecks), "Checks mismatch : %d in profile, %d after filtering", len(profiles.Get().Checks), len(filteredChecks))
 	})
 }

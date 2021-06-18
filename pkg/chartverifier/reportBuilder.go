@@ -88,7 +88,7 @@ func (r *reportBuilder) AddCheck(name checks.CheckName, checkType checks.CheckTy
 
 func (r *reportBuilder) Build() (*Report, error) {
 
-	for _, annotation := range profiles.GetProfile().Annotations {
+	for _, annotation := range profiles.Get().Annotations {
 		switch annotation {
 		case profiles.DigestAnnotation:
 			r.Report.Metadata.ToolMetadata.Digest = GenerateSha(r.Chart.Raw)

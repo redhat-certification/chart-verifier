@@ -132,7 +132,7 @@ func (b *verifierBuilder) Build() (Vertifier, error) {
 		requiredChecks = append(requiredChecks, check)
 	}
 
-	profileName := profiles.GetProfile().Name
+	profileName := profiles.Get().Name
 
 	return &verifier{
 		config:           b.config,
