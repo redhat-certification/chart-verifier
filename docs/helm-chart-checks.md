@@ -131,17 +131,33 @@ This section provides help on the basic usage of Helm chart checks with the podm
 
 ### Cluster Config
 
-Configuration of the `chart-testing` check can be achieved through the `--set` command line option, which in addition of configuring `chart-verifier` itself, can set check's configuration values.
+You can configure the chart-testing check by performing one of the following steps:
+
+* Option 1: Through the `--set` command line option:
     ```text
     $ chart-verifier                                                 \
         verify                                                       \
         --enable chart-testing                                       \
-        --set chartTesting.buildId=${BUILD_ID}                       \
-        --set chartTesting.upgrade=true                              \
-        --set chartTesting.skipMissingValues=true                    \
-        --set chartTesting.namespace=${NAMESPACE}                    \
-        --set chartTesting.releaseLabel="app.kubernetes.io/instance" \
+        --set chart-testing.buildId=${BUILD_ID}                       \
+        --set chart-testing.upgrade=true                              \
+        --set chart-testing.skipMissingValues=true                    \
+        --set chart-testing.namespace=${NAMESPACE}                    \
+        --set chart-testing.releaseLabel="app.kubernetes.io/instance" \
         some-chart.tgz
+    ```
+* Option 2: Create a YAML file (config.yaml) similar to the following example:
+   ```text
+    chart-testing:
+        buildId: <BUILD_ID>
+        upgrade: true
+        skipMissingValues: true
+        namespace: <NAMESPACE>
+        releaseLabel: "app.kubernetes.io/instance"
+    ```
+
+    Specify the file using the `--set-values` command line option:
+    ```text
+    $ chart-verifier verify --enable chart-testing --set-values config.yaml some-chart.tgz
     ```
 
 ### Override values
