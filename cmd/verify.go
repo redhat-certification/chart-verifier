@@ -18,6 +18,8 @@ package cmd
 
 import (
 	"encoding/json"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
@@ -41,7 +43,7 @@ func init() {
 //goland:noinspection GoUnusedGlobalVariable
 var (
 	// allChecks contains all available checks to be executed by the program.
-	allChecks []string
+	allChecks checks.DefaultRegistry
 	// enabledChecksFlag are the checks that should be performed, after the command initialization has happened.
 	enabledChecksFlag []string
 	// disabledChecksFlag are the checks that should not be performed.
@@ -54,36 +56,38 @@ var (
 	openshiftVersionFlag string
 )
 
-func filterChecks(set []string, subset []string, setEnabled bool, subsetEnabled bool) ([]string, error) {
-	selected := make([]string, 0)
-	seen := map[string]bool{}
-	for _, v := range set {
-		seen[v] = setEnabled
+func filterChecks(set profiles.FilteredRegistry, subset []string, setEnabled bool, subsetEnabled bool) (chartverifier.FilteredRegistry, error) {
+
+	selected := make(chartverifier.FilteredRegistry, 0)
+	seen := map[checks.CheckName]bool{}
+	for k, _ := range set {
+		seen[k] = setEnabled
 	}
 	for _, v := range subset {
-		if _, ok := seen[v]; !ok {
+		if _, ok := seen[checks.CheckName(v)]; !ok {
 			return nil, errors.Errorf("check %q is unknown", v)
 		}
-		seen[v] = subsetEnabled
+		seen[checks.CheckName(v)] = subsetEnabled
 	}
 	for k, v := range seen {
 		if v {
-			selected = append(selected, k)
+			selected[k] = set[k]
 		}
 	}
 	return selected, nil
 }
 
-func buildChecks(all, enabled, disabled []string) ([]string, error) {
+func buildChecks(all checks.DefaultRegistry, enabled, disabled []string) (chartverifier.FilteredRegistry, error) {
+	profileChecks := profiles.Get().FilterChecks(all)
 	switch {
 	case len(enabled) > 0 && len(disabled) > 0:
 		return nil, errors.New("--enable and --disable can't be used at the same time")
 	case len(enabled) > 0:
-		return filterChecks(all, enabled, false, true)
+		return filterChecks(profileChecks, enabled, false, true)
 	case len(disabled) > 0:
-		return filterChecks(all, disabled, true, false)
+		return filterChecks(profileChecks, disabled, true, false)
 	default:
-		return all, nil
+		return chartverifier.FilteredRegistry(profileChecks), nil
 	}
 }
 

@@ -47,7 +47,7 @@ func TestVerifier_Verify(t *testing.T) {
 
 	require.NoError(t, testutil.ServeCharts(ctx, addr, "./checks/"))
 
-	dummyCheckName := "dummy-check"
+	dummyCheck := checks.Check{CheckId: checks.CheckId{Name: "dummy-check"}}
 
 	erroredCheck := func(_ *checks.CheckOptions) (checks.Result, error) {
 		return checks.Result{}, errors.New("artificial error")
@@ -68,7 +68,7 @@ func TestVerifier_Verify(t *testing.T) {
 			settings:       cli.New(),
 			config:         viper.New(),
 			registry:       checks.NewRegistry(),
-			requiredChecks: []string{dummyCheckName},
+			requiredChecks: []checks.Check{dummyCheck},
 		}
 
 		r, err := c.Verify(validChartUri)
@@ -77,11 +77,12 @@ func TestVerifier_Verify(t *testing.T) {
 	})
 
 	t.Run("Should return error if check exists and returns error", func(t *testing.T) {
+		dummyCheck.Func = erroredCheck
 		c := &verifier{
 			settings:       cli.New(),
 			config:         viper.New(),
-			registry:       checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: erroredCheck}),
-			requiredChecks: []string{dummyCheckName},
+			registry:       checks.NewRegistry().Add(dummyCheck.CheckId.Name, "v1.0", erroredCheck),
+			requiredChecks: []checks.Check{dummyCheck},
 		}
 
 		r, err := c.Verify(validChartUri)
@@ -90,12 +91,12 @@ func TestVerifier_Verify(t *testing.T) {
 	})
 
 	t.Run("Result should be negative if check exists and returns negative", func(t *testing.T) {
-
+		dummyCheck.Func = negativeCheck
 		c := &verifier{
 			settings:         cli.New(),
 			config:           viper.New(),
-			registry:         checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: negativeCheck}),
-			requiredChecks:   []string{dummyCheckName},
+			registry:         checks.NewRegistry().Add(dummyCheck.CheckId.Name, "v1.0", negativeCheck),
+			requiredChecks:   []checks.Check{dummyCheck},
 			openshiftVersion: "4.9",
 		}
 
@@ -106,11 +107,12 @@ func TestVerifier_Verify(t *testing.T) {
 	})
 
 	t.Run("Result should be positive if check exists and returns positive", func(t *testing.T) {
+		dummyCheck.Func = positiveCheck
 		c := &verifier{
 			settings:       cli.New(),
 			config:         viper.New(),
-			registry:       checks.NewRegistry().Add(checks.Check{Name: dummyCheckName, Type: MandatoryCheckType, Func: positiveCheck}),
-			requiredChecks: []string{dummyCheckName},
+			registry:       checks.NewRegistry().Add(dummyCheck.CheckId.Name, "v1.0", positiveCheck),
+			requiredChecks: []checks.Check{dummyCheck},
 		}
 
 		r, err := c.Verify(validChartUri)

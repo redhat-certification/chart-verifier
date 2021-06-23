@@ -27,10 +27,6 @@ var ReportKind = "verify-report"
 type OutcomeType string
 
 const (
-	MandatoryCheckType    checks.CheckType = "Mandatory"
-	OptionalCheckType     checks.CheckType = "Optional"
-	ExperimentalCheckType checks.CheckType = "Experimental"
-
 	FailOutcomeType    OutcomeType = "FAIL"
 	PassOutcomeType    OutcomeType = "PASS"
 	UnknownOutcomeType OutcomeType = "UNKNOWN"
@@ -50,16 +46,16 @@ type ReportMetadata struct {
 }
 
 type ToolMetadata struct {
-	Version                string `json:"verifier-version" yaml:"verifier-version"`
-	ChartUri               string `json:"chart-uri" yaml:"chart-uri"`
-	Digest                 string `json:"digest" yaml:"digest"`
-	LastCertifiedTimestamp string `json:"lastCertifiedTimestamp" yaml:"lastCertifiedTimestamp"`
-
-	CertifiedOpenShiftVersions string `json:"certifiedOpenShiftVersions" yaml:"certifiedOpenShiftVersions"`
+	Version                    string `json:"verifier-version" yaml:"verifier-version"`
+	Profile                    string `json:"profileName" yaml:"profileName"`
+	ChartUri                   string `json:"chart-uri" yaml:"chart-uri"`
+	Digest                     string `json:"digest,omitempty" yaml:"digest,omitempty"`
+	LastCertifiedTimestamp     string `json:"lastCertifiedTimestamp,omitempty" yaml:"lastCertifiedTimestamp,omitempty"`
+	CertifiedOpenShiftVersions string `json:"certifiedOpenShiftVersions,omitempty" yaml:"certifiedOpenShiftVersions,omitempty"`
 }
 
 type CheckReport struct {
-	Check   string           `json:"check" yaml:"check"`
+	Check   checks.CheckName `json:"check" yaml:"check"`
 	Type    checks.CheckType `json:"type" yaml:"type"`
 	Outcome OutcomeType      `json:"outcome" yaml:"outcome"`
 	Reason  string           `json:"reason" yaml:"reason"`
@@ -74,7 +70,7 @@ func newReport() Report {
 	return report
 }
 
-func (c *Report) AddCheck(checkName string, checkType checks.CheckType) *CheckReport {
+func (c *Report) AddCheck(checkName checks.CheckName, checkType checks.CheckType) *CheckReport {
 	newCheck := CheckReport{}
 	newCheck.Check = checkName
 	newCheck.Type = checkType

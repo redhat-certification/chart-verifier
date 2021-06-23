@@ -56,12 +56,38 @@ type AnnotationHolder interface {
 	GetCertifiedOpenShiftVersionFlag() string
 }
 
+type CheckName string
 type CheckType string
+type Version string
 
+const (
+	HasReadmeName            CheckName = "has-readme"
+	IsHelmV3Name             CheckName = "is-helm-v3"
+	ContainsTestName         CheckName = "contains-test"
+	ContainsValuesName       CheckName = "contains-values"
+	ContainsValuesSchemaName CheckName = "contains-values-schema"
+	HasKubeversionName       CheckName = "has-kubeversion"
+	NotContainsCRDsName      CheckName = "not-contains-crds"
+	HelmLintName             CheckName = "helm-lint"
+	NotContainCsiObjectsName CheckName = "not-contain-csi-objects"
+	ImagesAreCertifiedName   CheckName = "images-are-certified"
+	ChartTestingName         CheckName = "chart-testing"
+)
+
+const (
+	MandatoryCheckType    CheckType = "Mandatory"
+	OptionalCheckType     CheckType = "Optional"
+	ExperimentalCheckType CheckType = "Experimental"
+)
+
+type CheckId struct {
+	Name    CheckName
+	Version Version
+}
 type Check struct {
-	Name string
-	Type CheckType
-	Func CheckFunc
+	CheckId CheckId
+	Type    CheckType
+	Func    CheckFunc
 }
 
 // CheckOptions contains options collected from the environment a check can
@@ -82,31 +108,29 @@ type CheckOptions struct {
 type CheckFunc func(options *CheckOptions) (Result, error)
 
 type Registry interface {
-	Get(name string) (Check, bool)
-	Add(check Check) Registry
-	AllChecks() []string
+	Get(id CheckId) (Check, bool)
+	Add(name CheckName, version Version, checkFunc CheckFunc) Registry
+	AllChecks() DefaultRegistry
 }
 
-type defaultRegistry map[string]Check
+type DefaultRegistry map[CheckId]Check
 
-func (r *defaultRegistry) AllChecks() []string {
-	allChecks := make([]string, 0)
-	for k, _ := range *r {
-		allChecks = append(allChecks, k)
-	}
-	return allChecks
+func (r *DefaultRegistry) AllChecks() DefaultRegistry {
+	return *r
 }
 
 func NewRegistry() Registry {
-	return &defaultRegistry{}
+	return &DefaultRegistry{}
 }
 
-func (r *defaultRegistry) Get(name string) (Check, bool) {
-	v, ok := (*r)[name]
+func (r *DefaultRegistry) Get(id CheckId) (Check, bool) {
+	v, ok := (*r)[id]
 	return v, ok
 }
 
-func (r *defaultRegistry) Add(check Check) Registry {
-	(*r)[check.Name] = check
+func (r *DefaultRegistry) Add(name CheckName, version Version, checkFunc CheckFunc) Registry {
+
+	check := Check{CheckId: CheckId{Name: name, Version: version}, Func: checkFunc}
+	(*r)[check.CheckId] = check
 	return r
 }

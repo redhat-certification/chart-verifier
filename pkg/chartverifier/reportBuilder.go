@@ -19,6 +19,7 @@ package chartverifier
 import (
 	"crypto/sha256"
 	"fmt"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 	"sort"
 	"time"
 
@@ -28,8 +29,9 @@ import (
 
 type ReportBuilder interface {
 	SetToolVersion(name string) ReportBuilder
+	SetProfile(name string) ReportBuilder
 	SetChartUri(name string) ReportBuilder
-	AddCheck(name string, checkType checks.CheckType, result checks.Result) ReportBuilder
+	AddCheck(name checks.CheckName, checkType checks.CheckType, result checks.Result) ReportBuilder
 	SetChart(chart *helmchart.Chart) ReportBuilder
 	SetCertifiedOpenShiftVersion(version string) ReportBuilder
 	Build() (*Report, error)
@@ -41,8 +43,9 @@ type CheckResult struct {
 }
 
 type reportBuilder struct {
-	Chart  *helmchart.Chart
-	Report Report
+	Chart      *helmchart.Chart
+	Report     Report
+	OCPVersion string
 }
 
 func NewReportBuilder() ReportBuilder {
@@ -52,12 +55,17 @@ func NewReportBuilder() ReportBuilder {
 }
 
 func (r *reportBuilder) SetCertifiedOpenShiftVersion(version string) ReportBuilder {
-	r.Report.Metadata.ToolMetadata.CertifiedOpenShiftVersions = version
+	r.OCPVersion = version
 	return r
 }
 
 func (r *reportBuilder) SetToolVersion(version string) ReportBuilder {
 	r.Report.Metadata.ToolMetadata.Version = version
+	return r
+}
+
+func (r *reportBuilder) SetProfile(profileName string) ReportBuilder {
+	r.Report.Metadata.ToolMetadata.Profile = profileName
 	return r
 }
 
@@ -72,7 +80,7 @@ func (r *reportBuilder) SetChart(chart *helmchart.Chart) ReportBuilder {
 	return r
 }
 
-func (r *reportBuilder) AddCheck(name string, checkType checks.CheckType, result checks.Result) ReportBuilder {
+func (r *reportBuilder) AddCheck(name checks.CheckName, checkType checks.CheckType, result checks.Result) ReportBuilder {
 	checkReport := r.Report.AddCheck(name, checkType)
 	checkReport.SetResult(result.Ok, result.Reason)
 	return r
@@ -80,10 +88,20 @@ func (r *reportBuilder) AddCheck(name string, checkType checks.CheckType, result
 
 func (r *reportBuilder) Build() (*Report, error) {
 
-	r.Report.Metadata.ToolMetadata.Digest = GenerateSha(r.Chart.Raw)
-
-	r.Report.Metadata.ToolMetadata.LastCertifiedTimestamp = time.Now().Format("2006-01-02T15:04:05.999999-07:00")
-
+	for _, annotation := range profiles.Get().Annotations {
+		switch annotation {
+		case profiles.DigestAnnotation:
+			r.Report.Metadata.ToolMetadata.Digest = GenerateSha(r.Chart.Raw)
+		case profiles.LastCertifiedTimestampAnnotation:
+			r.Report.Metadata.ToolMetadata.LastCertifiedTimestamp = time.Now().Format("2006-01-02T15:04:05.999999-07:00")
+		case profiles.OCPVersionAnnotation:
+			if len(r.OCPVersion) == 0 {
+				r.Report.Metadata.ToolMetadata.CertifiedOpenShiftVersions = "N/A"
+			} else {
+				r.Report.Metadata.ToolMetadata.CertifiedOpenShiftVersions = r.OCPVersion
+			}
+		}
+	}
 	return &r.Report, nil
 }
 

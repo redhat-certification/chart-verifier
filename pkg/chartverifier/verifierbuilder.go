@@ -18,6 +18,7 @@ package chartverifier
 
 import (
 	"errors"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 	"strings"
 
 	"helm.sh/helm/v3/pkg/cli"
@@ -32,25 +33,27 @@ var defaultRegistry checks.Registry
 func init() {
 	defaultRegistry = checks.NewRegistry()
 
-	defaultRegistry.Add(checks.Check{Name: "has-readme", Type: MandatoryCheckType, Func: checks.HasReadme})
-	defaultRegistry.Add(checks.Check{Name: "is-helm-v3", Type: MandatoryCheckType, Func: checks.IsHelmV3})
-	defaultRegistry.Add(checks.Check{Name: "contains-test", Type: MandatoryCheckType, Func: checks.ContainsTest})
-	defaultRegistry.Add(checks.Check{Name: "contains-values", Type: MandatoryCheckType, Func: checks.ContainsValues})
-	defaultRegistry.Add(checks.Check{Name: "contains-values-schema", Type: MandatoryCheckType, Func: checks.ContainsValuesSchema})
-	defaultRegistry.Add(checks.Check{Name: "has-kubeversion", Type: MandatoryCheckType, Func: checks.HasKubeVersion})
-	defaultRegistry.Add(checks.Check{Name: "not-contains-crds", Type: MandatoryCheckType, Func: checks.NotContainCRDs})
-	defaultRegistry.Add(checks.Check{Name: "helm-lint", Type: MandatoryCheckType, Func: checks.HelmLint})
-	defaultRegistry.Add(checks.Check{Name: "not-contain-csi-objects", Type: MandatoryCheckType, Func: checks.NotContainCSIObjects})
-	defaultRegistry.Add(checks.Check{Name: "images-are-certified", Type: MandatoryCheckType, Func: checks.ImagesAreCertified})
-	defaultRegistry.Add(checks.Check{Name: "chart-testing", Type: MandatoryCheckType, Func: checks.ChartTesting})
+	defaultRegistry.Add(checks.HasReadmeName, "v1.0", checks.HasReadme)
+	defaultRegistry.Add(checks.IsHelmV3Name, "v1.0", checks.IsHelmV3)
+	defaultRegistry.Add(checks.ContainsTestName, "v1.0", checks.ContainsTest)
+	defaultRegistry.Add(checks.ContainsValuesName, "v1.0", checks.ContainsValues)
+	defaultRegistry.Add(checks.ContainsValuesSchemaName, "v1.0", checks.ContainsValuesSchema)
+	defaultRegistry.Add(checks.HasKubeversionName, "v1.0", checks.HasKubeVersion)
+	defaultRegistry.Add(checks.NotContainsCRDsName, "v1.0", checks.NotContainCRDs)
+	defaultRegistry.Add(checks.HelmLintName, "v1.0", checks.HelmLint)
+	defaultRegistry.Add(checks.NotContainCsiObjectsName, "v1.0", checks.NotContainCSIObjects)
+	defaultRegistry.Add(checks.ImagesAreCertifiedName, "v1.0", checks.ImagesAreCertified)
+	defaultRegistry.Add(checks.ChartTestingName, "v1.0", checks.ChartTesting)
 }
 
 func DefaultRegistry() checks.Registry {
 	return defaultRegistry
 }
 
+type FilteredRegistry map[checks.CheckName]checks.Check
+
 type verifierBuilder struct {
-	checks           []string
+	checks           FilteredRegistry
 	config           *viper.Viper
 	overrides        []string
 	registry         checks.Registry
@@ -75,7 +78,7 @@ func (b *verifierBuilder) SetRegistry(registry checks.Registry) VerifierBuilder 
 	return b
 }
 
-func (b *verifierBuilder) SetChecks(checks []string) VerifierBuilder {
+func (b *verifierBuilder) SetChecks(checks FilteredRegistry) VerifierBuilder {
 	b.checks = checks
 	return b
 }
@@ -122,12 +125,22 @@ func (b *verifierBuilder) Build() (Vertifier, error) {
 		parts := strings.Split(val, "=")
 		b.config.Set(parts[0], parts[1])
 	}
+
+	var requiredChecks []checks.Check
+
+	for _, check := range b.checks {
+		requiredChecks = append(requiredChecks, check)
+	}
+
+	profileName := profiles.Get().Name
+
 	return &verifier{
 		config:           b.config,
 		registry:         b.registry,
-		requiredChecks:   b.checks,
+		requiredChecks:   requiredChecks,
 		settings:         b.settings,
 		toolVersion:      b.toolVersion,
+		profileName:      profileName,
 		openshiftVersion: b.openshiftVersion,
 		values:           b.values,
 	}, nil
