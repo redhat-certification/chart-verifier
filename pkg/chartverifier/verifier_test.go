@@ -19,6 +19,7 @@ package chartverifier
 import (
 	"context"
 	"errors"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -67,6 +68,7 @@ func TestVerifier_Verify(t *testing.T) {
 		c := &verifier{
 			settings:       cli.New(),
 			config:         viper.New(),
+			profile:        profiles.Get(),
 			registry:       checks.NewRegistry(),
 			requiredChecks: []checks.Check{dummyCheck},
 		}
@@ -81,6 +83,7 @@ func TestVerifier_Verify(t *testing.T) {
 		c := &verifier{
 			settings:       cli.New(),
 			config:         viper.New(),
+			profile:        profiles.Get(),
 			registry:       checks.NewRegistry().Add(dummyCheck.CheckId.Name, "v1.0", erroredCheck),
 			requiredChecks: []checks.Check{dummyCheck},
 		}
@@ -95,6 +98,7 @@ func TestVerifier_Verify(t *testing.T) {
 		c := &verifier{
 			settings:         cli.New(),
 			config:           viper.New(),
+			profile:          profiles.Get(),
 			registry:         checks.NewRegistry().Add(dummyCheck.CheckId.Name, "v1.0", negativeCheck),
 			requiredChecks:   []checks.Check{dummyCheck},
 			openshiftVersion: "4.9",
@@ -111,6 +115,7 @@ func TestVerifier_Verify(t *testing.T) {
 		c := &verifier{
 			settings:       cli.New(),
 			config:         viper.New(),
+			profile:        profiles.Get(),
 			registry:       checks.NewRegistry().Add(dummyCheck.CheckId.Name, "v1.0", positiveCheck),
 			requiredChecks: []checks.Check{dummyCheck},
 		}

@@ -18,6 +18,7 @@ package chartverifier
 
 import (
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 	"github.com/spf13/viper"
 	helmcli "helm.sh/helm/v3/pkg/cli"
 )
@@ -57,7 +58,7 @@ type verifier struct {
 	requiredChecks   []checks.Check
 	settings         *helmcli.EnvSettings
 	toolVersion      string
-	profileName      string
+	profile          *profiles.Profile
 	openshiftVersion string
 	values           map[string]interface{}
 }
@@ -81,7 +82,7 @@ func (c *verifier) Verify(uri string) (*Report, error) {
 		SetToolVersion(c.toolVersion).
 		SetChartUri(uri).
 		SetChart(chrt).
-		SetProfile(c.profileName)
+		SetProfile(c.profile.Vendor, c.profile.Version)
 
 	for _, check := range c.requiredChecks {
 
@@ -102,7 +103,7 @@ func (c *verifier) Verify(uri string) (*Report, error) {
 		if checkErr != nil {
 			return nil, NewCheckErr(checkErr)
 		}
-		_ = result.AddCheck(check.CheckId.Name, check.Type, r)
+		_ = result.AddCheck(check, r)
 
 	}
 

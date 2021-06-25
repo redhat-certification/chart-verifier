@@ -37,9 +37,9 @@ import (
 
 type ReportBuilder interface {
 	SetToolVersion(name string) ReportBuilder
-	SetProfile(name string) ReportBuilder
+	SetProfile(vendorType profiles.VendorType, version string) ReportBuilder
 	SetChartUri(name string) ReportBuilder
-	AddCheck(name checks.CheckName, checkType checks.CheckType, result checks.Result) ReportBuilder
+	AddCheck(check checks.Check, result checks.Result) ReportBuilder
 	SetChart(chart *helmchart.Chart) ReportBuilder
 	SetCertifiedOpenShiftVersion(version string) ReportBuilder
 	Build() (*Report, error)
@@ -72,8 +72,9 @@ func (r *reportBuilder) SetToolVersion(version string) ReportBuilder {
 	return r
 }
 
-func (r *reportBuilder) SetProfile(profileName string) ReportBuilder {
-	r.Report.Metadata.ToolMetadata.Profile = profileName
+func (r *reportBuilder) SetProfile(vendorType profiles.VendorType, version string) ReportBuilder {
+	r.Report.Metadata.ToolMetadata.Profile.VendorType = string(vendorType)
+	r.Report.Metadata.ToolMetadata.Profile.Version = version
 	return r
 }
 
@@ -88,8 +89,8 @@ func (r *reportBuilder) SetChart(chart *helmchart.Chart) ReportBuilder {
 	return r
 }
 
-func (r *reportBuilder) AddCheck(name checks.CheckName, checkType checks.CheckType, result checks.Result) ReportBuilder {
-	checkReport := r.Report.AddCheck(name, checkType)
+func (r *reportBuilder) AddCheck(check checks.Check, result checks.Result) ReportBuilder {
+	checkReport := r.Report.AddCheck(check)
 	checkReport.SetResult(result.Ok, result.Reason)
 	return r
 }

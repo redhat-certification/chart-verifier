@@ -58,7 +58,6 @@ type AnnotationHolder interface {
 
 type CheckName string
 type CheckType string
-type Version string
 
 const (
 	HasReadmeName            CheckName = "has-readme"
@@ -82,7 +81,7 @@ const (
 
 type CheckId struct {
 	Name    CheckName
-	Version Version
+	Version string
 }
 type Check struct {
 	CheckId CheckId
@@ -109,7 +108,7 @@ type CheckFunc func(options *CheckOptions) (Result, error)
 
 type Registry interface {
 	Get(id CheckId) (Check, bool)
-	Add(name CheckName, version Version, checkFunc CheckFunc) Registry
+	Add(name CheckName, version string, checkFunc CheckFunc) Registry
 	AllChecks() DefaultRegistry
 }
 
@@ -128,7 +127,7 @@ func (r *DefaultRegistry) Get(id CheckId) (Check, bool) {
 	return v, ok
 }
 
-func (r *DefaultRegistry) Add(name CheckName, version Version, checkFunc CheckFunc) Registry {
+func (r *DefaultRegistry) Add(name CheckName, version string, checkFunc CheckFunc) Registry {
 
 	check := Check{CheckId: CheckId{Name: name, Version: version}, Func: checkFunc}
 	(*r)[check.CheckId] = check
