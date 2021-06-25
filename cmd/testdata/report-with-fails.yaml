@@ -1,0 +1,50 @@
+apiversion: v1
+kind: verify-report
+metadata:
+results:
+  - check: contains-test
+    type: Mandatory
+    outcome: PASS
+    reason: Chart test files exist
+  - check: contains-values-schema
+    type: Mandatory
+    outcome: PASS
+    reason: Values schema file exist
+  - check: has-kubeversion
+    type: Mandatory
+    outcome: PASS
+    reason: Kubernetes version specified
+  - check: not-contains-crds
+    type: Mandatory
+    outcome: PASS
+    reason: Chart does not contain CRDs
+  - check: images-are-certified
+    type: Mandatory
+    outcome: FAIL
+    reason: |-
+        Error: some images are not certified.
+  - check: has-readme
+    type: Mandatory
+    outcome: PASS
+    reason: Chart has a README
+  - check: is-helm-v3
+    type: Mandatory
+    outcome: PASS
+    reason: API version is V2, used in Helm 3
+  - check: contains-values
+    type: Mandatory
+    outcome: PASS
+    reason: Values file exist
+  - check: helm-lint
+    type: Mandatory
+    outcome: UNKNOWN
+    reason: Unknown outcome.
+  - check: not-contain-csi-objects
+    type: Mandatory
+    outcome: PASS
+    reason: CSI objects do not exist
+  - check: chart-testing
+    type: Mandatory
+    outcome: FAIL
+    reason: |-
+        Error: chart testin failed.
