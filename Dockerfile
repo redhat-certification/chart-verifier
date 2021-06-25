@@ -31,4 +31,6 @@ COPY --from=build /tmp/src/out/chart-verifier /app/chart-verifier
 
 COPY --from=build /usr/local/bin/* /usr/local/bin/
 
+COPY ./config /app/config
+
 ENTRYPOINT ["/app/chart-verifier"]

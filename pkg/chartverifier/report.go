@@ -46,16 +46,22 @@ type ReportMetadata struct {
 }
 
 type ToolMetadata struct {
-	Version                    string `json:"verifier-version" yaml:"verifier-version"`
-	Profile                    string `json:"profileName" yaml:"profileName"`
-	ChartUri                   string `json:"chart-uri" yaml:"chart-uri"`
-	Digest                     string `json:"digest,omitempty" yaml:"digest,omitempty"`
-	LastCertifiedTimestamp     string `json:"lastCertifiedTimestamp,omitempty" yaml:"lastCertifiedTimestamp,omitempty"`
-	CertifiedOpenShiftVersions string `json:"certifiedOpenShiftVersions,omitempty" yaml:"certifiedOpenShiftVersions,omitempty"`
+	Version                    string  `json:"verifierVersion" yaml:"verifier-version"`
+	Profile                    Profile `json:"profile" yaml:"profile"`
+	ChartUri                   string  `json:"chart-uri" yaml:"chart-uri"`
+	Digest                     string  `json:"digest,omitempty" yaml:"digest,omitempty"`
+	LastCertifiedTimestamp     string  `json:"lastCertifiedTimestamp,omitempty" yaml:"lastCertifiedTimestamp,omitempty"`
+	CertifiedOpenShiftVersions string  `json:"certifiedOpenShiftVersions,omitempty" yaml:"certifiedOpenShiftVersions,omitempty"`
+}
+
+type Profile struct {
+	VendorType string `json:"vendorType" yaml:"VendorType"`
+	Version    string `json:"version" yaml:"version"`
 }
 
 type CheckReport struct {
 	Check   checks.CheckName `json:"check" yaml:"check"`
+	Version string           `json:"version" yaml:"version"`
 	Type    checks.CheckType `json:"type" yaml:"type"`
 	Outcome OutcomeType      `json:"outcome" yaml:"outcome"`
 	Reason  string           `json:"reason" yaml:"reason"`
@@ -70,10 +76,11 @@ func newReport() Report {
 	return report
 }
 
-func (c *Report) AddCheck(checkName checks.CheckName, checkType checks.CheckType) *CheckReport {
+func (c *Report) AddCheck(check checks.Check) *CheckReport {
 	newCheck := CheckReport{}
-	newCheck.Check = checkName
-	newCheck.Type = checkType
+	newCheck.Check = check.CheckId.Name
+	newCheck.Type = check.Type
+	newCheck.Version = check.CheckId.Version
 	newCheck.Outcome = UnknownOutcomeType
 	c.Results = append(c.Results, &newCheck)
 	return &newCheck

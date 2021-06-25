@@ -34,7 +34,7 @@ import (
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier"
 )
 
-var Version = "1.0.0"
+var Version = "1.1.0"
 
 func init() {
 	allChecks = chartverifier.DefaultRegistry().AllChecks()
@@ -77,8 +77,8 @@ func filterChecks(set profiles.FilteredRegistry, subset []string, setEnabled boo
 	return selected, nil
 }
 
-func buildChecks(all checks.DefaultRegistry, enabled, disabled []string) (chartverifier.FilteredRegistry, error) {
-	profileChecks := profiles.Get().FilterChecks(all)
+func buildChecks(all checks.DefaultRegistry, config *viper.Viper, enabled, disabled []string) (chartverifier.FilteredRegistry, error) {
+	profileChecks := profiles.New(Version, config).FilterChecks(all)
 	switch {
 	case len(enabled) > 0 && len(disabled) > 0:
 		return nil, errors.New("--enable and --disable can't be used at the same time")
@@ -113,10 +113,6 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		Short: "Verifies a Helm chart by checking some of its characteristics",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			checks, err := buildChecks(allChecks, enabledChecksFlag, disabledChecksFlag)
-			if err != nil {
-				return err
-			}
 
 			// vals is a resulting map considering all the options the user has given.
 			vals, err := opts.MergeValues(getter.All(settings))
@@ -124,12 +120,18 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 				return err
 			}
 
-			verifier, err := chartverifier.
-				NewVerifierBuilder().
+			verifierBuilder := chartverifier.NewVerifierBuilder().
 				SetValues(vals).
-				SetChecks(checks).
 				SetConfig(config).
-				SetOverrides(verifyOpts.Values).
+				SetOverrides(verifyOpts.Values)
+
+			checks, err := buildChecks(allChecks, verifierBuilder.GetConfig(), enabledChecksFlag, disabledChecksFlag)
+			if err != nil {
+				return err
+			}
+
+			verifier, err := verifierBuilder.
+				SetChecks(checks).
 				SetToolVersion(Version).
 				SetOpenShiftVersion(openshiftVersionFlag).
 				Build()
