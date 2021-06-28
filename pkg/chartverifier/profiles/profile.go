@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 	"io"
-
 	//"io"
 	"io/ioutil"
 	"os"
@@ -110,26 +109,26 @@ func getProfile(vendor VendorType, version *semver.Version) (*Profile, error) {
 		if !ok {
 			return nil, errors.New("failed to get profile directory")
 		}
-		fileParts := strings.SplitAfter(fn, "chart-verifier")
-		if len(fileParts) > 1 {
-			// running as cli
-			configDir = filepath.Join(fileParts[0], "config")
-		}
+		index := strings.LastIndex(fn, "chart-verifier/")
+		configDir = fn[0 : index+len("chart-verifier")]
+		configDir = filepath.Join(configDir, "config")
 	}
 
 	var profile *Profile
 
 	filepath.Walk(configDir, func(path string, info os.FileInfo, err error) error {
-		if strings.HasSuffix(info.Name(), ".yaml") {
-			profileRead, err := readProfile(path)
-			if err == nil {
-				if strings.Compare(string(profileRead.Vendor), string(vendor)) == 0 {
-					profileVersion, err := semver.NewVersion(string(profileRead.Version))
-					if err == nil {
-						if profileVersion.Major() == version.Major() && profileVersion.Minor() == version.Minor() {
-							profile = profileRead
-							profile.Name = strings.Split(info.Name(), ".yaml")[0]
-							return io.EOF
+		if info != nil {
+			if strings.HasSuffix(info.Name(), ".yaml") {
+				profileRead, err := readProfile(path)
+				if err == nil {
+					if strings.Compare(string(profileRead.Vendor), string(vendor)) == 0 {
+						profileVersion, err := semver.NewVersion(string(profileRead.Version))
+						if err == nil {
+							if profileVersion.Major() == version.Major() && profileVersion.Minor() == version.Minor() {
+								profile = profileRead
+								profile.Name = strings.Split(info.Name(), ".yaml")[0]
+								return io.EOF
+							}
 						}
 					}
 				}
