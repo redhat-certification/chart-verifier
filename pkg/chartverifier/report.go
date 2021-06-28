@@ -49,7 +49,8 @@ type ToolMetadata struct {
 	Version                    string  `json:"verifierVersion" yaml:"verifier-version"`
 	Profile                    Profile `json:"profile" yaml:"profile"`
 	ChartUri                   string  `json:"chart-uri" yaml:"chart-uri"`
-	Digest                     string  `json:"digest,omitempty" yaml:"digest,omitempty"`
+	Digest                     string  `json:"digest" yaml:"digest"`
+	Digests                    Digest  `json:"digests" yaml:"digests"`
 	LastCertifiedTimestamp     string  `json:"lastCertifiedTimestamp,omitempty" yaml:"lastCertifiedTimestamp,omitempty"`
 	CertifiedOpenShiftVersions string  `json:"certifiedOpenShiftVersions,omitempty" yaml:"certifiedOpenShiftVersions,omitempty"`
 }
@@ -57,6 +58,11 @@ type ToolMetadata struct {
 type Profile struct {
 	VendorType string `json:"vendorType" yaml:"VendorType"`
 	Version    string `json:"version" yaml:"version"`
+}
+
+type Digest struct {
+	Chart   string `json:"chart" yaml:"chart"`
+	Package string `json:"package,omitempty" yaml:"package,omitempty"`
 }
 
 type CheckReport struct {
