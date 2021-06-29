@@ -16,10 +16,10 @@ The new command is therefore design primarily for use from the workflow to isola
 
 ## Sub-commands
 * require report-uri:
-    * metatdata : return json information for metadata in the report
-    * digests : return json information for digests in the report
-    * annotations : return json information for annotations in the report
-    * results : return json information on the checks
+    * metatdata : return information for metadata in the report
+    * digests : return information for digests in the report
+    * annotations : return information for annotations in the report
+    * results : return information on the checks
     * full : all of the above (default) 
 * do not require a report-uri    
     * display : output the content of a profile in yaml (default is latest partnet profile)
@@ -54,7 +54,7 @@ Set the profile version to use for analysis. Default is vendor type in the repor
 *  ```-h, --help```                        
    * help for analyze
 *  ```-o, --output string```               
-   * the output format: default, json or yaml    
+   * the output format: default, json or yaml. Default is json for all command except display.    
 * ```-s, --set strings```                 
   * overrides a configuration, e.g: profile.vendortype=redhat
 * ```-f, --set-values strings```          
@@ -87,8 +87,9 @@ Set the profile version to use for analysis. Default is vendor type in the repor
   "results": { "passed": 11, "failed": 1, "Messages": [ "Mandatory check chart-testing not found"] } }
 ```
 ## list
-
+```
 { "profiles": [{"type": "partner", "version": "v1.1"},{"type": "redhat", "version": "v1.1"},{"type": "community", "version": "v1.1"}]} 
+```
 
 # design notes
 
