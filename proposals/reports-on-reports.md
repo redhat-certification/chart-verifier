@@ -1,16 +1,30 @@
 # adding a command to get information on a report
 
+##background
+
+The CI workflow in the chart repository currently contains report specific information which leads to two problems.
+* The worklflow may need to be updated when the report changes.
+* The workflow needs separate paths for different version of the report.
+* The workflow contains logic which duplicates logic in tne verifier code.
+* The workflow need access to the profiles
+
+The new command is therefore design primarily for use from the workflow to isolate the workflow as much as possible form future updates to the report format and content,
+
 # command spec
 
 chart-verifier analyze <subcommand> <options> <report-uri>
 
 ##sub-commands
-* metatdata : return json information for metadata in the report
-* digests : return json information for digests in the report
-* annotations : return json information for annotations in the report
-* results : return json information on the checks
-* all : all of the above (default)
-
+* require report-uri:
+    * metatdata : return json information for metadata in the report
+    * digests : return json information for digests in the report
+    * annotations : return json information for annotations in the report
+    * results : return json information on the checks
+    * full : all of the above (default) 
+* do not require a report-uri    
+    * display : output the content of a profile in yaml (default is latest partnet profile)
+    * list  : list the profile and version available
+    
 ##Options
 
 ### set prefix for annotations
@@ -22,7 +36,7 @@ set the prefix to be used for annotations. Default is ```charts.openshift.io```
 
 ### set profile vendor type
 
-Set the profile vendor type to use for analysis. Default is vendor type in the report. 
+Set the profile vendor type to use for analysis. Default is vendor type in the report, or partner of no report. 
 (change verify command set option to ```profile.vendorType``` - currently ```verifier.vendortype```?)
 
 * ```--set profile.vendortype=redhat```
@@ -30,7 +44,7 @@ Set the profile vendor type to use for analysis. Default is vendor type in the r
 
 ### set profile vendor type
 
-Set the profile version to use for analysis. Default is vendor type in the report.
+Set the profile version to use for analysis. Default is vendor type in the report, or latest version if no report.
 
 * ```--set profile.version=v1.1```
 * ```-v v1.1```
