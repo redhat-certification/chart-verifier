@@ -4,11 +4,11 @@
 
 The CI workflow in the chart repository currently contains report specific information which leads to several problems.
 * The worklflow may need to be updated when the report changes.
-* The workflow needs separate paths for different version of the report.
-* The workflow contains logic which duplicates logic in tne verifier code.
-* The workflow need access to the profiles
+* The workflow needs separate paths for different versions of the report.
+* The workflow contains logic which duplicates logic in the verifier code.
+* The workflow needs access to the profiles
 
-The new command is therefore design primarily for use from the workflow to isolate the workflow as much as possible form future updates to the report format and content.However it may also be useful for users and will documented.
+The new command is therefore design primarily for use from the workflow to isolate the workflow as much as possible from future updates to the report format and content.However, it may also be useful for users and will documented.
 
 # Command spec
 
