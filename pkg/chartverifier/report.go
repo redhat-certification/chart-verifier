@@ -49,7 +49,7 @@ type ToolMetadata struct {
 	Version                    string  `json:"verifier-version" yaml:"verifier-version"`
 	Profile                    string  `json:"profileName" yaml:"profileName"`
 	ChartUri                   string  `json:"chart-uri" yaml:"chart-uri"`
-	Digest                     string  `json:"digest,omitempty" yaml:"digest"`
+	Digest                     string  `json:"digest" yaml:"digest"`
 	Digests                    Digests `json:"digests" yaml:"digests"`
 	LastCertifiedTimestamp     string  `json:"lastCertifiedTimestamp,omitempty" yaml:"lastCertifiedTimestamp,omitempty"`
 	CertifiedOpenShiftVersions string  `json:"certifiedOpenShiftVersions,omitempty" yaml:"certifiedOpenShiftVersions,omitempty"`

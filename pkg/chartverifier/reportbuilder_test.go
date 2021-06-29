@@ -62,9 +62,7 @@ func TestFilePackageDigest(t *testing.T) {
 		var out bytes.Buffer
 		cmd.Stdout = &out
 		err := cmd.Run()
-		if err != nil {
-			fmt.Println("error running command:")
-		}
+		assert.NoError(t, err, "error running sha256sum command")
 		commandResponse := strings.Split(out.String(), " ")
 		assert.Equal(t, commandResponse[0], GetPackageDigest(chart), fmt.Sprintf("%s digests did not match as expected", chart))
 	}
@@ -82,16 +80,18 @@ func TestUrlPackageDigest(t *testing.T) {
 
 		var out bytes.Buffer
 		cmd1 := exec.Command("curl", "-L", chart)
-
 		cmd2 := exec.Command("sha256sum")
 
-		cmd2.Stdin, _ = cmd1.StdoutPipe()
+		var err error
+		cmd2.Stdin, err = cmd1.StdoutPipe()
+		assert.NoError(t, err, "error get pipe from curl -L command")
 		cmd2.Stdout = &out
-
-		cmd2.Start()
-		cmd1.Run()
-		cmd2.Wait()
-
+		err = cmd2.Start()
+		assert.NoError(t, err, "error starting sha256sum command")
+		err = cmd1.Run()
+		assert.NoError(t, err, "error starting curl -L command")
+		err = cmd2.Wait()
+		assert.NoError(t, err, "error waiting for sha256sum command")
 		commandResponse := strings.Split(out.String(), " ")
 		assert.Equal(t, commandResponse[0], GetPackageDigest(chart), fmt.Sprintf("%s digests did not match as expected", chart))
 
