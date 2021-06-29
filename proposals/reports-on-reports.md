@@ -12,7 +12,7 @@ The new command is therefore design primarily for use from the workflow to isola
 
 # Command spec
 
-chart-verifier analyze <subcommand> <options> <report-uri>
+```chart-verifier analyze <subcommand> <options> <report-uri>```
 
 ## Sub-commands
 * require report-uri:
