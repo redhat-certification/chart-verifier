@@ -42,6 +42,11 @@ func Get() *Profile {
 		return profile
 	}
 
+	if isRunningInDockerContainer() {
+		profile = getDefaultProfile("")
+		return profile
+	}
+
 	fileName, err := getProfileFileName()
 	if err != nil {
 		profile = getDefaultProfile(err.Error())
@@ -97,4 +102,15 @@ func (profile *Profile) FilterChecks(registry checks.DefaultRegistry) FilteredRe
 
 	return filteredChecks
 
+}
+
+func isRunningInDockerContainer() bool {
+	// docker creates a .dockerenv file at the root
+	// of the directory tree inside the container.
+	// if this file exists then verifier is running
+	// from inside a container
+	if _, err := os.Stat("/.dockerenv"); err == nil {
+		return true
+	}
+	return false
 }

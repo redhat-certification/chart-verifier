@@ -11,7 +11,10 @@ func getDefaultProfile(msg string) *Profile {
 	profile.Apiversion = "v1"
 	profile.Kind = "verifier-profile"
 
-	profile.Name = fmt.Sprintf("default-profile : %s", msg)
+	profile.Name = "default-profile"
+	if len(msg) > 0 {
+		profile.Name = fmt.Sprintf("%s : %s", profile.Name, msg)
+	}
 
 	profile.Annotations = []Annotation{DigestAnnotation, OCPVersionAnnotation, LastCertifiedTimestampAnnotation}
 
@@ -28,8 +31,6 @@ func getDefaultProfile(msg string) *Profile {
 		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ImagesAreCertifiedName), Type: checks.MandatoryCheckType},
 		{Name: fmt.Sprintf("%s/%s", "v1.0", checks.ChartTestingName), Type: checks.MandatoryCheckType},
 	}
-
-	profile.Name = fmt.Sprintf("default-profile : %s", msg)
 
 	return &profile
 }
