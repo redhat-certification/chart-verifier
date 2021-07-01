@@ -9,47 +9,80 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"strings"
 	"testing"
 )
 
 const (
-	NoVersion       string     = ""
-	configVersion10 string     = "1.0"
-	configVersion11 string     = "1.1"
-	configVersion12 string     = "1.2"
-	checkVersion10  string     = CheckVersion10
-	checkVersion11  string     = "v1.1"
-	NoVendorType    VendorType = ""
+	NoVersion           string     = ""
+	configVersion00     string     = "v0.0"
+	configVersion10     string     = "v1.0"
+	configVersion11     string     = "v1.1"
+	checkVersion10      string     = CheckVersion10
+	checkVersion11      string     = "v1.1"
+	NoVendorType        VendorType = ""
+	PartnerVendorType   VendorType = "partner"
+	RedhatVendorType    VendorType = "redhat"
+	CommunityVendorType VendorType = "community"
 )
 
 func TestProfile(t *testing.T) {
 
 	testProfile := getDefaultProfile("test")
-	testProfile.Name = "profile-partner-1.1"
+	testProfile.Name = "profile-partner-1.0"
 	config := viper.New()
+	config.Set(VendorTypeConfigName, string(PartnerVendorType))
 
 	t.Run("Profile read from disk should match test profile", func(t *testing.T) {
-		diskProfile := New("1.1.0", config)
-		assert.True(t, cmp.Equal(diskProfile, testProfile), "profiles do not match")
-
+		diskProfile := New(config)
+		if !cmp.Equal(diskProfile, testProfile) {
+			assert.Equal(t, testProfile.Name, diskProfile.Name, "Name mismatch")
+			assert.Equal(t, testProfile.Vendor, diskProfile.Vendor, "Vendor mismatch")
+			assert.Equal(t, testProfile.Version, diskProfile.Version, "Version mismatch")
+			assert.Equal(t, len(testProfile.Annotations), len(diskProfile.Annotations), "Annotations number mismatch")
+			for _, testAnnotation := range testProfile.Annotations {
+				found := false
+				for _, diskAnnotation := range diskProfile.Annotations {
+					if testAnnotation == diskAnnotation {
+						found = true
+						break
+					}
+				}
+				assert.True(t, found, fmt.Sprintf("Annotation not found : %s", testAnnotation))
+			}
+			assert.Equal(t, len(testProfile.Checks), len(diskProfile.Checks), "Checks number mismatch")
+			for _, testCheck := range testProfile.Checks {
+				found := false
+				for _, diskCheck := range diskProfile.Checks {
+					if strings.Compare(testCheck.Name, diskCheck.Name) == 0 {
+						if testCheck.Type == diskCheck.Type {
+							found = true
+							break
+						}
+					}
+				}
+				assert.True(t, found, fmt.Sprintf("Check not matched : %s : %s", testCheck.Name, testCheck.Type))
+			}
+			assert.True(t, cmp.Equal(diskProfile, testProfile), "profiles do not match")
+		}
 	})
 
 }
 
 func TestGetProfiles(t *testing.T) {
 
-	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion11, configVersion11)
-	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion11, configVersion11)
-	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion11, configVersion11)
-	getAndCheckProfile(t, NoVendorType, PartnerVendorType, configVersion11, configVersion11)
-	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, NoVersion, configVersion11)
-	getAndCheckProfile(t, NoVendorType, PartnerVendorType, NoVersion, configVersion11)
-	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion12, configVersion11)
-	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion10, configVersion11)
-	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion12, configVersion11)
-	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion10, configVersion11)
-	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion10, configVersion11)
-	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion12, configVersion11)
+	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion10, configVersion10)
+	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion10, configVersion10)
+	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion10, configVersion10)
+	getAndCheckProfile(t, NoVendorType, PartnerVendorType, configVersion10, configVersion10)
+	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, NoVersion, configVersion10)
+	getAndCheckProfile(t, NoVendorType, PartnerVendorType, NoVersion, configVersion10)
+	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion11, configVersion10)
+	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion00, configVersion10)
+	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion11, configVersion10)
+	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion00, configVersion10)
+	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion00, configVersion10)
+	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion11, configVersion10)
 }
 
 func getAndCheckProfile(t *testing.T, configVendorType, expectVendorType VendorType, configVersion, expectVersion string) {
@@ -63,13 +96,7 @@ func getAndCheckProfile(t *testing.T, configVendorType, expectVendorType VendorT
 	}
 
 	t.Run(fmt.Sprintf("Request : VendorType config %s expect %s : Version config %s expect %s ", configVendorType, expectVendorType, configVersion, expectVersion), func(t *testing.T) {
-		if len(configVendorType) > 0 {
-			config.Set(VendorTypeConfigName, string(configVendorType))
-		}
-		if len(configVersion) > 0 {
-			config.Set(VersionConfigName, configVersion)
-		}
-		profile := New("1.1.0", config)
+		profile := New(config)
 		assert.Equal(t, expectVendorType, profile.Vendor, "VendorType did not match")
 		assert.Equal(t, expectVersion, profile.Version, "Version did not match")
 	})
@@ -107,7 +134,7 @@ func TestProfileFilter(t *testing.T) {
 
 	config := viper.New()
 	t.Run("Checks filtered using profile subset", func(t *testing.T) {
-		filteredChecks := New("1.1.0", config).FilterChecks(defaultRegistry.AllChecks())
+		filteredChecks := New(config).FilterChecks(defaultRegistry.AllChecks())
 		CompareCheckMaps(t, expectedChecks, filteredChecks)
 	})
 
@@ -128,7 +155,7 @@ func TestProfileFilter(t *testing.T) {
 	expectedChecks[checks.ChartTestingName] = checks.Check{CheckId: checks.CheckId{Name: checks.ChartTestingName, Version: checkVersion10}, Type: checks.MandatoryCheckType, Func: checks.ChartTesting}
 
 	t.Run("Checks filtered using profile - full set", func(t *testing.T) {
-		filteredChecks := New("1.1.0", config).FilterChecks(defaultRegistry.AllChecks())
+		filteredChecks := New(config).FilterChecks(defaultRegistry.AllChecks())
 		CompareCheckMaps(t, expectedChecks, filteredChecks)
 	})
 

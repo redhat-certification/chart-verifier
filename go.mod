@@ -13,6 +13,7 @@ require (
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/viper v1.7.0
 	github.com/stretchr/testify v1.6.1
+	golang.org/x/mod v0.3.0
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 	helm.sh/helm/v3 v3.5.1
 	rsc.io/letsencrypt v0.0.3 // indirect

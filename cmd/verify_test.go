@@ -117,8 +117,7 @@ func TestCertify(t *testing.T) {
 		require.NotEmpty(t, outBuf.String())
 
 		expected := "results:\n" +
-			"  - check: is-helm-v3\n" +
-			"    version: v1.0\n" +
+			"  - check: v1.0/is-helm-v3\n" +
 			"    type: Mandatory\n" +
 			"    outcome: PASS\n" +
 			"    reason: API version is V2, used in Helm 3\n"
@@ -146,7 +145,7 @@ func TestCertify(t *testing.T) {
 		err := json.Unmarshal([]byte(outBuf.String()), &certificate)
 		require.NoError(t, err)
 		require.True(t, len(certificate.Results) == 1, "Expected only 1 result")
-		require.Equal(t, certificate.Results[0].Check, checks.CheckName("is-helm-v3"))
+		require.Equal(t, certificate.Results[0].Check, checks.CheckName("v1.0/is-helm-v3"))
 		require.Equal(t, certificate.Results[0].Outcome, chartverifier.PassOutcomeType)
 		require.Equal(t, certificate.Results[0].Type, checks.MandatoryCheckType)
 		require.Equal(t, certificate.Results[0].Reason, checks.Helm3Reason)
@@ -173,7 +172,7 @@ func TestCertify(t *testing.T) {
 		err := yaml.Unmarshal([]byte(outBuf.String()), &certificate)
 		require.NoError(t, err)
 		require.True(t, len(certificate.Results) == 1, "Expected only 1 result")
-		require.Equal(t, certificate.Results[0].Check, checks.CheckName("is-helm-v3"))
+		require.Equal(t, certificate.Results[0].Check, checks.CheckName("v1.0/is-helm-v3"))
 		require.Equal(t, certificate.Results[0].Outcome, chartverifier.PassOutcomeType)
 		require.Equal(t, certificate.Results[0].Type, checks.MandatoryCheckType)
 		require.Equal(t, certificate.Results[0].Reason, checks.Helm3Reason)

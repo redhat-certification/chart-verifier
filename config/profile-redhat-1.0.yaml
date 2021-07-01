@@ -1,7 +1,7 @@
 apiversion: v1
 kind: verifier-profile
-vendorType: partner
-version: 1.1
+vendorType: redhat
+version: v1.0
 annotations:
   - "Digest"
   - "OCPVersion"

@@ -6,7 +6,8 @@ import (
 )
 
 const (
-	CheckVersion10 = "v1.0"
+	CheckVersion10        = "v1.0"
+	DefaultProfileVersion = "v1.0"
 )
 
 func getDefaultProfile(msg string) *Profile {
@@ -20,8 +21,8 @@ func getDefaultProfile(msg string) *Profile {
 		profile.Name = fmt.Sprintf("%s : %s", profile.Name, msg)
 	}
 
-	profile.Vendor = PartnerVendorType
-	profile.Version = "v1.1"
+	profile.Vendor = "partner"
+	profile.Version = DefaultProfileVersion
 
 	profile.Annotations = []Annotation{DigestAnnotation, OCPVersionAnnotation, LastCertifiedTimestampAnnotation}
 

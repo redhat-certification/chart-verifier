@@ -1,14 +1,10 @@
 package profiles
 
 import (
-	"errors"
-	"fmt"
-	"github.com/Masterminds/semver"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/spf13/viper"
+	"golang.org/x/mod/semver"
 	"gopkg.in/yaml.v3"
-	"io"
-	//"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -25,14 +21,24 @@ const (
 	OCPVersionAnnotation             Annotation = "OCPVersion"
 	LastCertifiedTimestampAnnotation Annotation = "LastCertifiedTimestamp"
 
-	PartnerVendorType   VendorType = "partner"
-	CommunityVendorType VendorType = "community"
-	RedhatVendorType    VendorType = "redhat"
-	DefaultVendorType              = PartnerVendorType
+	VendorTypeConfigName string = "profile.vendortype"
+	VersionConfigName    string = "profile.version"
 
-	VendorTypeConfigName string = "verifier.vendortype"
-	VersionConfigName    string = "verifier.version"
+	VendorTypeDefault      VendorType = "default"
+	VendorTypeNotSpecified VendorType = "vendorTypeNotSpecified"
 )
+
+var profileMap map[VendorType][]*Profile
+
+func init() {
+	profileMap = make(map[VendorType][]*Profile)
+	getProfiles()
+
+	// add default profile to the map if a default profile was not found.
+	if _, ok := profileMap[VendorTypeDefault]; !ok {
+		profileMap[VendorTypeDefault] = append(profileMap[VendorTypeDefault], getDefaultProfile(""))
+	}
+}
 
 type Profile struct {
 	Apiversion  string       `json:"apiversion" yaml:"apiversion"`
@@ -60,46 +66,57 @@ func Get() *Profile {
 	return profile
 }
 
-func New(version string, config *viper.Viper) *Profile {
+func New(config *viper.Viper) *Profile {
 
-	profileVersion, _ := semver.NewVersion(version)
-	profileVendorType := DefaultVendorType
+	profileVendorType := VendorTypeDefault
+	var profileVersion string
 
 	if config != nil {
-		configVersion := config.GetString(VersionConfigName)
-		if len(configVersion) > 0 {
-			requestedVersion, err := semver.NewVersion(configVersion)
-			if err != nil {
-				if !requestedVersion.GreaterThan(profileVersion) {
-					profileVersion = requestedVersion
-				}
+
+		configVendorType := VendorType(config.GetString(VendorTypeConfigName))
+		if len(configVendorType) > 0 {
+			if _, ok := profileMap[configVendorType]; ok {
+				profileVendorType = configVendorType
 			}
 		}
-		configVendorType := config.GetString(VendorTypeConfigName)
-		if len(configVendorType) > 0 {
-			switch VendorType(configVendorType) {
-			case PartnerVendorType:
-				profileVendorType = PartnerVendorType
-			case CommunityVendorType:
-				profileVendorType = CommunityVendorType
-			case RedhatVendorType:
-				profileVendorType = RedhatVendorType
+
+		configVersion := config.GetString(VersionConfigName)
+		if len(configVersion) > 0 {
+			if semver.IsValid(configVersion) {
+				profileVersion = configVersion
 			}
 		}
 	}
 
-	profile, err := getProfile(profileVendorType, profileVersion)
+	var profile *Profile
+	vendorProfiles := profileMap[profileVendorType]
+	defaultProfile := vendorProfiles[0]
 
-	if err != nil {
-		profile = getDefaultProfile(err.Error())
-	} else if profile == nil {
-		profile = getDefaultProfile(fmt.Sprintf("No matching profile found : %s : %s :", profileVendorType, profileVersion))
+	if len(vendorProfiles) > 1 {
+		profile = nil
+		for _, vendorProfile := range vendorProfiles {
+			if len(profileVersion) > 0 {
+				if semver.Compare(semver.MajorMinor(vendorProfile.Version), semver.MajorMinor(profileVersion)) == 0 {
+					profile = vendorProfile
+					break
+				}
+			}
+			if semver.Compare(semver.MajorMinor(vendorProfile.Version), semver.MajorMinor(defaultProfile.Version)) > 1 {
+				defaultProfile = vendorProfile
+			}
+		}
+	}
+
+	if profile == nil {
+		profile = defaultProfile
 	}
 
 	return profile
+
 }
 
-func getProfile(vendor VendorType, version *semver.Version) (*Profile, error) {
+// Get all profiles in the profiles directory, and any subdirectories, and add each to the profile map
+func getProfiles() {
 
 	var configDir string
 	if isRunningInDockerContainer() {
@@ -107,37 +124,33 @@ func getProfile(vendor VendorType, version *semver.Version) (*Profile, error) {
 	} else {
 		_, fn, _, ok := runtime.Caller(0)
 		if !ok {
-			return nil, errors.New("failed to get profile directory")
+			return
 		}
 		index := strings.LastIndex(fn, "chart-verifier/")
 		configDir = fn[0 : index+len("chart-verifier")]
 		configDir = filepath.Join(configDir, "config")
 	}
 
-	var profile *Profile
-
 	filepath.Walk(configDir, func(path string, info os.FileInfo, err error) error {
 		if info != nil {
 			if strings.HasSuffix(info.Name(), ".yaml") {
 				profileRead, err := readProfile(path)
 				if err == nil {
-					if strings.Compare(string(profileRead.Vendor), string(vendor)) == 0 {
-						profileVersion, err := semver.NewVersion(string(profileRead.Version))
-						if err == nil {
-							if profileVersion.Major() == version.Major() && profileVersion.Minor() == version.Minor() {
-								profile = profileRead
-								profile.Name = strings.Split(info.Name(), ".yaml")[0]
-								return io.EOF
-							}
-						}
+					// If version is not valid set to a default version
+					if !semver.IsValid(profileRead.Version) {
+						profileRead.Version = DefaultProfileVersion
 					}
+					if len(profileRead.Vendor) == 0 {
+						profileRead.Vendor = VendorTypeNotSpecified
+					}
+					profileMap[profileRead.Vendor] = append(profileMap[profileRead.Vendor], profileRead)
+					profile.Name = strings.Split(info.Name(), ".yaml")[0]
 				}
 			}
 		}
 		return nil
 	})
-
-	return profile, nil
+	return
 }
 
 func (profile *Profile) FilterChecks(registry checks.DefaultRegistry) FilteredRegistry {
@@ -160,7 +173,7 @@ func (profile *Profile) FilterChecks(registry checks.DefaultRegistry) FilteredRe
 
 func readProfile(fileName string) (*Profile, error) {
 
-	// Open the json file which defines the tests to run
+	// Open the yaml file which defines the tests to run
 	profileYaml, err := os.Open(fileName)
 	if err != nil {
 		return nil, err

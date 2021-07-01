@@ -78,7 +78,7 @@ func filterChecks(set profiles.FilteredRegistry, subset []string, setEnabled boo
 }
 
 func buildChecks(all checks.DefaultRegistry, config *viper.Viper, enabled, disabled []string) (chartverifier.FilteredRegistry, error) {
-	profileChecks := profiles.New(Version, config).FilterChecks(all)
+	profileChecks := profiles.New(config).FilterChecks(all)
 	switch {
 	case len(enabled) > 0 && len(disabled) > 0:
 		return nil, errors.New("--enable and --disable can't be used at the same time")

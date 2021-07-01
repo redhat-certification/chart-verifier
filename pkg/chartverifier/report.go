@@ -84,7 +84,7 @@ func newReport() Report {
 
 func (c *Report) AddCheck(check checks.Check) *CheckReport {
 	newCheck := CheckReport{}
-	newCheck.Check = checks.CheckName(fmt.Sprintf("%s/%s",check.CheckId.Version,check.CheckId.Name))
+	newCheck.Check = checks.CheckName(fmt.Sprintf("%s/%s", check.CheckId.Version, check.CheckId.Name))
 	newCheck.Type = check.Type
 	newCheck.Outcome = UnknownOutcomeType
 	c.Results = append(c.Results, &newCheck)
