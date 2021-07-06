@@ -1,5 +1,7 @@
 # **chart-verifier**: Rules based tool to certify Helm charts
 
+[![Docker Repository on Quay](https://quay.io/repository/redhat-certification/chart-verifier/status "Docker Repository on Quay")](https://quay.io/repository/redhat-certification/chart-verifier)
+
 The **chart-verifier** CLI tool allows you to validate the Helm chart against a configurable list of checks. The tool ensures that the Helm charts include the associated metadata and formatting, and are distribution ready.
 
 The tool allows users to validate a Helm chart URL and provides a report where each check has a `positive` or `negative` result. A negative result from a check indicates a problem with the chart, which needs correction. It ensures that the Helm chart works seamlessly on Red Hat OpenShift and can be submitted as a certified Helm chart in the [OpenShift Helm Repository](https://github.com/openshift-helm-charts).
