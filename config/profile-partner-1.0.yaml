@@ -1,6 +1,7 @@
 apiversion: v1
 kind: verifier-profile
-name: "profile-1.0.0"
+vendorType: partner
+version: v1.0
 annotations:
   - "Digest"
   - "OCPVersion"

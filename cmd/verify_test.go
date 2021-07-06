@@ -117,7 +117,7 @@ func TestCertify(t *testing.T) {
 		require.NotEmpty(t, outBuf.String())
 
 		expected := "results:\n" +
-			"  - check: is-helm-v3\n" +
+			"  - check: v1.0/is-helm-v3\n" +
 			"    type: Mandatory\n" +
 			"    outcome: PASS\n" +
 			"    reason: API version is V2, used in Helm 3\n"
@@ -145,7 +145,7 @@ func TestCertify(t *testing.T) {
 		err := json.Unmarshal([]byte(outBuf.String()), &certificate)
 		require.NoError(t, err)
 		require.True(t, len(certificate.Results) == 1, "Expected only 1 result")
-		require.Equal(t, certificate.Results[0].Check, checks.CheckName("is-helm-v3"))
+		require.Equal(t, certificate.Results[0].Check, checks.CheckName("v1.0/is-helm-v3"))
 		require.Equal(t, certificate.Results[0].Outcome, chartverifier.PassOutcomeType)
 		require.Equal(t, certificate.Results[0].Type, checks.MandatoryCheckType)
 		require.Equal(t, certificate.Results[0].Reason, checks.Helm3Reason)
@@ -172,7 +172,7 @@ func TestCertify(t *testing.T) {
 		err := yaml.Unmarshal([]byte(outBuf.String()), &certificate)
 		require.NoError(t, err)
 		require.True(t, len(certificate.Results) == 1, "Expected only 1 result")
-		require.Equal(t, certificate.Results[0].Check, checks.CheckName("is-helm-v3"))
+		require.Equal(t, certificate.Results[0].Check, checks.CheckName("v1.0/is-helm-v3"))
 		require.Equal(t, certificate.Results[0].Outcome, chartverifier.PassOutcomeType)
 		require.Equal(t, certificate.Results[0].Type, checks.MandatoryCheckType)
 		require.Equal(t, certificate.Results[0].Reason, checks.Helm3Reason)
@@ -191,7 +191,7 @@ func TestBuildChecks(t *testing.T) {
 		all.Add(checks.HasReadmeName, "v1.0", nil)
 		all.Add(checks.ChartTestingName, "v1.0", nil)
 		all.Add(checks.ContainsTestName, "v1.0", nil)
-		selected, err := buildChecks(all, enabled, disabled)
+		selected, err := buildChecks(all, viper.New(), enabled, disabled)
 		require.Error(t, err)
 		require.Nil(t, selected)
 	})
@@ -205,7 +205,7 @@ func TestBuildChecks(t *testing.T) {
 		all.Add(checks.HasReadmeName, "v1.0", nil)
 		all.Add(checks.ChartTestingName, "v1.0", nil)
 		all.Add(checks.ContainsTestName, "v1.0", nil)
-		selected, err := buildChecks(all, enabled, disabled)
+		selected, err := buildChecks(all, viper.New(), enabled, disabled)
 		require.Error(t, err)
 		require.Nil(t, selected)
 	})
@@ -219,7 +219,7 @@ func TestBuildChecks(t *testing.T) {
 		all.Add(checks.HasReadmeName, "v1.0", checks.HasReadme)
 		all.Add(checks.ChartTestingName, "v1.0", checks.ChartTesting)
 		all.Add(checks.ContainsTestName, "v1.0", checks.ContainsTest)
-		selected, err := buildChecks(all, enabled, disabled)
+		selected, err := buildChecks(all, viper.New(), enabled, disabled)
 		require.Error(t, err)
 		require.Nil(t, selected)
 	})
@@ -233,7 +233,7 @@ func TestBuildChecks(t *testing.T) {
 		all.Add(checks.HasReadmeName, "v1.0", nil)
 		all.Add(checks.ChartTestingName, "v1.0", nil)
 		all.Add(checks.ContainsTestName, "v1.0", nil)
-		selected, err := buildChecks(all, enabled, disabled)
+		selected, err := buildChecks(all, viper.New(), enabled, disabled)
 		require.NoError(t, err)
 		for k, _ := range all {
 			_, ok := selected[k.Name]

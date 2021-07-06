@@ -55,7 +55,6 @@ type FilteredRegistry map[checks.CheckName]checks.Check
 type verifierBuilder struct {
 	checks           FilteredRegistry
 	config           *viper.Viper
-	overrides        []string
 	registry         checks.Registry
 	toolVersion      string
 	openshiftVersion string
@@ -89,7 +88,12 @@ func (b *verifierBuilder) SetConfig(config *viper.Viper) VerifierBuilder {
 }
 
 func (b *verifierBuilder) SetOverrides(overrides []string) VerifierBuilder {
-	b.overrides = overrides
+
+	// naively override values from the configuration
+	for _, val := range overrides {
+		parts := strings.Split(val, "=")
+		b.config.Set(parts[0], parts[1])
+	}
 	return b
 }
 
@@ -103,7 +107,11 @@ func (b *verifierBuilder) SetOpenShiftVersion(version string) VerifierBuilder {
 	return b
 }
 
-func (b *verifierBuilder) Build() (Vertifier, error) {
+func (b *verifierBuilder) GetConfig() *viper.Viper {
+	return b.config
+}
+
+func (b *verifierBuilder) Build() (Verifier, error) {
 	if len(b.checks) == 0 {
 		return nil, errors.New("no checks have been required")
 	}
@@ -120,19 +128,13 @@ func (b *verifierBuilder) Build() (Vertifier, error) {
 		b.settings = cli.New()
 	}
 
-	// naively override values from the configuration
-	for _, val := range b.overrides {
-		parts := strings.Split(val, "=")
-		b.config.Set(parts[0], parts[1])
-	}
-
 	var requiredChecks []checks.Check
 
 	for _, check := range b.checks {
 		requiredChecks = append(requiredChecks, check)
 	}
 
-	profileName := profiles.Get().Name
+	profile := profiles.Get()
 
 	return &verifier{
 		config:           b.config,
@@ -140,7 +142,7 @@ func (b *verifierBuilder) Build() (Vertifier, error) {
 		requiredChecks:   requiredChecks,
 		settings:         b.settings,
 		toolVersion:      b.toolVersion,
-		profileName:      profileName,
+		profile:          profile,
 		openshiftVersion: b.openshiftVersion,
 		values:           b.values,
 	}, nil

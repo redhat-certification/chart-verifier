@@ -27,13 +27,14 @@ type VerifierBuilder interface {
 	SetValues(vals map[string]interface{}) VerifierBuilder
 	SetChecks(checks FilteredRegistry) VerifierBuilder
 	SetConfig(config *viper.Viper) VerifierBuilder
+	GetConfig() *viper.Viper
 	SetOverrides([]string) VerifierBuilder
 	SetToolVersion(string) VerifierBuilder
 	SetOpenShiftVersion(string) VerifierBuilder
 	SetSettings(settings *cli.EnvSettings) VerifierBuilder
-	Build() (Vertifier, error)
+	Build() (Verifier, error)
 }
 
-type Vertifier interface {
+type Verifier interface {
 	Verify(uri string) (*Report, error)
 }

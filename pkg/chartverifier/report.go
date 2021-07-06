@@ -17,6 +17,7 @@
 package chartverifier
 
 import (
+	"fmt"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	helmchart "helm.sh/helm/v3/pkg/chart"
 )
@@ -47,7 +48,7 @@ type ReportMetadata struct {
 
 type ToolMetadata struct {
 	Version                    string  `json:"verifier-version" yaml:"verifier-version"`
-	Profile                    string  `json:"profileName" yaml:"profileName"`
+	Profile                    Profile `json:"profile" yaml:"profile"`
 	ChartUri                   string  `json:"chart-uri" yaml:"chart-uri"`
 	Digest                     string  `json:"digest" yaml:"digest"`
 	Digests                    Digests `json:"digests" yaml:"digests"`
@@ -58,6 +59,11 @@ type ToolMetadata struct {
 type Digests struct {
 	Chart   string `json:"chart" yaml:"chart"`
 	Package string `json:"package,omitempty" yaml:"package,omitempty"`
+}
+
+type Profile struct {
+	VendorType string `json:"vendorType" yaml:"VendorType"`
+	Version    string `json:"version" yaml:"version"`
 }
 
 type CheckReport struct {
@@ -76,10 +82,10 @@ func newReport() Report {
 	return report
 }
 
-func (c *Report) AddCheck(checkName checks.CheckName, checkType checks.CheckType) *CheckReport {
+func (c *Report) AddCheck(check checks.Check) *CheckReport {
 	newCheck := CheckReport{}
-	newCheck.Check = checkName
-	newCheck.Type = checkType
+	newCheck.Check = checks.CheckName(fmt.Sprintf("%s/%s", check.CheckId.Version, check.CheckId.Name))
+	newCheck.Type = check.Type
 	newCheck.Outcome = UnknownOutcomeType
 	c.Results = append(c.Results, &newCheck)
 	return &newCheck
