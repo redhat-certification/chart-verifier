@@ -91,7 +91,7 @@ func New(config *viper.Viper) *Profile {
 
 	profileInUse = getDefaultProfile(fmt.Sprintf("profile %s not found", profileVendorType))
 
-	if vendorProfiles,ok := profileMap[profileVendorType]; ok {
+	if vendorProfiles, ok := profileMap[profileVendorType]; ok {
 		profileInUse = vendorProfiles[0]
 		if len(vendorProfiles) > 1 {
 			for _, vendorProfile := range vendorProfiles {
