@@ -30,8 +30,8 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 	reportOpts := &reportOptions{}
 
 	cmd := &cobra.Command{
-		Use:   fmt.Sprintf("report {%s,%s,%s,%s,%s} <report-uri>", report.AllCommandsName, report.AnnotationsCommandName,report.DigestsCommandName,
-			report.MetadataCommandName,report.ResultsCommandName),
+		Use: fmt.Sprintf("report {%s,%s,%s,%s,%s} <report-uri>", report.AllCommandsName, report.AnnotationsCommandName, report.DigestsCommandName,
+			report.MetadataCommandName, report.ResultsCommandName),
 		Args:  cobra.ExactArgs(2),
 		Short: "Provides information from a report",
 		RunE: func(cmd *cobra.Command, args []string) error {

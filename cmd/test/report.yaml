@@ -12,7 +12,7 @@ metadata:
             chart: sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0
             package: 4f29f2a95bf2b9a1c62fd215b079a01bdc5a38e9b4ff874d0fa21d0afca2e76d
         lastCertifiedTimestamp: "2021-07-06T10:28:01.09604-04:00"
-        certifiedOpenShiftVersions: N/A
+        certifiedOpenShiftVersions: 4.7.8
     chart:
         name: chart
         home: ""
@@ -39,8 +39,8 @@ results:
     reason: API version is V2, used in Helm 3
   - check: v1.0/contains-values
     type: Mandatory
-    outcome: PASS
-    reason: Values file exist
+    outcome: Fail
+    reason: Values file does not exist
   - check: v1.0/not-contain-csi-objects
     type: Mandatory
     outcome: PASS

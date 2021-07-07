@@ -14,9 +14,9 @@ import (
 )
 
 const (
-	annotationsPrefixConfigName string = "annotations.prefix"
+	AnnotationsPrefixConfigName string = "annotations.prefix"
 
-	defaultAnnotationsPrefix string = "charts.openshift.io"
+	DefaultAnnotationsPrefix string = "charts.openshift.io"
 )
 
 func All(opts *ReportOptions) (OutputReport, error) {
@@ -56,10 +56,10 @@ func Annotations(opts *ReportOptions) (OutputReport, error) {
 	}
 
 	outputReport = OutputReport{}
-	anotationsPrefix := defaultAnnotationsPrefix
+	anotationsPrefix := DefaultAnnotationsPrefix
 
 	if opts.ViperConfig != nil {
-		configAnnotationsPrefix := opts.ViperConfig.GetString(annotationsPrefixConfigName)
+		configAnnotationsPrefix := opts.ViperConfig.GetString(AnnotationsPrefixConfigName)
 		if len(configAnnotationsPrefix) > 0 {
 			anotationsPrefix = configAnnotationsPrefix
 		}

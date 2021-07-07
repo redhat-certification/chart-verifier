@@ -113,7 +113,7 @@ func TestReports(t *testing.T) {
 			options.URI = test.path
 			options.ViperConfig = viper.New()
 			if len(test.annotationsPrefix) > 0 {
-				options.ViperConfig.Set(annotationsPrefixConfigName, test.annotationsPrefix)
+				options.ViperConfig.Set(AnnotationsPrefixConfigName, test.annotationsPrefix)
 			}
 			if len(test.setVendorType) > 0 {
 				options.ViperConfig.Set(profiles.VendorTypeConfigName, test.setVendorType)
@@ -123,16 +123,16 @@ func TestReports(t *testing.T) {
 			assert.NoError(t, err, "error getting All")
 			if err == nil {
 				if test.expectedReport.MetadataReport != nil {
-					assert.True(t, compareMetadata(test.expectedReport.MetadataReport, all.MetadataReport), "all report: Metadata does not match")
+					assert.True(t, CompareMetadata(test.expectedReport.MetadataReport, all.MetadataReport), "all report: Metadata does not match")
 				}
 				if test.expectedReport.DigestsReport != nil {
-					assert.True(t, compareDigests(test.expectedReport.DigestsReport, all.DigestsReport), "all report: Digests do not match")
+					assert.True(t, CompareDigests(test.expectedReport.DigestsReport, all.DigestsReport), "all report: Digests do not match")
 				}
 				if test.expectedReport.ResultsReport != nil {
-					assert.True(t, compareResults(test.expectedReport.ResultsReport, all.ResultsReport), "all report: Results do not match")
+					assert.True(t, CompareResults(test.expectedReport.ResultsReport, all.ResultsReport), "all report: Results do not match")
 				}
 				if len(test.expectedReport.AnnotationsReport) > 0 {
-					assert.True(t, compareAnnotations(test.expectedReport.AnnotationsReport, all.AnnotationsReport), "all report: Annotations do not match")
+					assert.True(t, CompareAnnotations(test.expectedReport.AnnotationsReport, all.AnnotationsReport), "all report: Annotations do not match")
 				}
 				_, err = json.Marshal(all)
 				assert.NoError(t, err, "All report is not valid json")
@@ -142,7 +142,7 @@ func TestReports(t *testing.T) {
 				metadata, err := ReportCommandRegistry().Get(MetadataCommandName)(options)
 				assert.NoError(t, err, "error getting Metadata")
 				if err == nil {
-					outcome := compareMetadata(test.expectedReport.MetadataReport, metadata.MetadataReport)
+					outcome := CompareMetadata(test.expectedReport.MetadataReport, metadata.MetadataReport)
 					assert.True(t, outcome, "Metadata report does not match")
 					reportjson, err := json.Marshal(metadata.MetadataReport)
 					assert.NoError(t, err, "Metadata report is not valid json")
@@ -156,7 +156,7 @@ func TestReports(t *testing.T) {
 				annotations, err := ReportCommandRegistry().Get(AnnotationsCommandName)(options)
 				assert.NoError(t, err, "error getting Annotations")
 				if err == nil {
-					outcome := compareAnnotations(test.expectedReport.AnnotationsReport, annotations.AnnotationsReport)
+					outcome := CompareAnnotations(test.expectedReport.AnnotationsReport, annotations.AnnotationsReport)
 					assert.True(t, outcome, "Annotations report does not match")
 					reportjson, err := json.Marshal(annotations.AnnotationsReport)
 					assert.NoError(t, err, "Annotations report is not valid json")
@@ -170,7 +170,7 @@ func TestReports(t *testing.T) {
 				results, err := ReportCommandRegistry().Get(ResultsCommandName)(options)
 				assert.NoError(t, err, "error getting Results")
 				if err == nil {
-					outcome := compareResults(test.expectedReport.ResultsReport, all.ResultsReport)
+					outcome := CompareResults(test.expectedReport.ResultsReport, all.ResultsReport)
 					assert.True(t, outcome, "Results report does not match")
 					reportjson, err := json.Marshal(results.ResultsReport)
 					assert.NoError(t, err, "Results report is not valid json")
@@ -184,7 +184,7 @@ func TestReports(t *testing.T) {
 				digests, err := ReportCommandRegistry().Get(DigestsCommandName)(options)
 				assert.NoError(t, err, "error getting Digests")
 				if err == nil {
-					outcome := compareDigests(test.expectedReport.DigestsReport, all.DigestsReport)
+					outcome := CompareDigests(test.expectedReport.DigestsReport, all.DigestsReport)
 					assert.True(t, outcome, "Digests report does not match")
 					reportjson, err := json.Marshal(digests.DigestsReport)
 					assert.NoError(t, err, "Digests report is not valid json")
@@ -197,7 +197,7 @@ func TestReports(t *testing.T) {
 	}
 }
 
-func compareMetadata(expected *MetadataReport, result *MetadataReport) bool {
+func CompareMetadata(expected *MetadataReport, result *MetadataReport) bool {
 	outcome := true
 	if strings.Compare(expected.ProfileVersion, result.ProfileVersion) != 0 {
 		fmt.Println(fmt.Sprintf("profile version mistmatch %s : %s", expected.ProfileVersion, result.ProfileVersion))
@@ -210,7 +210,7 @@ func compareMetadata(expected *MetadataReport, result *MetadataReport) bool {
 	return outcome
 }
 
-func compareDigests(expected *DigestReport, result *DigestReport) bool {
+func CompareDigests(expected *DigestReport, result *DigestReport) bool {
 	outcome := true
 	if strings.Compare(expected.PackageDigest, result.PackageDigest) != 0 {
 		fmt.Println(fmt.Sprintf("package digest mistmatch %s : %s", expected.PackageDigest, result.PackageDigest))
@@ -223,7 +223,7 @@ func compareDigests(expected *DigestReport, result *DigestReport) bool {
 	return outcome
 }
 
-func compareResults(expected *ResultsReport, result *ResultsReport) bool {
+func CompareResults(expected *ResultsReport, result *ResultsReport) bool {
 	outcome := true
 	if strings.Compare(expected.Passed, result.Passed) != 0 {
 		fmt.Println(fmt.Sprintf("results passed mistmatch %s : %s", expected.Passed, result.Passed))
@@ -244,7 +244,7 @@ func compareResults(expected *ResultsReport, result *ResultsReport) bool {
 	return outcome
 }
 
-func compareAnnotations(expected []Annotation, result []Annotation) bool {
+func CompareAnnotations(expected []Annotation, result []Annotation) bool {
 	outcome := true
 	if len(expected) != len(result) {
 		fmt.Println(fmt.Sprintf("num of annotation mismtatch %d : %d", len(expected), len(result)))
