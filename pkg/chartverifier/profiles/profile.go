@@ -89,12 +89,11 @@ func New(config *viper.Viper) *Profile {
 		}
 	}
 
-	vendorProfiles := profileMap[profileVendorType]
-	if len(vendorProfiles) > 0 {
-		profileInUse = vendorProfiles[0]
+	profileInUse = getDefaultProfile(fmt.Sprintf("profile %s not found", profileVendorType))
 
+	if vendorProfiles,ok := profileMap[profileVendorType]; ok {
+		profileInUse = vendorProfiles[0]
 		if len(vendorProfiles) > 1 {
-			profileInUse = nil
 			for _, vendorProfile := range vendorProfiles {
 				if len(profileVersion) > 0 {
 					if semver.Compare(semver.MajorMinor(vendorProfile.Version), semver.MajorMinor(profileVersion)) == 0 {
@@ -108,12 +107,8 @@ func New(config *viper.Viper) *Profile {
 			}
 		}
 	}
-	if profileInUse == nil {
-		profileInUse = getDefaultProfile(fmt.Sprintf("profile %s not found", profileVendorType))
-	}
 
 	return profileInUse
-
 }
 
 // Get all profiles in the profiles directory, and any subdirectories, and add each to the profile map
