@@ -99,6 +99,10 @@ func getAndCheckProfile(t *testing.T, configVendorType, expectVendorType VendorT
 		profile := New(config)
 		assert.Equal(t, expectVendorType, profile.Vendor, "VendorType did not match")
 		assert.Equal(t, expectVersion, profile.Version, "Version did not match")
+		profile = Get()
+		assert.Equal(t, expectVendorType, profile.Vendor, "VendorType did not match")
+		assert.Equal(t, expectVersion, profile.Version, "Version did not match")
+
 	})
 }
 func TestProfileFilter(t *testing.T) {

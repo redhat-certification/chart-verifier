@@ -1,6 +1,7 @@
 package profiles
 
 import (
+	"fmt"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/spf13/viper"
 	"golang.org/x/mod/semver"
@@ -57,13 +58,13 @@ type Check struct {
 
 type FilteredRegistry map[checks.CheckName]checks.Check
 
-var profile *Profile
+var profileInUse *Profile
 
 func Get() *Profile {
-	if profile == nil {
+	if profileInUse == nil {
 		return getDefaultProfile("No profile set for get")
 	}
-	return profile
+	return profileInUse
 }
 
 func New(config *viper.Viper) *Profile {
@@ -88,30 +89,30 @@ func New(config *viper.Viper) *Profile {
 		}
 	}
 
-	var profile *Profile
 	vendorProfiles := profileMap[profileVendorType]
-	defaultProfile := vendorProfiles[0]
+	if len(vendorProfiles) > 0 {
+		profileInUse = vendorProfiles[0]
 
-	if len(vendorProfiles) > 1 {
-		profile = nil
-		for _, vendorProfile := range vendorProfiles {
-			if len(profileVersion) > 0 {
-				if semver.Compare(semver.MajorMinor(vendorProfile.Version), semver.MajorMinor(profileVersion)) == 0 {
-					profile = vendorProfile
-					break
+		if len(vendorProfiles) > 1 {
+			profileInUse = nil
+			for _, vendorProfile := range vendorProfiles {
+				if len(profileVersion) > 0 {
+					if semver.Compare(semver.MajorMinor(vendorProfile.Version), semver.MajorMinor(profileVersion)) == 0 {
+						profileInUse = vendorProfile
+						break
+					}
 				}
-			}
-			if semver.Compare(semver.MajorMinor(vendorProfile.Version), semver.MajorMinor(defaultProfile.Version)) > 1 {
-				defaultProfile = vendorProfile
+				if semver.Compare(semver.MajorMinor(vendorProfile.Version), semver.MajorMinor(profileInUse.Version)) > 1 {
+					profileInUse = vendorProfile
+				}
 			}
 		}
 	}
-
-	if profile == nil {
-		profile = defaultProfile
+	if profileInUse == nil {
+		profileInUse = getDefaultProfile(fmt.Sprintf("profile %s not found", profileVendorType))
 	}
 
-	return profile
+	return profileInUse
 
 }
 
@@ -144,7 +145,7 @@ func getProfiles() {
 						profileRead.Vendor = VendorTypeNotSpecified
 					}
 					profileMap[profileRead.Vendor] = append(profileMap[profileRead.Vendor], profileRead)
-					profile.Name = strings.Split(info.Name(), ".yaml")[0]
+					profileRead.Name = strings.Split(info.Name(), ".yaml")[0]
 				}
 			}
 		}
@@ -184,7 +185,7 @@ func readProfile(fileName string) (*Profile, error) {
 		return nil, err
 	}
 
-	profile = &Profile{}
+	profile := &Profile{}
 	err = yaml.Unmarshal(profileBytes, profile)
 	if err != nil {
 		return nil, err
