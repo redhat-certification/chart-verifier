@@ -2,6 +2,7 @@ package report
 
 import (
 	"github.com/spf13/viper"
+	"strings"
 )
 
 const (
@@ -36,14 +37,28 @@ type ReportOptions struct {
 	URI string
 	// ViperConfig is the configuration collected by Viper.
 	ViperConfig *viper.Viper
-	// Values contains the values informed by the user through command line options.
-	Values map[string]interface{}
+}
+
+func (opt *ReportOptions) AddURI(uri string) {
+	opt.URI = uri
+}
+
+func (opt *ReportOptions) AddConfig(config *viper.Viper) {
+	opt.ViperConfig = config
+}
+
+func (opt *ReportOptions) AddValues(values []string) {
+	// naively override values from the configuration
+	for _, val := range values {
+		parts := strings.Split(val, "=")
+		opt.ViperConfig.Set(parts[0], parts[1])
+	}
 }
 
 type ReportRegistry interface {
 	Get(name string) ReportFunc
 	Add(name string, reportFunc ReportFunc) ReportRegistry
-	AllChecks() DefaultReportRegistry
+	AllCommands() DefaultReportRegistry
 }
 
 type DefaultReportRegistry map[string]ReportFunc
@@ -52,7 +67,7 @@ func NewReportRegistry() ReportRegistry {
 	return &DefaultReportRegistry{}
 }
 
-func (r *DefaultReportRegistry) AllChecks() DefaultReportRegistry {
+func (r *DefaultReportRegistry) AllCommands() DefaultReportRegistry {
 	return *r
 }
 
@@ -64,5 +79,4 @@ func (r *DefaultReportRegistry) Get(name string) ReportFunc {
 func (r *DefaultReportRegistry) Add(name string, reportFunc ReportFunc) ReportRegistry {
 	(*r)[name] = reportFunc
 	return r
-
 }

@@ -15,7 +15,7 @@ func TestBuilder(t *testing.T) {
 	commands = append(commands, MetadataCommandName)
 	commands = append(commands, AnnotationsCommandName)
 
-	allCommands := ReportCommandRegistry().AllChecks()
+	allCommands := ReportCommandRegistry().AllCommands()
 
 	assert.Equal(t, len(commands), len(allCommands), "Number of commands expected/found differs")
 
