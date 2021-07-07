@@ -80,7 +80,7 @@ command: ```chart-verifier report digests report.yaml```
 
 command: ```chart-verifier report annotations report.yaml```
 
-```{ "annotations": { "OCPVersion": "4.7.8", "digest": "88888", "LastCertifiedTimestamp": "2021-06-29T08:57:35.0023-04:00" } }```
+```{ "annotations": [{ "Name" : "OCPVersion", "Value" : "4.7.8"},{ "Name" : "digest", "Value" : "88888"},{ "Name" : "LastCertifiedTimestamp", "Value" : "2021-06-29T08:57:35.0023-04:00" }] }```
 
 ### report results
 
@@ -90,12 +90,12 @@ command: ```chart-verifier report results report.yaml```
 
 ### report Full
 
-command: ```chart-verifier report report.yaml```
+command: ```chart-verifier report all report.yaml```
 
 ```
 { "metadata": { "vendorType": "redhat", "profileVersion": "v1.1" },
   "digests": { "chart": "8f8f8f", "package": "8f9b3c" },
-  "annotations": { "charts.openshift.io/OCPVersion": "4.7.8", "charts.openshift.io/digest": "8f8f8f", "charts.openshift.io/LastCertifiedTimestamp": "2021-06-29T08:57:35.0023-04:00" },
+  "annotations": [{ "Name" : "OCPVersion", "Value" : "4.7.8"},{ "Name" : "digest", "Value" : "88888"},{ "Name" : "LastCertifiedTimestamp", "Value" : "2021-06-29T08:57:35.0023-04:00" }],
   "results": { "passed": 11, "failed": 1, "Messages": [ "Mandatory check chart-testing not found"] } }
 ```
 
