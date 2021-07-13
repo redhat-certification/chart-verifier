@@ -175,7 +175,9 @@ func Results(opts *ReportOptions) (OutputReport, error) {
 						passed++
 					} else {
 						failed++
-						messages = append(messages, reportCheck.Reason)
+						// Change multiple line reasons to a single line
+						reason := strings.ReplaceAll(strings.TrimRight(reportCheck.Reason, "\n"), "\n", ", ")
+						messages = append(messages, reason)
 					}
 					break
 				}
