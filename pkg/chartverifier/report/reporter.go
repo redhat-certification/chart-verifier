@@ -17,6 +17,10 @@ const (
 	AnnotationsPrefixConfigName string = "annotations.prefix"
 
 	DefaultAnnotationsPrefix string = "charts.openshift.io"
+
+	DigestsAnnotationName                string = "digests"
+	LastCertifiedTimestampAnnotationName string = "lastCertifiedTimestamp"
+	CertifiedOCPVersionAnnotationName    string = "certifiedOpenShiftVersions"
 )
 
 func All(opts *ReportOptions) (OutputReport, error) {
@@ -65,7 +69,7 @@ func Annotations(opts *ReportOptions) (OutputReport, error) {
 		}
 	}
 
-	name := fmt.Sprintf("%s/%s", anotationsPrefix, profiles.DigestAnnotation)
+	name := fmt.Sprintf("%s/%s", anotationsPrefix, DigestsAnnotationName)
 	value := report.Metadata.ToolMetadata.Digest
 	if len(value) > 0 {
 		annotation := Annotation{}
@@ -74,7 +78,7 @@ func Annotations(opts *ReportOptions) (OutputReport, error) {
 		outputReport.AnnotationsReport = append(outputReport.AnnotationsReport, annotation)
 	}
 
-	name = fmt.Sprintf("%s/%s", anotationsPrefix, profiles.LastCertifiedTimestampAnnotation)
+	name = fmt.Sprintf("%s/%s", anotationsPrefix, LastCertifiedTimestampAnnotationName)
 	value = report.Metadata.ToolMetadata.LastCertifiedTimestamp
 	if len(value) > 0 {
 		annotation := Annotation{}
@@ -83,7 +87,7 @@ func Annotations(opts *ReportOptions) (OutputReport, error) {
 		outputReport.AnnotationsReport = append(outputReport.AnnotationsReport, annotation)
 	}
 
-	name = fmt.Sprintf("%s/%s", anotationsPrefix, profiles.OCPVersionAnnotation)
+	name = fmt.Sprintf("%s/%s", anotationsPrefix, CertifiedOCPVersionAnnotationName)
 	value = report.Metadata.ToolMetadata.CertifiedOpenShiftVersions
 	if len(value) > 0 {
 		annotation := Annotation{}
