@@ -5,7 +5,7 @@ import "github.com/redhat-certification/chart-verifier/pkg/chartverifier/profile
 type OutputReport struct {
 	AnnotationsReport []Annotation    `json:"annotations,omitempty" yaml:"annotations,omitempty"`
 	DigestsReport     *DigestReport   `json:"digests,omitempty" yaml:"digests,omitempty"`
-	MetadataReport    *MetadataReport `json:"metadata,omitempty" yaml:"omitempty"`
+	MetadataReport    *MetadataReport `json:"metadata,omitempty" yaml:"metadata,omitempty"`
 	ResultsReport     *ResultsReport  `json:"results,omitempty" yaml:"results,omitempty"`
 }
 
