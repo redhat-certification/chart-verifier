@@ -18,7 +18,7 @@ const (
 
 	DefaultAnnotationsPrefix string = "charts.openshift.io"
 
-	DigestsAnnotationName                string = "digests"
+	DigestsAnnotationName                string = "digest"
 	LastCertifiedTimestampAnnotationName string = "lastCertifiedTimestamp"
 	CertifiedOCPVersionAnnotationName    string = "certifiedOpenShiftVersions"
 )
@@ -70,7 +70,7 @@ func Annotations(opts *ReportOptions) (OutputReport, error) {
 	}
 
 	name := fmt.Sprintf("%s/%s", anotationsPrefix, DigestsAnnotationName)
-	value := report.Metadata.ToolMetadata.Digest
+	value := report.Metadata.ToolMetadata.Digests.Chart
 	if len(value) > 0 {
 		annotation := Annotation{}
 		annotation.Name = name
