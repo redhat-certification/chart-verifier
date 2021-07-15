@@ -22,9 +22,9 @@ func TestReports(t *testing.T) {
 	testPartnerMetaDataReport.ProfileVendorType = "partner"
 
 	var testAnnotationsReport []Annotation
-	testAnnotationsReport = append(testAnnotationsReport, Annotation{Name: "charts.openshift.io/Digest", Value: "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"})
-	testAnnotationsReport = append(testAnnotationsReport, Annotation{Name: "charts.openshift.io/LastCertifiedTimestamp", Value: "2021-07-02T08:09:56.881793-04:00"})
-	testAnnotationsReport = append(testAnnotationsReport, Annotation{Name: "charts.openshift.io/OCPVersion", Value: "4.7.8"})
+	testAnnotationsReport = append(testAnnotationsReport, Annotation{Name: fmt.Sprintf("charts.openshift.io/%s", DigestsAnnotationName), Value: "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"})
+	testAnnotationsReport = append(testAnnotationsReport, Annotation{Name: fmt.Sprintf("charts.openshift.io/%s", LastCertifiedTimestampAnnotationName), Value: "2021-07-02T08:09:56.881793-04:00"})
+	testAnnotationsReport = append(testAnnotationsReport, Annotation{Name: fmt.Sprintf("charts.openshift.io/%s", CertifiedOCPVersionAnnotationName), Value: "4.7.8"})
 
 	testDigestReport := &DigestReport{}
 	testDigestReport.PackageDigest = "4f29f2a95bf2b9a1c62fd215b079a01bdc5a38e9b4ff874d0fa21d0afca2e76d"
@@ -98,9 +98,9 @@ func TestReports(t *testing.T) {
 	setBehaviorTestInfo.expectedReport.ResultsReport.Failed = "0"
 	setBehaviorTestInfo.annotationsPrefix = "test.report.command.io"
 	var setBehaviorAnnotationsReport []Annotation
-	setBehaviorAnnotationsReport = append(setBehaviorAnnotationsReport, Annotation{Name: fmt.Sprintf("%s/Digest", setBehaviorTestInfo.annotationsPrefix), Value: "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"})
-	setBehaviorAnnotationsReport = append(setBehaviorAnnotationsReport, Annotation{Name: fmt.Sprintf("%s/LastCertifiedTimestamp", setBehaviorTestInfo.annotationsPrefix), Value: "2021-07-02T08:09:56.881793-04:00"})
-	setBehaviorAnnotationsReport = append(setBehaviorAnnotationsReport, Annotation{Name: fmt.Sprintf("%s/OCPVersion", setBehaviorTestInfo.annotationsPrefix), Value: "4.7.8"})
+	setBehaviorAnnotationsReport = append(setBehaviorAnnotationsReport, Annotation{Name: fmt.Sprintf("%s/%s", setBehaviorTestInfo.annotationsPrefix, DigestsAnnotationName), Value: "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"})
+	setBehaviorAnnotationsReport = append(setBehaviorAnnotationsReport, Annotation{Name: fmt.Sprintf("%s/%s", setBehaviorTestInfo.annotationsPrefix, LastCertifiedTimestampAnnotationName), Value: "2021-07-02T08:09:56.881793-04:00"})
+	setBehaviorAnnotationsReport = append(setBehaviorAnnotationsReport, Annotation{Name: fmt.Sprintf("%s/%s", setBehaviorTestInfo.annotationsPrefix, CertifiedOCPVersionAnnotationName), Value: "4.7.8"})
 	setBehaviorTestInfo.expectedReport.AnnotationsReport = setBehaviorAnnotationsReport
 	setBehaviorTestInfo.expectedReport.MetadataReport = testPartnerMetaDataReport
 	tests = append(tests, setBehaviorTestInfo)
