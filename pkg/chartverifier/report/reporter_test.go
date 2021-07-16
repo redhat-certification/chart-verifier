@@ -6,6 +6,7 @@ import (
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+	helmchart "helm.sh/helm/v3/pkg/chart"
 	"strconv"
 	"strings"
 	"testing"
@@ -16,10 +17,14 @@ func TestReports(t *testing.T) {
 	testRedHatMetaDataReport := &MetadataReport{}
 	testRedHatMetaDataReport.ProfileVersion = "v1.0"
 	testRedHatMetaDataReport.ProfileVendorType = "redhat"
+	testRedHatMetaDataReport.ChartUri = "pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
+	testRedHatMetaDataReport.Chart = &helmchart.Metadata{Name: "chart", Version: "0.1.0-v3.valid"}
 
 	testPartnerMetaDataReport := &MetadataReport{}
 	testPartnerMetaDataReport.ProfileVersion = "v1.0"
 	testPartnerMetaDataReport.ProfileVendorType = "partner"
+	testPartnerMetaDataReport.ChartUri = "pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
+	testPartnerMetaDataReport.Chart = &helmchart.Metadata{Name: "chart", Version: "0.1.0-v3.valid"}
 
 	var testAnnotationsReport []Annotation
 	testAnnotationsReport = append(testAnnotationsReport, Annotation{Name: fmt.Sprintf("charts.openshift.io/%s", DigestsAnnotationName), Value: "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"})
@@ -207,6 +212,19 @@ func CompareMetadata(expected *MetadataReport, result *MetadataReport) bool {
 		fmt.Println(fmt.Sprintf("profile vendortype mistmatch %s : %s", expected.ProfileVendorType, result.ProfileVendorType))
 		outcome = false
 	}
+	if expected.ChartUri != result.ChartUri {
+		fmt.Println(fmt.Sprintf("chart uri mistmatch %s : %s", expected.ChartUri, result.ChartUri))
+		outcome = false
+	}
+	if expected.Chart.Name != result.Chart.Name {
+		fmt.Println(fmt.Sprintf("chart name mistmatch %s : %s", expected.Chart.Name, result.Chart.Name))
+		outcome = false
+	}
+	if expected.Chart.Version != result.Chart.Version {
+		fmt.Println(fmt.Sprintf("chart version mistmatch %s : %s", expected.Chart.Version, result.Chart.Version))
+		outcome = false
+	}
+
 	return outcome
 }
 

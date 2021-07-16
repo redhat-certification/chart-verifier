@@ -1,6 +1,9 @@
 package report
 
-import "github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
+import (
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
+	helmchart "helm.sh/helm/v3/pkg/chart"
+)
 
 type OutputReport struct {
 	AnnotationsReport []Annotation    `json:"annotations,omitempty" yaml:"annotations,omitempty"`
@@ -22,6 +25,8 @@ type DigestReport struct {
 type MetadataReport struct {
 	ProfileVendorType profiles.VendorType `json:"vendorType" yaml:"vendorType"`
 	ProfileVersion    string              `json:"profileVersion" yaml:"profileVersion"`
+	ChartUri          string              `json:"chart-uri" yaml:"chart-uri"`
+	Chart             *helmchart.Metadata `json:"chart" yaml:"chart"`
 }
 
 type ResultsReport struct {
