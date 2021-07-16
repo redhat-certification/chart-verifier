@@ -131,6 +131,8 @@ func Metadata(opts *ReportOptions) (OutputReport, error) {
 
 	outputReport.MetadataReport.ProfileVendorType = profiles.VendorType(report.Metadata.ToolMetadata.Profile.VendorType)
 	outputReport.MetadataReport.ProfileVersion = report.Metadata.ToolMetadata.Profile.Version
+	outputReport.MetadataReport.ChartUri = report.Metadata.ToolMetadata.ChartUri
+	outputReport.MetadataReport.Chart = report.Metadata.ChartData
 	return outputReport, nil
 
 }

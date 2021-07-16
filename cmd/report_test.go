@@ -8,6 +8,7 @@ import (
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
+	helmchart "helm.sh/helm/v3/pkg/chart"
 	"strconv"
 	"strings"
 	"testing"
@@ -28,6 +29,8 @@ func TestReport(t *testing.T) {
 	expectedMetadata := &report.MetadataReport{}
 	expectedMetadata.ProfileVersion = "v1.0"
 	expectedMetadata.ProfileVendorType = "redhat"
+	expectedMetadata.ChartUri = "pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
+	expectedMetadata.Chart = &helmchart.Metadata{Name: "chart", Version: "0.1.0-v3.valid"}
 
 	expectedDigests := &report.DigestReport{}
 	expectedDigests.PackageDigest = "4f29f2a95bf2b9a1c62fd215b079a01bdc5a38e9b4ff874d0fa21d0afca2e76d"
@@ -248,6 +251,18 @@ func compareMetadata(expected *report.MetadataReport, result *report.MetadataRep
 	}
 	if expected.ProfileVendorType != result.ProfileVendorType {
 		fmt.Println(fmt.Sprintf("profile vendortype mistmatch %s : %s", expected.ProfileVendorType, result.ProfileVendorType))
+		outcome = false
+	}
+	if expected.ChartUri != result.ChartUri {
+		fmt.Println(fmt.Sprintf("chart uri mistmatch %s : %s", expected.ChartUri, result.ChartUri))
+		outcome = false
+	}
+	if expected.Chart.Name != result.Chart.Name {
+		fmt.Println(fmt.Sprintf("chart name mistmatch %s : %s", expected.Chart.Name, result.Chart.Name))
+		outcome = false
+	}
+	if expected.Chart.Version != result.Chart.Version {
+		fmt.Println(fmt.Sprintf("chart version mistmatch %s : %s", expected.Chart.Version, result.Chart.Version))
 		outcome = false
 	}
 	return outcome
