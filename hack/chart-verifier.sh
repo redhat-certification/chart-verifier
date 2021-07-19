@@ -22,56 +22,44 @@ if [[ "$(uname -a)" =~ Linux.*WSL.*Linux && "$CONTAINER_RUNTIME" =~ podman ]]; t
     EXTRA_ARGS="${EXTRA_ARGS} --log-level=error --systemd=false --cgroup-manager=cgroupfs --cgroups=disabled --events-backend=none --log-driver=none"
 fi
 
-# "[-o <openshiftVersion] <chart>"
-
-PARSED_ARGUMENTS=$(getopt -a -o "S:V:h" --long "chart-set:,openshift-version:,help" -- "$@" 2>/dev/null)
-[ $? -eq 0 ] || {
-    PARSED_ARGUMENTS="--help"
-}
-
-eval set -- "${PARSED_ARGUMENTS}"
-
 VERIFY_ARGS=""
 
-while true; do
-    case "$1" in
-        -h|--help)
-            echo "$0 [-V|--openshift-version <openshiftVersion>] <chart>"
-            exit 0
-            ;;
-        -V|--openshift-version)
-            shift
-            V=$1
-            shift
-            OPENSHIFT_VERSION="--openshift-version=${V}"
-            ;;
-        -S|--chart-set)
-            FLAG=$1
-            shift
-            VALUE=$1
-            shift
-            VERIFY_ARGS="${VERIFY_ARGS} $FLAG=$VALUE"
-            ;;
-        --)
-            shift
-            break
-            ;;
+# http://abhipandey.com/2016/03/getopt-vs-getopts/
+OPTSPEC="S:V:h-:"
+while getopts "$OPTSPEC" optchar; do
+    case "${optchar}" in
+    h)
+        echo "$0 [-V <openshiftVersion>] <chart>"
+        exit 0
+        ;;
+    V)
+        VALUE=${OPTARG#*=}
+        OPENSHIFT_VERSION="--openshift-version=${VALUE}"
+        ;;
+    S)
+        VALUE=${OPTARG#*=}
+        FLAG=${OPTARG%=$VALUE}
+        VERIFY_ARGS="${VERIFY_ARGS} -S $FLAG=$VALUE"
+        ;;
     esac
 done
 
-[ -z "$1" ] && {
+# $OPTIND is the index of the first positional argument found
+CHART_TO_VERIFY="${*:$OPTIND:1}"
+
+[ -z "$CHART_TO_VERIFY" ] && {
     echo "Chart is missing, exiting."
     exit 1
 }
 
-case "$1" in
+case "${CHART_TO_VERIFY}" in
     http://*|https://*)
-        CHART_TO_VERIFY=$1
         ;;
     *)
-        CHART_TO_VERIFY=${1#file://}
+        CHART_TO_VERIFY=${CHART_TO_VERIFY#file://}
+        CHART_TO_VERIFY=$(realpath $CHART_TO_VERIFY)
         CHART_GUEST_BASEDIR="/charts"
-        CHART_HOST_BASEDIR=$(dirname $(realpath "$CHART_TO_VERIFY"))
+        CHART_HOST_BASEDIR=$(dirname $CHART_TO_VERIFY)
         CHART_NAME=$(basename "$CHART_TO_VERIFY")
         CHART_TO_VERIFY="${CHART_GUEST_BASEDIR}/${CHART_NAME}"
 
