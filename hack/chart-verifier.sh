@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
 
+# realpath is a simple bash portable version of realpath extracted from https://serverfault.com/a/942052
+realpath()
+{
+    if ! pushd "$1" &> /dev/null; then
+        pushd "${1##*/}" &> /dev/null
+        echo "$(pwd -P)/${1%/*}"
+    else
+        pwd -P
+    fi
+    popd > /dev/null
+}
+
+
 # KUBECONFIG is either the value the user has configured in the
 # environment or the default location `kubectl` uses.
 KUBECONFIG="${KUBECONFIG:-${HOME}/.kube/config}"
