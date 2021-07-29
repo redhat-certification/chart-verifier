@@ -20,6 +20,7 @@ const osVersionKey = "serverVersion"
 
 // Based on https://access.redhat.com/solutions/4870701
 var kubeOpenShiftVersionMap map[string]string = map[string]string{
+	"1.21": "4.8.0",
 	"1.20": "4.7.0",
 	"1.19": "4.6.0",
 	"1.18": "4.5.0",
