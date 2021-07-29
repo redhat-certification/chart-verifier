@@ -25,9 +25,6 @@ func TestOcVersion47(t *testing.T) {
 	}
 }
 
-type fakeProcessExecutor48 struct {
-}
-
 var output48 = `
 serverVersion:
   major: "1"
