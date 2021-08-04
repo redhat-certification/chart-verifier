@@ -1,4 +1,4 @@
-name: Release Automation
+name: Build Test and Release
 
 on:
     pull_request:
@@ -116,8 +116,8 @@ jobs:
               uses: softprops/action-gh-release@v0.1.5
               continue-on-error: true
               with:
-                tag_name: ${{ steps.check_version_in_PR.outputs.version_in_PR }}
-                body_path: cmd/releases/${{ steps.check_version_in_PR.outputs.version_in_PR }}.txt
+                tag_name: ${{ steps.check_version_in_PR.outputs.PR_version }}
+                body_path: ${{ steps.check_version_in_PR.outputs.PR_release_body }}
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

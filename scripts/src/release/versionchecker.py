@@ -32,6 +32,14 @@ def check_if_version_file_is_modified(api_url):
 
     return False
 
+def make_relase_body(version, image_name, release_info):
+    body = f"Chart verifier version {version} <br><br>Docker Image:<br>- {image_name}<br><br>"
+    body += "This version includes:<br>"
+    for info in release_info:
+        body += f"- {info}<br>"
+
+    print(f"[INFO] Release body: {body}")
+    print(f"::set-output name=PR_release_body::{body}")
 
 
 def main():
