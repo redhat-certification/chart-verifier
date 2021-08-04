@@ -44,14 +44,19 @@ def main():
     if args.api_url and check_if_version_file_is_modified(args.api_url):
         ## should be on PR branch
         version_info = json.loads(version_file)
-        new_version = version_info["version"]
-        print(f"::set-output name=PR_version::{new_version}")
+        print(f'[INFO] Release found in PR files : {version_info["version"]}.')
+        print(f'::set-output name=PR_version::{version_info["version"]}')
         print(f'::set-output name=PR_release_image::{version_info["quay-image"]}')
         print(f'::set-output name=PR_release_info::{version_info["release-info"]}')
     elif args.version:
         # should be on main branch
         version_info = json.loads(version_file)
         if semver.compare(args.version,version_info["version"]) > 0 :
+            print(f'[INFO] Release {args.Verision} found in PR files is newer than: {version_info["version"]}.')
             print("::set-output name=updated::true")
+        else:
+            print(f'[INFO] Release found in PR files is not new  : {version_info["version"]}.')
+    else:
+        print("[INFO] No new release found in PR files.")
 
 

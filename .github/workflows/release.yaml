@@ -77,7 +77,7 @@ jobs:
 
             - name: Check if version updated
               id: check-version_updated
-              if: ${{ steps.check_version_in_PR.outputs.version_in_PR == ''}}
+              if: ${{ steps.check_version_in_PR.outputs.version_in_PR != ''}}
               run: |
                 # check if version file was changed
                 ve1/bin/version-checker --version=${{ steps.check_version_in_PR.outputs.version_in_PR }}
