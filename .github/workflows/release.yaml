@@ -1,0 +1,108 @@
+name: Build artifacts
+
+on:
+    pull_request:
+        branches: [ main ]
+
+jobs:
+    build:
+        name: Build artifacts
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Set up Python 3.x Part 1
+              uses: actions/setup-python@v2
+              with:
+                python-version: '3.9'
+
+            - name: Set up Python 3.x Part 2
+              run: |
+                # set up python requirements and scripts
+                python3 -m venv ve1
+                cd scripts && ../ve1/bin/pip3 install -r requirements.txt && cd ..
+                cd scripts && ../ve1/bin/python3 setup.py install && cd ..
+
+            - name: Check if version included
+              id: check_version_in_PR
+              run: |
+                # check if version file was changed
+                ve1/bin/version-checker --api-url=${{ github.event.pull_request._links.self.href }}
+
+            - name: Checkout main
+              if: ${{ steps.check_version_in_PR.outputs.version_in_PR != ''}}
+              uses: actions/checkout@v2
+              with:
+                 ref: main
+
+            - name: Check if version updated
+              id: check-version_updated
+              if: ${{ steps.check_version_in_PR.outputs.version_in_PR == ''}}
+              run: |
+                # check if version file was changed
+                ve1/bin/version-checker --version=${{ steps.check_version_in_PR.outputs.version_in_PR }}
+
+            - name: Checkout code
+              if: ${{ steps.check-version_updated.outputs.updated != ''}}
+              uses: actions/checkout@v2
+
+            - name: Setup Go
+              uses: actions/setup-go@v2
+              with:
+                go-version: '1.15.8'
+
+            - name: Download dependencies
+              run: go mod download
+
+            - name: Run tests
+              run: make test
+
+            - name: Build and Test Image
+              id: build_and_test
+              if: ${{ steps.check-version_updated.outputs.updated == 'true'}}
+              run: echo "Build and Test Image to be completed"
+
+            - name: 'Approve PR'
+              id: approve_pr
+              if: ${{ steps.check-version_updated.outputs.updated == 'true' }}
+              uses: hmarr/auto-approve-action@v2
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: 'Merge PR'
+              id: merge_pr
+              if: ${{ steps.approve_pr.conclusion == 'success' }}
+              uses: pascalgn/automerge-action@v0.13.1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                MERGE_METHOD: squash
+                MERGE_LABELS: ""
+
+            - name: Check for PR merge
+              if: steps.check_ci_changes.outputs.run-tests != 'true'
+              run: |
+                  ./ve1/bin/check-auto-merge --api-url=${{ github.event.pull_request._links.self.href }}
+
+            - name: Block until there is no running workflow
+              if: steps.check_ci_changes.outputs.run-tests != 'true'
+              uses: softprops/turnstyle@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Create the the release
+              id: create_release
+              if: ${{ steps.check-version_updated.outputs.updated == 'true'}}
+              uses: softprops/action-gh-release@v0.1.5
+              continue-on-error: true
+              with:
+                tag_name: ${{ steps.check_version_in_PR.outputs.version_in_PR }}
+                body_path: cmd/releases/${{ steps.check_version_in_PR.outputs.version_in_PR }}.txt
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: start cron job to link image in quay
+              id: quay-cron
+              if: ${{ steps.check-version_updated.outputs.updated == 'true'}}
+              run: echo "Start cron job to be completed"
