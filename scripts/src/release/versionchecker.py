@@ -36,9 +36,9 @@ def check_if_version_file_is_modified(api_url):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-u", "--api-url", dest="api_url", type=str, required=False,
+    parser.add_argument("-a", "--api-url", dest="api_url", type=str, required=False,
                         help="API URL for the pull request")
-    parser.add_argument("-u", "--version", dest="version", type=str, required=False,
+    parser.add_argument("-v", "--version", dest="version", type=str, required=False,
                         help="Version to compare")
     args = parser.parse_args()
     if args.api_url and check_if_version_file_is_modified(args.api_url):
