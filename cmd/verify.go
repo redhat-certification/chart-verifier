@@ -34,8 +34,6 @@ import (
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier"
 )
 
-var Version = "1.1.0"
-
 func init() {
 	allChecks = chartverifier.DefaultRegistry().AllChecks()
 }
