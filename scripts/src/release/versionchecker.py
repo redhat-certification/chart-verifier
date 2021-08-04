@@ -46,7 +46,8 @@ def main():
         version_info = json.loads(version_file)
         new_version = version_info["version"]
         print(f"::set-output name=PR_version::{new_version}")
-        print(f"::set-output name=PR_version_info::{version_info}")
+        print(f'::set-output name=PR_release_image::{version_info["quay-image"]}')
+        print(f'::set-output name=PR_release_info::{version_info["release-info"]}')
     elif args.version:
         # should be on main branch
         version_info = json.loads(version_file)

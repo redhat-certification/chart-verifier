@@ -23,13 +23,15 @@ def build_image(image_id):
 
     try:
         image = client.images.build(path="./",tag=image_id)
-        print("logs:",image)
+        print("images:",image)
     except docker.errors.BuildError:
         print("docker build error")
-        sys.exit(1)
+        return False
     except  docker.errors.APIError:
         print ("docker API error")
-        sys.exit(1)
+        return False
+
+    return True
 
 def test_image(image_id,chart):
 
@@ -68,13 +70,16 @@ def test_image(image_id,chart):
         print("[ERROR] Chart verifier report includes unexpected results:")
         print(f'- Number of checks passed expected : {expectedPassed}, got {results["passed"]}')
         print(f'- Number of checks failed expected : {expectedFailed}, got {results["failed"]}')
-        sys.exit(1)
+        return False
     else:
         print(f'[PASS] Chart result validated : {chart["url"]}')
 
+    return True
 
 
 def main():
+
+    print("::set-output name=result::failure")
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-u", "--image-name", dest="image_name", type=str, required=True,
@@ -86,10 +91,11 @@ def main():
 
     image_id = args.image_name + ":" + args.sha_value[:7]
 
-    build_image(image_id)
+    if build_image(image_id):
 
-    chart = {"url" : "https://github.com/redhat-certification/chart-verifier/blob/main/pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz?raw=true",
-             "results":{"passed":"10","failed":"1"},
-             "metadata":{"vendorType":"partner","profileVersion":"v1.0"}}
+        chart = {"url" : "https://github.com/redhat-certification/chart-verifier/blob/main/pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz?raw=true",
+                "results":{"passed":"10","failed":"1"},
+                "metadata":{"vendorType":"partner","profileVersion":"v1.0"}}
 
-    test_image(image_id,chart)
+        if test_image(image_id,chart):
+            print("::set-output name=result::success")
