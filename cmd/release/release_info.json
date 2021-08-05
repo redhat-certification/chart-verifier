@@ -1,5 +1,5 @@
 {
-    "version": "1.2.2",
+    "version": "1.2.3",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
         "This PR.",

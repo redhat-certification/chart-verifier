@@ -127,8 +127,7 @@ jobs:
             - name: Create the the release
               id: create_release
               if: ${{ steps.check-version_updated.outputs.updated == 'true'}}
-              uses: softprops/action-gh-release@v0.1.5
-              continue-on-error: true
+              uses: softprops/action-gh-release@v1
               with:
                 tag_name: ${{ steps.check_version_in_PR.outputs.PR_version }}
                 body_path: ${{ steps.check_version_in_PR.outputs.PR_release_body }}
