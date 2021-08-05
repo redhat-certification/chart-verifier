@@ -101,7 +101,7 @@ jobs:
               if: ${{ steps.check-version_updated.outputs.updated == 'true'}}
               run: |
                 # build and test image
-                ve1/bin/build-and-test --image-name=${{steps.check_version_in_PR.outputs.PR_release_image}} --sha-value=${GITHUB_SHA}
+                ve1/bin/build-and-test -i=${{steps.check_version_in_PR.outputs.PR_release_image}} -s=${GITHUB_SHA} -v=${{steps.check_version_in_PR.outputs.PR_version}}
 
             - name: Approve PR
               id: approve_pr

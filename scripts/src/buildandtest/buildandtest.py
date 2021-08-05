@@ -33,7 +33,7 @@ def build_image(image_id):
 
     return True
 
-def test_image(image_id,chart):
+def test_image(image_id,chart,verifier_version):
 
     docker_command = "verify " + chart["url"]
 
@@ -57,6 +57,10 @@ def test_image(image_id,chart):
     out = client.containers.run(image_id,docker_command,stdin_open=True,tty=True,stderr=True)
     report = yaml.load(out, Loader=Loader)
     report_path = "banddreport.yaml"
+
+    if verifier_version != report["metadata"]["tool"]["verifier-version"]:
+        print(f'[ERROR] Chart verifier report version {report["metadata"]["tool"]["verifier-version"]} does not match  expected version: {verifier_version}')
+
     print("[INFO] report:\n", report)
     with open(report_path, "w") as fd:
         yaml.dump(report,fd)
@@ -86,6 +90,9 @@ def main():
                         help="Github sha value for PR")
     parser.add_argument("-s", "--sha-value", dest="sha_value", type=str, required=True,
                         help="Github sha value for PR")
+    parser.add_argument("-v", "--verifier-version", dest="verifier_version", type=str, required=True,
+                        help="New version of chart verifier")
+
 
     args = parser.parse_args()
 
@@ -99,5 +106,5 @@ def main():
 
         os.environ["VERIFIER_IMAGE"] = image_id
 
-        if test_image(image_id,chart):
+        if test_image(image_id,chart,args.verifier_version):
             print("::set-output name=result::success")
