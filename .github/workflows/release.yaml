@@ -130,7 +130,7 @@ jobs:
               uses: softprops/action-gh-release@v1
               with:
                 tag_name: ${{ steps.check_version_in_PR.outputs.PR_version }}
-                body_path: ${{ steps.check_version_in_PR.outputs.PR_release_body }}
+                body: ${{ steps.check_version_in_PR.outputs.PR_release_body }}
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
