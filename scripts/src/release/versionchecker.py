@@ -32,7 +32,7 @@ def check_if_version_file_is_modified(api_url):
 
     return False
 
-def make_relase_body(version, image_name, release_info):
+def make_release_body(version, image_name, release_info):
     body = f"Chart verifier version {version} <br><br>Docker Image:<br>- {image_name}<br><br>"
     body += "This version includes:<br>"
     for info in release_info:
@@ -57,6 +57,7 @@ def main():
         print(f'::set-output name=PR_version::{version_info["version"]}')
         print(f'::set-output name=PR_release_image::{version_info["quay-image"]}')
         print(f'::set-output name=PR_release_info::{version_info["release-info"]}')
+        make_release_body(version_info["version"],version_info["quay-image"],version_info["release-info"])
         file.close()
     elif args.version:
         # should be on main branch
