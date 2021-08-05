@@ -60,6 +60,7 @@ def test_image(image_id,chart,verifier_version):
 
     if verifier_version != report["metadata"]["tool"]["verifier-version"]:
         print(f'[ERROR] Chart verifier report version {report["metadata"]["tool"]["verifier-version"]} does not match  expected version: {verifier_version}')
+        return False
 
     print("[INFO] report:\n", report)
     with open(report_path, "w") as fd:

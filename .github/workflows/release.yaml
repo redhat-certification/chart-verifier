@@ -69,20 +69,27 @@ jobs:
                 # check if version file is include in PR
                 ve1/bin/version-checker --api-url=${{ github.event.pull_request._links.self.href }}
 
-            - name: Checkout main
+            - name: Build and Test Image
+              id: build_and_test
               if: ${{ steps.check_version_in_PR.outputs.PR_version != ''}}
+              run: |
+                # build and test image
+                ve1/bin/build-and-test --image-name=${{steps.check_version_in_PR.outputs.PR_release_image}} --sha-value=${GITHUB_SHA} --verifier-version=${{steps.check_version_in_PR.outputs.PR_version}}
+
+            - name: Checkout main
+              if: ${{ steps.build_and_test.outputs.result == 'success' }}
               uses: actions/checkout@v2
               with:
                 ref: main
 
             - name: Set up Python 3.x on main branch Part 1
-              if: ${{ steps.check_version_in_PR.outputs.PR_version != ''}}
+              if: ${{ steps.build_and_test.outputs.result == 'success' }}
               uses: actions/setup-python@v2
               with:
                 python-version: '3.9'
 
             - name: Set up Python 3.x on main branch Part 2
-              if: ${{ steps.check_version_in_PR.outputs.PR_version != ''}}
+              if: ${{ steps.build_and_test.outputs.result == 'success' }}
               run: |
                 # set up python requirements and scripts on main branch
                 python3 -m venv ve1
@@ -91,28 +98,21 @@ jobs:
 
             - name: Check if version updated
               id: check-version_updated
-              if: ${{ steps.check_version_in_PR.outputs.PR_version != ''}}
+              if: ${{ steps.build_and_test.outputs.result == 'success' }}
               run: |
                 # check if version file was changed
                 ve1/bin/version-checker --version=${{ steps.check_version_in_PR.outputs.PR_version }}
 
-            - name: Build and Test Image
-              id: build_and_test
-              if: ${{ steps.check-version_updated.outputs.updated == 'true'}}
-              run: |
-                # build and test image
-                ve1/bin/build-and-test -i=${{steps.check_version_in_PR.outputs.PR_release_image}} -s=${GITHUB_SHA} -v=${{steps.check_version_in_PR.outputs.PR_version}}
-
             - name: Approve PR
               id: approve_pr
-              if: ${{ steps.build_and_test.outputs.result == 'success' }}
+              if: ${{ steps.check-version_updated.outputs.updated == 'true'}}
               uses: hmarr/auto-approve-action@v2
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Merge PR
               id: merge_pr
-              if: ${{ steps.approve_pr.conclusion == 'success' }}
+              if: ${{ steps.check-version_updated.outputs.updated == 'true'}}
               uses: pascalgn/automerge-action@v0.13.1
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -120,7 +120,7 @@ jobs:
                 MERGE_LABELS: ""
 
             - name: Check for PR merge
-              if: ${{ steps.approve_pr.conclusion == 'success' }}
+              if: ${{ steps.check-version_updated.outputs.updated == 'true'}}
               run: |
                   ./ve1/bin/check-auto-merge --api-url=${{ github.event.pull_request._links.self.href }}
 
