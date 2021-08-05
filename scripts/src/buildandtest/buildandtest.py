@@ -82,9 +82,9 @@ def main():
     print("::set-output name=result::failure")
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-u", "--image-name", dest="image_name", type=str, required=True,
+    parser.add_argument("-i", "--image-name", dest="image_name", type=str, required=True,
                         help="Github sha value for PR")
-    parser.add_argument("-u", "--sha-value", dest="sha_value", type=str, required=True,
+    parser.add_argument("-s", "--sha-value", dest="sha_value", type=str, required=True,
                         help="Github sha value for PR")
 
     args = parser.parse_args()
@@ -96,6 +96,8 @@ def main():
         chart = {"url" : "https://github.com/redhat-certification/chart-verifier/blob/main/pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz?raw=true",
                 "results":{"passed":"10","failed":"1"},
                 "metadata":{"vendorType":"partner","profileVersion":"v1.0"}}
+
+        os.environ["VERIFIER_IMAGE"] = image_id
 
         if test_image(image_id,chart):
             print("::set-output name=result::success")
