@@ -63,7 +63,7 @@ def main():
         file = open(version_file,)
         version_info = json.load(file)
         if semver.compare(args.version,version_info["version"]) > 0 :
-            print(f'[INFO] Release {args.Verision} found in PR files is newer than: {version_info["version"]}.')
+            print(f'[INFO] Release {args.version} found in PR files is newer than: {version_info["version"]}.')
             print("::set-output name=updated::true")
         else:
             print(f'[INFO] Release found in PR files is not new  : {version_info["version"]}.')
