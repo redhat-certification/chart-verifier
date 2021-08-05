@@ -60,7 +60,8 @@ def main():
         file.close()
     elif args.version:
         # should be on main branch
-        version_info = json.loads(version_file)
+        file = open(version_file,)
+        version_info = json.load(file)
         if semver.compare(args.version,version_info["version"]) > 0 :
             print(f'[INFO] Release {args.Verision} found in PR files is newer than: {version_info["version"]}.')
             print("::set-output name=updated::true")
