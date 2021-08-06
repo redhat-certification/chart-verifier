@@ -1,0 +1,146 @@
+name: Build, Test and Release
+
+on:
+    pull_request:
+        branches: [ main ]
+
+jobs:
+    build:
+        name: Build artifacts
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Setup Go
+              uses: actions/setup-go@v2
+              with:
+                go-version: '1.15.8'
+
+            - name: Check go mod status
+              run: |
+                make gomod_tidy
+                if [[ ! -z $(git status -s) ]]
+                then
+                    echo "Go mod - state is not clean"
+                    git diff "$GITHUB_SHA"
+                    exit 1
+                fi
+
+            - name: Build Binary
+              run: make bin
+
+            - name: Check format
+              run: |
+                make gofmt
+                if [[ ! -z $(git status -s) ]]
+                then
+                    echo "go fmt - found badly formatted source : $(git status -s)"
+                    exit 1
+                fi
+
+            - name: Download dependencies
+              run: go mod download
+
+            - name: Run tests
+              run: |
+                  make test
+                  if [[ ! -z $(git status -s) ]]
+                  then
+                    echo "go test - errors running go tests : $(git status -s)"
+                    exit 1
+                  fi
+
+            - name: Set up Python 3.x on PR branch Part 1
+              uses: actions/setup-python@v2
+              with:
+                python-version: '3.9'
+
+            - name: Set up Python 3.x on PR branch Part 2
+              run: |
+                # set up python requirements and scripts on pr branch
+                python3 -m venv ve1
+                cd scripts && ../ve1/bin/pip3 install -r requirements.txt && cd ..
+                cd scripts && ../ve1/bin/python3 setup.py install && cd ..
+
+            - name: Check if only release file in PR
+              id: check_version_in_PR
+              run: |
+                # check if release file only is included in PR
+                ve1/bin/release-checker --api-url=${{ github.event.pull_request._links.self.href }}
+
+            - name: Build and Test Image
+              id: build_and_test
+              run: |
+                # build and test a docker image
+                ve1/bin/build-and-test --image-name=${{steps.check_version_in_PR.outputs.PR_release_image}} --sha-value=${GITHUB_SHA} --verifier-version=${{steps.check_version_in_PR.outputs.PR_version}}
+
+            - name: Checkout main
+              if: ${{ steps.check_version_in_PR.outputs.PR_includes_release == 'true' }}
+              uses: actions/checkout@v2
+              with:
+                ref: main
+
+            - name: Set up Python 3.x on main branch Part 1
+              if: ${{ steps.check_version_in_PR.outputs.PR_includes_release == 'true' }}
+              uses: actions/setup-python@v2
+              with:
+                python-version: '3.9'
+
+            - name: Set up Python 3.x on main branch Part 2
+              if: ${{ steps.check_version_in_PR.outputs.PR_includes_release == 'true' }}
+              run: |
+                # set up python requirements and scripts on main branch
+                python3 -m venv ve1
+                cd scripts && ../ve1/bin/pip3 install -r requirements.txt && cd ..
+                cd scripts && ../ve1/bin/python3 setup.py install && cd ..
+
+            - name: Check for restricted files and user permissiom
+              id: check_authorization
+              run: |
+                # check for a restricted file and, if found, check user has permissiom
+                ve1/bin/check-user --api-url=${{ github.event.pull_request._links.self.href }} --user=${{ github.event.pull_request.user.login }}
+
+            - name: Check if version updated
+              id: check-version_updated
+              if: ${{ steps.check_version_in_PR.outputs.PR_includes_release == 'true' }}
+              run: |
+                # check if version file was changed
+                ve1/bin/release-checker --version=${{ steps.check_version_in_PR.outputs.PR_version }}
+
+            - name: Approve PR
+              id: approve_pr
+              if: ${{ steps.check-version_updated.outputs.updated == 'true'}}
+              uses: hmarr/auto-approve-action@v2
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Merge PR
+              id: merge_pr
+              if: ${{ steps.check-version_updated.outputs.updated == 'true'}}
+              uses: pascalgn/automerge-action@v0.13.1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                MERGE_METHOD: squash
+                MERGE_LABELS: ""
+
+            - name: Check for PR merge
+              if: ${{ steps.check-version_updated.outputs.updated == 'true'}}
+              run: |
+                  ./ve1/bin/check-auto-merge --api-url=${{ github.event.pull_request._links.self.href }}
+
+            - name: Create the the release
+              id: create_release
+              if: ${{ steps.check-version_updated.outputs.updated == 'true'}}
+              uses: softprops/action-gh-release@v1
+              with:
+                tag_name: ${{ steps.check_version_in_PR.outputs.PR_version }}
+                body: ${{ steps.check_version_in_PR.outputs.PR_release_body }}
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: start cron job to link image in quay
+              id: quay-cron
+              if: ${{ steps.check-version_updated.outputs.updated == 'true'}}
+              run: echo "Start cron job to be completed"

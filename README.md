@@ -25,3 +25,4 @@ For more information see:
 For developer specific information, see:
 
 - [Additional information for developers.](docs/helm-chart-developer.md)
+- [Creating a chart-verifier release.](docs/helm-chart-release.md)
