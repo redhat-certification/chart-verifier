@@ -1,3 +1,15 @@
+"""
+Used by a github action to determine if the owner of a PR is permitted to change the files
+associated with publishing a release of the chart verifier.
+
+parameters:
+    --api-url : API URL for the pull request
+    --user : user to be checked for authority to modify release files in a PR
+
+results:
+    exit code 1 if pull request contains restricted files and user is not authorized to modify them.
+"""
+
 import re
 import argparse
 import requests
@@ -9,13 +21,18 @@ try:
 except ImportError:
     from yaml import Loader, Dumper
 
+
+OWNERS_FILE = "OWNERS"
+VERSION_FILE = "cmd/release/release_info.json"
+THIS_FILE = "scripts/src/owners/checkuser.py"
+
+
 def verify_user(username):
     print(f"[INFO] Verify user. {username}")
-    owners_path = "OWNERS"
-    if not os.path.exists(owners_path):
-        print(f"[ERROR] {owners_path} file does not exist.")
+    if not os.path.exists(OWNERS_FILE):
+        print(f"[ERROR] {OWNERS_FILE} file does not exist.")
     else:
-        data = open(owners_path).read()
+        data = open(OWNERS_FILE).read()
         out = yaml.load(data, Loader=Loader)
         if username in out["approvers"]:
             print(f"[INFO] {username} authorized")
@@ -27,9 +44,9 @@ def verify_user(username):
 def check_for_restricted_file(api_url):
     files_api_url = f'{api_url}/files'
     headers = {'Accept': 'application/vnd.github.v3+json'}
-    pattern_owners = re.compile(r"OWNERS")
-    pattern_versionfile = re.compile(r"cmd/release/release_info.json")
-    pattern_thisfile = re.compile(r"scripts/src/owners/checkuser.py")
+    pattern_owners = re.compile(OWNERS_FILE)
+    pattern_versionfile = re.compile(VERSION_FILE)
+    pattern_thisfile = re.compile(THIS_FILE)
     page_number = 1
     max_page_size,page_size = 100,100
 
@@ -52,10 +69,10 @@ def check_for_restricted_file(api_url):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--api-url", dest="api_url", type=str, required=False,
+    parser.add_argument("-a", "--api-url", dest="api_url", type=str, required=True,
                         help="API URL for the pull request")
-    parser.add_argument("-u", "--user", dest="username", type=str, required=False,
-                        help="check if the user can run tests")
+    parser.add_argument("-u", "--user", dest="username", type=str, required=True,
+                        help="user to be checked for authority to modify release files in a PR")
     args = parser.parse_args()
 
     if check_for_restricted_file(args.api_url):

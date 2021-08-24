@@ -1,3 +1,15 @@
+"""
+Used by a github action to build a test a chart verifier docker image based on a pull request
+
+parameters:
+    ---image-name : Name to be used for the chart verifier image.
+    --sha-value : Sha value to be used for the image.
+    --verifier-version : Version of the chart-verifier to test.
+
+results:
+    exit code 1 if the image fails to build or a test fails.
+"""
+
 import argparse
 import docker
 import os
@@ -88,9 +100,9 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--image-name", dest="image_name", type=str, required=True,
-                        help="Github sha value for PR")
+                        help="Name of the chart verifier image")
     parser.add_argument("-s", "--sha-value", dest="sha_value", type=str, required=True,
-                        help="Github sha value for PR")
+                        help="Image sha value to test")
     parser.add_argument("-v", "--verifier-version", dest="verifier_version", type=str, required=True,
                         help="New version of chart verifier")
 
@@ -109,5 +121,6 @@ def main():
 
         if not test_image(image_id,chart,args.verifier_version):
             sys.exit(1)
+
     else:
         sys.exit(1)

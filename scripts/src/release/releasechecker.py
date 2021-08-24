@@ -1,11 +1,34 @@
+"""
+Used by a github action
+1. To determine if the contents of pull request contain only the file which contains the chart verifier release.
+2. To determine if the release has been updated.
+
+parameters:
+    --api-url : API URL for the pull request.
+    --version : user to be checked for authority to modify release files in a PR.
+
+results:
+    if --api-url is specified, output variables are set:
+        PR_version : The chart verifier version read from the version file from the PR.
+        PR_release_image : The name of the image to be used for the release.
+        PR_release_info : Information about the release content.
+        PR_includes_release : Set to true if the PR contains the version file.
+        PR_release_body : Body of text to be used to describe the release.
+    if --version only is specified, output variables are set:
+        updated : set to true if the version specified is later than the version in the version file
+                  from the main branch.
+    if neither parameters are specified, output variables are set:
+        PR_version : The chart verifier version read from the version file from main branch.
+        PR_release_image : The name of the image from the version file from main branch.
+"""
+
 import re
 import argparse
 import json
 import requests
 import semver
-import os
 
-version_file = "cmd/release/release_info.json"
+VERSION_FILE = "cmd/release/release_info.json"
 
 def check_if_only_version_file_is_modified(api_url):
     # api_url https://api.github.com/repos/<organization-name>/<repository-name>/pulls/<pr_number>
@@ -55,7 +78,7 @@ def main():
     args = parser.parse_args()
     if args.api_url and check_if_only_version_file_is_modified(args.api_url):
         ## should be on PR branch
-        file = open(version_file,)
+        file = open(VERSION_FILE, )
         version_info = json.load(file)
         print(f'[INFO] Release found in PR files : {version_info["version"]}.')
         print(f'::set-output name=PR_version::{version_info["version"]}')
@@ -65,7 +88,7 @@ def main():
         make_release_body(version_info["version"],version_info["quay-image"],version_info["release-info"])
         file.close()
     else:
-        file = open(version_file,)
+        file = open(VERSION_FILE, )
         version_info = json.load(file)
         if args.version:
             # should be on main branch
@@ -78,5 +101,3 @@ def main():
             print(f'::set-output name=PR_version::{version_info["version"]}')
             print(f'::set-output name=PR_release_image::{version_info["quay-image"]}')
             print("[INFO] PR contains non-release files.")
-
-

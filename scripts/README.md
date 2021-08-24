@@ -9,7 +9,7 @@
     - loops waiting for a PR to merge
     - exact copy of same script from chart repo
       - ```https://github.com/openshift-helm-charts/charts/blob/main/scripts/src/checkautomerge/checkautomerge.py```
-- ```report/rrport-info.py```
+- ```report/report-info.py```
     - used to generate of report of a chart verifier verify report.
     - exact copy of same script from chart repo    
       - ```https://github.com/openshift-helm-charts/charts/blob/main/scripts/src/report/report_info.py```
