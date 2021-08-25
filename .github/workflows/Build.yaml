@@ -119,7 +119,7 @@ jobs:
 
             - name: Merge PR
               id: merge_pr
-              if: ${{ steps.check-version_updated.outputs.updated == 'true'}}
+              if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
               uses: pascalgn/automerge-action@v0.13.1
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -127,13 +127,13 @@ jobs:
                 MERGE_LABELS: ""
 
             - name: Check for PR merge
-              if: ${{ steps.check-version_updated.outputs.updated == 'true'}}
+              if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
               run: |
                   ./ve1/bin/check-auto-merge --api-url=${{ github.event.pull_request._links.self.href }}
 
             - name: Create the the release
               id: create_release
-              if: ${{ steps.check-version_updated.outputs.updated == 'true'}}
+              if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
               uses: softprops/action-gh-release@v1
               with:
                 tag_name: ${{ steps.check_version_in_PR.outputs.PR_version }}
