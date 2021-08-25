@@ -112,7 +112,7 @@ jobs:
 
             - name: Approve PR
               id: approve_pr
-              if: ${{ steps.check-version_updated.outputs.updated == 'true'}}
+              if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
               uses: hmarr/auto-approve-action@v2
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
