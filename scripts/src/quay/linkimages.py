@@ -41,35 +41,37 @@ defaultLinkTag= "test"
 tagUrl = 'https://quay.io/api/v1/repository/redhat-certification/chart-verifier/tag/'
 
 # try every 15 seconds for 15 minutes
-@retry(Exception,tries=60, delay=15)
+@retry(Exception,tries=10, delay=5)
 def getImageId(tagValue,doRetry):
 
-    print(f"[INFO] look for {tagValue} tag.")
+    print(f"[INFO] look for tag : {tagValue}, retry : {doRetry}")
     tagUrl = 'https://quay.io/api/v1/repository/redhat-certification/chart-verifier/tag/'
 
-    getParams = {'onlyActiveTags' : 'true','specificTag' : tagValue}
-    out = requests.get(tagUrl,params=getParams)
-
+    getParams = {'onlyActiveTags' : 'true','specificTag' : tagValue }
     imageId = ""
 
-    if out.statusCode > 201:
-        print(f"[Error] Error getting tags from quay : status_code={out.status_code}")
-        print(f"[Error] Error getting tags from quay : text={out.text}")
+    try:
+        resposne = requests.get(tagUrl,params=getParams)
 
-    else:
-
-        tags = json.loads(out.text)
         imageId = ""
+        if resposne.status_code > 201:
+            print(f"[Error] Error getting tags from quay : status_code={resposne.status_code}")
+        else:
+            tags = json.loads(resposne.text)
+            print("[INFO] loaded the tags")
+            for tag in tags["tags"]:
+                if tag['name'] == tagValue:
+                    imageId = tag['image_id']
+                    print(f"[INFO] Found tag {tagValue}. image_id : {imageId}")
+                    break
+                else:
+                    print(f"[INFO] ignore tag {tag['name']}")
 
-        for tag in tags["tags"]:
-            if tag['name'] == tagValue:
-                imageId = tag['image_id']
-                print(f"[INFO] Found tag {tagValue}. image_id : {imageId}")
-                break
-
-        if not imageId and doRetry:
-            print(f"[INFO] {tagValue} not found. Retry!")
-            raise Exception(f"Image {tagValue} not found")
+            if not imageId and doRetry:
+                print(f"[INFO] {tagValue} not found. Retry!")
+                raise Exception(f"Image {tagValue} not found")
+    except:
+        print(f"[Error] Exception getting tags from quay : {sys.exc_info()[0]}")
 
     return imageId
 
@@ -115,7 +117,7 @@ def main():
             print(f"[INFO] Tag {args.link_tag} is current")
             return "PASS: Already linked"
     except:
-        print(f"[WARNING] New tag not found : {newTag}")
+        print(f"[WARNING] New tag not found : {newTag} : {sys.exc_info()[0]}")
         sys.exit(1)
 
 if __name__ == "__main__":
