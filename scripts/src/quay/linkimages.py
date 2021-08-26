@@ -22,6 +22,7 @@ results:
     exit code 1 if version image was not found.
 
 """
+
 import requests
 import json
 import sys
