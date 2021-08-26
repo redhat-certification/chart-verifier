@@ -68,8 +68,10 @@ def make_release_body(version, image_name, release_info):
     print(f"::set-output name=PR_release_body::{body}")
 
 def get_version_info():
-    file = open(version_file,)
-    return json.load(file)
+    file = open(VERSION_FILE,)
+    jsonData = json.load(file)
+    file.close()
+    return jsonData
 
 def main():
     parser = argparse.ArgumentParser()
@@ -88,7 +90,6 @@ def main():
         print(f'::set-output name=PR_release_info::{version_info["release-info"]}')
         print(f'::set-output name=PR_includes_release::true')
         make_release_body(version_info["version"],version_info["quay-image"],version_info["release-info"])
-        file.close()
     else:
         version_info = get_version_info()
         if args.version:
