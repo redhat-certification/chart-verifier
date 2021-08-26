@@ -50,18 +50,26 @@ def getImageId(tagValue,doRetry):
     getParams = {'onlyActiveTags' : 'true','specificTag' : tagValue}
     out = requests.get(tagUrl,params=getParams)
 
-    tags = json.loads(out.text)
     imageId = ""
 
-    for tag in tags["tags"]:
-        if tag['name'] == tagValue:
-            imageId = tag['image_id']
-            print(f"[INFO] Found tag {tagValue}. image_id : {imageId}")
-            break
+    if out.statusCode > 201:
+        print(f"[Error] Error getting tags from quay : status_code={out.status_code}")
+        print(f"[Error] Error getting tags from quay : text={out.text}")
 
-    if not imageId and doRetry:
-       print(f"[INFO] {tagValue} not found. Retry!")
-       raise Exception(f"Image {tagValue} not found")
+    else:
+
+        tags = json.loads(out.text)
+        imageId = ""
+
+        for tag in tags["tags"]:
+            if tag['name'] == tagValue:
+                imageId = tag['image_id']
+                print(f"[INFO] Found tag {tagValue}. image_id : {imageId}")
+                break
+
+        if not imageId and doRetry:
+            print(f"[INFO] {tagValue} not found. Retry!")
+            raise Exception(f"Image {tagValue} not found")
 
     return imageId
 
