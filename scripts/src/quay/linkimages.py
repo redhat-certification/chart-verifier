@@ -74,9 +74,13 @@ def getImageId(tagValue,doRetry):
 def linkImage(linkImage,linkTag):
 
     print(f"[INFO] Update {linkTag} to point to {linkImage}")
-    print(f"[INFO] Bearer : {os.environ.get('QUAY_AUTH_TOKEN')}")
-    auth_token = f"Bearer {os.environ.get('QUAY_AUTH_TOKEN')}"
-    putHeader = {'content-type': 'application/json','Authorization': auth_token }
+    auth_token = os.environ.get('QUAY_AUTH_TOKEN')
+    if auth_token is None:
+        print("[ERROR] repository secret QUAY_AUTH_TOKEN not set")
+        return False
+
+    quay_token = f"Bearer {auth_token}"
+    putHeader = {'content-type': 'application/json','Authorization': quay_token }
 
     puturl = tagUrl + linkTag
     putData = {'image': linkImage}

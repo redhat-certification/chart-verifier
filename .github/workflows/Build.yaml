@@ -30,7 +30,13 @@ jobs:
                 fi
 
             - name: Build Binary
-              run: make bin
+              run: |
+                token=${{ secrets.QUAY_AUTH_TOKEN }}
+                if [[ -z $(token) ]]
+                then
+                  echo "QAUY_AUTH_TOKEN not set"
+                  exit 1
+                make bin
 
             - name: Check format
               run: |
