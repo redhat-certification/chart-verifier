@@ -74,6 +74,7 @@ def getImageId(tagValue,doRetry):
 def linkImage(linkImage,linkTag):
 
     print(f"[INFO] Update {linkTag} to point to {linkImage}")
+    ptint(f"Berer : {os.environ.get('QUAY_AUTH_TOKEN')")
     auth_token = f"Bearer {os.environ.get('QUAY_AUTH_TOKEN')}"
     putHeader = {'content-type': 'application/json','Authorization': auth_token }
 
