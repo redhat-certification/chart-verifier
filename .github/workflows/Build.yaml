@@ -33,7 +33,7 @@ jobs:
               env:
                   quayToken: ${{ secrets.QUAY_AUTH_TOKEN }}
               run: |
-                if [[ -z $(quayToken) ]]
+                if [[ -z "$quayToken" ]]
                 then
                     echo "QAUY_AUTH_TOKEN not set"
                     exit 1
