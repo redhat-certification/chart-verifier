@@ -67,6 +67,11 @@ def make_release_body(version, image_name, release_info):
     print(f"[INFO] Release body: {body}")
     print(f"::set-output name=PR_release_body::{body}")
 
+def get_version_info():
+    file = open(VERSION_FILE,)
+    jsonData = json.load(file)
+    file.close()
+    return jsonData
 
 def main():
     parser = argparse.ArgumentParser()
@@ -78,18 +83,15 @@ def main():
     args = parser.parse_args()
     if args.api_url and check_if_only_version_file_is_modified(args.api_url):
         ## should be on PR branch
-        file = open(VERSION_FILE, )
-        version_info = json.load(file)
+        version_info = get_version_info()
         print(f'[INFO] Release found in PR files : {version_info["version"]}.')
         print(f'::set-output name=PR_version::{version_info["version"]}')
         print(f'::set-output name=PR_release_image::{version_info["quay-image"]}')
         print(f'::set-output name=PR_release_info::{version_info["release-info"]}')
         print(f'::set-output name=PR_includes_release::true')
         make_release_body(version_info["version"],version_info["quay-image"],version_info["release-info"])
-        file.close()
     else:
-        file = open(VERSION_FILE, )
-        version_info = json.load(file)
+        version_info = get_version_info()
         if args.version:
             # should be on main branch
             if semver.compare(args.version,version_info["version"]) > 0 :
