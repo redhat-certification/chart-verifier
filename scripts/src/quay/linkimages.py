@@ -48,30 +48,26 @@ def getImageId(tagValue,doRetry):
     tagUrl = 'https://quay.io/api/v1/repository/redhat-certification/chart-verifier/tag/'
 
     getParams = {'onlyActiveTags' : 'true','specificTag' : tagValue }
+
+    response = requests.get(tagUrl,params=getParams)
+
     imageId = ""
+    if response.status_code > 201:
+        print(f"[Error] Error getting tags from quay : status_code={response.status_code}")
+    else:
+        tags = json.loads(response.text)
+        print("[INFO] loaded the tags")
+        for tag in tags["tags"]:
+            if tag['name'] == tagValue:
+                imageId = tag['image_id']
+                print(f"[INFO] Found tag {tagValue}. image_id : {imageId}")
+                break
+            else:
+                print(f"[INFO] ignore tag {tag['name']}")
 
-    try:
-        resposne = requests.get(tagUrl,params=getParams)
-
-        imageId = ""
-        if resposne.status_code > 201:
-            print(f"[Error] Error getting tags from quay : status_code={resposne.status_code}")
-        else:
-            tags = json.loads(resposne.text)
-            print("[INFO] loaded the tags")
-            for tag in tags["tags"]:
-                if tag['name'] == tagValue:
-                    imageId = tag['image_id']
-                    print(f"[INFO] Found tag {tagValue}. image_id : {imageId}")
-                    break
-                else:
-                    print(f"[INFO] ignore tag {tag['name']}")
-
-            if not imageId and doRetry:
-                print(f"[INFO] {tagValue} not found. Retry!")
-                raise Exception(f"Image {tagValue} not found")
-    except:
-        print(f"[Error] Exception getting tags from quay : {sys.exc_info()[0]}")
+        if not imageId and doRetry:
+            print(f"[INFO] {tagValue} not found. Retry!")
+            raise Exception(f"Image {tagValue} not found")
 
     return imageId
 
@@ -86,6 +82,7 @@ def linkImage(linkImage,linkTag):
     putOut = requests.put(puturl,data=json.dumps(putData), headers=putHeader)
     print(f"[INFO] Update link response code : {putOut.status_code}")
     print(f"[INFO] Update link response : {putOut.text}")
+
     return putOut.status_code == 200 or putOut.status_code == 201
 
 
@@ -108,17 +105,19 @@ def main():
         tagImageId = getImageId(args.link_tag,False)
         if tagImageId != newImageId:
             if linkImage(newImageId,args.link_tag):
-                print(f"[INFO] {args.link_tag} linked to {newTag}")
-                return "PASS: Images linked"
+                print(f"[INFO] PASS {args.link_tag} linked to {newTag}")
+                return
             else:
                 print(f"[ERROR] Failed to link tags")
-                return "FAIL: Image linking failed"
+                sys.exit(1)
         else:
             print(f"[INFO] Tag {args.link_tag} is current")
-            return "PASS: Already linked"
-    except:
-        print(f"[WARNING] New tag not found : {newTag} : {sys.exc_info()[0]}")
+            return
+    except Exception as inst:
+        print(f"[WARNING] {inst.args}")
         sys.exit(1)
+
+    return
 
 if __name__ == "__main__":
     main()
