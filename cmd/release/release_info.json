@@ -1,7 +1,7 @@
 {
-    "version": "1.2.0",
+    "version": "1.0.0",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
-        "Testing Testing 120."
+        "Testing Testing 100."
     ]
 }
