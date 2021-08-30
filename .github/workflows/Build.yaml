@@ -140,3 +140,12 @@ jobs:
                 body: ${{ steps.check_version_in_PR.outputs.PR_release_body }}
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Check and link latest image in quay
+              id: link_image_in_qauy
+              if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
+              env:
+                QUAY_AUTH_TOKEN: ${{ secrets.QUAY_AUTH_TOKEN }}
+              run: |
+                # Check and link latest image to latest release if needed
+                ve1/bin/link-images --verifier-version=${{ steps.check_version_in_PR.outputs.PR_version }} --link-tag="latest"
