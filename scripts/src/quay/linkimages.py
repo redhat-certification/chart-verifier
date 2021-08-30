@@ -42,80 +42,83 @@ from release import releasechecker
 # Quay Swagger API: https://docs.quay.io/api/swagger/
 #
 
-defaultLinkTag= "test"
-tagUrl = 'https://quay.io/api/v1/repository/redhat-certification/chart-verifier/tag/'
+DEFAULT_TAG_TO_LINK= "test"
+QUAY_TAG_PAGE_URL = 'https://quay.io/api/v1/repository/redhat-certification/chart-verifier/tag/'
 
 # try every 15 seconds for 15 minutes
 @retry(Exception,tries=60, delay=15)
-def getImageId(tagValue,doRetry):
+def get_image_id(tag_value, do_retry):
 
-    print(f"[INFO] look for tag : {tagValue}, retry : {doRetry}")
-    tagUrl = 'https://quay.io/api/v1/repository/redhat-certification/chart-verifier/tag/'
+    print(f"[INFO] look for tag : {tag_value}, retry : {do_retry}")
+    tag_url = 'https://quay.io/api/v1/repository/redhat-certification/chart-verifier/tag/'
 
-    get_params = {'onlyActiveTags' : 'true','specificTag' : tagValue }
+    get_params = {'onlyActiveTags' : 'true','specificTag' : tag_value}
 
-    response = requests.get(tagUrl,params=get_params)
+    response = requests.get(tag_url,params=get_params)
 
-    imageId = ""
-    if response.status_code > 201:
+    image_id = ""
+    if response.status_code not in [200,201]:
         print(f"[Error] Error getting tags from quay : status_code={response.status_code}")
     else:
         tags = json.loads(response.text)
         print("[INFO] loaded the tags")
         for tag in tags["tags"]:
-            if tag['name'] == tagValue:
-                imageId = tag['image_id']
-                print(f"[INFO] Found tag {tagValue}. image_id : {imageId}")
+            if tag['name'] == tag_value:
+                image_id = tag['image_id']
+                print(f"[INFO] Found tag {tag_value}. image_id : {image_id}")
                 break
             else:
                 print(f"[INFO] ignore tag {tag['name']}")
 
-        if not imageId and doRetry:
-            print(f"[INFO] {tagValue} not found. Retry!")
-            raise Exception(f"Image {tagValue} not found")
+        if not image_id and do_retry:
+            print(f"[INFO] {tag_value} not found. Retry!")
+            raise Exception(f"Image {tag_value} not found")
 
-    return imageId
+    return image_id
 
-def linkImage(linkImage,linkTag):
+def link_image(image_to_link, tag_value):
 
-    print(f"[INFO] Update {linkTag} to point to {linkImage}")
+    print(f"[INFO] Update {tag_value} to point to {image_to_link}")
     auth_token = os.environ.get('QUAY_AUTH_TOKEN')
-    if auth_token is None:
+    if not auth_token:
         print("[ERROR] repository secret QUAY_AUTH_TOKEN not set")
         return False
 
     quay_token = f"Bearer {auth_token}"
     put_header = {'content-type': 'application/json','Authorization': quay_token}
 
-    puturl = tagUrl + linkTag
-    putData = {'image': linkImage}
-    putOut = requests.put(puturl,data=json.dumps(putData), headers=put_header)
-    print(f"[INFO] Update link response code : {putOut.status_code}")
-    print(f"[INFO] Update link response : {putOut.text}")
+    put_url = f"{QUAY_TAG_PAGE_URL}{tag_value}"
+    put_data = {'image': image_to_link}
+    put_out = requests.put(put_url,data=json.dumps(put_data), headers=put_header)
+    print(f"[INFO] Update link response code : {put_out.status_code}")
+    print(f"[INFO] Update link response : {put_out.text}")
 
-    return putOut.status_code == 200 or putOut.status_code == 201
+    return put_out.status_code in [200,201]
 
 
 def main():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--link-tag", dest="link_tag", type=str, required=False, default=defaultLinkTag,
+    parser.add_argument("-t", "--link-tag", dest="link_tag", type=str, required=False, default=DEFAULT_TAG_TO_LINK,
                         help="Tag image should be linked to (default: test")
     parser.add_argument("-v", "--verifier-version", dest="verifier_version", type=str, required=False,
                         help="New version of chart verifier")
     args = parser.parse_args()
 
-    newTag = args.verifier_version
-    if args.verifier_version is None:
+    new_tag = args.verifier_version
+    if not args.verifier_version:
         version_info = releasechecker.get_version_info()
-        newTag = version_info["version"]
+        new_tag = version_info["version"]
 
     try:
-        newImageId = getImageId(newTag,True)
-        tagImageId = getImageId(args.link_tag,False)
-        if tagImageId != newImageId:
-            if linkImage(newImageId,args.link_tag):
-                print(f"[INFO] PASS {args.link_tag} linked to {newTag}")
+        new_image_id = get_image_id(new_tag, True)
+        if not new_image_id:
+            print(f"[ERROR] Failed find new Image : {new_tag}")
+            sys.exit(1)
+        tag_image_id = get_image_id(args.link_tag, False)
+        if tag_image_id != new_image_id:
+            if link_image(new_image_id, args.link_tag):
+                print(f"[INFO] PASS {args.link_tag} linked to {new_tag}")
                 return
             else:
                 print(f"[ERROR] Failed to link tags")

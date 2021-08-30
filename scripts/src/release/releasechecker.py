@@ -68,10 +68,10 @@ def make_release_body(version, image_name, release_info):
     print(f"::set-output name=PR_release_body::{body}")
 
 def get_version_info():
-    file = open(VERSION_FILE,)
-    jsonData = json.load(file)
-    file.close()
-    return jsonData
+    data = {}
+    with open(VERSION_FILE) as json_file:
+        data = json.load(json_file)
+    return data
 
 def main():
     parser = argparse.ArgumentParser()
