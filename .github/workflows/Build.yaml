@@ -1,7 +1,7 @@
 name: Build, Test and Release
 
 on:
-    pull_request:
+    pull_request_target:
         types: [opened, synchronize, reopened]
         branches: [ main ]
 
@@ -14,26 +14,39 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v2
 
+            - name: Checkout
+              uses: actions/checkout@v2
+              with:
+                ref: ${{ github.event.pull_request.head.ref }}
+                repository: ${{ github.event.pull_request.head.repo.full_name }}
+                path: "pr-branch"
+
             - name: Setup Go
               uses: actions/setup-go@v2
               with:
                 go-version: '1.15.8'
 
             - name: Check go mod status
+              working-directory: ./pr-branch
               run: |
+                # run `make gomod_tidy`
                 make gomod_tidy
                 if [[ ! -z $(git status -s) ]]
                 then
-                    echo "Go mod - state is not clean"
+                    echo "Go mod - state is not clean:"
+                    git status -s
                     git diff "$GITHUB_SHA"
                     exit 1
                 fi
 
             - name: Build Binary
+              working-directory: ./pr-branch
               run: make bin
 
             - name: Check format
+              working-directory: ./pr-branch
               run: |
+                # run `make gofmt`
                 make gofmt
                 if [[ ! -z $(git status -s) ]]
                 then
@@ -42,10 +55,13 @@ jobs:
                 fi
 
             - name: Download dependencies
+              working-directory: ./pr-branch
               run: go mod download
 
             - name: Run tests
+              working-directory: ./pr-branch
               run: |
+                  # Run go tests
                   make test
                   if [[ ! -z $(git status -s) ]]
                   then
@@ -53,46 +69,37 @@ jobs:
                     exit 1
                   fi
 
-            - name: Set up Python 3.x on PR branch Part 1
+            - name: Set up Python 3.x
               uses: actions/setup-python@v2
               with:
                 python-version: '3.9'
 
-            - name: Set up Python 3.x on PR branch Part 2
+            - name: Set up Python scripts on PR branch
+              working-directory: ./pr-branch
               run: |
-                # set up python requirements and scripts on pr branch
+                # set up python requirements and scripts on PR branch
                 python3 -m venv ve1
                 cd scripts && ../ve1/bin/pip3 install -r requirements.txt && cd ..
                 cd scripts && ../ve1/bin/python3 setup.py install && cd ..
 
             - name: Check if only release file in PR
+              working-directory: ./pr-branch
               id: check_version_in_PR
               run: |
                 # check if release file only is included in PR
                 ve1/bin/release-checker --api-url=${{ github.event.pull_request._links.self.href }}
 
             - name: Build and Test Image
+              working-directory: ./pr-branch
               id: build_and_test
               run: |
                 # build and test a docker image
                 ve1/bin/build-and-test --image-name=${{steps.check_version_in_PR.outputs.PR_release_image}} --sha-value=${GITHUB_SHA} --verifier-version=${{steps.check_version_in_PR.outputs.PR_version}}
 
-            - name: Checkout main
-              if: ${{ steps.check_version_in_PR.outputs.PR_includes_release == 'true' }}
-              uses: actions/checkout@v2
-              with:
-                ref: main
-
-            - name: Set up Python 3.x on main branch Part 1
-              if: ${{ steps.check_version_in_PR.outputs.PR_includes_release == 'true' }}
-              uses: actions/setup-python@v2
-              with:
-                python-version: '3.9'
-
-            - name: Set up Python 3.x on main branch Part 2
-              if: ${{ steps.check_version_in_PR.outputs.PR_includes_release == 'true' }}
+            - name: Set up Python scripts on main branch
               run: |
                 # set up python requirements and scripts on main branch
+                echo $(pwd)
                 python3 -m venv ve1
                 cd scripts && ../ve1/bin/pip3 install -r requirements.txt && cd ..
                 cd scripts && ../ve1/bin/python3 setup.py install && cd ..
@@ -129,7 +136,7 @@ jobs:
             - name: Check for PR merge
               if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
               run: |
-                  ./ve1/bin/check-auto-merge --api-url=${{ github.event.pull_request._links.self.href }}
+                ve1/bin/check-auto-merge --api-url=${{ github.event.pull_request._links.self.href }}
 
             - name: Create the the release
               id: create_release
