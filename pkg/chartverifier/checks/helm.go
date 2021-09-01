@@ -18,7 +18,6 @@ package checks
 
 import (
 	"bufio"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -209,9 +208,7 @@ func getImageReferences(chartUri string, vals map[string]interface{}) ([]string,
 		Ref string `yaml:"image"`
 	}
 
-	if err != nil {
-		fmt.Printf("RenderManifests error : %v\n", err)
-	} else {
+	if err == nil {
 		r := strings.NewReader(txt)
 		scanner := bufio.NewScanner(r)
 		for scanner.Scan() {
