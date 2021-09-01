@@ -24,7 +24,7 @@ jobs:
             - name: Setup Go
               uses: actions/setup-go@v2
               with:
-                  go-version: '1.15.8'
+                go-version: '1.15.8'
 
             - name: Check go mod status
               working-directory: ./pr-branch
@@ -72,7 +72,7 @@ jobs:
             - name: Set up Python 3.x
               uses: actions/setup-python@v2
               with:
-                  python-version: '3.9'
+                python-version: '3.9'
 
             - name: Set up Python scripts on PR branch
               working-directory: ./pr-branch
@@ -87,7 +87,7 @@ jobs:
               id: check_version_in_PR
               run: |
                 # check if release file only is included in PR
-                 ve1/bin/release-checker --api-url=${{ github.event.pull_request._links.self.href }}
+                ve1/bin/release-checker --api-url=${{ github.event.pull_request._links.self.href }}
 
             - name: Build and Test Image
               working-directory: ./pr-branch
@@ -115,7 +115,7 @@ jobs:
               if: ${{ steps.check_version_in_PR.outputs.PR_includes_release == 'true' }}
               run: |
                 # check if version file was changed
-                pr-branch/ve1/bin/release-checker --version=${{ steps.check_version_in_PR.outputs.PR_version }}
+                ve1/bin/release-checker --version=${{ steps.check_version_in_PR.outputs.PR_version }}
 
             - name: Approve PR
               id: approve_pr
@@ -136,7 +136,7 @@ jobs:
             - name: Check for PR merge
               if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
               run: |
-                  ve1/bin/check-auto-merge --api-url=${{ github.event.pull_request._links.self.href }}
+                ve1/bin/check-auto-merge --api-url=${{ github.event.pull_request._links.self.href }}
 
             - name: Create the the release
               id: create_release
