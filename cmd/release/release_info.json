@@ -1,8 +1,7 @@
 {
-    "version": "1.2.2",
+    "version": "1.2.3",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
-        "Update Helm to 3.6.2 (#175)",
-        "Detect install and test on OCP Version 4.8 (#156)"
+        "Remove error message output when certifying images (#191)"
     ]
 }
