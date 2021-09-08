@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 )
@@ -85,7 +85,7 @@ func GetImageRegistries(repository string) ([]string, error) {
 	} else {
 		if resp.StatusCode == 200 {
 			defer resp.Body.Close()
-			body, _ := ioutil.ReadAll(resp.Body)
+			body, _ := io.ReadAll(resp.Body)
 			var repositoriesBody RepositoriesBody
 			json.Unmarshal(body, &repositoriesBody)
 
@@ -127,7 +127,7 @@ Loops:
 		if reqErr == nil {
 			if resp.StatusCode == 200 {
 				defer resp.Body.Close()
-				body, _ := ioutil.ReadAll(resp.Body)
+				body, _ := io.ReadAll(resp.Body)
 				var registriesBody RegistriesBody
 				json.Unmarshal(body, &registriesBody)
 

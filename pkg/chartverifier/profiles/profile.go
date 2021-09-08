@@ -2,16 +2,17 @@ package profiles
 
 import (
 	"fmt"
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
-	"github.com/spf13/viper"
-	"golang.org/x/mod/semver"
-	"gopkg.in/yaml.v3"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
+
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	"github.com/spf13/viper"
+	"golang.org/x/mod/semver"
+	"gopkg.in/yaml.v3"
 )
 
 type Annotation string
@@ -175,7 +176,7 @@ func readProfile(fileName string) (*Profile, error) {
 		return nil, err
 	}
 
-	profileBytes, err := ioutil.ReadAll(profileYaml)
+	profileBytes, err := io.ReadAll(profileYaml)
 	if err != nil {
 		return nil, err
 	}

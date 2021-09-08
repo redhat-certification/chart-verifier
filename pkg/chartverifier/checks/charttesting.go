@@ -2,7 +2,6 @@ package checks
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -249,7 +248,7 @@ func upgradeAndTestChart(
 
 // readObjectFromYamlFile unmarshals the given filename and returns an object with its contents.
 func readObjectFromYamlFile(filename string) (map[string]interface{}, error) {
-	objBytes, err := ioutil.ReadFile(filename)
+	objBytes, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("reading values file: %w", err)
 	}
@@ -272,14 +271,14 @@ func writeObjectToTempYamlFile(obj map[string]interface{}) (filename string, cle
 		return "", nil, fmt.Errorf("marshalling values file new contents: %w", err)
 	}
 
-	tempDir, err := ioutil.TempDir(os.TempDir(), "chart-testing-*")
+	tempDir, err := os.MkdirTemp(os.TempDir(), "chart-testing-*")
 	if err != nil {
 		return "", nil, fmt.Errorf("creating temporary directory: %w", err)
 	}
 
 	filename = path.Join(tempDir, "values.yaml")
 
-	err = ioutil.WriteFile(filename, objBytes, 0644)
+	err = os.WriteFile(filename, objBytes, 0644)
 	if err != nil {
 		return "", nil, fmt.Errorf("writing values file new contents: %w", err)
 	}

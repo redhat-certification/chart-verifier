@@ -2,15 +2,16 @@ package report
 
 import (
 	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 const (
@@ -233,7 +234,7 @@ func readReport(path string) (*chartverifier.Report, error) {
 		return nil, err
 	}
 
-	reportBytes, err := ioutil.ReadAll(reportYaml)
+	reportBytes, err := io.ReadAll(reportYaml)
 	if err != nil {
 		return nil, err
 	}

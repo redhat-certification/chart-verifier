@@ -11,8 +11,8 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v2
+            # - name: Checkout code
+            #   uses: actions/checkout@v2
 
             - name: Checkout
               uses: actions/checkout@v2
@@ -24,7 +24,9 @@ jobs:
             - name: Setup Go
               uses: actions/setup-go@v2
               with:
-                go-version: '1.15.8'
+                go-version: '1.16.7'
+
+            - run: go version
 
             - name: Check go mod status
               working-directory: ./pr-branch

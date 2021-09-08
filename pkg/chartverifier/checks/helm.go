@@ -18,7 +18,7 @@ package checks
 
 import (
 	"bufio"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -192,7 +192,7 @@ func getImageReferences(chartUri string, vals map[string]interface{}) ([]string,
 
 	actionConfig := &action.Configuration{
 		Releases:     nil,
-		KubeClient:   &kubefake.PrintingKubeClient{Out: ioutil.Discard},
+		KubeClient:   &kubefake.PrintingKubeClient{Out: io.Discard},
 		Capabilities: chartutil.DefaultCapabilities,
 		Log:          func(format string, v ...interface{}) {},
 	}
