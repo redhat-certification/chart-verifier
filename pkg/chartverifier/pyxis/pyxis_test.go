@@ -73,8 +73,8 @@ func Test_checkImageInRegistry(t *testing.T) {
 		{description: "Test nginx rhel6.7 and version found.", imageRef: ImageReference{Repository: "rhel6.7", Registries: []string{"registry.access.redhat.com"}, Tag: "6.7", Sha: ""}, message: ""},
 		{description: "Test rhel8/nginx-116 respository found.", imageRef: ImageReference{Repository: "rhel8/nginx-116", Registries: []string{"registry.access.redhat.com"}, Tag: "1-75", Sha: ""}, message: ""},
 		{description: "Test turbonomic/zookeeper respository and version found.", imageRef: ImageReference{Repository: "turbonomic/zookeeper", Registries: []string{"registry.connect.redhat.com"}, Tag: "8.1.2", Sha: ""}, message: ""},
-		{description: "Test ibmcom/ibmcloud-object-storage-driver respository and sha found.", imageRef: ImageReference{Repository: "ibmcom/ibmcloud-object-storage-driver", Registries: []string{"docker.io"}, Tag: "", Sha: "sha256:b6ec40ca7300bf9e2d0e7b9ff4272258f50d2d6ff9db766207f4a4281b2e33a1"}, message: ""},
-		{description: "Test ibmcom/ibmcloud-object-storage-plugin respository and sha found.", imageRef: ImageReference{Repository: "ibmcom/ibmcloud-object-storage-plugin", Registries: []string{"docker.io"}, Tag: "", Sha: "sha256:0c361f70133a5aae4ac3cbbc250322f8dee2e71da734b818621033179508ce6f"}, message: ""},
+		{description: "Test ibmcom/ibmcloud-object-storage-driver respository and sha found.", imageRef: ImageReference{Repository: "ibmcom/ibmcloud-object-storage-driver", Registries: []string{"docker.io"}, Tag: "", Sha: "sha256:e9152b9e7dfca10cf02f8de7a8d14a4067e7fe69695699411cadaf282263f099"}, message: ""},
+		{description: "Test ibmcom/ibmcloud-object-storage-plugin respository and sha found.", imageRef: ImageReference{Repository: "ibmcom/ibmcloud-object-storage-plugin", Registries: []string{"docker.io"}, Tag: "", Sha: "sha256:b2e7a3ced38cb9197e7d1a3bea3ffcc9dda46e7d12ca5337e5ba8d4253659309"}, message: ""},
 	}
 
 	for _, tc := range PassTestCases {
