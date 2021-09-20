@@ -1,5 +1,7 @@
 # **chart-verifier**: Rules based tool to certify Helm charts
 
+testing
+
 [![Docker Repository on Quay](https://quay.io/repository/redhat-certification/chart-verifier/status "Docker Repository on Quay")](https://quay.io/repository/redhat-certification/chart-verifier)
 
 The **chart-verifier** CLI tool allows you to validate the Helm chart against a configurable list of checks. The tool ensures that the Helm charts include the associated metadata and formatting, and are distribution ready.
