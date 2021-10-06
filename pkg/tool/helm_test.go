@@ -3,6 +3,7 @@ package tool
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -49,10 +50,7 @@ func TestInstallWithValues(t *testing.T) {
 		release := "non-existing-release"
 		valuesFile := ""
 		namespace := "default"
-		expectedErrorMessage := fmt.Sprintf(
-			"Error running process: executing helm with args \"install %s %s --namespace %s --wait\": "+
-				"exit status 1\n---\nError: failed to download \"%s\" (hint: running `helm repo update` may help)",
-			release, chrt, namespace, chrt)
+		expectedErrorMessage := "Error running process"
 		processExecutor := NewProcessExecutor(false)
 		extraArgs := []string{}
 		h := NewHelm(processExecutor, extraArgs)
@@ -62,6 +60,6 @@ func TestInstallWithValues(t *testing.T) {
 
 		// assert
 		require.Error(t, err)
-		require.Equal(t, expectedErrorMessage, err.Error())
+		require.True(t, strings.Contains(err.Error(), expectedErrorMessage))
 	})
 }
