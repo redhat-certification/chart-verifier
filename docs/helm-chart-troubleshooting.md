@@ -107,6 +107,11 @@ values are set using chart-verifier flags when generating a report.
 Also note that if chart-verifier flags are required for the chart-verifier chart-testing check to pass 
 a verifier report must be included in the chart submission.
 
+Run the chart verifier and set log_ouput to true to get additional information:
+```
+$ podman run -it --rm quay.io/redhat-certification/chart-verifier -l=true verify <chart-uri>
+```
+
 
 ## Report related submission failures
 
