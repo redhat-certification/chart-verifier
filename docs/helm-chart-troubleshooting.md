@@ -109,7 +109,7 @@ a verifier report must be included in the chart submission.
 
 Run the chart verifier and set log_ouput to true to get additional information:
 ```
-$ podman run -it --rm quay.io/redhat-certification/chart-verifier -l=true verify <chart-uri>
+$ podman run -it --rm quay.io/redhat-certification/chart-verifier -l verify <chart-uri>
 ```
 
 

@@ -153,7 +153,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 					return err
 				}
 
-				cmd.Println(fmt.Sprintf("%s", string(b)))
+				cmd.Println(string(b))
 
 			} else {
 				b, err := yaml.Marshal(result)
@@ -164,10 +164,10 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 
 				if outputLogs {
 					logs, err := tool.GetLogsOutput(outputFormatFlag)
-					if len(logs) > 0 {
-						cmd.Println(logs)
-					} else {
+					if err != nil {
 						cmd.Println(fmt.Sprintf("LoggingError: %v", err))
+					} else if len(logs) > 0 {
+						cmd.Println(logs)
 					}
 				}
 			}
@@ -195,7 +195,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 
 	cmd.Flags().StringSliceVarP(&verifyOpts.ValueFiles, "set-values", "f", nil, "specify application and check configuration values in a YAML file or a URL (can specify multiple)")
 	cmd.Flags().StringVarP(&openshiftVersionFlag, "openshift-version", "V", "", "version of OpenShift used in the cluster")
-	cmd.Flags().BoolVarP(&outputLogs, "log-output", "l", false, "output logs after report true/false (default: false) ")
+	cmd.Flags().BoolVarP(&outputLogs, "log-output", "l", false, "output logs after report (default: false) ")
 
 	return cmd
 }
