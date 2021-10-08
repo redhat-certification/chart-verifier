@@ -47,7 +47,7 @@ def build_image(image_id):
 
 def test_image(image_id,chart,verifier_version):
 
-    docker_command = "verify -l" + chart["url"]
+    docker_command = "verify -l " + chart["url"]
 
     set_values = ""
     vendor_type = ""
