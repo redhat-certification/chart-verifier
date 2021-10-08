@@ -90,8 +90,8 @@ func TestTemplate(t *testing.T) {
 	TestCases := []testCase{
 		{description: "chart-0.1.0-v3.valid.tgz images ", uri: "chart-0.1.0-v3.valid.tgz", images: []string{"nginx:latest",
 			"snyk/kubernetes-operator", "rhscl/mongodb-36-rhel7:latest",
-			"docker.io/ibmcom/ibmcloud-object-storage-driver@sha256:e9152b9e7dfca10cf02f8de7a8d14a4067e7fe69695699411cadaf282263f099",
-			"docker.io/ibmcom/ibmcloud-object-storage-plugin@sha256:b2e7a3ced38cb9197e7d1a3bea3ffcc9dda46e7d12ca5337e5ba8d4253659309"}},
+			"icr.io/cpopen/ibmcloud-object-storage-driver@sha256:fc17bb3e89d00b3eb0f50b3ea83aa75c52e43d8e56cf2e0f17475e934eeeeb5f",
+			"icr.io/cpopen/ibmcloud-object-storage-plugin@sha256:cf654987c38d048bc9e654f3928e9ce9a2a4fd47ce0283bb5f339c1b99298e6e"}},
 		{description: "chart-0.1.0-v3.with-crd.tgz", uri: "chart-0.1.0-v3.with-crd.tgz", images: []string{"nginx:1.16.0", "busybox"}},
 		{description: "chart-0.1.0-v3.with-csi.tgz", uri: "chart-0.1.0-v3.with-csi.tgz", images: []string{"nginx:1.16.0"}},
 	}
