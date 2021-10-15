@@ -18,8 +18,9 @@ package chartverifier
 
 import (
 	"errors"
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 	"strings"
+
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 
 	"helm.sh/helm/v3/pkg/cli"
 
@@ -44,6 +45,7 @@ func init() {
 	defaultRegistry.Add(checks.NotContainCsiObjectsName, "v1.0", checks.NotContainCSIObjects)
 	defaultRegistry.Add(checks.ImagesAreCertifiedName, "v1.0", checks.ImagesAreCertified)
 	defaultRegistry.Add(checks.ChartTestingName, "v1.0", checks.ChartTesting)
+	defaultRegistry.Add(checks.RequiredAnnotationsPresentName, "v1.0", checks.RequiredAnnotationsPresent)
 }
 
 func DefaultRegistry() checks.Registry {

@@ -3,13 +3,14 @@ package report
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
+	"testing"
+
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	helmchart "helm.sh/helm/v3/pkg/chart"
-	"strconv"
-	"strings"
-	"testing"
 )
 
 func TestReports(t *testing.T) {

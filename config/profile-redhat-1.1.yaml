@@ -1,7 +1,7 @@
 apiversion: v1
 kind: verifier-profile
 vendorType: redhat
-version: v1.0
+version: v1.1
 annotations:
   - "Digest"
   - "OCPVersion"
@@ -28,4 +28,6 @@ checks:
     - name: v1.0/images-are-certified
       type: Mandatory
     - name: v1.0/chart-testing
+      type: Mandatory
+    - name: v1.0/required-annotations-present
       type: Mandatory

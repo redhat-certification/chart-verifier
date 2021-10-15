@@ -1,31 +1,33 @@
 apiversion: v1
 kind: verifier-profile
-vendorType: redhat
-version: v1.0
+vendorType: community
+version: v1.1
 annotations:
   - "Digest"
   - "OCPVersion"
   - "LastCertifiedTimestamp"
 checks:
     - name: v1.0/has-readme
-      type: Mandatory
+      type: Optional
     - name: v1.0/is-helm-v3
-      type: Mandatory
+      type: Optional
     - name: v1.0/contains-test
-      type: Mandatory
+      type: Optional
     - name: v1.0/contains-values
-      type: Mandatory
+      type: Optional
     - name: v1.0/contains-values-schema
-      type: Mandatory
+      type: Optional
     - name: v1.0/has-kubeversion
-      type: Mandatory
+      type: Optional
     - name: v1.0/not-contains-crds
-      type: Mandatory
+      type: Optional
     - name: v1.0/helm-lint
       type: Mandatory
     - name: v1.0/not-contain-csi-objects
-      type: Mandatory
+      type: Optional
     - name: v1.0/images-are-certified
-      type: Mandatory
+      type: Optional
     - name: v1.0/chart-testing
-      type: Mandatory
+      type: Optional
+    - name: v1.0/required-annotations-present
+      type: Optional
