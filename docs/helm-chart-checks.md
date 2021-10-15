@@ -94,6 +94,7 @@ This section provides help on the basic usage of Helm chart checks with the podm
         --kube-context string         name of the kubeconfig context to use
         --kube-token string           bearer token used for authentication
         --kubeconfig string           path to the kubeconfig file
+    -l, --log-output                  output logs after report (default: false) 
     -n, --namespace string            namespace scope for this request
     -V, --openshift-version string    set the value of certifiedOpenShiftVersions in the report
     -o, --output string               the output format: default, json or yaml

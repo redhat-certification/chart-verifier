@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 
@@ -32,6 +33,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier"
+	"github.com/redhat-certification/chart-verifier/pkg/tool"
 )
 
 func init() {
@@ -52,6 +54,8 @@ var (
 	setOverridesFlag []string
 	// openshiftVersionFlag set the value of `certifiedOpenShiftVersions` in the report
 	openshiftVersionFlag string
+	// output logs flag
+	outputLogs bool
 )
 
 func filterChecks(set profiles.FilteredRegistry, subset []string, setEnabled bool, subsetEnabled bool) (chartverifier.FilteredRegistry, error) {
@@ -156,8 +160,16 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 				if err != nil {
 					return err
 				}
-
 				cmd.Println(string(b))
+
+				if outputLogs {
+					logs, err := tool.GetLogsOutput(outputFormatFlag)
+					if err != nil {
+						cmd.Println(fmt.Sprintf("LoggingError: %v", err))
+					} else if len(logs) > 0 {
+						cmd.Println(logs)
+					}
+				}
 			}
 			return nil
 		},
@@ -183,6 +195,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 
 	cmd.Flags().StringSliceVarP(&verifyOpts.ValueFiles, "set-values", "f", nil, "specify application and check configuration values in a YAML file or a URL (can specify multiple)")
 	cmd.Flags().StringVarP(&openshiftVersionFlag, "openshift-version", "V", "", "version of OpenShift used in the cluster")
+	cmd.Flags().BoolVarP(&outputLogs, "log-output", "l", false, "output logs after report (default: false) ")
 
 	return cmd
 }
