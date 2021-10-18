@@ -110,12 +110,12 @@ This section provides help on the basic usage of Helm chart checks with the podm
 - Run a subset of the checks:
 
   ```
-  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -e images-are-certified,helm-lint
+  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -e images-are-certified,helm-lint <chart-uri>
   ```
 - Run all the checks except a subset:
 
   ```
-  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -x images-are-certified,helm-lint
+  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -x images-are-certified,helm-lint <chart-uri>
   ```
 - Provide chart-override values:
 
@@ -127,6 +127,39 @@ This section provides help on the basic usage of Helm chart checks with the podm
   ```
   $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -F overrides.yaml images-are-certified,helm-lint
   ```
+
+## Profiles
+
+A profile defines a set of checks to run and an indication of whether each check is mandatory or optional. Four profiles are currently available: 
+- partner
+  - Defines the requirements for a partner chart to pass helm chart certfication.
+  - All checks are mandatory.
+- redhat 
+  - Defines the requirements for a red hat internal chart to pass helm chart certfication.
+  - All checks are mandatory.
+- community
+  - Defines the requirements for a community chart to pass helm chart certfication.
+  - The ```helm-lint``` check is mandatory with all other checks optional.  
+- default
+  - Profile used if a specific one is not specified.
+  - All checks are mandatory.
+
+Each profile also has a version and currently all profiles are v1.0.
+
+To specify which profile to use the --set flag:
+```
+    --set profile.vendorType=partner
+        valid values based on current profiles: partner, community, redhat, default
+        default is same as partner.
+        If value specified is not recognized default will be assumed
+    --set profile.version=v1.0
+        Current only valid version is v1.0
+        If value specified is invalid v1.0 will be assumed.
+```
+For example:
+```
+$ podman run -it --rm quay.io/redhat-certification/chart-verifier verify --set profile.vendorType=partner, profile.version=v1.0 <chart>
+```
 
 ## Chart Testing
 
