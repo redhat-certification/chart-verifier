@@ -35,4 +35,6 @@ COPY ./config /app/config
 
 COPY cmd/release /app/releases
 
+RUN ln -s /app/chart-verifier /usr/local/bin/chart-verifier
+
 ENTRYPOINT ["/app/chart-verifier"]
