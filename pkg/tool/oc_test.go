@@ -48,11 +48,11 @@ func TestOCVersions(t *testing.T) {
 	}
 }
 
-func checkOcVersion(kubeVersion string, expectedOCversion string, t *testing.T) {
+func checkOcVersion(kubeVersion string, expectedOCVersion string, t *testing.T) {
 	fp := fakeProcessExecutor{Output: kubeVersion}
 	oc := NewOc(fp)
 	version, _ := oc.GetVersion()
-	if version != expectedOCversion {
-		t.Error(fmt.Sprintf("Version mismatch expected: %s, got: %s", expectedOCversion, version))
+	if version != expectedOCVersion {
+		t.Error(fmt.Sprintf("Version mismatch expected: %s, got: %s", expectedOCVersion, version))
 	}
 }
