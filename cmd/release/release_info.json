@@ -1,7 +1,8 @@
 {
-    "version": "1.2.3",
+    "version": "1.3.0",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
-        "Remove error message output when certifying images (#191)"
+        "Update IBM images which have been updated (#195)",
+        "Enable chart verifier to recognize OCP 4.9 (#209)"
     ]
 }
