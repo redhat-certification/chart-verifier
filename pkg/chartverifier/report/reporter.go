@@ -2,15 +2,16 @@ package report
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strings"
 )
 
 const (
@@ -148,7 +149,7 @@ func Results(opts *ReportOptions) (OutputReport, error) {
 	}
 
 	profileVendorType := report.Metadata.ToolMetadata.Profile.VendorType
-	profileVersion := report.Metadata.ToolMetadata.Profile.VendorType
+	profileVersion := report.Metadata.ToolMetadata.Profile.Version
 
 	if opts.ViperConfig != nil {
 

@@ -2,20 +2,22 @@ package profiles
 
 import (
 	"fmt"
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
-	"github.com/spf13/viper"
-	"golang.org/x/mod/semver"
-	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
+
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	"github.com/spf13/viper"
+	"golang.org/x/mod/semver"
+	"gopkg.in/yaml.v3"
 )
 
 type Annotation string
 type VendorType string
+type VendorVersion string
 
 const (
 	DigestAnnotation                 Annotation = "Digest"
@@ -37,7 +39,7 @@ func init() {
 
 	// add default profile to the map if a default profile was not found.
 	if _, ok := profileMap[VendorTypeDefault]; !ok {
-		profileMap[VendorTypeDefault] = append(profileMap[VendorTypeDefault], getDefaultProfile(""))
+		profileMap[VendorTypeDefault] = profileMap[DefaultProfile]
 	}
 }
 
@@ -101,7 +103,7 @@ func New(config *viper.Viper) *Profile {
 						break
 					}
 				}
-				if semver.Compare(semver.MajorMinor(vendorProfile.Version), semver.MajorMinor(profileInUse.Version)) > 1 {
+				if semver.Compare(semver.MajorMinor(vendorProfile.Version), semver.MajorMinor(profileInUse.Version)) > 0 {
 					profileInUse = vendorProfile
 				}
 			}
@@ -146,7 +148,6 @@ func getProfiles() {
 		}
 		return nil
 	})
-	return
 }
 
 func (profile *Profile) FilterChecks(registry checks.DefaultRegistry) FilteredRegistry {

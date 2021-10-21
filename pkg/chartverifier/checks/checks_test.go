@@ -17,9 +17,11 @@
 package checks
 
 import (
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/pyxis"
+	"fmt"
 	"strings"
 	"testing"
+
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/pyxis"
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
@@ -432,6 +434,44 @@ func TestImageParsing(t *testing.T) {
 		t.Run(testCase.description, func(t *testing.T) {
 			imageRef := parseImageReference(testCase.image)
 			require.Equal(t, *testCase.expectedImageRef, imageRef)
+		})
+	}
+}
+
+func TestRequiredAnnotationsPresent(t *testing.T) {
+	type testCase struct {
+		description string
+		uri         string
+	}
+
+	positiveTestCases := []testCase{
+		{description: "chart with no missing required annotations", uri: "chart-0.1.0-v3.no-missing-annotations.tgz"},
+	}
+
+	for _, tc := range positiveTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			config := viper.New()
+			r, err := RequiredAnnotationsPresent(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.True(t, r.Ok)
+			require.Equal(t, RequiredAnnotationsSuccess, r.Reason)
+		})
+	}
+
+	negativeTestCases := []testCase{
+		{description: "chart with missing required annotations", uri: "chart-0.1.0-v3.missing-annotations.tgz"},
+	}
+
+	for _, tc := range negativeTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			message := fmt.Sprintf("%s: %v", RequiredAnnotationsFailure, requiredAnnotations)
+			config := viper.New()
+			r, err := RequiredAnnotationsPresent(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.False(t, r.Ok)
+			require.Equal(t, message, r.Reason)
 		})
 	}
 }

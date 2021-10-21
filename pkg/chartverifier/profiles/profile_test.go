@@ -2,15 +2,16 @@ package profiles
 
 import (
 	"fmt"
-	"github.com/google/go-cmp/cmp"
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
-	"github.com/spf13/viper"
-	"github.com/stretchr/testify/assert"
 	"path/filepath"
 	"reflect"
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	"github.com/spf13/viper"
+	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -18,6 +19,7 @@ const (
 	configVersion00     string     = "v0.0"
 	configVersion10     string     = "v1.0"
 	configVersion11     string     = "v1.1"
+	configVersion12     string     = "v1.2"
 	checkVersion10      string     = CheckVersion10
 	checkVersion11      string     = "v1.1"
 	NoVendorType        VendorType = ""
@@ -29,7 +31,7 @@ const (
 func TestProfile(t *testing.T) {
 
 	testProfile := getDefaultProfile("test")
-	testProfile.Name = "profile-partner-1.0"
+	testProfile.Name = "profile-partner-1.1"
 	config := viper.New()
 	config.Set(VendorTypeConfigName, string(PartnerVendorType))
 
@@ -71,18 +73,18 @@ func TestProfile(t *testing.T) {
 
 func TestGetProfiles(t *testing.T) {
 
-	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion10, configVersion10)
-	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion10, configVersion10)
-	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion10, configVersion10)
-	getAndCheckProfile(t, NoVendorType, PartnerVendorType, configVersion10, configVersion10)
-	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, NoVersion, configVersion10)
-	getAndCheckProfile(t, NoVendorType, PartnerVendorType, NoVersion, configVersion10)
-	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion11, configVersion10)
-	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion00, configVersion10)
-	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion11, configVersion10)
-	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion00, configVersion10)
-	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion00, configVersion10)
-	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion11, configVersion10)
+	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion11, configVersion11)
+	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion11, configVersion11)
+	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion11, configVersion11)
+	getAndCheckProfile(t, NoVendorType, PartnerVendorType, configVersion11, configVersion11)
+	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, NoVersion, configVersion11)
+	getAndCheckProfile(t, NoVendorType, PartnerVendorType, NoVersion, configVersion11)
+	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion12, configVersion11)
+	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion00, configVersion11)
+	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion12, configVersion11)
+	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion00, configVersion11)
+	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion00, configVersion11)
+	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion12, configVersion11)
 }
 
 func getAndCheckProfile(t *testing.T, configVendorType, expectVendorType VendorType, configVersion, expectVersion string) {

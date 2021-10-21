@@ -60,17 +60,18 @@ type CheckName string
 type CheckType string
 
 const (
-	HasReadmeName            CheckName = "has-readme"
-	IsHelmV3Name             CheckName = "is-helm-v3"
-	ContainsTestName         CheckName = "contains-test"
-	ContainsValuesName       CheckName = "contains-values"
-	ContainsValuesSchemaName CheckName = "contains-values-schema"
-	HasKubeversionName       CheckName = "has-kubeversion"
-	NotContainsCRDsName      CheckName = "not-contains-crds"
-	HelmLintName             CheckName = "helm-lint"
-	NotContainCsiObjectsName CheckName = "not-contain-csi-objects"
-	ImagesAreCertifiedName   CheckName = "images-are-certified"
-	ChartTestingName         CheckName = "chart-testing"
+	HasReadmeName                  CheckName = "has-readme"
+	IsHelmV3Name                   CheckName = "is-helm-v3"
+	ContainsTestName               CheckName = "contains-test"
+	ContainsValuesName             CheckName = "contains-values"
+	ContainsValuesSchemaName       CheckName = "contains-values-schema"
+	HasKubeversionName             CheckName = "has-kubeversion"
+	NotContainsCRDsName            CheckName = "not-contains-crds"
+	HelmLintName                   CheckName = "helm-lint"
+	NotContainCsiObjectsName       CheckName = "not-contain-csi-objects"
+	ImagesAreCertifiedName         CheckName = "images-are-certified"
+	ChartTestingName               CheckName = "chart-testing"
+	RequiredAnnotationsPresentName CheckName = "required-annotations-present"
 )
 
 const (

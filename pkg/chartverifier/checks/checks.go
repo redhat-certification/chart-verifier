@@ -53,6 +53,13 @@ const (
 	ImageCertified               = "Image is Red Hat certified"
 	ImageNotCertified            = "Image is not Red Hat certified"
 	ChartTestingSuccess          = "Chart tests have passed"
+	MetadataFailure              = "Empty metadata in chart"
+	RequiredAnnotationsSuccess   = "All required annotations present"
+	RequiredAnnotationsFailure   = "Missing required annotations"
+)
+
+var (
+	requiredAnnotations = [...]string{"charts.openshift.io/name"}
 )
 
 func notImplemented() (Result, error) {
@@ -272,6 +279,31 @@ func ImagesAreCertified(opts *CheckOptions) (Result, error) {
 	}
 
 	return r, nil
+}
+
+func RequiredAnnotationsPresent(opts *CheckOptions) (Result, error) {
+	c, _, err := LoadChartFromURI(opts.URI)
+	if err != nil {
+		return NewResult(false, err.Error()), err
+	}
+
+	if c.Metadata == nil {
+		return NewResult(false, MetadataFailure), nil
+	}
+
+	missingAnnotations := make([]string, 0)
+	for _, annotation := range requiredAnnotations {
+		if _, ok := c.Metadata.Annotations[annotation]; !ok {
+			missingAnnotations = append(missingAnnotations, annotation)
+		}
+	}
+
+	if len(missingAnnotations) > 0 {
+		message := fmt.Sprintf("%s: %v", RequiredAnnotationsFailure, missingAnnotations)
+		return NewResult(false, message), nil
+	}
+
+	return NewResult(true, RequiredAnnotationsSuccess), nil
 }
 
 func parseImageReference(image string) pyxis.ImageReference {

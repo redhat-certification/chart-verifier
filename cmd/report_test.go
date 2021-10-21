@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strconv"
+	"strings"
+	"testing"
+
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 	helmchart "helm.sh/helm/v3/pkg/chart"
-	"strconv"
-	"strings"
-	"testing"
 )
 
 func TestReport(t *testing.T) {
@@ -23,11 +24,11 @@ func TestReport(t *testing.T) {
 	expectedAnnotations = append(expectedAnnotations, annotation1, annotation2, annotation3)
 
 	expectedResults := &report.ResultsReport{}
-	expectedResults.Passed = "10"
+	expectedResults.Passed = "11"
 	expectedResults.Failed = "1"
 
 	expectedMetadata := &report.MetadataReport{}
-	expectedMetadata.ProfileVersion = "v1.0"
+	expectedMetadata.ProfileVersion = "v1.1"
 	expectedMetadata.ProfileVendorType = "redhat"
 	expectedMetadata.ChartUri = "pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
 	expectedMetadata.Chart = &helmchart.Metadata{Name: "chart", Version: "0.1.0-v3.valid"}
