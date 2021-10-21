@@ -11,7 +11,7 @@ REPORT_METADATA = "metadata"
 
 def _get_report_info(report_path, info_type, profile_type, profile_version):
 
-    docker_command = "report " + info_type + " charts/"+os.path.basename(report_path)
+    docker_command = "report " + info_type + " /charts/"+os.path.basename(report_path)
 
     set_values = ""
     if profile_type:

@@ -118,7 +118,7 @@ func getProfiles() {
 
 	var configDir string
 	if isRunningInDockerContainer() {
-		configDir = filepath.Join("app", "config")
+		configDir = filepath.Join("/app", "config")
 	} else {
 		_, fn, _, ok := runtime.Caller(0)
 		if !ok {

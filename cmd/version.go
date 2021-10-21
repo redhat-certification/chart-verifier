@@ -19,7 +19,7 @@ func init() {
 
 	var configDir string
 	if isRunningInDockerContainer() {
-		configDir = filepath.Join("app", "releases")
+		configDir = filepath.Join("/app", "releases")
 	} else {
 		_, fn, _, ok := runtime.Caller(0)
 		if !ok {
