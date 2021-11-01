@@ -19,7 +19,7 @@ jobs:
               with:
                 ref: ${{ github.event.pull_request.head.ref }}
                 repository: ${{ github.event.pull_request.head.repo.full_name }}
-                path: "pr-branch"
+                path: "chart-verifier"
 
             - name: Setup Go
               uses: actions/setup-go@v2
@@ -27,7 +27,7 @@ jobs:
                 go-version: '1.15.8'
 
             - name: Check go mod status
-              working-directory: ./pr-branch
+              working-directory: ./chart-verifier
               run: |
                 # run `make gomod_tidy`
                 make gomod_tidy
@@ -40,11 +40,11 @@ jobs:
                 fi
 
             - name: Build Binary
-              working-directory: ./pr-branch
+              working-directory: ./chart-verifier
               run: make bin
 
             - name: Check format
-              working-directory: ./pr-branch
+              working-directory: ./chart-verifier
               run: |
                 # run `make gofmt`
                 make gofmt
@@ -55,11 +55,11 @@ jobs:
                 fi
 
             - name: Download dependencies
-              working-directory: ./pr-branch
+              working-directory: ./chart-verifier
               run: go mod download
 
             - name: Run tests
-              working-directory: ./pr-branch
+              working-directory: ./chart-verifier
               run: |
                   # Run go tests
                   make test
@@ -75,7 +75,7 @@ jobs:
                 python-version: '3.9'
 
             - name: Set up Python scripts on PR branch
-              working-directory: ./pr-branch
+              working-directory: ./chart-verifier
               run: |
                 # set up python requirements and scripts on PR branch
                 python3 -m venv ve1
@@ -83,14 +83,14 @@ jobs:
                 cd scripts && ../ve1/bin/python3 setup.py install && cd ..
 
             - name: Check if only release file in PR
-              working-directory: ./pr-branch
+              working-directory: ./chart-verifier
               id: check_version_in_PR
               run: |
                 # check if release file only is included in PR
                 ve1/bin/release-checker --api-url=${{ github.event.pull_request._links.self.href }}
 
             - name: Build and Test Image
-              working-directory: ./pr-branch
+              working-directory: ./chart-verifier
               id: build_and_test
               run: |
                 # build and test a docker image
