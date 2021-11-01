@@ -41,7 +41,8 @@ type ReportBuilder interface {
 	SetChartUri(name string) ReportBuilder
 	AddCheck(check checks.Check, result checks.Result) ReportBuilder
 	SetChart(chart *helmchart.Chart) ReportBuilder
-	SetCertifiedOpenShiftVersion(version string) ReportBuilder
+	SetTestedOpenShiftVersion(version string) ReportBuilder
+	SetSupportedOpenShiftVersions(versions string) ReportBuilder
 	Build() (*Report, error)
 }
 
@@ -51,9 +52,10 @@ type CheckResult struct {
 }
 
 type reportBuilder struct {
-	Chart      *helmchart.Chart
-	Report     Report
-	OCPVersion string
+	Chart                *helmchart.Chart
+	Report               Report
+	OCPVersion           string
+	SupportedOCPVersions string
 }
 
 func NewReportBuilder() ReportBuilder {
@@ -62,8 +64,13 @@ func NewReportBuilder() ReportBuilder {
 	return &b
 }
 
-func (r *reportBuilder) SetCertifiedOpenShiftVersion(version string) ReportBuilder {
+func (r *reportBuilder) SetTestedOpenShiftVersion(version string) ReportBuilder {
 	r.OCPVersion = version
+	return r
+}
+
+func (r *reportBuilder) SetSupportedOpenShiftVersions(versions string) ReportBuilder {
+	r.SupportedOCPVersions = versions
 	return r
 }
 
@@ -109,6 +116,18 @@ func (r *reportBuilder) Build() (*Report, error) {
 				r.Report.Metadata.ToolMetadata.CertifiedOpenShiftVersions = "N/A"
 			} else {
 				r.Report.Metadata.ToolMetadata.CertifiedOpenShiftVersions = r.OCPVersion
+			}
+		case profiles.TestedOCPVersionAnnotation:
+			if len(r.OCPVersion) == 0 {
+				r.Report.Metadata.ToolMetadata.TestedOpenShiftVersion = "N/A"
+			} else {
+				r.Report.Metadata.ToolMetadata.TestedOpenShiftVersion = r.OCPVersion
+			}
+		case profiles.SupportedOCPVersionsAnnotation:
+			if len(r.SupportedOCPVersions) == 0 {
+				r.Report.Metadata.ToolMetadata.SupportedOpenShiftVersions = "N/A"
+			} else {
+				r.Report.Metadata.ToolMetadata.SupportedOpenShiftVersions = r.SupportedOCPVersions
 			}
 		}
 	}

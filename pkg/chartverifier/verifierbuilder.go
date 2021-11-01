@@ -40,6 +40,7 @@ func init() {
 	defaultRegistry.Add(checks.ContainsValuesName, "v1.0", checks.ContainsValues)
 	defaultRegistry.Add(checks.ContainsValuesSchemaName, "v1.0", checks.ContainsValuesSchema)
 	defaultRegistry.Add(checks.HasKubeversionName, "v1.0", checks.HasKubeVersion)
+	defaultRegistry.Add(checks.HasKubeversionName, "v1.1", checks.HasKubeVersion_V1_1)
 	defaultRegistry.Add(checks.NotContainsCRDsName, "v1.0", checks.NotContainCRDs)
 	defaultRegistry.Add(checks.HelmLintName, "v1.0", checks.HelmLint)
 	defaultRegistry.Add(checks.NotContainCsiObjectsName, "v1.0", checks.NotContainCSIObjects)
@@ -55,13 +56,14 @@ func DefaultRegistry() checks.Registry {
 type FilteredRegistry map[checks.CheckName]checks.Check
 
 type verifierBuilder struct {
-	checks           FilteredRegistry
-	config           *viper.Viper
-	registry         checks.Registry
-	toolVersion      string
-	openshiftVersion string
-	values           map[string]interface{}
-	settings         *cli.EnvSettings
+	checks                      FilteredRegistry
+	config                      *viper.Viper
+	registry                    checks.Registry
+	toolVersion                 string
+	openshiftVersion            string
+	suppportedOpenshiftVersions string
+	values                      map[string]interface{}
+	settings                    *cli.EnvSettings
 }
 
 func (b *verifierBuilder) SetSettings(settings *cli.EnvSettings) VerifierBuilder {

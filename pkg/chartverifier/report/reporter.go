@@ -21,7 +21,9 @@ const (
 
 	DigestsAnnotationName                string = "digest"
 	LastCertifiedTimestampAnnotationName string = "lastCertifiedTimestamp"
-	CertifiedOCPVersionAnnotationName    string = "certifiedOpenShiftVersions"
+	CertifiedOCPVersionsAnnotationName   string = "certifiedOpenShiftVersions"
+	TestedOCPVersionAnnotationName       string = "testedOpenShiftVersion"
+	SupportedOCPVersionsAnnotationName   string = "supportedOpenShiftVersions"
 )
 
 func All(opts *ReportOptions) (OutputReport, error) {
@@ -88,8 +90,26 @@ func Annotations(opts *ReportOptions) (OutputReport, error) {
 		outputReport.AnnotationsReport = append(outputReport.AnnotationsReport, annotation)
 	}
 
-	name = fmt.Sprintf("%s/%s", anotationsPrefix, CertifiedOCPVersionAnnotationName)
+	name = fmt.Sprintf("%s/%s", anotationsPrefix, CertifiedOCPVersionsAnnotationName)
 	value = report.Metadata.ToolMetadata.CertifiedOpenShiftVersions
+	if len(value) > 0 {
+		annotation := Annotation{}
+		annotation.Name = name
+		annotation.Value = value
+		outputReport.AnnotationsReport = append(outputReport.AnnotationsReport, annotation)
+	}
+
+	name = fmt.Sprintf("%s/%s", anotationsPrefix, TestedOCPVersionAnnotationName)
+	value = report.Metadata.ToolMetadata.TestedOpenShiftVersion
+	if len(value) > 0 {
+		annotation := Annotation{}
+		annotation.Name = name
+		annotation.Value = value
+		outputReport.AnnotationsReport = append(outputReport.AnnotationsReport, annotation)
+	}
+
+	name = fmt.Sprintf("%s/%s", anotationsPrefix, SupportedOCPVersionsAnnotationName)
+	value = report.Metadata.ToolMetadata.SupportedOpenShiftVersions
 	if len(value) > 0 {
 		annotation := Annotation{}
 		annotation.Name = name

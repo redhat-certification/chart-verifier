@@ -54,6 +54,7 @@ func (r *Result) AddResult(outcome bool, reason string) Result {
 type AnnotationHolder interface {
 	SetCertifiedOpenShiftVersion(version string)
 	GetCertifiedOpenShiftVersionFlag() string
+	SetSupportedOpenShiftVersions(versions string)
 }
 
 type CheckName string

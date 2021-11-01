@@ -38,9 +38,9 @@ func (p fakeProcessExecutor) RunProcessAndCaptureOutput(executable string, execA
 
 func TestOCVersions(t *testing.T) {
 
-	testsData = append(testsData, TestData{getVersionOut: output120, OCVersion: "4.7.0"})
-	testsData = append(testsData, TestData{getVersionOut: output121, OCVersion: "4.8.0"})
-	testsData = append(testsData, TestData{getVersionOut: output122, OCVersion: "4.9.0"})
+	testsData = append(testsData, TestData{getVersionOut: output120, OCVersion: "4.7"})
+	testsData = append(testsData, TestData{getVersionOut: output121, OCVersion: "4.8"})
+	testsData = append(testsData, TestData{getVersionOut: output122, OCVersion: "4.9"})
 
 	for _, testdata := range testsData {
 		t.Logf("Check for OC %s", testdata.OCVersion)

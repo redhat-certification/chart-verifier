@@ -78,7 +78,3 @@ results:
       type: Mandatory
       outcome: PASS
       reason: Helm lint successful
-    - check: v1.0/required-annotations-present
-      type: Mandatory
-      outcome: FAIL
-      reason: 'Missing required annotations: [charts.openshift.io/name]'

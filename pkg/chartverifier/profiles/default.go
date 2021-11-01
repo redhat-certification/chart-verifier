@@ -8,6 +8,7 @@ import (
 
 const (
 	CheckVersion10        = "v1.0"
+	CheckVersion11        = "v1.1"
 	DefaultProfile        = "partner"
 	DefaultProfileVersion = "v1.1"
 )
@@ -26,7 +27,7 @@ func getDefaultProfile(msg string) *Profile {
 	profile.Vendor = DefaultProfile
 	profile.Version = DefaultProfileVersion
 
-	profile.Annotations = []Annotation{DigestAnnotation, OCPVersionAnnotation, LastCertifiedTimestampAnnotation}
+	profile.Annotations = []Annotation{DigestAnnotation, TestedOCPVersionAnnotation, LastCertifiedTimestampAnnotation, SupportedOCPVersionsAnnotation}
 
 	profile.Checks = []*Check{
 		{Name: fmt.Sprintf("%s/%s", CheckVersion10, checks.HasReadmeName), Type: checks.MandatoryCheckType},
@@ -34,7 +35,7 @@ func getDefaultProfile(msg string) *Profile {
 		{Name: fmt.Sprintf("%s/%s", CheckVersion10, checks.ContainsTestName), Type: checks.MandatoryCheckType},
 		{Name: fmt.Sprintf("%s/%s", CheckVersion10, checks.ContainsValuesName), Type: checks.MandatoryCheckType},
 		{Name: fmt.Sprintf("%s/%s", CheckVersion10, checks.ContainsValuesSchemaName), Type: checks.MandatoryCheckType},
-		{Name: fmt.Sprintf("%s/%s", CheckVersion10, checks.HasKubeversionName), Type: checks.MandatoryCheckType},
+		{Name: fmt.Sprintf("%s/%s", CheckVersion11, checks.HasKubeversionName), Type: checks.MandatoryCheckType},
 		{Name: fmt.Sprintf("%s/%s", CheckVersion10, checks.NotContainsCRDsName), Type: checks.MandatoryCheckType},
 		{Name: fmt.Sprintf("%s/%s", CheckVersion10, checks.HelmLintName), Type: checks.MandatoryCheckType},
 		{Name: fmt.Sprintf("%s/%s", CheckVersion10, checks.NotContainCsiObjectsName), Type: checks.MandatoryCheckType},

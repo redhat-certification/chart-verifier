@@ -20,11 +20,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Masterminds/sprig"
 	"github.com/pkg/errors"
+	"golang.org/x/mod/semver"
 	"helm.sh/helm/v3/pkg/lint"
 	"helm.sh/helm/v3/pkg/lint/support"
 
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/pyxis"
+	"github.com/redhat-certification/chart-verifier/pkg/tool"
 )
 
 const (
@@ -38,6 +41,7 @@ const (
 	ChartTestFilesDoesNotExist   = "Chart test files do not exist"
 	KuberVersionSpecified        = "Kubernetes version specified"
 	KuberVersionNotSpecified     = "Kubernetes version is not specified"
+	KuberVersionProcessingError  = "Error converting kubeVersion to an OCP range"
 	ValuesSchemaFileExist        = "Values schema file exist"
 	ValuesSchemaFileDoesNotExist = "Values schema file does not exist"
 	ValuesFileExist              = "Values file exist"
@@ -168,7 +172,27 @@ func HasKubeVersion(opts *CheckOptions) (Result, error) {
 	if c.Metadata.KubeVersion != "" {
 		r.SetResult(true, KuberVersionSpecified)
 	}
+	return r, nil
+}
 
+func HasKubeVersion_V1_1(opts *CheckOptions) (Result, error) {
+
+	c, _, err := LoadChartFromURI(opts.URI)
+	if err != nil {
+		return NewResult(false, err.Error()), err
+	}
+
+	r := NewResult(false, KuberVersionNotSpecified)
+
+	if c.Metadata.KubeVersion != "" {
+		OCPRange := getOCPRange(c.Metadata.KubeVersion)
+		if strings.HasPrefix(OCPRange, KuberVersionProcessingError) {
+			r = NewResult(false, OCPRange)
+		} else {
+			opts.AnnotationHolder.SetSupportedOpenShiftVersions(OCPRange)
+			r = NewResult(true, KuberVersionSpecified)
+		}
+	}
 	return r, nil
 }
 
@@ -335,5 +359,42 @@ func parseImageReference(image string) pyxis.ImageReference {
 	}
 
 	return imageRef
+
+}
+
+func getOCPRange(kubeVersionRange string) string {
+
+	semverCompare := sprig.GenericFuncMap()["semverCompare"].(func(string, string) (bool, error))
+	minOCPVersion := ""
+	maxOCPVersion := ""
+	for kubeVersion, OCPVersion := range tool.GetKubeOpenShiftVersionMap() {
+		match, err := semverCompare(kubeVersionRange, kubeVersion)
+		if err != nil {
+			return fmt.Sprintf("%s : %s", KuberVersionProcessingError, err)
+		}
+		if match {
+			testOCPVersion := fmt.Sprintf("v%s", OCPVersion)
+			if minOCPVersion == "" || semver.Compare(testOCPVersion, fmt.Sprintf("v%s", minOCPVersion)) < 0 {
+				minOCPVersion = OCPVersion
+			}
+			if maxOCPVersion == "" || semver.Compare(testOCPVersion, fmt.Sprintf("v%s", maxOCPVersion)) > 0 {
+				maxOCPVersion = OCPVersion
+			}
+		}
+	}
+	if minOCPVersion != "" {
+		match, _ := semverCompare(kubeVersionRange, "1.999")
+		if match {
+			return fmt.Sprintf(">=%s", minOCPVersion)
+		} else {
+			if minOCPVersion == maxOCPVersion {
+				return minOCPVersion
+			} else {
+				return fmt.Sprintf("%s - %s", minOCPVersion, maxOCPVersion)
+			}
+		}
+	}
+
+	return fmt.Sprintf("%s : Failed to determine a minimum OCP version", KuberVersionProcessingError)
 
 }

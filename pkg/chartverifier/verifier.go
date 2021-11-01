@@ -45,11 +45,15 @@ type AnnotationHolder struct {
 }
 
 func (holder *AnnotationHolder) SetCertifiedOpenShiftVersion(version string) {
-	holder.Holder.SetCertifiedOpenShiftVersion(version)
+	holder.Holder.SetTestedOpenShiftVersion(version)
 }
 
 func (holder *AnnotationHolder) GetCertifiedOpenShiftVersionFlag() string {
 	return holder.CertifiedOpenShiftVersionFlag
+}
+
+func (holder *AnnotationHolder) SetSupportedOpenShiftVersions(versions string) {
+	holder.Holder.SetSupportedOpenShiftVersions(versions)
 }
 
 type verifier struct {

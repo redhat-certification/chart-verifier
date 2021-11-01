@@ -140,6 +140,8 @@ func (holder *testAnnotationHolder) GetCertifiedOpenShiftVersionFlag() string {
 	return holder.CertifiedOpenShiftVersionFlag
 }
 
+func (holder *testAnnotationHolder) SetSupportedOpenShiftVersions(version string) {}
+
 func TestVersionSetting(t *testing.T) {
 	type testCase struct {
 		description string

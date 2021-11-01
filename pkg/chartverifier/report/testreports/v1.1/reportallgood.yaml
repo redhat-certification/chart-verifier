@@ -4,14 +4,16 @@ metadata:
     tool:
         verifier-version: 1.1.0
         profile:
-            VendorType: partner
-            version: v1.0
+            VendorType: redhat
+            version: v1.1
         chart-uri: pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz
         digest: sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0
         digests:
             chart: sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0
+            package: 4f29f2a95bf2b9a1c62fd215b079a01bdc5a38e9b4ff874d0fa21d0afca2e76d
         lastCertifiedTimestamp: "2021-07-02T08:09:56.881793-04:00"
-        certifiedOpenShiftVersions: N/A
+        testedOpenShiftVersion: 4.7.8
+        supportedOpenShiftVersions: ">=4.7.8"
     chart:
         name: chart
         home: ""
@@ -34,9 +36,9 @@ metadata:
 results:
     - check: v1.0/has-readme
       type: Mandatory
-      outcome: FAIL
+      outcome: PASS
       reason: Chart has a README
-    - check: v1.0/has-kubeversion
+    - check: v1.1/has-kubeversion
       type: Mandatory
       outcome: PASS
       reason: Kubernetes version specified
@@ -63,10 +65,10 @@ results:
       reason: Chart test files exist
     - check: v1.0/contains-values
       type: Mandatory
-      outcome: FAIL
-      reason: Values file does not exist
+      outcome: PASS
+      reason: Values file exist
     - check: v1.0/contains-values-schema
-      type: Optional
+      type: Mandatory
       outcome: PASS
       reason: Values schema file exist
     - check: v1.0/not-contains-crds
@@ -77,3 +79,12 @@ results:
       type: Mandatory
       outcome: PASS
       reason: Helm lint successful
+    - check: v1.0/chart-testing
+      type: Mandatory
+      outcome: PASS
+      reason: Chart tests have passed
+    - check: v1.0/required-annotations-present
+      type: Mandatory
+      outcome: PASS
+      reason: No missing required annotations
+
