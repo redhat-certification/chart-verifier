@@ -141,7 +141,7 @@ A profile defines a set of checks to run and an indication of whether each check
   - Defines the requirements for a community chart to pass helm chart certfication.
   - The ```helm-lint``` check is mandatory with all other checks optional.  
 - default
-  - Profile used if a specific one is not specified.
+  - The default is the same as the partner profile and is used if a specific one is not specified.
   - All checks are mandatory.
 
 Each profile also has a version and currently all profiles are v1.0.
@@ -151,10 +151,12 @@ To specify which profile to use the --set flag:
     --set profile.vendorType=partner
         valid values based on current profiles: partner, community, redhat, default
         default is same as partner.
-        If value specified is not recognized default will be assumed
+        If value specified is not recognized default will be assumed.
+        The flag name is case insensitive.
     --set profile.version=v1.0
         Current only valid version is v1.0
         If value specified is invalid v1.0 will be assumed.
+        The flag name is case insensitive.
 ```
 For example:
 ```
