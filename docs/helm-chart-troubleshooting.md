@@ -1,17 +1,19 @@
 # Troubleshooting
 
 - [Check failures](#troubleshooting-check-failures)
-  - [is-helm-v3](#is-helm-v3)
-  - [has-readme](#has-readme)
-  - [contains-test](#contains-test)
-  - [has-kubeversion](#has-kubeversion)
-  - [contains-values](#contains-values)
-  - [contains-values-schema](#contains-values-schema)  
-  - [not-contains-crds](#not-contains-crds)  
-  - [not-contain-csi-objects](#not-contain-csi-objects)  
-  - [helm-lint](#helm-lint)  
-  - [images-are-certified](#images-are-certified)
-  - [chart-testing](#chart-testing)
+  - [is-helm-v3 v1.0](#is-helm-v3-v10)
+  - [has-readme v1.0](#has-readme-v10)
+  - [contains-test v1.0](#contains-test-v10)
+  - [has-kubeversion v1.1](#has-kubeversion-v10)
+  - [has-kubeversion v1.0](#has-kubeversion-v11)
+  - [contains-values v1.0](#contains-values-v10)
+  - [contains-values-schema v1.0](#contains-values-schema-v10)  
+  - [not-contains-crds v1.0](#not-contains-crds-v1.0)  
+  - [not-contain-csi-objects v1.0](#not-contain-csi-objects-v10)  
+  - [helm-lint v1.0](#helm-lint-v10)  
+  - [images-are-certified v1.0](#images-are-certified-v10)
+  - [chart-testing v1.0](#chart-testing-v10)
+  - [required-annotations-present v1.0](#required-annotations-present-v10)  
 - [Report related submission failures](#report-related-submission-failures)   
   - [One or more mandatory checks have failed or are missing from the report.](#one-or-more-mandatory-checks-have-failed-or-are-missing-from-the-report.)
   - [The digest in the report does not match the digest calculated for the submitted chart.](#the-digest-in-the-report-does-not-match-the-digest-calculated-for-the-submitted-chart)
@@ -20,60 +22,67 @@
     
 ## Troubleshooting check failures
 
-### `is-helm-v3`
+### `is-helm-v3` v1.0
 
 Requires the "api-version" attribute of chart.yaml to be set to "v2". Any other value will result in the check failing.
 
-### `has-readme`
+### `has-readme` v1.0
 
 Requires a "README.md" file to exist in the root directory of the chart. Any other spelling or
 capitialisation of letters will result in the check failing.
 
-### `contains-test`
+### `contains-test` v1.0
 
 Requires at least one file to exist in the ```templates/tests``` subdirectory of the chart. If no such file
 exists this check will fail. Note the `chart-testing` check will require the directory to contain a valid test.
 
 See also helm documentation: [chart tests](https://helm.sh/docs/topics/chart_tests/)
 
-### `has-kubeversion`
+### `has-kubeversion` v1.0
 
 Requires the "kubeVersion" attribute of chart.yaml to be set to a value. If the attribute is not set the check
 will fail. The value set is not checked.
 
-### `contains-values`
+### `has-kubeversion` v1.1 
+
+Requires the ```kubeVersion``` attribute of chart.yaml to be set to a valid semantic version. If the attribute is not a valid semantic version the check will fail.
+
+See also helm documentation: [Helm documentetaion of the kubeVersion attribute](https://helm.sh/docs/topics/charts/#the-kubeversion-field)
+
+Note: The kubeVersion filed will be used to detremine the Open Shift versions the charts supports and will be set as annotation ``````  
+### `contains-values` v1.0
 
 Requires a ```values.schema``` file to be present in the chart. If the file is not present the check will fail.
 
 See also helm documentation: [values](https://helm.sh/docs/chart_template_guide/values_files/) and [Best Practices for using values](https://helm.sh/docs/chart_best_practices/values/).
 
-### `contains-values-schema`
+### `contains-values-schema` v1.0
 
 Requires a ```values.schema.json``` file to be present in the chart. If the file is not present the check will fail.
 
 See also helm documentation: [Schema Files](https://helm.sh/docs/topics/charts/#schema-files)
 
-### `not-contains-crds`
+### `not-contains-crds` v1.0
 
 Requires no RCRD's to be defined in the chart. A crd is a file with an extension of `.yaml`, `.yml` or `.json`
 in a `crd` subdirectory of the chart and should be removed if present.
 
 CRD's should be defined using operators. See: [Operator CRDs](https://docs.openshift.com/container-platform/4.2/operators/crds/crd-extending-api-with-crds.html)
 
-### `not-contain-csi-objects`
+### `not-contain-csi-objects` v1.0
 
 Requires no csi objects in a chart. A csi object is a file in the template subdirectory, with an extension of `.yaml`,
 and containing an `kind` attribute set to `CSIDriver`. If such a file exists it should be removed.
 
 
-### `helm-lint`
+### `helm-lint` v1.0
 
 Requires a `helm lint` of the chart to not result in any `ERROR` messages. If an ERROR does occur the helm lint messages
 will be output. Run `helm lint` on your chart for additional information. If the chart requires specification of additional
 values to pass `helm lint` use one of the `chart-set` flags of the verifier tool for this check to pass. If additional
 values are required a verifier report mut be included in the chart submission.
 
-### `images-are-certified`
+### `images-are-certified` v1.0
 
 Requires any images referenced in a chart to be Red Hat Certified.
 - The list of image references is found by running `helm template` and if this fails the error output from `helm template`
@@ -98,7 +107,7 @@ Requires any images referenced in a chart to be Red Hat Certified.
 
 For information on certifying images see: [Red Hat container certification](https://connect.redhat.com/partner-with-us/red-hat-container-certification)
 
-### `chart-testing`
+### `chart-testing` v1.0
 
 Chart testing runs the equivalant of `helm install ...` followed by `helm test...`. Try to run these independantly of 
 the chart-verifier and make a note of any flags or overrides that must be set for them both to work. Ensure these 
@@ -112,6 +121,12 @@ Run the chart verifier and set log_ouput to true to get additional information:
 $ podman run -it --rm quay.io/redhat-certification/chart-verifier -l verify <chart-uri>
 ```
 
+### `required-annotations-present` v1.0
+
+Requires the following annotation to be present in chart.yaml:
+- ```charts.openshift.io/name```
+
+The value of thet annotation will be used in the Open Shift catalogue as the name of the chart.
 
 ## Report related submission failures
 
