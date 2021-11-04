@@ -1,14 +1,14 @@
 #
-# The golang:1.15 image is a copy of docker.io/library/golang:1.15 hosted in Quay to work around rate limits to
+# The golang:1.15 image is a copy of docker.io/library/golang:1.17 hosted in Quay to work around rate limits to
 # Dockerhub:
 #
-# > docker pull golang:1.15
-# > docker tag golang:1.15 quay.io/redhat-certification/golang:1.15
-# > docker push quay.io/redhat-certification/golang:1.15
+# > docker pull golang:1.17.2
+# > docker tag golang:1.17.2 quay.io/redhat-certification/golang:1.17.2
+# > docker push quay.io/redhat-certification/golang:1.17.2
 #
 # To upgrade Go, then a new image should be pushed to Quay and updated below.
 #
-FROM quay.io/redhat-certification/golang:1.15 as build
+FROM quay.io/redhat-certification/golang:1.17.2 as build
 
 WORKDIR /tmp/src
 
@@ -34,5 +34,9 @@ COPY --from=build /usr/local/bin/* /usr/local/bin/
 COPY ./config /app/config
 
 COPY cmd/release /app/releases
+
+WORKDIR /app
+
+ENV PATH "$PATH:/app"
 
 ENTRYPOINT ["/app/chart-verifier"]

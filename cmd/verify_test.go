@@ -117,10 +117,10 @@ func TestCertify(t *testing.T) {
 		require.NotEmpty(t, outBuf.String())
 
 		expected := "results:\n" +
-			"  - check: v1.0/is-helm-v3\n" +
-			"    type: Mandatory\n" +
-			"    outcome: PASS\n" +
-			"    reason: API version is V2, used in Helm 3\n"
+			"    - check: v1.0/is-helm-v3\n" +
+			"      type: Mandatory\n" +
+			"      outcome: PASS\n" +
+			"      reason: API version is V2, used in Helm 3\n"
 		require.Contains(t, outBuf.String(), expected)
 	})
 
@@ -142,6 +142,7 @@ func TestCertify(t *testing.T) {
 
 		// attempts to deserialize the command's output, expecting a json string
 		certificate := chartverifier.Report{}
+
 		err := json.Unmarshal([]byte(outBuf.String()), &certificate)
 		require.NoError(t, err)
 		require.True(t, len(certificate.Results) == 1, "Expected only 1 result")
