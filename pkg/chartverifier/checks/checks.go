@@ -185,9 +185,9 @@ func HasKubeVersion_V1_1(opts *CheckOptions) (Result, error) {
 	r := NewResult(false, KuberVersionNotSpecified)
 
 	if c.Metadata.KubeVersion != "" {
-		OCPRange := getOCPRange(c.Metadata.KubeVersion)
-		if strings.HasPrefix(OCPRange, KuberVersionProcessingError) {
-			r = NewResult(false, OCPRange)
+		OCPRange, err := getOCPRange(c.Metadata.KubeVersion)
+		if err != nil {
+			r = NewResult(false, err.Error())
 		} else {
 			opts.AnnotationHolder.SetSupportedOpenShiftVersions(OCPRange)
 			r = NewResult(true, KuberVersionSpecified)
@@ -362,7 +362,7 @@ func parseImageReference(image string) pyxis.ImageReference {
 
 }
 
-func getOCPRange(kubeVersionRange string) string {
+func getOCPRange(kubeVersionRange string) (string, error) {
 
 	semverCompare := sprig.GenericFuncMap()["semverCompare"].(func(string, string) (bool, error))
 	minOCPVersion := ""
@@ -370,7 +370,7 @@ func getOCPRange(kubeVersionRange string) string {
 	for kubeVersion, OCPVersion := range tool.GetKubeOpenShiftVersionMap() {
 		match, err := semverCompare(kubeVersionRange, kubeVersion)
 		if err != nil {
-			return fmt.Sprintf("%s : %s", KuberVersionProcessingError, err)
+			return "", fmt.Errorf("%s : %s", KuberVersionProcessingError, err)
 		}
 		if match {
 			testOCPVersion := fmt.Sprintf("v%s", OCPVersion)
@@ -385,16 +385,16 @@ func getOCPRange(kubeVersionRange string) string {
 	if minOCPVersion != "" {
 		match, _ := semverCompare(kubeVersionRange, "1.999")
 		if match {
-			return fmt.Sprintf(">=%s", minOCPVersion)
+			return fmt.Sprintf(">=%s", minOCPVersion), nil
 		} else {
 			if minOCPVersion == maxOCPVersion {
-				return minOCPVersion
+				return minOCPVersion, nil
 			} else {
-				return fmt.Sprintf("%s - %s", minOCPVersion, maxOCPVersion)
+				return fmt.Sprintf("%s - %s", minOCPVersion, maxOCPVersion), nil
 			}
 		}
 	}
 
-	return fmt.Sprintf("%s : Failed to determine a minimum OCP version", KuberVersionProcessingError)
+	return "", fmt.Errorf("%s : Failed to determine a minimum OCP version", KuberVersionProcessingError)
 
 }

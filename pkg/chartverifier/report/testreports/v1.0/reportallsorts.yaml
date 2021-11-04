@@ -11,7 +11,7 @@ metadata:
         digests:
             chart: sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0
         lastCertifiedTimestamp: "2021-07-02T08:09:56.881793-04:00"
-        certifiedOpenShiftVersions : N/A
+        certifiedOpenShiftVersions: N/A
     chart:
         name: chart
         home: ""

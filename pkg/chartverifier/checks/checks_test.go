@@ -509,8 +509,12 @@ func TestSemVers(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(fmt.Sprintf("Check kube version %s", test.kubeVersion), func(t *testing.T) {
-			OCPRange := getOCPRange(test.kubeVersion)
-			require.Equal(t, test.OCPRange, OCPRange)
+			OCPRange, err := getOCPRange(test.kubeVersion)
+			if err != nil {
+				require.Equal(t, test.OCPRange, fmt.Sprintf("%v", err))
+			} else {
+				require.Equal(t, test.OCPRange, OCPRange)
+			}
 		})
 	}
 
