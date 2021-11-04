@@ -101,7 +101,6 @@ func (r *reportBuilder) Build() (*Report, error) {
 		switch annotation {
 		case profiles.DigestAnnotation:
 			r.Report.Metadata.ToolMetadata.Digests.Chart = GenerateSha(r.Chart.Raw)
-			r.Report.Metadata.ToolMetadata.Digest = r.Report.Metadata.ToolMetadata.Digests.Chart
 		case profiles.LastCertifiedTimestampAnnotation:
 			r.Report.Metadata.ToolMetadata.LastCertifiedTimestamp = time.Now().Format("2006-01-02T15:04:05.999999-07:00")
 		case profiles.OCPVersionAnnotation:
