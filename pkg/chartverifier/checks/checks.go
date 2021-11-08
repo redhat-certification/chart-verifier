@@ -382,6 +382,8 @@ func getOCPRange(kubeVersionRange string) (string, error) {
 			}
 		}
 	}
+	// Check if min ocp range is open ended, for example 1.* or >-=1.20
+	// To do this see if 1.999 is valid for the min OCP version range, not perfect but works until kubernetes hits 2.0.
 	if minOCPVersion != "" {
 		match, _ := semverCompare(kubeVersionRange, "1.999")
 		if match {
