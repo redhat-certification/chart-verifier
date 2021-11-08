@@ -19,9 +19,10 @@ func TestReport(t *testing.T) {
 
 	var expectedAnnotations []report.Annotation
 	annotation1 := report.Annotation{Name: fmt.Sprintf("%s/%s", report.DefaultAnnotationsPrefix, report.DigestsAnnotationName), Value: "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"}
-	annotation2 := report.Annotation{Name: fmt.Sprintf("%s/%s", report.DefaultAnnotationsPrefix, report.CertifiedOCPVersionAnnotationName), Value: "4.7.8"}
+	annotation2 := report.Annotation{Name: fmt.Sprintf("%s/%s", report.DefaultAnnotationsPrefix, report.TestedOCPVersionAnnotationName), Value: "4.7.8"}
 	annotation3 := report.Annotation{Name: fmt.Sprintf("%s/%s", report.DefaultAnnotationsPrefix, report.LastCertifiedTimestampAnnotationName), Value: "2021-07-06T10:28:01.09604-04:00"}
-	expectedAnnotations = append(expectedAnnotations, annotation1, annotation2, annotation3)
+	annotation4 := report.Annotation{Name: fmt.Sprintf("%s/%s", report.DefaultAnnotationsPrefix, report.SupportedOCPVersionsAnnotationName), Value: "4.7.8"}
+	expectedAnnotations = append(expectedAnnotations, annotation1, annotation2, annotation3, annotation4)
 
 	expectedResults := &report.ResultsReport{}
 	expectedResults.Passed = "11"
@@ -186,9 +187,10 @@ func TestReport(t *testing.T) {
 
 		var expectedPrefixAnnotations []report.Annotation
 		annotationP1 := report.Annotation{Name: fmt.Sprintf("%s/%s", annotationPrefix, report.DigestsAnnotationName), Value: "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"}
-		annotationP2 := report.Annotation{Name: fmt.Sprintf("%s/%s", annotationPrefix, report.CertifiedOCPVersionAnnotationName), Value: "4.7.8"}
+		annotationP2 := report.Annotation{Name: fmt.Sprintf("%s/%s", annotationPrefix, report.TestedOCPVersionAnnotationName), Value: "4.7.8"}
 		annotationP3 := report.Annotation{Name: fmt.Sprintf("%s/%s", annotationPrefix, report.LastCertifiedTimestampAnnotationName), Value: "2021-07-06T10:28:01.09604-04:00"}
-		expectedPrefixAnnotations = append(expectedPrefixAnnotations, annotationP1, annotationP2, annotationP3)
+		annotationP4 := report.Annotation{Name: fmt.Sprintf("%s/%s", annotationPrefix, report.SupportedOCPVersionsAnnotationName), Value: "4.7.8"}
+		expectedPrefixAnnotations = append(expectedPrefixAnnotations, annotationP1, annotationP2, annotationP3, annotationP4)
 
 		testReport := report.OutputReport{}
 		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))

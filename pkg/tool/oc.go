@@ -20,15 +20,15 @@ const osVersionKey = "serverVersion"
 
 // Based on https://access.redhat.com/solutions/4870701
 var kubeOpenShiftVersionMap map[string]string = map[string]string{
-	"1.22": "4.9.0",
-	"1.21": "4.8.0",
-	"1.20": "4.7.0",
-	"1.19": "4.6.0",
-	"1.18": "4.5.0",
-	"1.17": "4.4.0",
-	"1.16": "4.3.0",
-	"1.14": "4.2.0",
-	"1.13": "4.1.0",
+	"1.22": "4.9",
+	"1.21": "4.8",
+	"1.20": "4.7",
+	"1.19": "4.6",
+	"1.18": "4.5",
+	"1.17": "4.4",
+	"1.16": "4.3",
+	"1.14": "4.2",
+	"1.13": "4.1",
 }
 
 func (o Oc) GetVersion() (string, error) {
@@ -51,4 +51,8 @@ func (o Oc) GetVersion() (string, error) {
 	}
 
 	return osVersion, nil
+}
+
+func GetKubeOpenShiftVersionMap() map[string]string {
+	return kubeOpenShiftVersionMap
 }

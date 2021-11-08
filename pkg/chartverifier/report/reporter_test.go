@@ -13,16 +13,26 @@ import (
 	helmchart "helm.sh/helm/v3/pkg/chart"
 )
 
-func TestReports(t *testing.T) {
+type testInfo struct {
+	description       string
+	path              string
+	annotationsPrefix string
+	setVendorType     string
+	expectedReport    *OutputReport
+}
 
+func TestReports_1_0(t *testing.T) {
+	var tests []testInfo
+
+	version := "v1.0"
 	testRedHatMetaDataReport := &MetadataReport{}
-	testRedHatMetaDataReport.ProfileVersion = "v1.0"
+	testRedHatMetaDataReport.ProfileVersion = version
 	testRedHatMetaDataReport.ProfileVendorType = "redhat"
 	testRedHatMetaDataReport.ChartUri = "pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
 	testRedHatMetaDataReport.Chart = &helmchart.Metadata{Name: "chart", Version: "0.1.0-v3.valid"}
 
 	testPartnerMetaDataReport := &MetadataReport{}
-	testPartnerMetaDataReport.ProfileVersion = "v1.0"
+	testPartnerMetaDataReport.ProfileVersion = version
 	testPartnerMetaDataReport.ProfileVendorType = "partner"
 	testPartnerMetaDataReport.ChartUri = "pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
 	testPartnerMetaDataReport.Chart = &helmchart.Metadata{Name: "chart", Version: "0.1.0-v3.valid"}
@@ -30,7 +40,7 @@ func TestReports(t *testing.T) {
 	var testAnnotationsReport []Annotation
 	testAnnotationsReport = append(testAnnotationsReport, Annotation{Name: fmt.Sprintf("charts.openshift.io/%s", DigestsAnnotationName), Value: "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"})
 	testAnnotationsReport = append(testAnnotationsReport, Annotation{Name: fmt.Sprintf("charts.openshift.io/%s", LastCertifiedTimestampAnnotationName), Value: "2021-07-02T08:09:56.881793-04:00"})
-	testAnnotationsReport = append(testAnnotationsReport, Annotation{Name: fmt.Sprintf("charts.openshift.io/%s", CertifiedOCPVersionAnnotationName), Value: "4.7.8"})
+	testAnnotationsReport = append(testAnnotationsReport, Annotation{Name: fmt.Sprintf("charts.openshift.io/%s", CertifiedOCPVersionsAnnotationName), Value: "4.7.8"})
 
 	testDigestReport := &DigestReport{}
 	testDigestReport.PackageDigest = "4f29f2a95bf2b9a1c62fd215b079a01bdc5a38e9b4ff874d0fa21d0afca2e76d"
@@ -46,25 +56,15 @@ func TestReports(t *testing.T) {
 	testAllReport.DigestsReport = testDigestReport
 	testAllReport.AnnotationsReport = testAnnotationsReport
 
-	type testInfo struct {
-		description       string
-		path              string
-		annotationsPrefix string
-		setVendorType     string
-		expectedReport    *OutputReport
-	}
-
-	var tests []testInfo
-
 	allgoodTestInfo := testInfo{}
-	allgoodTestInfo.path = "testreports/reportallgood.yaml"
-	allgoodTestInfo.description = fmt.Sprintf("test all good report %s", allgoodTestInfo.path)
+	allgoodTestInfo.path = "testreports/v1.0/reportallgood.yaml"
+	allgoodTestInfo.description = fmt.Sprintf("Version %s test all good report %s", version, allgoodTestInfo.path)
 	allgoodTestInfo.expectedReport = testAllReport
 	tests = append(tests, allgoodTestInfo)
 
 	missingMandatoryTestInfo := testInfo{}
-	missingMandatoryTestInfo.path = "testreports/reportmissingmandatory.yaml"
-	missingMandatoryTestInfo.description = fmt.Sprintf("test missing mandatory report %s", missingMandatoryTestInfo.path)
+	missingMandatoryTestInfo.path = "testreports/v1.0/reportmissingmandatory.yaml"
+	missingMandatoryTestInfo.description = fmt.Sprintf("Version %s test missing mandatory report %s", version, missingMandatoryTestInfo.path)
 	missingMandatoryTestInfo.expectedReport = &OutputReport{}
 	missingMandatoryTestInfo.expectedReport.ResultsReport = &ResultsReport{}
 	missingMandatoryTestInfo.expectedReport.ResultsReport.Passed = "9"
@@ -73,18 +73,18 @@ func TestReports(t *testing.T) {
 	tests = append(tests, missingMandatoryTestInfo)
 
 	withFailureTestInfo := testInfo{}
-	withFailureTestInfo.path = "testreports/reportwithfailure.yaml"
-	withFailureTestInfo.description = fmt.Sprintf("test missing failures report %s", missingMandatoryTestInfo.path)
+	withFailureTestInfo.path = "testreports/v1.0/reportwithfailure.yaml"
+	withFailureTestInfo.description = fmt.Sprintf("Version %s test missing failures report %s", version, missingMandatoryTestInfo.path)
 	withFailureTestInfo.expectedReport = &OutputReport{}
-	missingMandatoryTestInfo.expectedReport.ResultsReport = &ResultsReport{}
-	missingMandatoryTestInfo.expectedReport.ResultsReport.Passed = "9"
-	missingMandatoryTestInfo.expectedReport.ResultsReport.Failed = "2"
+	withFailureTestInfo.expectedReport.ResultsReport = &ResultsReport{}
+	withFailureTestInfo.expectedReport.ResultsReport.Passed = "9"
+	withFailureTestInfo.expectedReport.ResultsReport.Failed = "2"
 	withFailureTestInfo.expectedReport.MetadataReport = testRedHatMetaDataReport
 	tests = append(tests, withFailureTestInfo)
 
 	allsortsTestInfo := testInfo{}
-	allsortsTestInfo.path = "testreports/reportallsorts.yaml"
-	allsortsTestInfo.description = fmt.Sprintf("test allsorts report %s", missingMandatoryTestInfo.path)
+	allsortsTestInfo.path = "testreports/v1.0/reportallsorts.yaml"
+	allsortsTestInfo.description = fmt.Sprintf("Version %s test allsorts report %s", version, missingMandatoryTestInfo.path)
 	allsortsTestInfo.expectedReport = &OutputReport{}
 	allsortsTestInfo.expectedReport.ResultsReport = &ResultsReport{}
 	allsortsTestInfo.expectedReport.ResultsReport.Passed = "8"
@@ -95,8 +95,8 @@ func TestReports(t *testing.T) {
 	tests = append(tests, allsortsTestInfo)
 
 	setBehaviorTestInfo := testInfo{}
-	setBehaviorTestInfo.path = "testreports/reportmissingmandatory.yaml"
-	setBehaviorTestInfo.description = fmt.Sprintf("test set behvaior missing mandatory report %s", missingMandatoryTestInfo.path)
+	setBehaviorTestInfo.path = "testreports/v1.0/reportmissingmandatory.yaml"
+	setBehaviorTestInfo.description = fmt.Sprintf("Version %s test set behvaior missing mandatory report %s", version, missingMandatoryTestInfo.path)
 	setBehaviorTestInfo.setVendorType = "community"
 	setBehaviorTestInfo.expectedReport = &OutputReport{}
 	setBehaviorTestInfo.expectedReport.ResultsReport = &ResultsReport{}
@@ -106,12 +106,115 @@ func TestReports(t *testing.T) {
 	var setBehaviorAnnotationsReport []Annotation
 	setBehaviorAnnotationsReport = append(setBehaviorAnnotationsReport, Annotation{Name: fmt.Sprintf("%s/%s", setBehaviorTestInfo.annotationsPrefix, DigestsAnnotationName), Value: "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"})
 	setBehaviorAnnotationsReport = append(setBehaviorAnnotationsReport, Annotation{Name: fmt.Sprintf("%s/%s", setBehaviorTestInfo.annotationsPrefix, LastCertifiedTimestampAnnotationName), Value: "2021-07-02T08:09:56.881793-04:00"})
-	setBehaviorAnnotationsReport = append(setBehaviorAnnotationsReport, Annotation{Name: fmt.Sprintf("%s/%s", setBehaviorTestInfo.annotationsPrefix, CertifiedOCPVersionAnnotationName), Value: "4.7.8"})
+	setBehaviorAnnotationsReport = append(setBehaviorAnnotationsReport, Annotation{Name: fmt.Sprintf("%s/%s", setBehaviorTestInfo.annotationsPrefix, CertifiedOCPVersionsAnnotationName), Value: "4.7.8"})
 	setBehaviorTestInfo.expectedReport.AnnotationsReport = setBehaviorAnnotationsReport
 	setBehaviorTestInfo.expectedReport.MetadataReport = testPartnerMetaDataReport
 	tests = append(tests, setBehaviorTestInfo)
 
+	reportTest(tests, t)
+
+}
+
+func TestReports_1_1(t *testing.T) {
+	var tests []testInfo
+
+	version := "v1.1"
+	testRedHatMetaDataReport := &MetadataReport{}
+	testRedHatMetaDataReport.ProfileVersion = version
+	testRedHatMetaDataReport.ProfileVendorType = "redhat"
+	testRedHatMetaDataReport.ChartUri = "pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
+	testRedHatMetaDataReport.Chart = &helmchart.Metadata{Name: "chart", Version: "0.1.0-v3.valid"}
+
+	testPartnerMetaDataReport := &MetadataReport{}
+	testPartnerMetaDataReport.ProfileVersion = version
+	testPartnerMetaDataReport.ProfileVendorType = "partner"
+	testPartnerMetaDataReport.ChartUri = "pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
+	testPartnerMetaDataReport.Chart = &helmchart.Metadata{Name: "chart", Version: "0.1.0-v3.valid"}
+
+	var testAnnotationsReport []Annotation
+	testAnnotationsReport = append(testAnnotationsReport, Annotation{Name: fmt.Sprintf("charts.openshift.io/%s", DigestsAnnotationName), Value: "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"})
+	testAnnotationsReport = append(testAnnotationsReport, Annotation{Name: fmt.Sprintf("charts.openshift.io/%s", LastCertifiedTimestampAnnotationName), Value: "2021-07-02T08:09:56.881793-04:00"})
+	testAnnotationsReport = append(testAnnotationsReport, Annotation{Name: fmt.Sprintf("charts.openshift.io/%s", TestedOCPVersionAnnotationName), Value: "4.7.8"})
+	testAnnotationsReport = append(testAnnotationsReport, Annotation{Name: fmt.Sprintf("charts.openshift.io/%s", SupportedOCPVersionsAnnotationName), Value: ">=4.7.8"})
+
+	testDigestReport := &DigestReport{}
+	testDigestReport.PackageDigest = "4f29f2a95bf2b9a1c62fd215b079a01bdc5a38e9b4ff874d0fa21d0afca2e76d"
+	testDigestReport.ChartDigest = "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"
+
+	testResultsReport := &ResultsReport{}
+	testResultsReport.Passed = "12"
+	testResultsReport.Failed = "0"
+
+	testAllReport := &OutputReport{}
+	testAllReport.ResultsReport = testResultsReport
+	testAllReport.MetadataReport = testRedHatMetaDataReport
+	testAllReport.DigestsReport = testDigestReport
+	testAllReport.AnnotationsReport = testAnnotationsReport
+
+	allgoodTestInfo := testInfo{}
+	allgoodTestInfo.path = "testreports/v1.1/reportallgood.yaml"
+	allgoodTestInfo.description = fmt.Sprintf("Version %s test all good report %s", version, allgoodTestInfo.path)
+	allgoodTestInfo.expectedReport = testAllReport
+	tests = append(tests, allgoodTestInfo)
+
+	missingMandatoryTestInfo := testInfo{}
+	missingMandatoryTestInfo.path = "testreports/v1.1/reportmissingmandatory.yaml"
+	missingMandatoryTestInfo.description = fmt.Sprintf("Version %s test missing mandatory report %s", version, missingMandatoryTestInfo.path)
+	missingMandatoryTestInfo.expectedReport = &OutputReport{}
+	missingMandatoryTestInfo.expectedReport.ResultsReport = &ResultsReport{}
+	missingMandatoryTestInfo.expectedReport.ResultsReport.Passed = "9"
+	missingMandatoryTestInfo.expectedReport.ResultsReport.Failed = "3"
+	missingMandatoryTestInfo.expectedReport.MetadataReport = testPartnerMetaDataReport
+	tests = append(tests, missingMandatoryTestInfo)
+
+	withFailureTestInfo := testInfo{}
+	withFailureTestInfo.path = "testreports/v1.1/reportwithfailure.yaml"
+	withFailureTestInfo.description = fmt.Sprintf("Version %s test missing failures report %s", version, missingMandatoryTestInfo.path)
+	withFailureTestInfo.expectedReport = &OutputReport{}
+	withFailureTestInfo.expectedReport.ResultsReport = &ResultsReport{}
+	withFailureTestInfo.expectedReport.ResultsReport.Passed = "10"
+	withFailureTestInfo.expectedReport.ResultsReport.Failed = "2"
+	withFailureTestInfo.expectedReport.MetadataReport = testRedHatMetaDataReport
+	tests = append(tests, withFailureTestInfo)
+
+	allsortsTestInfo := testInfo{}
+	allsortsTestInfo.path = "testreports/v1.1/reportallsorts.yaml"
+	allsortsTestInfo.description = fmt.Sprintf("Version %s test allsorts report %s", version, missingMandatoryTestInfo.path)
+	allsortsTestInfo.expectedReport = &OutputReport{}
+	allsortsTestInfo.expectedReport.ResultsReport = &ResultsReport{}
+	allsortsTestInfo.expectedReport.ResultsReport.Passed = "9"
+	allsortsTestInfo.expectedReport.ResultsReport.Failed = "3"
+	allsortsTestInfo.expectedReport.DigestsReport = &DigestReport{}
+	allsortsTestInfo.expectedReport.DigestsReport.ChartDigest = "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"
+	allsortsTestInfo.expectedReport.MetadataReport = testPartnerMetaDataReport
+	tests = append(tests, allsortsTestInfo)
+
+	setBehaviorTestInfo := testInfo{}
+	setBehaviorTestInfo.path = "testreports/v1.1/reportmissingmandatory.yaml"
+	setBehaviorTestInfo.description = fmt.Sprintf("Version %s test set behvaior missing mandatory report %s", version, missingMandatoryTestInfo.path)
+	setBehaviorTestInfo.setVendorType = "community"
+	setBehaviorTestInfo.expectedReport = &OutputReport{}
+	setBehaviorTestInfo.expectedReport.ResultsReport = &ResultsReport{}
+	setBehaviorTestInfo.expectedReport.ResultsReport.Passed = "1"
+	setBehaviorTestInfo.expectedReport.ResultsReport.Failed = "0"
+	setBehaviorTestInfo.annotationsPrefix = "test.report.command.io"
+	var setBehaviorAnnotationsReport []Annotation
+	setBehaviorAnnotationsReport = append(setBehaviorAnnotationsReport, Annotation{Name: fmt.Sprintf("%s/%s", setBehaviorTestInfo.annotationsPrefix, DigestsAnnotationName), Value: "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"})
+	setBehaviorAnnotationsReport = append(setBehaviorAnnotationsReport, Annotation{Name: fmt.Sprintf("%s/%s", setBehaviorTestInfo.annotationsPrefix, LastCertifiedTimestampAnnotationName), Value: "2021-07-02T08:09:56.881793-04:00"})
+	setBehaviorAnnotationsReport = append(setBehaviorAnnotationsReport, Annotation{Name: fmt.Sprintf("%s/%s", setBehaviorTestInfo.annotationsPrefix, TestedOCPVersionAnnotationName), Value: "4.7.8"})
+	setBehaviorAnnotationsReport = append(setBehaviorAnnotationsReport, Annotation{Name: fmt.Sprintf("%s/%s", setBehaviorTestInfo.annotationsPrefix, SupportedOCPVersionsAnnotationName), Value: ">=4.7.8"})
+	setBehaviorTestInfo.expectedReport.AnnotationsReport = setBehaviorAnnotationsReport
+	setBehaviorTestInfo.expectedReport.MetadataReport = testPartnerMetaDataReport
+	tests = append(tests, setBehaviorTestInfo)
+
+	reportTest(tests, t)
+}
+
+func reportTest(tests []testInfo, t *testing.T) {
+
 	for _, test := range tests {
+
+		fmt.Println(fmt.Sprintf("Test: %s", test.description))
 
 		t.Run("Report test : "+test.description, func(t *testing.T) {
 			options := &ReportOptions{}
@@ -153,7 +256,7 @@ func TestReports(t *testing.T) {
 					reportjson, err := json.Marshal(metadata.MetadataReport)
 					assert.NoError(t, err, "Metadata report is not valid json")
 					if err == nil && !outcome {
-						fmt.Println(fmt.Sprintf("MetaDataReport :\n%s", reportjson))
+						fmt.Println(fmt.Sprintf("%s: MetaDataReport :\n%s", test.description, reportjson))
 					}
 				}
 			}
@@ -167,7 +270,7 @@ func TestReports(t *testing.T) {
 					reportjson, err := json.Marshal(annotations.AnnotationsReport)
 					assert.NoError(t, err, "Annotations report is not valid json")
 					if err == nil && !outcome {
-						fmt.Println(fmt.Sprintf("AnnotationsReport :\n%s", reportjson))
+						fmt.Println(fmt.Sprintf("%s: AnnotationsReport :\n%s", test.description, reportjson))
 					}
 				}
 			}
@@ -181,7 +284,7 @@ func TestReports(t *testing.T) {
 					reportjson, err := json.Marshal(results.ResultsReport)
 					assert.NoError(t, err, "Results report is not valid json")
 					if err == nil && !outcome {
-						fmt.Println(fmt.Sprintf("AResultsReport :\n%s", reportjson))
+						fmt.Println(fmt.Sprintf("%s: ResultsReport :\n%s", test.description, reportjson))
 					}
 				}
 			}
@@ -195,7 +298,7 @@ func TestReports(t *testing.T) {
 					reportjson, err := json.Marshal(digests.DigestsReport)
 					assert.NoError(t, err, "Digests report is not valid json")
 					if err == nil && !outcome {
-						fmt.Println(fmt.Sprintf("DigestsReport :\n%s", reportjson))
+						fmt.Println(fmt.Sprintf("%s: DigestsReport :\n%s", test.description, reportjson))
 					}
 				}
 			}

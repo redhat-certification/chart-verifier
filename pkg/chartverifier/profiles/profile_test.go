@@ -121,7 +121,7 @@ func TestProfileFilter(t *testing.T) {
 	defaultRegistry.Add(checks.ContainsTestName, checkVersion11, checks.ContainsTest)
 	defaultRegistry.Add(checks.ContainsValuesName, checkVersion11, checks.ContainsValues)
 	defaultRegistry.Add(checks.ContainsValuesSchemaName, checkVersion11, checks.ContainsValuesSchema)
-	defaultRegistry.Add(checks.HasKubeversionName, checkVersion11, checks.HasKubeVersion)
+	defaultRegistry.Add(checks.HasKubeversionName, checkVersion11, checks.HasKubeVersion_V1_1)
 	defaultRegistry.Add(checks.NotContainsCRDsName, checkVersion11, checks.NotContainCRDs)
 	defaultRegistry.Add(checks.HelmLintName, checkVersion11, checks.HelmLint)
 	defaultRegistry.Add(checks.NotContainsCRDsName, checkVersion11, checks.NotContainCSIObjects)
@@ -137,6 +137,7 @@ func TestProfileFilter(t *testing.T) {
 	expectedChecks[checks.IsHelmV3Name] = checks.Check{CheckId: checks.CheckId{Name: checks.IsHelmV3Name, Version: checkVersion10}, Type: checks.MandatoryCheckType, Func: checks.IsHelmV3}
 	expectedChecks[checks.ContainsTestName] = checks.Check{CheckId: checks.CheckId{Name: checks.ContainsTestName, Version: checkVersion10}, Type: checks.MandatoryCheckType, Func: checks.ContainsTest}
 	expectedChecks[checks.ContainsValuesName] = checks.Check{CheckId: checks.CheckId{Name: checks.ContainsValuesName, Version: checkVersion10}, Type: checks.MandatoryCheckType, Func: checks.ContainsValues}
+	expectedChecks[checks.HasKubeversionName] = checks.Check{CheckId: checks.CheckId{Name: checks.HasKubeversionName, Version: checkVersion11}, Type: checks.MandatoryCheckType, Func: checks.HasKubeVersion_V1_1}
 
 	config := viper.New()
 	t.Run("Checks filtered using profile subset", func(t *testing.T) {
@@ -151,14 +152,15 @@ func TestProfileFilter(t *testing.T) {
 	defaultRegistry.Add(checks.NotContainCsiObjectsName, checkVersion10, checks.NotContainCSIObjects)
 	defaultRegistry.Add(checks.ImagesAreCertifiedName, checkVersion10, checks.ImagesAreCertified)
 	defaultRegistry.Add(checks.ChartTestingName, checkVersion10, checks.ChartTesting)
+	defaultRegistry.Add(checks.RequiredAnnotationsPresentName, checkVersion10, checks.RequiredAnnotationsPresent)
 
 	expectedChecks[checks.ContainsValuesSchemaName] = checks.Check{CheckId: checks.CheckId{Name: checks.ContainsValuesSchemaName, Version: checkVersion10}, Type: checks.MandatoryCheckType, Func: checks.ContainsValuesSchema}
-	expectedChecks[checks.HasKubeversionName] = checks.Check{CheckId: checks.CheckId{Name: checks.HasKubeversionName, Version: checkVersion10}, Type: checks.MandatoryCheckType, Func: checks.HasKubeVersion}
 	expectedChecks[checks.NotContainsCRDsName] = checks.Check{CheckId: checks.CheckId{Name: checks.NotContainsCRDsName, Version: checkVersion10}, Type: checks.MandatoryCheckType, Func: checks.NotContainCRDs}
 	expectedChecks[checks.HelmLintName] = checks.Check{CheckId: checks.CheckId{Name: checks.HelmLintName, Version: checkVersion10}, Type: checks.MandatoryCheckType, Func: checks.HelmLint}
 	expectedChecks[checks.NotContainCsiObjectsName] = checks.Check{CheckId: checks.CheckId{Name: checks.NotContainCsiObjectsName, Version: checkVersion10}, Type: checks.MandatoryCheckType, Func: checks.NotContainCSIObjects}
 	expectedChecks[checks.ImagesAreCertifiedName] = checks.Check{CheckId: checks.CheckId{Name: checks.ImagesAreCertifiedName, Version: checkVersion10}, Type: checks.MandatoryCheckType, Func: checks.ImagesAreCertified}
 	expectedChecks[checks.ChartTestingName] = checks.Check{CheckId: checks.CheckId{Name: checks.ChartTestingName, Version: checkVersion10}, Type: checks.MandatoryCheckType, Func: checks.ChartTesting}
+	expectedChecks[checks.RequiredAnnotationsPresentName] = checks.Check{CheckId: checks.CheckId{Name: checks.RequiredAnnotationsPresentName, Version: checkVersion10}, Type: checks.MandatoryCheckType, Func: checks.RequiredAnnotationsPresent}
 
 	t.Run("Checks filtered using profile - full set", func(t *testing.T) {
 		filteredChecks := New(config).FilterChecks(defaultRegistry.AllChecks())

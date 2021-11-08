@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/pyxis"
-
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 	"helm.sh/helm/v3/pkg/cli"
@@ -474,4 +473,49 @@ func TestRequiredAnnotationsPresent(t *testing.T) {
 			require.Equal(t, message, r.Reason)
 		})
 	}
+}
+
+func TestSemVers(t *testing.T) {
+
+	// Vault: kubeVersion: '>= 1.14.0-0'
+	// IBM: kubeversion: '>=1.10.1-0'
+	// Fortanix : kubeversion: '>= 1.16.0 < 1.22.0'
+	// Wildfly: kubeversion: ""
+	// Infispan: kubeversion: ""
+
+	type testCase struct {
+		kubeVersion string
+		OCPRange    string
+	}
+
+	type TestError struct {
+		expectedOCPRange string
+		gotOCORange      string
+	}
+
+	testCases := []testCase{
+		{kubeVersion: "~1.22-0", OCPRange: "4.9"},
+		{kubeVersion: "1.22.*", OCPRange: "4.9"},
+		{kubeVersion: "^1.22", OCPRange: ">=4.9"},
+		{kubeVersion: ">=1.20-0", OCPRange: ">=4.7"},
+		{kubeVersion: "1.21 - 1.22", OCPRange: "4.8 - 4.9"},
+		{kubeVersion: ">1.20", OCPRange: ">=4.8"},
+		{kubeVersion: "~1.21", OCPRange: "4.8"},
+		{kubeVersion: ">= 1.14.0-0", OCPRange: ">=4.2"},
+		{kubeVersion: "1.16 - 1.21", OCPRange: "4.3 - 4.8"},
+		{kubeVersion: "*", OCPRange: ">=4.1"},
+		{kubeVersion: ">=1.16.0 <1.22.0", OCPRange: "Error converting kubeVersion to an OCP range : improper constraint: >=1.16.0 <1.22.0"},
+	}
+
+	for _, test := range testCases {
+		t.Run(fmt.Sprintf("Check kube version %s", test.kubeVersion), func(t *testing.T) {
+			OCPRange, err := getOCPRange(test.kubeVersion)
+			if err != nil {
+				require.Equal(t, test.OCPRange, fmt.Sprintf("%v", err))
+			} else {
+				require.Equal(t, test.OCPRange, OCPRange)
+			}
+		})
+	}
+
 }

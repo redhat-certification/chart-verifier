@@ -22,7 +22,9 @@ type VendorVersion string
 const (
 	DigestAnnotation                 Annotation = "Digest"
 	OCPVersionAnnotation             Annotation = "OCPVersion"
+	TestedOCPVersionAnnotation       Annotation = "TestedOpenShiftVersion"
 	LastCertifiedTimestampAnnotation Annotation = "LastCertifiedTimestamp"
+	SupportedOCPVersionsAnnotation   Annotation = "SupportedOpenShiftVersions"
 
 	VendorTypeConfigName string = "profile.vendortype"
 	VersionConfigName    string = "profile.version"

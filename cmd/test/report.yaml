@@ -11,7 +11,8 @@ metadata:
             chart: sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0
             package: 4f29f2a95bf2b9a1c62fd215b079a01bdc5a38e9b4ff874d0fa21d0afca2e76d
         lastCertifiedTimestamp: "2021-07-06T10:28:01.09604-04:00"
-        certifiedOpenShiftVersions: 4.7.8
+        testedOpenShiftVersion: 4.7.8
+        supportedOpenShiftVersions: 4.7.8
     chart:
         name: chart
         home: ""
@@ -73,7 +74,7 @@ results:
     type: Mandatory
     outcome: PASS
     reason: Values schema file exist
-  - check: v1.0/has-kubeversion
+  - check: v1.1/has-kubeversion
     type: Mandatory
     outcome: PASS
     reason: Kubernetes version specified
