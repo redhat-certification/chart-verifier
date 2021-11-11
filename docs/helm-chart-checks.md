@@ -9,6 +9,8 @@ Helm chart checks are a set of checks against which the Red Hat Helm chart-verif
 - Executing the checks includes running the `helm lint`, `helm template`, `helm install`, and `helm test` commands against the chart.
 - The checks are configurable. For example, if a chart requires additional values to be compliant with the checks, configure the values using the available options. The options are similar to those used by the `helm lint` and `helm template` commands.
 - When there are no error messages, the `helm-lint` check passes the verification and is successful. Messages such as `Warning` and `info` do not cause the check to fail.
+- Profiles define the checks needed based on the chart type: partner, redhat or community.
+    - Profiles are versioned. Each new version may include updated checks, new checks, new annotations or chnaged annotations.
 
 ## Types of Helm chart checks
 Helm chart checks are categorized into the following types:
@@ -21,26 +23,27 @@ Helm chart checks are categorized into the following types:
 | Recommended | Checks are about to become mandatory; we recommend fixing any check failures.
 | Optional | Checks are ready for customer testing. Checks can fail and still pass the verification for certification.
 | Experimental | New checks introduced for testing purposes or beta versions.
-> **_NOTE:_**  The current release of the chart-verifier includes only the mandatory type of checks.
+> **_NOTE:_**  The current release of the chart-verifier includes only the mandatory and optional type of checks.
 
 ## Default set of checks for a Helm chart
-The following table lists the default set of checks with details including the names of the checks, their type, and description. These checks must be successful for a Helm chart to be certified by Red Hat.
+The following table lists the set of checks for each profile version with details including the name and version of the check, and a description of the check.
 
 #### Table 2: Helm chart default checks
 
-| Name | Check type | Description
-|------|------------|------------
-| `is-helm-v3` | Mandatory | Checks that the given `uri` points to a Helm v3 chart.
-| `has-readme` | Mandatory | Checks that the Helm chart contains the `README.md` file.
-| `contains-test` | Mandatory | Checks that the Helm chart contains at least one test file.
-| `has-kubeversion` | Mandatory | Checks that the `Chart.yaml` file of the Helm chart includes the `kubeVersion` field.
-| `contains-values-schema` | Mandatory | Checks that the Helm chart contains a JSON schema file (`values.schema.json`) to validate the `values.yaml` file in the chart.
-| `not-contains-crds` | Mandatory | Checks that the Helm chart does not include custom resource definitions (CRDs).
-| `not-contain-csi-objects` | Mandatory | Checks that the Helm chart does not include Container Storage Interface (CSI) objects.
-| `images-are-certified` | Mandatory | Checks that the images referenced by the Helm chart are Red Hat-certified.
-| `helm-lint` | Mandatory | Checks that the chart is well formed by running the `helm lint` command.
-| `chart-testing` | Mandatory | Installs the chart and verifies it on a Red Hat OpenShift Container Platform cluster.
-| `contains-values` | Mandatory | Checks that the Helm chart contains the `values`[¹](https://github.com/redhat-certification/chart-verifier/blob/main/docs/helm-chart-checks.md#-for-more-information-on-the-values-file-see-values-and-best-practices-for-using-values) file.
+| Profile v1.1 | Profile v1.0 | Description |
+|:-------------------------------:|:-------------------------------:|---------------
+| [is-helm-v3 v1.0](helm-chart-troubleshooting.md#is-helm-v3-v10) | [is-helm-v3 v1.0](helm-chart-troubleshooting.md#is-helm-v3-v10) | Checks that the given `uri` points to a Helm v3 chart.
+| [has-readme v1.0](helm-chart-troubleshooting.md#has-readme-v10) | [has-readme v1.0](helm-chart-troubleshooting.md#has-readme-v10) | Checks that the Helm chart contains the `README.md` file.
+| [contains-test V1.0](helm-chart-troubleshooting.md#contains-test-v10) | [contains-test v1.0](helm-chart-troubleshooting.md#contains-test-v10) | Checks that the Helm chart contains at least one test file.
+| [has-kubeversion v1.1](helm-chart-troubleshooting.md#has-kubeversion-v11) | [has-kubeversion v1.0](helm-chart-troubleshooting.md#has-kubeversion-v10) | Checks that the `Chart.yaml` file of the Helm chart includes the `kubeVersion` field (v1.0) and is a valid semantic version (v1.1).
+| [contains-values-schema v1.0](helm-chart-troubleshooting.md#contains-values-schema-v10) | [contains-values-schema v1.0](helm-chart-troubleshooting.md#contains-values-schema-v10) | Checks that the Helm chart contains a JSON schema file (`values.schema.json`) to validate the `values.yaml` file in the chart.
+| [not-contains-crds v1.0](helm-chart-troubleshooting.md#not-contains-crds-v10) | [not-contains-crds v1.0](helm-chart-troubleshooting.md#not-contains-crds-v10) | Checks that the Helm chart does not include custom resource definitions (CRDs).
+| [not-contain-csi-objects v1.0](helm-chart-troubleshooting.md#not-contain-csi-objects-v10) | [not-contain-csi-objects v1.0](helm-chart-troubleshooting.md#not-contain-csi-objects-v10) | Checks that the Helm chart does not include Container Storage Interface (CSI) objects.
+| [images-are-certified v1.0](helm-chart-troubleshooting.md#images-are-certified-v10) | [images-are-certified v1.0](helm-chart-troubleshooting.md#images-are-certified-v10) | Checks that the images referenced by the Helm chart are Red Hat-certified.
+| [helm-lint v1.0](helm-chart-troubleshooting.md#helm-lint-v10) | [helm-lint v1.0](helm-chart-troubleshooting.md#helm-lint-v10) | Checks that the chart is well formed by running the `helm lint` command.
+| [chart-testing v1.0](helm-chart-troubleshooting.md#chart-testing-v10) | [chart-testing v1.0](helm-chart-troubleshooting.md#chart-testing-v10)  | Installs the chart and verifies it on a Red Hat OpenShift Container Platform cluster.
+| [contains-values v1.0](helm-chart-troubleshooting.md#contains-values-v10)  | [contains-values  v1.0](helm-chart-troubleshooting.md#contains-values-v10) | Checks that the Helm chart contains the `values`[¹](https://github.com/redhat-certification/chart-verifier/blob/main/docs/helm-chart-checks.md#-for-more-information-on-the-values-file-see-values-and-best-practices-for-using-values) file.
+| [required-annotations-present v1.0](helm-chart-troubleshooting.md#required-annotations-present-v10) | - | Checks that the Helm chart contains the annotation: ```charts.openshift.io/name```.
 
 #
 ###### ¹ For more information on the `values` file, see [`values`](https://helm.sh/docs/chart_template_guide/values_files/) and [Best Practices for using values](https://helm.sh/docs/chart_best_practices/values/).
@@ -110,12 +113,12 @@ This section provides help on the basic usage of Helm chart checks with the podm
 - Run a subset of the checks:
 
   ```
-  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -e images-are-certified,helm-lint
+  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -e images-are-certified,helm-lint <chart-uri>
   ```
 - Run all the checks except a subset:
 
   ```
-  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -x images-are-certified,helm-lint
+  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -x images-are-certified,helm-lint <chart-uri>
   ```
 - Provide chart-override values:
 
@@ -127,6 +130,107 @@ This section provides help on the basic usage of Helm chart checks with the podm
   ```
   $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -F overrides.yaml images-are-certified,helm-lint
   ```
+
+## Profiles
+
+A profile defines a set of checks to run and an indication of whether each check is mandatory or optional. Four profiles are currently available: 
+- partner
+  - Defines the requirements for a partner chart to pass helm chart certfication.
+  - All checks are mandatory, that is they must all pass for a partner helm chart to be certified.
+- redhat 
+  - Defines the requirements for a red hat internal chart to pass helm chart certfication.
+  - All checks are mandatory, that is they must all pass for a Red Hat helm chart to be certified.
+- community
+  - Defines the requirements for a community chart to pass helm chart certfication.
+  - The ```helm-lint``` check is the only mandatory check with all other checks optional.  
+- default
+  - The default is the same as the partner profile and is used if a specific one is not specified.
+  - All checks are mandatory.
+
+Each profile also has a version and currently there are two profile versions: v1.0 and v1.1.
+
+### Profile v1.1
+
+#### Annotations
+
+Annotations added to a v1.1 profile report are common to all profile types: partner, RedHat, community and default
+
+| annotation        | description      |
+|-------------------|------------------|
+| [digests.chart](helm-chart-annotations.md#digests) | The sha value of the chart as calculated from the copy loaded into memory. |
+| [digests.package](helm-chart-annotations.md#digests) | The sha value of the chart tarball if used to create the report. |
+| [testedOpenShiftVersion](helm-chart-annotations.md#testedOpenShiftVersion) | The Open Shift version that was used by the chart-testing check. |
+| [lastCertifiedTimestamp](helm-chart-annotations.md#lastCertifiedTimestamp) | The time that the report was created by the chart verifier |
+| [supportedOpenShiftVersions](helm-chart-annotations.md#supportedOpenShiftVersions) | The Open Shift versions supported by the chart based on the kuberVersion attrinute in chart.yaml |
+
+#### Checks
+
+This table shows which checks are preformed and whether or not they ar mnandatory or optional for each profile type.
+
+| check | partner | RedHat | community | default |
+|-------|---------|--------|-----------|---------
+| [is-helm-v3 v.1.0](helm-chart-troubleshooting.md#is-helm-v3-v10)  | mandatory | mandatory | optional | mandatory 
+| [has-readme v1.0](helm-chart-troubleshooting.md#has-readme-v10) | mandatory | mandatory | optional | mandatory 
+| [contains-test v1.0](helm-chart-troubleshooting.md#contains-test-v10) | mandatory | mandatory | optional | mandatory
+| [has-kubeversion v1.1](helm-chart-troubleshooting.md#has-kubeversion-v11)| mandatory | mandatory | optional | mandatory
+| [contains-values-schema v1.0](helm-chart-troubleshooting.md#contains-values-schema-v10) | mandatory | mandatory | optional | mandatory
+| [not-contains-crds v1.0](helm-chart-troubleshooting.md#not-contains-crds-v10) |  mandatory | mandatory | optional | mandatory
+| [not-contain-csi-objects v1.0](helm-chart-troubleshooting.md#not-contain-csi-objects-v10) |  mandatory | mandatory | optional | mandatory
+| [images-are-certified v1.0](helm-chart-troubleshooting.md#images-are-certified-v10) | mandatory | mandatory | optional | mandatory
+| [helm-lint v1.0](helm-chart-troubleshooting.md#helm-lint-v10) | mandatory | mandatory | optional | mandatory
+| [chart-testing v1.0](helm-chart-troubleshooting.md#chart-testing-v10) | mandatory | mandatory | optional | mandatory
+| [contains-values v1.0](helm-chart-troubleshooting.md#contains-values-v10)  | mandatory | mandatory | optional | mandatory
+| [required-annotations-present v1.0](helm-chart-troubleshooting.md#required-annotations-present-v10) | mandatory | mandatory | optional | mandatory
+
+### Profile 1.0
+
+#### Annotations
+
+Annotations added to a v1.0 profile report are common to all profile types: partner, RedHat, community and default
+
+| annotation        | description      |
+|-------------------|------------------|
+| [digests.chart](helm-chart-annotations.md#digests) | The sha value of the chart as calculated from the copy loaded into memory. |
+| [digests.package](helm-chart-annotations.md#digests) | The sha value of the chart tarball if used to create the report. |
+| [certifiedOpenShiftVersion](helm-chart-annotations.md#certifiedOpenShiftVersion) | The Open Shift version that was used by the chart-testing check. |
+| [lastCertifiedTimestamp](helm-chart-annotations.md#lastCertifiedTimestamp) | The time that the report was created by the chart verifier |
+
+#### Checks
+
+This table shows which checks are preformed and whether or not they ar mnandatory or potion for each profile type.
+
+| check | partner | RedHat | community | default |
+|-------|---------|--------|-----------|---------
+| [is-helm-v3 v.1.0](helm-chart-troubleshooting.md#is-helm-v3-v10)  | mandatory | mandatory | optional | mandatory
+| [has-readme v1.0](helm-chart-troubleshooting.md#has-readme-v10) | mandatory | mandatory | optional | mandatory
+| [contains-test v1.0](helm-chart-troubleshooting.md#contains-test-v10) | mandatory | mandatory | optional | mandatory
+| [has-kubeversion v1.0](helm-chart-troubleshooting.md#has-kubeversion-v10)| mandatory | mandatory | optional | mandatory
+| [contains-values-schema v1.0](helm-chart-troubleshooting.md#contains-values-schema-v10) | mandatory | mandatory | optional | mandatory
+| [not-contains-crds v1.0](helm-chart-troubleshooting.md#not-contains-crds-v10) |  mandatory | mandatory | optional | mandatory
+| [not-contain-csi-objects v1.0](helm-chart-troubleshooting.md#not-contain-csi-objects-v10) |  mandatory | mandatory | optional | mandatory
+| [images-are-certified v1.0](helm-chart-troubleshooting.md#images-are-certified-v10) | mandatory | mandatory | optional | mandatory
+| [helm-lint v1.0](helm-chart-troubleshooting.md#helm-lint-v10) | mandatory | mandatory | optional | mandatory
+| [chart-testing v1.0](helm-chart-troubleshooting.md#chart-testing-v10) | mandatory | mandatory | optional | mandatory
+| [contains-values v1.0](helm-chart-troubleshooting.md#contains-values-v10)  | mandatory | mandatory | optional | mandatory
+
+#### Running the chart verifier with a specific profile.
+
+To specify which profile to use the --set flag:
+```
+    --set profile.vendorType=partner
+        valid values based on current profiles: partner, community, redhat, default
+        default is same as partner.
+        If value specified is not specified or not recognized, default will be assumed.
+        The flag name is case insensitive.
+    --set profile.version=v1.1
+        Valid values based on current profiles: v1.0, v1.0
+        If value specified is not specified or not recognized, v1.1 will be assumed.
+        The flag name is case insensitive.
+```
+For example:
+```
+$ podman run -it --rm quay.io/redhat-certification/chart-verifier verify --set profile.vendorType=partner, profile.version=v1.1 <chart>
+```
 
 ## Chart Testing
 
