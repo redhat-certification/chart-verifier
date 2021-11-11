@@ -1,8 +1,16 @@
 {
-    "version": "1.3.0",
+    "version": "1.4.0",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
-        "Update IBM images which have been updated (#195)",
-        "Enable chart verifier to recognize OCP 4.9 (#209)"
+        "<ul><li>Profile Version 1.1 introduced (now default):</li>",
+        "<ul><li>New mandatory check: required-annotations-present/v1.0 (#203).</li>",
+        "<ul><li>Requires chart annotation charts.openshift.io/name to bet set.</li></ul>",
+        "</ul>",
+        "<li>Updated mandatory check: has-kubeversion/v1.1 (#213).</li>",
+        "<ul><li>Requires chart kubeVersion to be a valid semantic version.</li>",
+        "<li>Adds new supportedOpenShiftVersions attribute used for chart certification.</li>",
+        "</ul>",
+        "<li>add option for user to specify helm release for chart-testing check (#218)</li>",
+        "</ul>"
     ]
 }
