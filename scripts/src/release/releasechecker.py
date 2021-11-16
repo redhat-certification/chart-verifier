@@ -62,7 +62,10 @@ def make_release_body(version, image_name, release_info):
     body = f"Chart verifier version {version} <br><br>Docker Image:<br>- {image_name}:{version}<br><br>"
     body += "This version includes:<br>"
     for info in release_info:
-        body += f"- {info}<br>"
+        if info.startswith("<"):
+            body += info
+        else:
+            body += f"- {info}<br>"
 
     print(f"[INFO] Release body: {body}")
     print(f"::set-output name=PR_release_body::{body}")
