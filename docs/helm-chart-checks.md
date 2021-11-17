@@ -267,7 +267,7 @@ You can configure the chart-testing check by performing one of the following ste
     $ chart-verifier verify --enable chart-testing --set-values config.yaml some-chart.tgz
     ```
 
-    All settings are optional, if not set a default values will be used.
+    All settings are optional, if not set default values will be used.
 
 ### Override values
 

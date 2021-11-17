@@ -112,7 +112,7 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 	}
 
 	configRelease := opts.ViperConfig.GetString(ReleaseConfigString)
-	if len(configRelease) >0 {
+	if len(configRelease) > 0 {
 		tool.LogInfo(fmt.Sprintf("User specifed release: %s", configRelease))
 	}
 
