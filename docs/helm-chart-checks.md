@@ -248,6 +248,7 @@ You can configure the chart-testing check by performing one of the following ste
         --set chart-testing.skipMissingValues=true                    \
         --set chart-testing.namespace=${NAMESPACE}                    \
         --set chart-testing.releaseLabel="app.kubernetes.io/instance" \
+        --set chart-testing.release=${RELEASE}
         some-chart.tgz
     ```
 * Option 2: Create a YAML file (config.yaml) similar to the following example:
@@ -258,12 +259,15 @@ You can configure the chart-testing check by performing one of the following ste
         skipMissingValues: true
         namespace: <NAMESPACE>
         releaseLabel: "app.kubernetes.io/instance"
+        release: <RELEASE>
     ```
 
     Specify the file using the `--set-values` command line option:
     ```text
     $ chart-verifier verify --enable chart-testing --set-values config.yaml some-chart.tgz
     ```
+
+    All settings are optional, if not set a default values will be used.
 
 ### Override values
 
