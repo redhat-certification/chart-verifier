@@ -16,6 +16,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const (
+	ReleaseConfigString string = "release"
+)
+
 // Versioner provides OpenShift version
 type Versioner func() (string, error)
 
@@ -107,6 +111,11 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 		return NewResult(false, err.Error()), nil
 	}
 
+	configRelease := opts.ViperConfig.GetString(ReleaseConfigString)
+	if len(configRelease) > 0 {
+		tool.LogInfo(fmt.Sprintf("User specifed release: %s", configRelease))
+	}
+
 	if cfg.Upgrade {
 		oldChrt, err := getChartPreviousVersion(chrt)
 		if err != nil {
@@ -127,14 +136,14 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 			tool.LogError(fmt.Sprintf("End chart install and test check with BreakingChangeAllowed error: %v", err))
 			return NewResult(false, err.Error()), nil
 		}
-		result := upgradeAndTestChart(cfg, oldChrt, chrt, helm, kubectl)
+		result := upgradeAndTestChart(cfg, oldChrt, chrt, helm, kubectl, configRelease)
 
 		if result.Error != nil {
 			tool.LogError(fmt.Sprintf("End chart install and test check with upgradeAndTestChart error: %v", result.Error))
 			return NewResult(false, result.Error.Error()), nil
 		}
 	} else {
-		result := installAndTestChartRelease(cfg, chrt, helm, kubectl, opts.Values)
+		result := installAndTestChartRelease(cfg, chrt, helm, kubectl, opts.Values, configRelease)
 		if result.Error != nil {
 			tool.LogError(fmt.Sprintf("End chart install and test check with installAndTestChartRelease error: %v", result.Error))
 			return NewResult(false, result.Error.Error()), nil
@@ -160,16 +169,24 @@ func generateInstallConfig(
 	chrt *chart.Chart,
 	helm tool.Helm,
 	kubectl tool.Kubectl,
+	configRelease string,
 ) (namespace, release, releaseSelector string, cleanup func()) {
+	release = configRelease
 	if cfg.Namespace != "" {
 		namespace = cfg.Namespace
-		release, _ = chrt.CreateInstallParams(cfg.BuildId)
+		if len(release) == 0 {
+			release, _ = chrt.CreateInstallParams(cfg.BuildId)
+		}
 		releaseSelector = fmt.Sprintf("%s=%s", cfg.ReleaseLabel, release)
 		cleanup = func() {
 			helm.DeleteRelease(namespace, release)
 		}
 	} else {
-		release, namespace = chrt.CreateInstallParams(cfg.BuildId)
+		if len(release) == 0 {
+			release, namespace = chrt.CreateInstallParams(cfg.BuildId)
+		} else {
+			_, namespace = chrt.CreateInstallParams(cfg.BuildId)
+		}
 		cleanup = func() {
 			helm.DeleteRelease(namespace, release)
 			kubectl.DeleteNamespace(namespace)
@@ -209,6 +226,7 @@ func upgradeAndTestChart(
 	oldChrt, chrt *chart.Chart,
 	helm tool.Helm,
 	kubectl tool.Kubectl,
+	configRelease string,
 ) chart.TestResult {
 
 	// result contains the test result; please notice that each values
@@ -233,7 +251,7 @@ func upgradeAndTestChart(
 		// Use anonymous function. Otherwise deferred calls would pile up
 		// and be executed in reverse order after the loop.
 		fun := func() error {
-			namespace, release, releaseSelector, cleanup := generateInstallConfig(cfg, oldChrt, helm, kubectl)
+			namespace, release, releaseSelector, cleanup := generateInstallConfig(cfg, oldChrt, helm, kubectl, configRelease)
 			defer cleanup()
 
 			// Install previous version of chart. If installation fails, ignore this release.
@@ -345,6 +363,7 @@ func installAndTestChartRelease(
 	helm tool.Helm,
 	kubectl tool.Kubectl,
 	valuesOverrides map[string]interface{},
+	configRelease string,
 ) chart.TestResult {
 
 	// valuesFiles contains all the configurations that should be
@@ -373,7 +392,7 @@ func installAndTestChartRelease(
 			}
 			defer tmpValuesFileCleanup()
 
-			namespace, release, releaseSelector, releaseCleanup := generateInstallConfig(cfg, chrt, helm, kubectl)
+			namespace, release, releaseSelector, releaseCleanup := generateInstallConfig(cfg, chrt, helm, kubectl, configRelease)
 			defer releaseCleanup()
 
 			if err := helm.InstallWithValues(chrt.Path(), tmpValuesFile, namespace, release); err != nil {
