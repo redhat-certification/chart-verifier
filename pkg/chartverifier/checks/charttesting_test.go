@@ -119,11 +119,11 @@ func TestChartTesting(t *testing.T) {
 	}
 }
 
-func getVersionError() (string, error) {
+func getVersionError(settings *cli.EnvSettings) (string, error) {
 	return "", errors.New("error")
 }
 
-func getVersionGood() (string, error) {
+func getVersionGood(settings *cli.EnvSettings) (string, error) {
 	return "4.7.9", nil
 }
 
@@ -145,7 +145,7 @@ func (holder *testAnnotationHolder) SetSupportedOpenShiftVersions(version string
 func TestVersionSetting(t *testing.T) {
 	type testCase struct {
 		description string
-		holder      *testAnnotationHolder
+		opts        *CheckOptions
 		versioner   Versioner
 		version     string
 		error       string
@@ -154,25 +154,25 @@ func TestVersionSetting(t *testing.T) {
 	testCases := []testCase{
 		{
 			description: "oc.Version returns 4.7.9",
-			holder:      &testAnnotationHolder{},
+			opts:        &CheckOptions{AnnotationHolder: &testAnnotationHolder{}},
 			versioner:   getVersionGood,
 			version:     "4.7.9",
 		},
 		{
 			description: "oc.Version returns error, flag set to 4.7.8",
-			holder:      &testAnnotationHolder{CertifiedOpenShiftVersionFlag: "4.7.8"},
+			opts:        &CheckOptions{AnnotationHolder: &testAnnotationHolder{CertifiedOpenShiftVersionFlag: "4.7.8"}},
 			versioner:   getVersionError,
 			version:     "4.7.8",
 		},
 		{
 			description: "oc.Version returns semantic error, flag set to fourseveneight",
-			holder:      &testAnnotationHolder{CertifiedOpenShiftVersionFlag: "fourseveneight"},
+			opts:        &CheckOptions{AnnotationHolder: &testAnnotationHolder{CertifiedOpenShiftVersionFlag: "fourseveneight"}},
 			versioner:   getVersionError,
 			error:       "OpenShift version is not following SemVer spec. Invalid Semantic Version",
 		},
 		{
 			description: "oc.Version returns error, flag not set",
-			holder:      &testAnnotationHolder{},
+			opts:        &CheckOptions{AnnotationHolder: &testAnnotationHolder{}},
 			versioner:   getVersionError,
 			error:       "Missing OpenShift version. error. And the 'openshift-version' flag has not set.",
 		},
@@ -182,14 +182,14 @@ func TestVersionSetting(t *testing.T) {
 
 		t.Run(tc.description, func(t *testing.T) {
 
-			err := setOCVersion(tc.holder, tc.versioner)
+			err := setOCVersion(tc.opts, tc.versioner)
 
 			if len(tc.error) > 0 {
 				require.Error(t, err)
 				require.Equal(t, tc.error, err.Error())
 			} else {
 				require.NoError(t, err)
-				require.Equal(t, tc.version, tc.holder.OpenShiftVersion)
+				require.Equal(t, tc.version, tc.opts.AnnotationHolder.(*testAnnotationHolder).OpenShiftVersion)
 			}
 
 		})

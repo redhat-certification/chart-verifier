@@ -3,20 +3,13 @@ package tool
 import (
 	"fmt"
 
-	"gopkg.in/yaml.v3"
+	"helm.sh/helm/v3/pkg/cli"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/kubectl/pkg/scheme"
 )
-
-type Oc struct {
-	ProcessExecutorer
-}
-
-func NewOc(exec ProcessExecutorer) Oc {
-	return Oc{
-		ProcessExecutorer: exec,
-	}
-}
-
-const osVersionKey = "serverVersion"
 
 // Based on https://access.redhat.com/solutions/4870701
 var kubeOpenShiftVersionMap map[string]string = map[string]string{
@@ -31,23 +24,48 @@ var kubeOpenShiftVersionMap map[string]string = map[string]string{
 	"1.13": "4.1",
 }
 
-func (o Oc) GetVersion() (string, error) {
-	rawOutput, err := o.RunProcessAndCaptureOutput("oc", "version", "-o", "yaml")
+type Oc struct {
+	clientset kubernetes.Interface
+}
+
+func NewOc(setttings *cli.EnvSettings) (*Oc, error) {
+	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
+	if len(setttings.KubeConfig) > 0 {
+		loadingRules = &clientcmd.ClientConfigLoadingRules{ExplicitPath: setttings.KubeConfig}
+	}
+
+	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		loadingRules,
+		&clientcmd.ConfigOverrides{})
+	config, err := kubeConfig.ClientConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	config.APIPath = "/api"
+	config.GroupVersion = &schema.GroupVersion{Group: "core", Version: "v1"}
+	config.NegotiatedSerializer = serializer.WithoutConversionCodecFactory{CodecFactory: scheme.Codecs}
+	oc := new(Oc)
+	oc.clientset, err = kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return oc, nil
+}
+
+func (o Oc) GetOcVersion() (string, error) {
+	version, err := o.clientset.Discovery().ServerVersion()
 	if err != nil {
 		return "", err
 	}
-	out := map[string]interface{}{}
-	err = yaml.Unmarshal([]byte(rawOutput), &out)
-	if err != nil {
-		return "", err
-	}
+
 	// Relying on Kubernetes version can be replaced after fixing this issue:
 	// https://bugzilla.redhat.com/show_bug.cgi?id=1850656
-	kubeServerVersion := out[osVersionKey].(map[string]interface{})
-	kubeVersion := fmt.Sprintf("%s.%s", kubeServerVersion["major"], kubeServerVersion["minor"])
+	kubeVersion := fmt.Sprintf("%s.%s", version.Major, version.Minor)
 	osVersion, ok := kubeOpenShiftVersionMap[kubeVersion]
 	if !ok {
-		return "", fmt.Errorf("Internal error: %q not found in Kubernetes-OpenShift version map", kubeVersion)
+		return "", fmt.Errorf("internal error: %q not found in Kubernetes-OpenShift version map", kubeVersion)
 	}
 
 	return osVersion, nil

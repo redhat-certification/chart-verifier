@@ -14,6 +14,7 @@ import (
 	"github.com/imdario/mergo"
 	"github.com/redhat-certification/chart-verifier/pkg/tool"
 	"gopkg.in/yaml.v3"
+	"helm.sh/helm/v3/pkg/cli"
 )
 
 const (
@@ -21,16 +22,14 @@ const (
 )
 
 // Versioner provides OpenShift version
-type Versioner func() (string, error)
+type Versioner func(settings *cli.EnvSettings) (string, error)
 
-func getVersion() (string, error) {
-
-	procExec := tool.NewProcessExecutor(false)
-	oc := tool.NewOc(procExec)
-
-	// oc.GetVersion() returns an error both in case the oc command can't be executed and
-	// the value for the OpenShift version key not present.
-	return oc.GetVersion()
+func getVersion(settings *cli.EnvSettings) (string, error) {
+	oc, err := tool.NewOc(settings)
+	if err != nil {
+		return "", err
+	}
+	return oc.GetOcVersion()
 }
 
 type OpenShiftVersionErr string
@@ -150,7 +149,7 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 		}
 	}
 
-	if versionError := setOCVersion(opts.AnnotationHolder, getVersion); versionError != nil {
+	if versionError := setOCVersion(opts, getVersion); versionError != nil {
 		if versionError != nil {
 			tool.LogWarning(fmt.Sprintf("End chart install and test check with version error: %v", versionError))
 		}
@@ -411,10 +410,13 @@ func installAndTestChartRelease(
 	return result
 }
 
-func setOCVersion(holder AnnotationHolder, versioner Versioner) error {
+func setOCVersion(opts *CheckOptions, versioner Versioner) error {
+	holder := opts.AnnotationHolder
+	settings := opts.HelmEnvSettings
+
 	// oc.GetVersion() returns an error both in case the oc command can't be executed and
 	// the value for the OpenShift version key not present.
-	osVersion, getVersionErr := versioner()
+	osVersion, getVersionErr := versioner(settings)
 
 	// From this point on, an error is set and osVersion is empty.
 	if getVersionErr != nil && holder.GetCertifiedOpenShiftVersionFlag() != "" {
