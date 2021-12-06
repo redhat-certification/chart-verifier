@@ -96,7 +96,11 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 	procExec := tool.NewProcessExecutor(cfg.Debug)
 	extraArgs := strings.Fields(cfg.HelmExtraArgs)
 	helm := tool.NewHelm(procExec, extraArgs)
-	kubectl := tool.NewKubectl(procExec)
+	kubectl, err := tool.NewKubectl(opts.HelmEnvSettings)
+	if err != nil {
+		tool.LogError("End chart install and test check with NewKubectl error")
+		return NewResult(false, err.Error()), nil
+	}
 
 	_, path, err := LoadChartFromURI(opts.URI)
 	if err != nil {
@@ -167,7 +171,7 @@ func generateInstallConfig(
 	cfg config.Configuration,
 	chrt *chart.Chart,
 	helm tool.Helm,
-	kubectl tool.Kubectl,
+	kubectl *tool.Kubectl,
 	configRelease string,
 ) (namespace, release, releaseSelector string, cleanup func()) {
 	release = configRelease
@@ -197,7 +201,7 @@ func generateInstallConfig(
 // testRelease tests a release.
 func testRelease(
 	helm tool.Helm,
-	kubectl tool.Kubectl,
+	kubectl *tool.Kubectl,
 	release, namespace, releaseSelector string,
 	cleanupHelmTests bool,
 ) error {
@@ -224,7 +228,7 @@ func upgradeAndTestChart(
 	cfg config.Configuration,
 	oldChrt, chrt *chart.Chart,
 	helm tool.Helm,
-	kubectl tool.Kubectl,
+	kubectl *tool.Kubectl,
 	configRelease string,
 ) chart.TestResult {
 
@@ -360,7 +364,7 @@ func installAndTestChartRelease(
 	cfg config.Configuration,
 	chrt *chart.Chart,
 	helm tool.Helm,
-	kubectl tool.Kubectl,
+	kubectl *tool.Kubectl,
 	valuesOverrides map[string]interface{},
 	configRelease string,
 ) chart.TestResult {
