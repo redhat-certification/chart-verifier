@@ -94,7 +94,8 @@ jobs:
               id: build_and_test
               run: |
                 # build and test a docker image
-                ve1/bin/build-and-test --image-name=${{steps.check_version_in_PR.outputs.PR_release_image}} --sha-value=${GITHUB_SHA} --verifier-version=${{steps.check_version_in_PR.outputs.PR_version}}
+                commit_sha=$(git rev-parse --short HEAD)
+                ve1/bin/build-and-test --image-name=${{steps.check_version_in_PR.outputs.PR_release_image}} --sha-value=$commit_sha --verifier-version=${{steps.check_version_in_PR.outputs.PR_version}}
 
             - name: Set up Python scripts on main branch
               run: |

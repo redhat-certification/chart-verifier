@@ -79,8 +79,6 @@ def run_verifier(image, profile_type, chart_location):
 
     print(f'docker command: {docker_command}')
 
-    client = docker.from_env()
-
     kubeconfig = os.environ.get("KUBECONFIG")
     if not kubeconfig:
         return "FAIL: missing KUBECONFIG environment variable"
@@ -115,9 +113,12 @@ def check_report(run_verifier, profile_type, report_info_location):
 
     report_data = yaml.load(run_verifier, Loader=Loader)
 
+    test_passed = True
+
     report_vendor_type = report_data["metadata"]["tool"]["profile"]["VendorType"]
     if report_vendor_type != profile_type:
         print(f"FAIL: profiles do not match. Expected {profile_type}, but report has {report_vendor_type}")
+        test_passed = False
 
     report_version = report_data["metadata"]["tool"]["profile"]["version"]
 
@@ -140,8 +141,6 @@ def check_report(run_verifier, profile_type, report_info_location):
 
     expected_reports_file = open(report_info_location,)
     expected_reports = json.load(expected_reports_file)
-
-    test_passed = True
 
     results_diff = DeepDiff(expected_reports[report_info.REPORT_RESULTS],test_reports[report_info.REPORT_RESULTS],ignore_order=True)
     if results_diff:

@@ -59,7 +59,8 @@ jobs:
               id: build_image
               run: |
                     # build a docker image
-                    ve1/bin/build-and-test --image-name="quay.io/redhat-certification/chart-verifier" --sha-value=${GITHUB_SHA} --build-only="True"}
+                    commit_sha=$(git rev-parse --short HEAD)
+                    ve1/bin/build-and-test --image-name="quay.io/redhat-certification/chart-verifier" --sha-value=$commit_sha --build-only="True"}
 
             - name: Login to oc
               working-directory: ./chart-verifier

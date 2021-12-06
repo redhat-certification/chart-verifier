@@ -110,12 +110,12 @@ def main():
 
 
     args = parser.parse_args()
-    image_tag = args.sha_value[:7]
-    image_id = f"{args.image_name}:{image_tag}"
+
+    image_id = f"{args.image_name}:{args.sha_value}"
 
     if build_image(image_id):
 
-        print(f'::set-output name=verifier-image-tag::{image_tag}')
+        print(f'::set-output name=verifier-image-tag::{args.sha_value}')
 
         if not args.build_only:
 

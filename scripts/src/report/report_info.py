@@ -82,7 +82,7 @@ def get_report_chart(report_path):
      print("[INFO] report chart : %s" % metadata["chart"])
      return metadata["chart"]
 
-def get_all_reports(report_path,profile_type,profile_version):
+def get_all_reports(report_path, profile_type, profile_version):
     all_reports = _get_report_info(report_path,ALL_REPORTS,profile_type,profile_version)
     print(f"[INFO] all reports : {all_reports}")
     return all_reports
