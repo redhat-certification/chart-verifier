@@ -27,6 +27,9 @@ import argparse
 import json
 import requests
 import semver
+import sys
+sys.path.append('./scripts/src/')
+from release import tarfile_asset
 
 VERSION_FILE = "cmd/release/release_info.json"
 
@@ -93,6 +96,9 @@ def main():
         print(f'::set-output name=PR_release_info::{version_info["release-info"]}')
         print(f'::set-output name=PR_includes_release::true')
         make_release_body(version_info["version"],version_info["quay-image"],version_info["release-info"])
+        asset_file = tarfile_asset.create(version_info["version"])
+        print(f'[INFO] Release asset created : {asset_file}.')
+        print(f'::set-output name=PR_tarball_name::{asset_file}')
     else:
         version_info = get_version_info()
         if args.version:

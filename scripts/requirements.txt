@@ -1,6 +1,7 @@
 attrs==21.2.0
 certifi==2020.12.5
 chardet==4.0.0
+deepdiff==5.6.0
 gitdb==4.0.7
 GitPython==3.1.18
 glob2==0.7
