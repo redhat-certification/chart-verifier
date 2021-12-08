@@ -103,24 +103,30 @@ def main():
                         help="Name of the chart verifier image")
     parser.add_argument("-s", "--sha-value", dest="sha_value", type=str, required=True,
                         help="Image sha value to test")
-    parser.add_argument("-v", "--verifier-version", dest="verifier_version", type=str, required=True,
+    parser.add_argument("-v", "--verifier-version", dest="verifier_version", type=str, required=False,
                         help="New version of chart verifier")
+    parser.add_argument("-b","--build-only",dest="build_only",type=str, required=False,
+                        help="set to any value to build only and not test")
 
 
     args = parser.parse_args()
 
-    image_id = args.image_name + ":" + args.sha_value[:7]
+    image_id = f"{args.image_name}:{args.sha_value}"
 
     if build_image(image_id):
 
-        chart = {"url" : "https://github.com/redhat-certification/chart-verifier/blob/main/pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz?raw=true",
+        print(f'::set-output name=verifier-image-tag::{args.sha_value}')
+
+        if not args.build_only:
+
+            chart = {"url" : "https://github.com/redhat-certification/chart-verifier/blob/main/pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz?raw=true",
                 "results":{"passed":"10","failed":"1"},
                 "metadata":{"vendorType":"partner","profileVersion":"v1.0"}}
 
-        os.environ["VERIFIER_IMAGE"] = image_id
+            os.environ["VERIFIER_IMAGE"] = image_id
 
-        if not test_image(image_id,chart,args.verifier_version):
-            sys.exit(1)
+            if not test_image(image_id,chart,args.verifier_version):
+                sys.exit(1)
 
     else:
         sys.exit(1)

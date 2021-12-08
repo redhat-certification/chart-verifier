@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.k8Name }}
+  #namespace: {{ .Values.k8Project }}
+  annotations:
+      app.kubernetes.io/part-of: ssm
+spec:
+  selector:
+    matchLabels: 
+      app: {{ .Values.k8Name }}
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      annotations:
+        alpha.image.policy.openshift.io/resolve-names: '*'
+      labels:
+        app: {{ .Values.k8Name }}
+        phase: test
+    spec:
+      # securityContext:
+      #   runAsUser: {{ .Values.securityContext.runAsUser }}
+      #   fsGroup: {{ .Values.podSecurityContext.fsGroup }}
+      # serviceAccount: {{ .Values.serviceAccount }}
+      containers:
+      - name: {{ .Values.k8Name }}
+        image: '{{ .Values.image.repository }}{{ .Values.image.name }}:{{ .Values.image.tag }}'
+        env:
+        - name: POSTGRESQL_USER
+          value: {{ .Values.config.postgresUser }}
+        - name: POSTGRESQL_PASSWORD
+          value: {{ .Values.config.postgresPassword }}
+        - name: POSTGRESQL_DATABASE
+          value: {{ .Values.config.postgresDatabase }}
+        - name: CHART_VERSION
+          value: {{ .Chart.AppVersion }}
+        ports:
+          - containerPort: {{ .Values.service.port }}
+        securityContext:
+          runAsNonRoot: true
+        resources:
+          limits:
+            cpu: {{ .Values.resources.limits.cpu }}
+            memory: {{ .Values.resources.limits.memory }}
+          requests:
+            cpu: {{ .Values.resources.requests.cpu }}
+            memory: {{ .Values.resources.requests.memory }}
+        readinessProbe:
+          tcpSocket:
+            port: {{ .Values.service.port }}
+          initialDelaySeconds: 15
+          periodSeconds: 20
