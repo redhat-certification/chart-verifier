@@ -19,6 +19,13 @@ require (
 )
 
 require (
+	k8s.io/apimachinery v0.22.1
+	k8s.io/client-go v0.22.1
+	k8s.io/helm v2.17.0+incompatible
+	k8s.io/kubectl v0.22.1
+)
+
+require (
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/MakeNowJust/heredoc v1.0.0 // indirect
@@ -48,6 +55,7 @@ require (
 	github.com/exponent-io/jsonpath v0.0.0-20151013193312-d6023ce2651d // indirect
 	github.com/fatih/color v1.10.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
+	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-errors/errors v1.0.1 // indirect
 	github.com/go-logr/logr v0.4.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
@@ -139,14 +147,11 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	k8s.io/api v0.22.1 // indirect
 	k8s.io/apiextensions-apiserver v0.22.1 // indirect
-	k8s.io/apimachinery v0.22.1 // indirect
 	k8s.io/apiserver v0.22.1 // indirect
 	k8s.io/cli-runtime v0.22.1 // indirect
-	k8s.io/client-go v0.22.1 // indirect
 	k8s.io/component-base v0.22.1 // indirect
 	k8s.io/klog/v2 v2.9.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20210421082810-95288971da7e // indirect
-	k8s.io/kubectl v0.22.1 // indirect
 	k8s.io/utils v0.0.0-20210707171843-4b05e18ac7d9 // indirect
 	oras.land/oras-go v0.4.0 // indirect
 	sigs.k8s.io/kustomize/api v0.8.11 // indirect
