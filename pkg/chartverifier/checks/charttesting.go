@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"strings"
 
 	"github.com/Masterminds/semver"
 	"github.com/helm/chart-testing/v3/pkg/chart"
@@ -84,18 +83,17 @@ func buildChartTestingConfiguration(opts *CheckOptions) config.Configuration {
 // interpretation the main logic chart-testing carries, and other
 // functions used in this context were also ported from
 // chart-verifier.
-//
-// Helm and kubectl are requirements in the system executing the check
-// in order to orchestrate the install, upgrade and chart testing
-// phases.
 func ChartTesting(opts *CheckOptions) (Result, error) {
 
 	tool.LogInfo("Start chart install and test check")
 
 	cfg := buildChartTestingConfiguration(opts)
-	procExec := tool.NewProcessExecutor(cfg.Debug)
-	extraArgs := strings.Fields(cfg.HelmExtraArgs)
-	helm := tool.NewHelm(procExec, extraArgs)
+	helm, err := tool.NewHelm(opts.HelmEnvSettings, opts.Values)
+	if err != nil {
+		tool.LogError("End chart install and test check with NewHelm error")
+		return NewResult(false, err.Error()), nil
+	}
+
 	kubectl, err := tool.NewKubectl(opts.HelmEnvSettings)
 	if err != nil {
 		tool.LogError("End chart install and test check with NewKubectl error")
@@ -170,7 +168,7 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 func generateInstallConfig(
 	cfg config.Configuration,
 	chrt *chart.Chart,
-	helm tool.Helm,
+	helm *tool.Helm,
 	kubectl *tool.Kubectl,
 	configRelease string,
 ) (namespace, release, releaseSelector string, cleanup func()) {
@@ -182,7 +180,7 @@ func generateInstallConfig(
 		}
 		releaseSelector = fmt.Sprintf("%s=%s", cfg.ReleaseLabel, release)
 		cleanup = func() {
-			helm.DeleteRelease(namespace, release)
+			helm.Uninstall(namespace, release)
 		}
 	} else {
 		if len(release) == 0 {
@@ -191,7 +189,7 @@ func generateInstallConfig(
 			_, namespace = chrt.CreateInstallParams(cfg.BuildId)
 		}
 		cleanup = func() {
-			helm.DeleteRelease(namespace, release)
+			helm.Uninstall(namespace, release)
 			kubectl.DeleteNamespace(namespace)
 		}
 	}
@@ -200,7 +198,7 @@ func generateInstallConfig(
 
 // testRelease tests a release.
 func testRelease(
-	helm tool.Helm,
+	helm *tool.Helm,
 	kubectl *tool.Kubectl,
 	release, namespace, releaseSelector string,
 	cleanupHelmTests bool,
@@ -227,7 +225,7 @@ func getChartPreviousVersion(chrt *chart.Chart) (*chart.Chart, error) {
 func upgradeAndTestChart(
 	cfg config.Configuration,
 	oldChrt, chrt *chart.Chart,
-	helm tool.Helm,
+	helm *tool.Helm,
 	kubectl *tool.Kubectl,
 	configRelease string,
 ) chart.TestResult {
@@ -258,14 +256,14 @@ func upgradeAndTestChart(
 			defer cleanup()
 
 			// Install previous version of chart. If installation fails, ignore this release.
-			if err := helm.InstallWithValues(oldChrt.Path(), valuesFile, namespace, release); err != nil {
+			if err := helm.Install(namespace, oldChrt.Path(), release, valuesFile); err != nil {
 				return fmt.Errorf("Upgrade testing for release '%s' skipped because of previous revision installation error: %w", release, err)
 			}
 			if err := testRelease(helm, kubectl, release, namespace, releaseSelector, true); err != nil {
 				return fmt.Errorf("Upgrade testing for release '%s' skipped because of previous revision testing error", release)
 			}
 
-			if err := helm.Upgrade(oldChrt.Path(), namespace, release); err != nil {
+			if err := helm.Upgrade(namespace, oldChrt.Path(), release); err != nil {
 				return err
 			}
 
@@ -363,7 +361,7 @@ func newTempValuesFileWithOverrides(filename string, valuesOverrides map[string]
 func installAndTestChartRelease(
 	cfg config.Configuration,
 	chrt *chart.Chart,
-	helm tool.Helm,
+	helm *tool.Helm,
 	kubectl *tool.Kubectl,
 	valuesOverrides map[string]interface{},
 	configRelease string,
@@ -398,7 +396,7 @@ func installAndTestChartRelease(
 			namespace, release, releaseSelector, releaseCleanup := generateInstallConfig(cfg, chrt, helm, kubectl, configRelease)
 			defer releaseCleanup()
 
-			if err := helm.InstallWithValues(chrt.Path(), tmpValuesFile, namespace, release); err != nil {
+			if err := helm.Install(namespace, chrt.Path(), release, tmpValuesFile); err != nil {
 				return err
 			}
 			return testRelease(helm, kubectl, release, namespace, releaseSelector, false)

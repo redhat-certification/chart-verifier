@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -30,23 +29,9 @@ func absPathFromSourceFileLocation(name string) (string, error) {
 	return filepath.Join(dirname, name), nil
 }
 
-func lookPath(programs ...string) error {
-	for _, p := range programs {
-		_, err := exec.LookPath(p)
-		if err != nil {
-			return fmt.Errorf("required program %q not found", p)
-		}
-	}
-	return nil
-}
-
 func TestChartTesting(t *testing.T) {
 	if os.Getenv("CHART_VERIFIER_ENABLE_CLUSTER_TESTING") == "" {
 		t.Skip("CHART_VERIFIER_ENABLE_CLUSTER_TESTING not set, skipping in cluster tests")
-	}
-
-	if err := lookPath("helm", "kubectl"); err != nil {
-		t.Skip(err.Error())
 	}
 
 	type testCase struct {

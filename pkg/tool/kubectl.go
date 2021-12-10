@@ -17,10 +17,10 @@ type Kubectl struct {
 	clientset kubernetes.Interface
 }
 
-func NewKubectl(setttings *cli.EnvSettings) (*Kubectl, error) {
+func NewKubectl(settings *cli.EnvSettings) (*Kubectl, error) {
 	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
-	if len(setttings.KubeConfig) > 0 {
-		loadingRules = &clientcmd.ClientConfigLoadingRules{ExplicitPath: setttings.KubeConfig}
+	if len(settings.KubeConfig) > 0 {
+		loadingRules = &clientcmd.ClientConfigLoadingRules{ExplicitPath: settings.KubeConfig}
 	}
 
 	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(

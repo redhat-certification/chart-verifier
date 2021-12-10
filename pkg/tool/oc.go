@@ -28,10 +28,10 @@ type Oc struct {
 	clientset kubernetes.Interface
 }
 
-func NewOc(setttings *cli.EnvSettings) (*Oc, error) {
+func NewOc(settings *cli.EnvSettings) (*Oc, error) {
 	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
-	if len(setttings.KubeConfig) > 0 {
-		loadingRules = &clientcmd.ClientConfigLoadingRules{ExplicitPath: setttings.KubeConfig}
+	if len(settings.KubeConfig) > 0 {
+		loadingRules = &clientcmd.ClientConfigLoadingRules{ExplicitPath: settings.KubeConfig}
 	}
 
 	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(

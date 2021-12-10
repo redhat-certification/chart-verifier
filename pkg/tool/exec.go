@@ -56,3 +56,11 @@ func (p ProcessExecutor) RunProcessInDirAndCaptureOutput(
 	}
 	return capturedOutput, nil
 }
+
+func toStringArray(args []interface{}) []string {
+	copy := make([]string, len(args))
+	for i, a := range args {
+		copy[i] = fmt.Sprint(a)
+	}
+	return copy
+}
