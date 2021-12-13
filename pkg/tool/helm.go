@@ -51,7 +51,9 @@ func (h Helm) Install(namespace, chart, release, valuesFile string) error {
 
 	p := getter.All(h.settings)
 	valueOpts := &values.Options{}
-	valueOpts.ValueFiles = append(valueOpts.ValueFiles, valuesFile)
+	if valuesFile != "" {
+		valueOpts.ValueFiles = append(valueOpts.ValueFiles, valuesFile)
+	}
 	vals, err := valueOpts.MergeValues(p)
 	if err != nil {
 		LogError(fmt.Sprintf("Error MergeValues: %v", err))

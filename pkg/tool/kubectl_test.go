@@ -43,7 +43,7 @@ func TestOCVersions(t *testing.T) {
 			Major: testdata.getVersionOut.Major,
 			Minor: testdata.getVersionOut.Minor,
 		}
-		oc := Oc{clientset: clientset}
+		oc := Kubectl{clientset: clientset}
 		version, err := oc.GetOcVersion()
 		if err != nil {
 			t.Error(err)

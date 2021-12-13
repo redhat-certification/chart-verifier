@@ -24,11 +24,11 @@ const (
 type Versioner func(settings *cli.EnvSettings) (string, error)
 
 func getVersion(settings *cli.EnvSettings) (string, error) {
-	oc, err := tool.NewOc(settings)
+	kubectl, err := tool.NewKubectl(settings)
 	if err != nil {
 		return "", err
 	}
-	return oc.GetOcVersion()
+	return kubectl.GetOcVersion()
 }
 
 type OpenShiftVersionErr string
@@ -416,7 +416,7 @@ func setOCVersion(opts *CheckOptions, versioner Versioner) error {
 	holder := opts.AnnotationHolder
 	settings := opts.HelmEnvSettings
 
-	// oc.GetVersion() returns an error both in case the oc command can't be executed and
+	// kubectl.GetVersion() returns an error both in case the kubectl command can't be executed and
 	// the value for the OpenShift version key not present.
 	osVersion, getVersionErr := versioner(settings)
 
