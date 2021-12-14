@@ -118,7 +118,12 @@ a verifier report must be included in the chart submission.
 
 Run the chart verifier and set log_ouput to true to get additional information:
 ```
-$ podman run -it --rm quay.io/redhat-certification/chart-verifier -l verify <chart-uri>
+$ podman run --rm -i \
+          -e KUBECONFIG=/.kube/config \
+          -v "${HOME}/.kube":/.kube \ 
+          "quay.io/redhat-certification/chart-verifier" \
+          verify -l \
+          <chart-uri>
 ```
 
 ### `required-annotations-present` v1.0

@@ -59,15 +59,26 @@ This section provides help on the basic usage of Helm chart checks with the podm
 
 ### Procedure
 
-- Run all the available checks for the chart using a `uri`:
+- Run all the available checks for remotely available chart using a `uri`, assuming the kube config file is available in ${HOME}/.kube:
 
   ```
-  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify <chart-uri>
+  $ podman run --rm -i \
+          -e KUBECONFIG=/.kube/config \
+          -v "${HOME}/.kube":/.kube \
+          "quay.io/redhat-certification/chart-verifier" \
+          verify \
+          <chart-uri>
   ```
-- Run all the checks available locally on your system for the chart, from the same directory as the chart:
+- Run all the available checks for a chart local to your file system, assuming the chart is in the current directory and the kube config file is available in ${HOME}/.kube:
 
   ```
-  $ podman run -v $(pwd):/charts --rm quay.io/redhat-certification/chart-verifier verify /charts/<chart>
+  $ podman run --rm \
+          -e KUBECONFIG=/.kube/config \
+          -v "${HOME}/.kube":/.kube \
+          -v $(pwd):/charts 
+          "quay.io/redhat-certification/chart-verifier" \
+          verify 
+          /charts/<chart>
   ```
 - Get the list of options for the `verify` command:
 
@@ -113,22 +124,45 @@ This section provides help on the basic usage of Helm chart checks with the podm
 - Run a subset of the checks:
 
   ```
-  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -e images-are-certified,helm-lint <chart-uri>
+  $ podman run --rm -i \
+          -e KUBECONFIG=/.kube/config \
+          -v "${HOME}/.kube":/.kube \
+          "quay.io/redhat-certification/chart-verifier" \
+          verify -e images-are-certified,helm-lint \
+          <chart-uri>
+  
   ```
 - Run all the checks except a subset:
 
   ```
-  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -x images-are-certified,helm-lint <chart-uri>
-  ```
+  $ podman run --rm -i \
+          -e KUBECONFIG=/.kube/config \
+          -v "${HOME}/.kube":/.kube \
+          "quay.io/redhat-certification/chart-verifier" \
+          verify -x images-are-certified,helm-lint \
+          <chart-uri>
+    ```
 - Provide chart-override values:
 
   ```
-  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -S default.port=8080 images-are-certified,helm-lint
+  $ podman run --rm -i \
+          -e KUBECONFIG=/.kube/config \
+          -v "${HOME}/.kube":/.kube \
+          "quay.io/redhat-certification/chart-verifier" \
+          verify -S default.port=8080 \
+          <chart-uri>
   ```
-- Provide chart-override values in a file:
+- Provide chart-override values from a file in the current directory:
 
   ```
-  $ podman run -it --rm quay.io/redhat-certification/chart-verifier verify -F overrides.yaml images-are-certified,helm-lint
+  $ podman run --rm -i \
+          -e KUBECONFIG=/.kube/config \
+          -v "${HOME}/.kube":/.kube \
+          -v $(pwd):/values   
+          "quay.io/redhat-certification/chart-verifier" \
+          verify -F /values/overrides.yaml \
+          <chart-uri>
+
   ```
 
 ## Profiles
@@ -229,7 +263,12 @@ To specify which profile to use the --set flag:
 ```
 For example:
 ```
-$ podman run -it --rm quay.io/redhat-certification/chart-verifier verify --set profile.vendorType=partner, profile.version=v1.1 <chart>
+$ podman run --rm -i \
+          -e KUBECONFIG=/.kube/config \
+          -v "${HOME}/.kube":/.kube \ 
+          "quay.io/redhat-certification/chart-verifier" \
+          verify --set profile.vendorType=partner, profile.version=v1.1 \
+          <chart-uri>
 ```
 
 ## Chart Testing
