@@ -279,15 +279,15 @@ You can configure the chart-testing check by performing one of the following ste
 
 * Option 1: Through the `--set` command line option:
     ```text
-    $ chart-verifier                                                 \
-        verify                                                       \
-        --enable chart-testing                                       \
+    $ chart-verifier                                                  \
+        verify                                                        \
+        --enable chart-testing                                        \
         --set chart-testing.buildId=${BUILD_ID}                       \
         --set chart-testing.upgrade=true                              \
         --set chart-testing.skipMissingValues=true                    \
         --set chart-testing.namespace=${NAMESPACE}                    \
         --set chart-testing.releaseLabel="app.kubernetes.io/instance" \
-        --set chart-testing.release=${RELEASE}
+        --set chart-testing.release=${RELEASE}                        \
         some-chart.tgz
     ```
 * Option 2: Create a YAML file (config.yaml) similar to the following example:
