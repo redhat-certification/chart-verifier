@@ -59,7 +59,7 @@ This section provides help on the basic usage of Helm chart checks with the podm
 
 ### Procedure
 
-- Run all the available checks for remotely available chart using a `uri`, assuming the kube config file is available in ${HOME}/.kube:
+- Run all the available checks for a remotely available chart using a `uri`, assuming the kube config file is available in ${HOME}/.kube:
 
   ```
   $ podman run --rm -i \
@@ -75,9 +75,9 @@ This section provides help on the basic usage of Helm chart checks with the podm
   $ podman run --rm \
           -e KUBECONFIG=/.kube/config \
           -v "${HOME}/.kube":/.kube \
-          -v $(pwd):/charts 
+          -v $(pwd):/charts \
           "quay.io/redhat-certification/chart-verifier" \
-          verify 
+          verify \
           /charts/<chart>
   ```
 - Get the list of options for the `verify` command:
@@ -158,7 +158,7 @@ This section provides help on the basic usage of Helm chart checks with the podm
   $ podman run --rm -i \
           -e KUBECONFIG=/.kube/config \
           -v "${HOME}/.kube":/.kube \
-          -v $(pwd):/values   
+          -v $(pwd):/values \  
           "quay.io/redhat-certification/chart-verifier" \
           verify -F /values/overrides.yaml \
           <chart-uri>
