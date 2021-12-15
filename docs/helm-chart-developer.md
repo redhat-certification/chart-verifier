@@ -18,7 +18,7 @@ of the chart itself; for example, whether a `README.md` file exists, or whether 
 specification, implicating in offering a cache API layer is required to avoid downloading and unpacking the charts for
 each test.
 
-## Getting chart-verifier
+## Getting chart-verifier with Docker/Podman
 
 Container images built from the source code are hosted in https://quay.io/repository/redhat-certification/chart-verifier
 ; to download using `docker` execute the following command:
@@ -27,9 +27,13 @@ Container images built from the source code are hosted in https://quay.io/reposi
 docker pull quay.io/redhat-certification/chart-verifier
 ```
 
+## Getting chart-verifier binary directly (Linux only)
+
+Alternatively, download `chart-verifier` binary from the [release page](https://github.com/redhat-certification/chart-verifier/releases) and run `chart-verifier verify` command to perform Helm chart checks.
+
 ## Building chart-verifier
 
-To build `chart-verifier` locally, execute `hack/build.sh` or its PowerShell alternative.
+To build `chart-verifier` locally, execute `make bin` for macOS and Linux, or `make bin_win` for Windows.
 
 To build `chart-verifier` container image, execute `hack/build-image.sh` or its PowerShell alternative:
 
