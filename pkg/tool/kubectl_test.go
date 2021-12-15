@@ -43,13 +43,18 @@ func TestOCVersions(t *testing.T) {
 			Major: testdata.getVersionOut.Major,
 			Minor: testdata.getVersionOut.Minor,
 		}
-		oc := Kubectl{clientset: clientset}
-		version, err := oc.GetOcVersion()
+		kubectl := Kubectl{clientset: clientset}
+		serverVersion, err := kubectl.GetServerVersion()
 		if err != nil {
 			t.Error(err)
 		}
-		if version != testdata.OCVersion {
-			t.Error(fmt.Sprintf("Version mismatch expected: %s, got: %s", testdata.OCVersion, version))
+		if serverVersion.Major != testdata.getVersionOut.Major || serverVersion.Minor != testdata.getVersionOut.Minor {
+			t.Error(fmt.Sprintf("server version mismatch, expected: %+v, got: %+v", testdata.getVersionOut, serverVersion))
+		}
+		kubeVersion := fmt.Sprintf("%s.%s", serverVersion.Major, serverVersion.Minor)
+		ocVersion := GetKubeOpenShiftVersionMap()[kubeVersion]
+		if ocVersion != testdata.OCVersion {
+			t.Error(fmt.Sprintf("version mismatch, expected: %s, got: %s", testdata.OCVersion, ocVersion))
 		}
 	}
 }

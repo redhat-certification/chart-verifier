@@ -14,17 +14,15 @@ import (
 )
 
 type Helm struct {
-	config   *action.Configuration
-	settings *cli.EnvSettings
-	args     map[string]interface{}
+	config      *action.Configuration
+	envSettings *cli.EnvSettings
+	args        map[string]interface{}
 }
 
-func NewHelm(settings *cli.EnvSettings, args map[string]interface{}) (*Helm, error) {
-	helm := new(Helm)
-	helm.settings = settings
-	helm.args = args
+func NewHelm(envSettings *cli.EnvSettings, args map[string]interface{}) (*Helm, error) {
+	helm := &Helm{envSettings: envSettings, args: args}
 	config := new(action.Configuration)
-	if err := config.Init(settings.RESTClientGetter(), settings.Namespace(), os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
+	if err := config.Init(envSettings.RESTClientGetter(), envSettings.Namespace(), os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
 		LogInfo(fmt.Sprintf(format, v))
 	}); err != nil {
 		return nil, err
@@ -43,13 +41,13 @@ func (h Helm) Install(namespace, chart, release, valuesFile string) error {
 	// ref: https://helm.sh/docs/helm/helm_install
 	client.Timeout = 5 * time.Minute
 
-	cp, err := client.ChartPathOptions.LocateChart(chart, h.settings)
+	cp, err := client.ChartPathOptions.LocateChart(chart, h.envSettings)
 	if err != nil {
 		LogError(fmt.Sprintf("Error LocateChart: %v", err))
 		return err
 	}
 
-	p := getter.All(h.settings)
+	p := getter.All(h.envSettings)
 	valueOpts := &values.Options{}
 	if valuesFile != "" {
 		valueOpts.ValueFiles = append(valueOpts.ValueFiles, valuesFile)
@@ -136,13 +134,13 @@ func (h Helm) Upgrade(namespace, chart, release string) error {
 	client.ReuseValues = true
 	client.Wait = true
 
-	cp, err := client.ChartPathOptions.LocateChart(chart, h.settings)
+	cp, err := client.ChartPathOptions.LocateChart(chart, h.envSettings)
 	if err != nil {
 		LogError(fmt.Sprintf("Error LocateChart: %v", err))
 		return err
 	}
 
-	p := getter.All(h.settings)
+	p := getter.All(h.envSettings)
 	valueOpts := &values.Options{}
 	vals, err := valueOpts.MergeValues(p)
 	if err != nil {

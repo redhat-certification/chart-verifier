@@ -41,9 +41,9 @@ func TestInstall(t *testing.T) {
 				Log:          func(format string, v ...interface{}) {},
 			}
 			helm := Helm{
-				config:   actionConfig,
-				args:     map[string]interface{}{"set": "k8Project=default"},
-				settings: &cli.EnvSettings{},
+				config:      actionConfig,
+				args:        map[string]interface{}{"set": "k8Project=default"},
+				envSettings: &cli.EnvSettings{},
 			}
 			err := helm.Install("default", tt.chartPath, tt.releaseName, "")
 			if err == nil {
@@ -95,9 +95,9 @@ func TestUninstall(t *testing.T) {
 				Log:          func(format string, v ...interface{}) {},
 			}
 			helm := Helm{
-				config:   actionConfig,
-				args:     make(map[string]interface{}),
-				settings: &cli.EnvSettings{},
+				config:      actionConfig,
+				args:        make(map[string]interface{}),
+				envSettings: &cli.EnvSettings{},
 			}
 			if tt.expected == "" {
 				// create fake release
@@ -165,9 +165,9 @@ func TestUpgrade(t *testing.T) {
 				Log:          func(format string, v ...interface{}) {},
 			}
 			helm := Helm{
-				config:   actionConfig,
-				args:     make(map[string]interface{}),
-				settings: &cli.EnvSettings{},
+				config:      actionConfig,
+				args:        make(map[string]interface{}),
+				envSettings: &cli.EnvSettings{},
 			}
 			if tt.expected == "" {
 				// create fake release
@@ -245,9 +245,9 @@ func TestReleaseTesting(t *testing.T) {
 				Log:          func(format string, v ...interface{}) {},
 			}
 			helm := Helm{
-				config:   actionConfig,
-				args:     make(map[string]interface{}),
-				settings: &cli.EnvSettings{},
+				config:      actionConfig,
+				args:        make(map[string]interface{}),
+				envSettings: &cli.EnvSettings{},
 			}
 			if tt.expected == "" {
 				// create fake release

@@ -1,6 +1,7 @@
 package checks
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -14,6 +15,7 @@ import (
 	"github.com/redhat-certification/chart-verifier/pkg/tool"
 	"gopkg.in/yaml.v3"
 	"helm.sh/helm/v3/pkg/cli"
+	helmcli "helm.sh/helm/v3/pkg/cli"
 )
 
 const (
@@ -21,14 +23,29 @@ const (
 )
 
 // Versioner provides OpenShift version
-type Versioner func(settings *cli.EnvSettings) (string, error)
+type Versioner func(envSettings *cli.EnvSettings) (string, error)
 
-func getVersion(settings *cli.EnvSettings) (string, error) {
-	kubectl, err := tool.NewKubectl(settings)
+func getVersion(envSettings *cli.EnvSettings) (string, error) {
+	kubeConfig := tool.GetClientConfig(envSettings)
+	kubectl, err := tool.NewKubectl(kubeConfig)
 	if err != nil {
 		return "", err
 	}
-	return kubectl.GetOcVersion()
+
+	serverVersion, err := kubectl.GetServerVersion()
+	if err != nil {
+		return "", err
+	}
+
+	// Relying on Kubernetes version can be replaced after fixing this issue:
+	// https://bugzilla.redhat.com/show_bug.cgi?id=1850656
+	kubeVersion := fmt.Sprintf("%s.%s", serverVersion.Major, serverVersion.Minor)
+	osVersion, ok := tool.GetKubeOpenShiftVersionMap()[kubeVersion]
+	if !ok {
+		return "", fmt.Errorf("internal error: %q not found in Kubernetes-OpenShift version map", kubeVersion)
+	}
+
+	return osVersion, nil
 }
 
 type OpenShiftVersionErr string
@@ -94,7 +111,8 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 		return NewResult(false, err.Error()), nil
 	}
 
-	kubectl, err := tool.NewKubectl(opts.HelmEnvSettings)
+	kubeConfig := tool.GetClientConfig(opts.HelmEnvSettings)
+	kubectl, err := tool.NewKubectl(kubeConfig)
 	if err != nil {
 		tool.LogError("End chart install and test check with NewKubectl error")
 		return NewResult(false, err.Error()), nil
@@ -151,7 +169,7 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 		}
 	}
 
-	if versionError := setOCVersion(opts, getVersion); versionError != nil {
+	if versionError := setOCVersion(opts.AnnotationHolder, opts.HelmEnvSettings, getVersion); versionError != nil {
 		if versionError != nil {
 			tool.LogWarning(fmt.Sprintf("End chart install and test check with version error: %v", versionError))
 		}
@@ -190,7 +208,7 @@ func generateInstallConfig(
 		}
 		cleanup = func() {
 			helm.Uninstall(namespace, release)
-			kubectl.DeleteNamespace(namespace)
+			kubectl.DeleteNamespace(context.TODO(), namespace)
 		}
 	}
 	return
@@ -203,7 +221,7 @@ func testRelease(
 	release, namespace, releaseSelector string,
 	cleanupHelmTests bool,
 ) error {
-	if err := kubectl.WaitForDeployments(namespace, releaseSelector); err != nil {
+	if err := kubectl.WaitForDeployments(context.TODO(), namespace, releaseSelector); err != nil {
 		return err
 	}
 	if err := helm.Test(namespace, release); err != nil {
@@ -412,13 +430,10 @@ func installAndTestChartRelease(
 	return result
 }
 
-func setOCVersion(opts *CheckOptions, versioner Versioner) error {
-	holder := opts.AnnotationHolder
-	settings := opts.HelmEnvSettings
-
+func setOCVersion(holder AnnotationHolder, envSettings *helmcli.EnvSettings, versioner Versioner) error {
 	// kubectl.GetVersion() returns an error both in case the kubectl command can't be executed and
 	// the value for the OpenShift version key not present.
-	osVersion, getVersionErr := versioner(settings)
+	osVersion, getVersionErr := versioner(envSettings)
 
 	// From this point on, an error is set and osVersion is empty.
 	if getVersionErr != nil && holder.GetCertifiedOpenShiftVersionFlag() != "" {

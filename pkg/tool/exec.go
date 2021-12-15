@@ -58,9 +58,9 @@ func (p ProcessExecutor) RunProcessInDirAndCaptureOutput(
 }
 
 func toStringArray(args []interface{}) []string {
-	copy := make([]string, len(args))
+	cpy := make([]string, len(args))
 	for i, a := range args {
-		copy[i] = fmt.Sprint(a)
+		cpy[i] = fmt.Sprint(a)
 	}
-	return copy
+	return cpy
 }

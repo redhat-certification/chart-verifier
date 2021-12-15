@@ -8,6 +8,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
+	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/kubectl/pkg/scheme"
@@ -30,15 +31,7 @@ type Kubectl struct {
 	clientset kubernetes.Interface
 }
 
-func NewKubectl(settings *cli.EnvSettings) (*Kubectl, error) {
-	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
-	if len(settings.KubeConfig) > 0 {
-		loadingRules = &clientcmd.ClientConfigLoadingRules{ExplicitPath: settings.KubeConfig}
-	}
-
-	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-		loadingRules,
-		&clientcmd.ConfigOverrides{})
+func NewKubectl(kubeConfig clientcmd.ClientConfig) (*Kubectl, error) {
 	config, err := kubeConfig.ClientConfig()
 	if err != nil {
 		return nil, err
@@ -56,8 +49,8 @@ func NewKubectl(settings *cli.EnvSettings) (*Kubectl, error) {
 	return kubectl, nil
 }
 
-func (k Kubectl) WaitForDeployments(namespace string, selector string) error {
-	deployments, err := k.clientset.AppsV1().Deployments(namespace).List(context.TODO(), metav1.ListOptions{
+func (k Kubectl) WaitForDeployments(context context.Context, namespace string, selector string) error {
+	deployments, err := k.clientset.AppsV1().Deployments(namespace).List(context, metav1.ListOptions{
 		LabelSelector: selector,
 	})
 	if err != nil {
@@ -76,30 +69,32 @@ func (k Kubectl) WaitForDeployments(namespace string, selector string) error {
 	return nil
 }
 
-func (k Kubectl) DeleteNamespace(namespace string) error {
-	if err := k.clientset.CoreV1().Namespaces().Delete(context.TODO(), namespace, *metav1.NewDeleteOptions(0)); err != nil {
+func (k Kubectl) DeleteNamespace(context context.Context, namespace string) error {
+	if err := k.clientset.CoreV1().Namespaces().Delete(context, namespace, *metav1.NewDeleteOptions(0)); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (k Kubectl) GetOcVersion() (string, error) {
+func (k Kubectl) GetServerVersion() (*version.Info, error) {
 	version, err := k.clientset.Discovery().ServerVersion()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-
-	// Relying on Kubernetes version can be replaced after fixing this issue:
-	// https://bugzilla.redhat.com/show_bug.cgi?id=1850656
-	kubeVersion := fmt.Sprintf("%s.%s", version.Major, version.Minor)
-	osVersion, ok := kubeOpenShiftVersionMap[kubeVersion]
-	if !ok {
-		return "", fmt.Errorf("internal error: %q not found in Kubernetes-OpenShift version map", kubeVersion)
-	}
-
-	return osVersion, nil
+	return version, err
 }
 
 func GetKubeOpenShiftVersionMap() map[string]string {
 	return kubeOpenShiftVersionMap
+}
+
+func GetClientConfig(envSettings *cli.EnvSettings) clientcmd.ClientConfig {
+	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
+	if len(envSettings.KubeConfig) > 0 {
+		loadingRules = &clientcmd.ClientConfigLoadingRules{ExplicitPath: envSettings.KubeConfig}
+	}
+
+	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+		loadingRules,
+		&clientcmd.ConfigOverrides{})
 }

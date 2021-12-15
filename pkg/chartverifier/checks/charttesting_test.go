@@ -167,7 +167,7 @@ func TestVersionSetting(t *testing.T) {
 
 		t.Run(tc.description, func(t *testing.T) {
 
-			err := setOCVersion(tc.opts, tc.versioner)
+			err := setOCVersion(tc.opts.AnnotationHolder, tc.opts.HelmEnvSettings, tc.versioner)
 
 			if len(tc.error) > 0 {
 				require.Error(t, err)
