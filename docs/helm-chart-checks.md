@@ -50,6 +50,8 @@ The following table lists the set of checks for each profile version with detail
 
 ## Run Helm chart checks
 
+There are two ways to run Helm chart checks, either through [containers with `podman`/`docker` command](#using-the-podman-or-docker-command-for-helm-chart-checks), or [run the binary directly (Linux only)](#using-the-chart-verifier-binary-for-helm-chart-checks-linux-only).
+
 ### Using the podman or docker command for Helm chart checks
 This section provides help on the basic usage of Helm chart checks with the podman or docker command.
 
