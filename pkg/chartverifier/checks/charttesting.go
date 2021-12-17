@@ -1,11 +1,11 @@
 package checks
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path"
-	"strings"
 
 	"github.com/Masterminds/semver"
 	"github.com/helm/chart-testing/v3/pkg/chart"
@@ -14,6 +14,8 @@ import (
 	"github.com/imdario/mergo"
 	"github.com/redhat-certification/chart-verifier/pkg/tool"
 	"gopkg.in/yaml.v3"
+	"helm.sh/helm/v3/pkg/cli"
+	helmcli "helm.sh/helm/v3/pkg/cli"
 )
 
 const (
@@ -21,16 +23,29 @@ const (
 )
 
 // Versioner provides OpenShift version
-type Versioner func() (string, error)
+type Versioner func(envSettings *cli.EnvSettings) (string, error)
 
-func getVersion() (string, error) {
+func getVersion(envSettings *cli.EnvSettings) (string, error) {
+	kubeConfig := tool.GetClientConfig(envSettings)
+	kubectl, err := tool.NewKubectl(kubeConfig)
+	if err != nil {
+		return "", err
+	}
 
-	procExec := tool.NewProcessExecutor(false)
-	oc := tool.NewOc(procExec)
+	serverVersion, err := kubectl.GetServerVersion()
+	if err != nil {
+		return "", err
+	}
 
-	// oc.GetVersion() returns an error both in case the oc command can't be executed and
-	// the value for the OpenShift version key not present.
-	return oc.GetVersion()
+	// Relying on Kubernetes version can be replaced after fixing this issue:
+	// https://bugzilla.redhat.com/show_bug.cgi?id=1850656
+	kubeVersion := fmt.Sprintf("%s.%s", serverVersion.Major, serverVersion.Minor)
+	osVersion, ok := tool.GetKubeOpenShiftVersionMap()[kubeVersion]
+	if !ok {
+		return "", fmt.Errorf("internal error: %q not found in Kubernetes-OpenShift version map", kubeVersion)
+	}
+
+	return osVersion, nil
 }
 
 type OpenShiftVersionErr string
@@ -85,19 +100,23 @@ func buildChartTestingConfiguration(opts *CheckOptions) config.Configuration {
 // interpretation the main logic chart-testing carries, and other
 // functions used in this context were also ported from
 // chart-verifier.
-//
-// Helm and kubectl are requirements in the system executing the check
-// in order to orchestrate the install, upgrade and chart testing
-// phases.
 func ChartTesting(opts *CheckOptions) (Result, error) {
 
 	tool.LogInfo("Start chart install and test check")
 
 	cfg := buildChartTestingConfiguration(opts)
-	procExec := tool.NewProcessExecutor(cfg.Debug)
-	extraArgs := strings.Fields(cfg.HelmExtraArgs)
-	helm := tool.NewHelm(procExec, extraArgs)
-	kubectl := tool.NewKubectl(procExec)
+	helm, err := tool.NewHelm(opts.HelmEnvSettings, opts.Values)
+	if err != nil {
+		tool.LogError("End chart install and test check with NewHelm error")
+		return NewResult(false, err.Error()), nil
+	}
+
+	kubeConfig := tool.GetClientConfig(opts.HelmEnvSettings)
+	kubectl, err := tool.NewKubectl(kubeConfig)
+	if err != nil {
+		tool.LogError("End chart install and test check with NewKubectl error")
+		return NewResult(false, err.Error()), nil
+	}
 
 	_, path, err := LoadChartFromURI(opts.URI)
 	if err != nil {
@@ -150,7 +169,7 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 		}
 	}
 
-	if versionError := setOCVersion(opts.AnnotationHolder, getVersion); versionError != nil {
+	if versionError := setOCVersion(opts.AnnotationHolder, opts.HelmEnvSettings, getVersion); versionError != nil {
 		if versionError != nil {
 			tool.LogWarning(fmt.Sprintf("End chart install and test check with version error: %v", versionError))
 		}
@@ -167,8 +186,8 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 func generateInstallConfig(
 	cfg config.Configuration,
 	chrt *chart.Chart,
-	helm tool.Helm,
-	kubectl tool.Kubectl,
+	helm *tool.Helm,
+	kubectl *tool.Kubectl,
 	configRelease string,
 ) (namespace, release, releaseSelector string, cleanup func()) {
 	release = configRelease
@@ -179,7 +198,7 @@ func generateInstallConfig(
 		}
 		releaseSelector = fmt.Sprintf("%s=%s", cfg.ReleaseLabel, release)
 		cleanup = func() {
-			helm.DeleteRelease(namespace, release)
+			helm.Uninstall(namespace, release)
 		}
 	} else {
 		if len(release) == 0 {
@@ -188,8 +207,8 @@ func generateInstallConfig(
 			_, namespace = chrt.CreateInstallParams(cfg.BuildId)
 		}
 		cleanup = func() {
-			helm.DeleteRelease(namespace, release)
-			kubectl.DeleteNamespace(namespace)
+			helm.Uninstall(namespace, release)
+			kubectl.DeleteNamespace(context.TODO(), namespace)
 		}
 	}
 	return
@@ -197,12 +216,12 @@ func generateInstallConfig(
 
 // testRelease tests a release.
 func testRelease(
-	helm tool.Helm,
-	kubectl tool.Kubectl,
+	helm *tool.Helm,
+	kubectl *tool.Kubectl,
 	release, namespace, releaseSelector string,
 	cleanupHelmTests bool,
 ) error {
-	if err := kubectl.WaitForDeployments(namespace, releaseSelector); err != nil {
+	if err := kubectl.WaitForDeployments(context.TODO(), namespace, releaseSelector); err != nil {
 		return err
 	}
 	if err := helm.Test(namespace, release); err != nil {
@@ -224,8 +243,8 @@ func getChartPreviousVersion(chrt *chart.Chart) (*chart.Chart, error) {
 func upgradeAndTestChart(
 	cfg config.Configuration,
 	oldChrt, chrt *chart.Chart,
-	helm tool.Helm,
-	kubectl tool.Kubectl,
+	helm *tool.Helm,
+	kubectl *tool.Kubectl,
 	configRelease string,
 ) chart.TestResult {
 
@@ -255,14 +274,14 @@ func upgradeAndTestChart(
 			defer cleanup()
 
 			// Install previous version of chart. If installation fails, ignore this release.
-			if err := helm.InstallWithValues(oldChrt.Path(), valuesFile, namespace, release); err != nil {
+			if err := helm.Install(namespace, oldChrt.Path(), release, valuesFile); err != nil {
 				return fmt.Errorf("Upgrade testing for release '%s' skipped because of previous revision installation error: %w", release, err)
 			}
 			if err := testRelease(helm, kubectl, release, namespace, releaseSelector, true); err != nil {
 				return fmt.Errorf("Upgrade testing for release '%s' skipped because of previous revision testing error", release)
 			}
 
-			if err := helm.Upgrade(oldChrt.Path(), namespace, release); err != nil {
+			if err := helm.Upgrade(namespace, oldChrt.Path(), release); err != nil {
 				return err
 			}
 
@@ -360,8 +379,8 @@ func newTempValuesFileWithOverrides(filename string, valuesOverrides map[string]
 func installAndTestChartRelease(
 	cfg config.Configuration,
 	chrt *chart.Chart,
-	helm tool.Helm,
-	kubectl tool.Kubectl,
+	helm *tool.Helm,
+	kubectl *tool.Kubectl,
 	valuesOverrides map[string]interface{},
 	configRelease string,
 ) chart.TestResult {
@@ -395,7 +414,7 @@ func installAndTestChartRelease(
 			namespace, release, releaseSelector, releaseCleanup := generateInstallConfig(cfg, chrt, helm, kubectl, configRelease)
 			defer releaseCleanup()
 
-			if err := helm.InstallWithValues(chrt.Path(), tmpValuesFile, namespace, release); err != nil {
+			if err := helm.Install(namespace, chrt.Path(), release, tmpValuesFile); err != nil {
 				return err
 			}
 			return testRelease(helm, kubectl, release, namespace, releaseSelector, false)
@@ -411,10 +430,10 @@ func installAndTestChartRelease(
 	return result
 }
 
-func setOCVersion(holder AnnotationHolder, versioner Versioner) error {
-	// oc.GetVersion() returns an error both in case the oc command can't be executed and
+func setOCVersion(holder AnnotationHolder, envSettings *helmcli.EnvSettings, versioner Versioner) error {
+	// kubectl.GetVersion() returns an error both in case the kubectl command can't be executed and
 	// the value for the OpenShift version key not present.
-	osVersion, getVersionErr := versioner()
+	osVersion, getVersionErr := versioner(envSettings)
 
 	// From this point on, an error is set and osVersion is empty.
 	if getVersionErr != nil && holder.GetCertifiedOpenShiftVersionFlag() != "" {

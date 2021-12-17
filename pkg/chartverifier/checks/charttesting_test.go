@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"runtime"
@@ -30,23 +29,9 @@ func absPathFromSourceFileLocation(name string) (string, error) {
 	return filepath.Join(dirname, name), nil
 }
 
-func lookPath(programs ...string) error {
-	for _, p := range programs {
-		_, err := exec.LookPath(p)
-		if err != nil {
-			return fmt.Errorf("required program %q not found", p)
-		}
-	}
-	return nil
-}
-
 func TestChartTesting(t *testing.T) {
 	if os.Getenv("CHART_VERIFIER_ENABLE_CLUSTER_TESTING") == "" {
 		t.Skip("CHART_VERIFIER_ENABLE_CLUSTER_TESTING not set, skipping in cluster tests")
-	}
-
-	if err := lookPath("helm", "kubectl"); err != nil {
-		t.Skip(err.Error())
 	}
 
 	type testCase struct {
@@ -119,11 +104,11 @@ func TestChartTesting(t *testing.T) {
 	}
 }
 
-func getVersionError() (string, error) {
+func getVersionError(settings *cli.EnvSettings) (string, error) {
 	return "", errors.New("error")
 }
 
-func getVersionGood() (string, error) {
+func getVersionGood(settings *cli.EnvSettings) (string, error) {
 	return "4.7.9", nil
 }
 
@@ -145,7 +130,7 @@ func (holder *testAnnotationHolder) SetSupportedOpenShiftVersions(version string
 func TestVersionSetting(t *testing.T) {
 	type testCase struct {
 		description string
-		holder      *testAnnotationHolder
+		opts        *CheckOptions
 		versioner   Versioner
 		version     string
 		error       string
@@ -154,25 +139,25 @@ func TestVersionSetting(t *testing.T) {
 	testCases := []testCase{
 		{
 			description: "oc.Version returns 4.7.9",
-			holder:      &testAnnotationHolder{},
+			opts:        &CheckOptions{AnnotationHolder: &testAnnotationHolder{}},
 			versioner:   getVersionGood,
 			version:     "4.7.9",
 		},
 		{
 			description: "oc.Version returns error, flag set to 4.7.8",
-			holder:      &testAnnotationHolder{CertifiedOpenShiftVersionFlag: "4.7.8"},
+			opts:        &CheckOptions{AnnotationHolder: &testAnnotationHolder{CertifiedOpenShiftVersionFlag: "4.7.8"}},
 			versioner:   getVersionError,
 			version:     "4.7.8",
 		},
 		{
 			description: "oc.Version returns semantic error, flag set to fourseveneight",
-			holder:      &testAnnotationHolder{CertifiedOpenShiftVersionFlag: "fourseveneight"},
+			opts:        &CheckOptions{AnnotationHolder: &testAnnotationHolder{CertifiedOpenShiftVersionFlag: "fourseveneight"}},
 			versioner:   getVersionError,
 			error:       "OpenShift version is not following SemVer spec. Invalid Semantic Version",
 		},
 		{
 			description: "oc.Version returns error, flag not set",
-			holder:      &testAnnotationHolder{},
+			opts:        &CheckOptions{AnnotationHolder: &testAnnotationHolder{}},
 			versioner:   getVersionError,
 			error:       "Missing OpenShift version. error. And the 'openshift-version' flag has not set.",
 		},
@@ -182,14 +167,14 @@ func TestVersionSetting(t *testing.T) {
 
 		t.Run(tc.description, func(t *testing.T) {
 
-			err := setOCVersion(tc.holder, tc.versioner)
+			err := setOCVersion(tc.opts.AnnotationHolder, tc.opts.HelmEnvSettings, tc.versioner)
 
 			if len(tc.error) > 0 {
 				require.Error(t, err)
 				require.Equal(t, tc.error, err.Error())
 			} else {
 				require.NoError(t, err)
-				require.Equal(t, tc.version, tc.holder.OpenShiftVersion)
+				require.Equal(t, tc.version, tc.opts.AnnotationHolder.(*testAnnotationHolder).OpenShiftVersion)
 			}
 
 		})

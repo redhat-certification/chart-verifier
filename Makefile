@@ -14,7 +14,7 @@ gofmt:
 
 .PHONY: bin
 bin:
-	 hack/build.sh
+	 go build -o ./out/chart-verifier main.go
 
 .PHONY: test
 test:
