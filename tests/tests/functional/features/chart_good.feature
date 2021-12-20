@@ -3,14 +3,15 @@ Feature: Chart  verification
     chart verifier against an error free chart.
 
     Examples:
-        | image |
-        | main |
+        | image_type |
+        | docker |
+        | tarball |
 
-    Scenario Outline: A chart provider verifies their chart using the chart verifier docker image
+    Scenario Outline: A chart provider verifies their chart using the chart verifier
         Given I would like to use the <type> profile
         Given I will provide a <location> of a <helm_chart>
         Given I will provide a <location> of an expected <report_info>
-        When I run the <image> chart-verifier verify command against the chart to generate a report
+        When I run the <image_type> chart-verifier verify command against the chart to generate a report
         Then I should see the report-info from the generated report matching the expected report-info
 
         Examples:
