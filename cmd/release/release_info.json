@@ -1,16 +1,13 @@
 {
-    "version": "1.4.0",
+    "version": "1.4.1",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
-        "<ul><li>Profile Version 1.1 introduced (now default):</li>",
-        "<ul><li>New mandatory check: required-annotations-present/v1.0 (#203).</li>",
-        "<ul><li>Requires chart annotation charts.openshift.io/name to bet set.</li></ul>",
+        "<ul>",
+        "<li>Adds support for chart verifier binary (linux only):</li>",
+        "<ul>",
+        "<li>Remove dependencies on helm, oc and kubectl clients (#221).</li>",
+        "<li>Include new chart verifier binary as part of a release (#222).</li>",
         "</ul>",
-        "<li>Updated mandatory check: has-kubeversion/v1.1 (#213).</li>",
-        "<ul><li>Requires chart kubeVersion to be a valid semantic version.</li>",
-        "<li>Adds new supportedOpenShiftVersions attribute used for chart certification.</li>",
-        "</ul>",
-        "<li>add option for user to specify helm release for chart-testing check (#218)</li>",
         "</ul>"
     ]
 }
