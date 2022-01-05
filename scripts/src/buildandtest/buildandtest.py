@@ -15,6 +15,7 @@ import docker
 import os
 import sys
 import yaml
+import json
 try:
     from yaml import CLoader as Loader, CDumper as Dumper
 except ImportError:
@@ -73,6 +74,12 @@ def test_image(image_id,chart,verifier_version):
     if verifier_version and verifier_version != report["metadata"]["tool"]["verifier-version"]:
         print(f'[ERROR] Chart verifier report version {report["metadata"]["tool"]["verifier-version"]} does not match  expected version: {verifier_version}')
         return False
+
+    docker_command = "version"
+    # sample output: v1.0.0
+    out = client.containers.run(image_id, docker_command, stdin_open=True, tty=True, stderr=True)
+    if not out or out[1:] != verifier_version:
+        print(f"[ERROR] 'chart-verifier version' output {out} does not match expected version: {verifier_version}")
 
     print("[INFO] report:\n", report)
     with open(report_path, "w") as fd:
