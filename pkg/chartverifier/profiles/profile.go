@@ -119,7 +119,7 @@ func New(config *viper.Viper) *Profile {
 func getProfiles() {
 
 	var configDir string
-	if IsRunningInContainer() {
+	if isRunningInDockerContainer() {
 		configDir = filepath.Join("/app", "config")
 	} else {
 		_, fn, _, ok := runtime.Caller(0)
@@ -193,14 +193,12 @@ func readProfile(fileName string) (*Profile, error) {
 
 }
 
-func IsRunningInContainer() bool {
+func isRunningInDockerContainer() bool {
 	// docker creates a .dockerenv file at the root
-	// podman create a /run/.containerenv file
-	// if either is present wer are running in a container
+	// of the directory tree inside the container.
+	// if this file exists then verifier is running
+	// from inside a container
 	if _, err := os.Stat("/.dockerenv"); err == nil {
-		return true
-
-	} else if _, err := os.Stat("/run/.containerenv"); err == nil {
 		return true
 	}
 	return false
