@@ -2,11 +2,15 @@ package cmd
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/spf13/cobra"
 )
 
 var Version = "0.0.0"
@@ -53,7 +57,7 @@ func init() {
 	}
 
 	Version = release.Version
-
+	rootCmd.AddCommand(newVersionCmd())
 }
 
 func isRunningInDockerContainer() bool {
@@ -65,4 +69,24 @@ func isRunningInDockerContainer() bool {
 		return true
 	}
 	return false
+}
+
+func newVersionCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "version",
+		Short: "print the chart-verifier version information",
+		Args:  cobra.NoArgs,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runVersion(os.Stdout)
+		},
+	}
+	return cmd
+}
+
+func runVersion(out io.Writer) error {
+	if Version == "0.0.0" {
+		return fmt.Errorf("no version info available")
+	}
+	fmt.Fprintf(out, "v%s\n", Version)
+	return nil
 }
