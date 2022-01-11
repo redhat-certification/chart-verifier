@@ -53,7 +53,7 @@ def run_verifier(image_type, profile_type, chart_location):
         return run_docker_image(image_name,image_tag,profile_type,chart_location)
     else:
         image_tag = os.environ.get("PODMAN_IMAGE_TAG")
-        print(f"FAIL: run podman image: {image_tag}")
+        print(f"FAIL: to be implemented - run podman image: {image_tag}")
 
 
 def run_docker_image(verifier_image_name,verifier_image_tag,profile_type, chart_location):
