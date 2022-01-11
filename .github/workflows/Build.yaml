@@ -123,7 +123,7 @@ jobs:
               run: |
                   # build a podman image
                   commit_sha=$(git rev-parse --short HEAD)
-                  image_tag="podman-"$commit_sha"
+                  image_tag="podman-"$commit_sha
                   podman machine init --disk-size 100
                   podman machine start
                   podman build -t quay.io/redhat-certification/chart-verifier:$image_tag .
