@@ -45,15 +45,12 @@ def run_verifier(image_type, profile_type, chart_location):
     if image_type == "tarball":
         tarball_name = os.environ.get("VERIFIER_TARBALL_NAME")
         return run_tarball_image(tarball_name,profile_type,chart_location)
-    elif image_type == "docker":
+    else:
         image_tag  =  os.environ.get("VERIFER_IMAGE_TAG")
         if not image_tag:
             image_tag = "main"
         image_name =  "quay.io/redhat-certification/chart-verifier"
         return run_docker_image(image_name,image_tag,profile_type,chart_location)
-    else:
-        image_tag = os.environ.get("PODMAN_IMAGE_TAG")
-        print(f"FAIL: run podman image: {image_tag}")
 
 
 def run_docker_image(verifier_image_name,verifier_image_tag,profile_type, chart_location):

@@ -10,7 +10,6 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 	"github.com/spf13/cobra"
 )
 
@@ -23,7 +22,7 @@ type Release struct {
 func init() {
 
 	var configDir string
-	if profiles.IsRunningInContainer() {
+	if isRunningInDockerContainer() {
 		configDir = filepath.Join("/app", "releases")
 	} else {
 		_, fn, _, ok := runtime.Caller(0)
@@ -59,6 +58,17 @@ func init() {
 
 	Version = release.Version
 	rootCmd.AddCommand(newVersionCmd())
+}
+
+func isRunningInDockerContainer() bool {
+	// docker creates a .dockerenv file at the root
+	// of the directory tree inside the container.
+	// if this file exists then verifier is running
+	// from inside a container
+	if _, err := os.Stat("/.dockerenv"); err == nil {
+		return true
+	}
+	return false
 }
 
 func newVersionCmd() *cobra.Command {
