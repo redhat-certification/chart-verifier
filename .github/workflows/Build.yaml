@@ -117,6 +117,18 @@ jobs:
                   commit_sha=$(git rev-parse --short HEAD)
                   ve1/bin/build-and-test --image-name="quay.io/redhat-certification/chart-verifier" --sha-value=$commit_sha --build-only="True"}
 
+            - name: Build podman Image
+              working-directory: ./chart-verifier
+              id: build_podman_image
+              run: |
+                  # build a podman image
+                  commit_sha=$(git rev-parse --short HEAD)
+                  image_tag="podman-"$commit_sha"
+                  podman machine init --disk-size 100
+                  podman machine start
+                  podman build -t quay.io/redhat-certification/chart-verifier:$image_tag .
+                  echo "::set-output name=podman_image_tag::$image_tag"
+
             - name: Login to oc
               working-directory: ./chart-verifier
               env:
@@ -139,6 +151,7 @@ jobs:
                   KUBECONFIG: /tmp/ci-kubeconfig
                   VERIFIER_IMAGE_TAG:  ${{ steps.build_image.outputs.verifier-image-tag }}
                   VERIFIER_TARBALL_NAME : ${{ steps.check_version_in_PR.outputs.PR_tarball_name }}
+                  PODMAN_IMAGE_TAG : ${{ steps.build_podman_image.outputs.podman_image_tag }}
               id: run_tetst
               run: |
                   # run pytest
