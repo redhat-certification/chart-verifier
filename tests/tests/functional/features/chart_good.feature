@@ -6,6 +6,7 @@ Feature: Chart  verification
         | image_type |
         | docker |
         | tarball |
+        | podman |
 
     Scenario Outline: A chart provider verifies their chart using the chart verifier
         Given I would like to use the <type> profile
