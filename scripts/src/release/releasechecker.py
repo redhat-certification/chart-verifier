@@ -87,18 +87,19 @@ def main():
                         help="Version to compare")
 
     args = parser.parse_args()
-    if args.api_url and check_if_only_version_file_is_modified(args.api_url):
-        ## should be on PR branch
+    if args.api_url:
         version_info = get_version_info()
-        print(f'[INFO] Release found in PR files : {version_info["version"]}.')
-        print(f'::set-output name=PR_version::{version_info["version"]}')
-        print(f'::set-output name=PR_release_image::{version_info["quay-image"]}')
-        print(f'::set-output name=PR_release_info::{version_info["release-info"]}')
-        print(f'::set-output name=PR_includes_release::true')
-        make_release_body(version_info["version"],version_info["quay-image"],version_info["release-info"])
         asset_file = tarfile_asset.create(version_info["version"])
-        print(f'[INFO] Release asset created : {asset_file}.')
+        print(f'[INFO] Verifier tarball created : {asset_file}.')
         print(f'::set-output name=PR_tarball_name::{asset_file}')
+        if check_if_only_version_file_is_modified(args.api_url):
+            ## should be on PR branch
+            print(f'[INFO] Release found in PR files : {version_info["version"]}.')
+            print(f'::set-output name=PR_version::{version_info["version"]}')
+            print(f'::set-output name=PR_release_image::{version_info["quay-image"]}')
+            print(f'::set-output name=PR_release_info::{version_info["release-info"]}')
+            print(f'::set-output name=PR_includes_release::true')
+            make_release_body(version_info["version"],version_info["quay-image"],version_info["release-info"])
     else:
         version_info = get_version_info()
         if args.version:
