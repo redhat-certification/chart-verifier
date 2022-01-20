@@ -2,17 +2,13 @@ package profiles
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"regexp"
-	"runtime"
-	"strings"
-
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	"github.com/redhat-certification/chart-verifier/pkg/profileconfig"
 	"github.com/spf13/viper"
 	"golang.org/x/mod/semver"
 	"gopkg.in/yaml.v3"
+	"regexp"
+	"strings"
 )
 
 type Annotation string
@@ -96,17 +92,19 @@ func New(config *viper.Viper) *Profile {
 	profileInUse = getDefaultProfile(fmt.Sprintf("profile %s not found", profileVendorType))
 
 	if vendorProfiles, ok := profileMap[profileVendorType]; ok {
-		profileInUse = vendorProfiles[0]
-		if len(vendorProfiles) > 1 {
-			for _, vendorProfile := range vendorProfiles {
-				if len(profileVersion) > 0 {
-					if semver.Compare(semver.MajorMinor(vendorProfile.Version), semver.MajorMinor(profileVersion)) == 0 {
-						profileInUse = vendorProfile
-						break
+		if len(vendorProfiles) > 0 {
+			profileInUse = vendorProfiles[0]
+			if len(vendorProfiles) > 1 {
+				for _, vendorProfile := range vendorProfiles {
+					if len(profileVersion) > 0 {
+						if semver.Compare(semver.MajorMinor(vendorProfile.Version), semver.MajorMinor(profileVersion)) == 0 {
+							profileInUse = vendorProfile
+							break
+						}
 					}
-				}
-				if semver.Compare(semver.MajorMinor(vendorProfile.Version), semver.MajorMinor(profileInUse.Version)) > 0 {
-					profileInUse = vendorProfile
+					if semver.Compare(semver.MajorMinor(vendorProfile.Version), semver.MajorMinor(profileInUse.Version)) > 0 {
+						profileInUse = vendorProfile
+					}
 				}
 			}
 		}
@@ -118,38 +116,26 @@ func New(config *viper.Viper) *Profile {
 // Get all profiles in the profiles directory, and any subdirectories, and add each to the profile map
 func getProfiles() {
 
-	var configDir string
-	if IsRunningInContainer() {
-		configDir = filepath.Join("/app", "config")
-	} else {
-		_, fn, _, ok := runtime.Caller(0)
-		if !ok {
-			return
-		}
-		index := strings.LastIndex(fn, "chart-verifier/")
-		configDir = fn[0 : index+len("chart-verifier")]
-		configDir = filepath.Join(configDir, "config")
+	profileFiles, err := profileconfig.GetProfiles()
+	if err != nil {
+		return
 	}
-
-	filepath.Walk(configDir, func(path string, info os.FileInfo, err error) error {
-		if info != nil {
-			if strings.HasSuffix(info.Name(), ".yaml") {
-				profileRead, err := readProfile(path)
-				if err == nil {
-					// If version is not valid set to a default version
-					if !semver.IsValid(profileRead.Version) {
-						profileRead.Version = DefaultProfileVersion
-					}
-					if len(profileRead.Vendor) == 0 {
-						profileRead.Vendor = VendorTypeNotSpecified
-					}
-					profileMap[profileRead.Vendor] = append(profileMap[profileRead.Vendor], profileRead)
-					profileRead.Name = strings.Split(info.Name(), ".yaml")[0]
+	for _, profileFile := range profileFiles {
+		if strings.HasSuffix(profileFile.Name, ".yaml") {
+			profileRead, err := readProfile(profileFile.Data)
+			if err == nil {
+				// If version is not valid set to a default version
+				if !semver.IsValid(profileRead.Version) {
+					profileRead.Version = DefaultProfileVersion
 				}
+				if len(profileRead.Vendor) == 0 {
+					profileRead.Vendor = VendorTypeNotSpecified
+				}
+				profileMap[profileRead.Vendor] = append(profileMap[profileRead.Vendor], profileRead)
+				profileRead.Name = strings.Split(profileFile.Name, ".yaml")[0]
 			}
 		}
-		return nil
-	})
+	}
 }
 
 func (profile *Profile) FilterChecks(registry checks.DefaultRegistry) FilteredRegistry {
@@ -170,38 +156,14 @@ func (profile *Profile) FilterChecks(registry checks.DefaultRegistry) FilteredRe
 
 }
 
-func readProfile(fileName string) (*Profile, error) {
-
-	// Open the yaml file which defines the tests to run
-	profileYaml, err := os.Open(fileName)
-	if err != nil {
-		return nil, err
-	}
-
-	profileBytes, err := ioutil.ReadAll(profileYaml)
-	if err != nil {
-		return nil, err
-	}
+func readProfile(profileBytes []byte) (*Profile, error) {
 
 	profile := &Profile{}
-	err = yaml.Unmarshal(profileBytes, profile)
+	err := yaml.Unmarshal(profileBytes, profile)
 	if err != nil {
 		return nil, err
 	}
 
 	return profile, nil
 
-}
-
-func IsRunningInContainer() bool {
-	// docker creates a .dockerenv file at the root
-	// podman create a /run/.containerenv file
-	// if either is present wer are running in a container
-	if _, err := os.Stat("/.dockerenv"); err == nil {
-		return true
-
-	} else if _, err := os.Stat("/run/.containerenv"); err == nil {
-		return true
-	}
-	return false
 }
