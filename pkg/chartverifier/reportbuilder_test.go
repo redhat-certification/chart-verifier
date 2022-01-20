@@ -77,7 +77,7 @@ func TestUrlPackageDigest(t *testing.T) {
 	charts["https://github.com/openshift-helm-charts/charts/releases/download/hashicorp-vault-0.13.0/hashicorp-vault-0.13.0.tgz"] = "97e274069d9d3d028903610a3f9fca892b2620f0a334de6215ec5f962328586f"
 	charts["https://github.com/openshift-helm-charts/charts/releases/download/hashicorp-vault-0.12.0/hashicorp-vault-0.12.0.tgz"] = "b07be2a554ecbe6a6dd48ea763ed568de317d17cf1a19fb11ddb562983286555"
 	charts["https://github.com/IBM/charts/blob/master/repo/ibm-helm/ibm-object-storage-plugin-2.1.2.tgz?raw=true"] = "06efa1e26f8a7ba93a6e6136650b0624af2558cc44a4588198fca322f9219e32"
-	charts["checks/chart-0.1.0-v3.valid.tgz?raw=true"] = "7e95be19a34918f5a563952f8a40d1913c86306c12be490ead2648c62d27721d"
+	charts["checks/chart-0.1.0-v3.valid.tgz?raw=true"] = "4d6a38386eb8f3bbcdb4c1a4a6c3ccb7e8f38317e2a7924c0666087ff9b29c39"
 
 	for chart, sha := range charts {
 
