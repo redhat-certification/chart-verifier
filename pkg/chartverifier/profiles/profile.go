@@ -3,6 +3,7 @@ package profiles
 import (
 	"fmt"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/utils"
 	"github.com/redhat-certification/chart-verifier/pkg/profileconfig"
 	"github.com/spf13/viper"
 	"golang.org/x/mod/semver"
@@ -109,7 +110,7 @@ func New(config *viper.Viper) *Profile {
 			}
 		}
 	}
-
+	utils.LogInfo(fmt.Sprintf("Profile in use: %s %s", profileInUse.Vendor, profileInUse.Version))
 	return profileInUse
 }
 

@@ -98,7 +98,7 @@ def run_docker_image(verifier_image_name,verifier_image_tag,profile_type, chart_
             chart_directory = os.path.dirname(os.path.abspath(chart_location))
             docker_volumes[chart_directory] = {'bind': '/charts/', 'mode': 'rw'}
 
-        output = client.containers.run(verifier_image,docker_command,stdin_open=True,tty=True,stderr=True,volumes=docker_volumes,environment=docker_environment)
+        output = client.containers.run(verifier_image,docker_command,stdin_open=True,tty=True,stdout=True,volumes=docker_volumes,environment=docker_environment)
 
     except docker.errors.ContainerError as exc:
         return f"FAIL: docker.errors.ContainerError: {exc.args}"
@@ -121,7 +121,7 @@ def run_tarball_image(tarball_name,profile_type, chart_location):
 
     out = subprocess.run(["./test_verifier/chart-verifier","verify","--set",f"profile.vendorType={profile_type}",chart_location],capture_output=True)
 
-    return out.stderr.decode("utf-8")
+    return out.stdout.decode("utf-8")
 
 def run_podman_image(verifier_image_name,verifier_image_tag,profile_type, chart_location):
 
@@ -139,7 +139,7 @@ def run_podman_image(verifier_image_name,verifier_image_tag,profile_type, chart_
         out = subprocess.run(["podman", "run", "-v", f"{chart_directory}:/charts:z", "-v", f"{kubeconfig}:/kubeconfig", "-e", "KUBECONFIG=/kubeconfig", "--rm",
                               f"{verifier_image_name}:{verifier_image_tag}", "verify", "--set", f"profile.vendortype={profile_type}", f"/charts/{chart_name}"], capture_output=True)
 
-    return out.stderr.decode("utf-8")
+    return out.stdout.decode("utf-8")
 
 @then("I should see the report-info from the generated report matching the expected report-info")
 def check_report(run_verifier, profile_type, report_info_location):

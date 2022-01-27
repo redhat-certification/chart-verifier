@@ -28,6 +28,7 @@ import (
 
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/utils"
 )
 
 func TestCertify(t *testing.T) {
@@ -49,7 +50,7 @@ func TestCertify(t *testing.T) {
 		errBuf := bytes.NewBufferString("")
 		cmd.SetErr(errBuf)
 
-		cmd.SetArgs([]string{"../pkg/chartverifier/checks/chart-0.1.0-v3.non-existing.tgz"})
+		cmd.SetArgs([]string{"-E", "../pkg/chartverifier/checks/chart-0.1.0-v3.non-existing.tgz"})
 
 		err := cmd.Execute()
 		require.Error(t, err)
@@ -63,7 +64,7 @@ func TestCertify(t *testing.T) {
 		errBuf := bytes.NewBufferString("")
 		cmd.SetErr(errBuf)
 
-		cmd.SetArgs([]string{"../pkg/chartverifier/checks/chart-0.1.0-v3.non-existing.tgz", "-o"})
+		cmd.SetArgs([]string{"-E", "../pkg/chartverifier/checks/chart-0.1.0-v3.non-existing.tgz", "-o"})
 		err := cmd.Execute()
 		require.Error(t, err)
 		require.False(t, checks.IsChartNotFound(err))
@@ -78,6 +79,7 @@ func TestCertify(t *testing.T) {
 
 		cmd.SetArgs([]string{
 			"-e", "is-helm-vv3",
+			"-E",
 			"../pkg/chartverifier/checks/chart-0.1.0-v3.non-existing.tgz",
 		})
 		err := cmd.Execute()
@@ -94,6 +96,7 @@ func TestCertify(t *testing.T) {
 
 		cmd.SetArgs([]string{
 			"-e", "is-helm-vv3",
+			"-E",
 			"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 		})
 		err := cmd.Execute()
@@ -103,16 +106,19 @@ func TestCertify(t *testing.T) {
 
 	t.Run("Should succeed when the chart exists and is valid for a single check", func(t *testing.T) {
 		cmd := NewVerifyCmd(viper.New())
-		outBuf := bytes.NewBufferString("")
-		cmd.SetOut(outBuf)
+
 		errBuf := bytes.NewBufferString("")
 		cmd.SetErr(errBuf)
+		outBuf := bytes.NewBufferString("")
+		utils.CmdStdout = outBuf
 
 		cmd.SetArgs([]string{
 			"-e", "is-helm-v3",
 			"-V", "4.9",
+			"-E",
 			"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 		})
+
 		require.NoError(t, cmd.Execute())
 		require.NotEmpty(t, outBuf.String())
 
@@ -126,17 +132,19 @@ func TestCertify(t *testing.T) {
 
 	t.Run("Should display JSON certificate when option --output and argument values are given", func(t *testing.T) {
 		cmd := NewVerifyCmd(viper.New())
-		outBuf := bytes.NewBufferString("")
-		cmd.SetOut(outBuf)
 		errBuf := bytes.NewBufferString("")
 		cmd.SetErr(errBuf)
+		outBuf := bytes.NewBufferString("")
+		utils.CmdStdout = outBuf
 
 		cmd.SetArgs([]string{
 			"-e", "is-helm-v3", // only consider a single check, perhaps more checks in the future
 			"-V", "4.9",
 			"-o", "json",
+			"-E",
 			"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 		})
+
 		require.NoError(t, cmd.Execute())
 		require.NotEmpty(t, outBuf.String())
 
@@ -155,7 +163,7 @@ func TestCertify(t *testing.T) {
 	t.Run("Should display YAML certificate when option --output and argument values are given", func(t *testing.T) {
 		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
-		cmd.SetOut(outBuf)
+		utils.CmdStdout = outBuf
 		errBuf := bytes.NewBufferString("")
 		cmd.SetErr(errBuf)
 
@@ -164,6 +172,7 @@ func TestCertify(t *testing.T) {
 			"-V", "4.9",
 			"-o", "yaml",
 			"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
+			"-E",
 		})
 		require.NoError(t, cmd.Execute())
 		require.NotEmpty(t, outBuf.String())

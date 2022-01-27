@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/utils"
 	"io"
 	"net/http"
 	"net/url"
@@ -99,6 +100,10 @@ func (r *reportBuilder) SetChart(chart *helmchart.Chart) ReportBuilder {
 func (r *reportBuilder) AddCheck(check checks.Check, result checks.Result) ReportBuilder {
 	checkReport := r.Report.AddCheck(check)
 	checkReport.SetResult(result.Ok, result.Reason)
+	utils.LogInfo(fmt.Sprintf("Check: %s:%s result : %t", check.CheckId.Name, check.CheckId.Version, result.Ok))
+	if !result.Ok {
+		utils.LogInfo(fmt.Sprintf("Check: %s:%s reason : %s", check.CheckId.Name, check.CheckId.Version, result.Reason))
+	}
 	return r
 }
 

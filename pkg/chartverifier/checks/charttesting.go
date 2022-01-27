@@ -12,6 +12,7 @@ import (
 	"github.com/helm/chart-testing/v3/pkg/config"
 	"github.com/helm/chart-testing/v3/pkg/util"
 	"github.com/imdario/mergo"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/utils"
 	"github.com/redhat-certification/chart-verifier/pkg/tool"
 	"gopkg.in/yaml.v3"
 	"helm.sh/helm/v3/pkg/cli"
@@ -102,43 +103,43 @@ func buildChartTestingConfiguration(opts *CheckOptions) config.Configuration {
 // chart-verifier.
 func ChartTesting(opts *CheckOptions) (Result, error) {
 
-	tool.LogInfo("Start chart install and test check")
+	utils.LogInfo("Start chart install and test check")
 
 	cfg := buildChartTestingConfiguration(opts)
 	helm, err := tool.NewHelm(opts.HelmEnvSettings, opts.Values)
 	if err != nil {
-		tool.LogError("End chart install and test check with NewHelm error")
+		utils.LogError("End chart install and test check with NewHelm error")
 		return NewResult(false, err.Error()), nil
 	}
 
 	kubeConfig := tool.GetClientConfig(opts.HelmEnvSettings)
 	kubectl, err := tool.NewKubectl(kubeConfig)
 	if err != nil {
-		tool.LogError("End chart install and test check with NewKubectl error")
+		utils.LogError("End chart install and test check with NewKubectl error")
 		return NewResult(false, err.Error()), nil
 	}
 
 	_, path, err := LoadChartFromURI(opts.URI)
 	if err != nil {
-		tool.LogError("End chart install and test check with LoadChartFromURI error")
+		utils.LogError("End chart install and test check with LoadChartFromURI error")
 		return NewResult(false, err.Error()), nil
 	}
 
 	chrt, err := chart.NewChart(path)
 	if err != nil {
-		tool.LogError("End chart install and test check with NewChart error")
+		utils.LogError("End chart install and test check with NewChart error")
 		return NewResult(false, err.Error()), nil
 	}
 
 	configRelease := opts.ViperConfig.GetString(ReleaseConfigString)
 	if len(configRelease) > 0 {
-		tool.LogInfo(fmt.Sprintf("User specifed release: %s", configRelease))
+		utils.LogInfo(fmt.Sprintf("User specifed release: %s", configRelease))
 	}
 
 	if cfg.Upgrade {
 		oldChrt, err := getChartPreviousVersion(chrt)
 		if err != nil {
-			tool.LogError("End chart install and test check with getChartPreviousVersion error")
+			utils.LogError("End chart install and test check with getChartPreviousVersion error")
 			return NewResult(
 					false,
 					fmt.Sprintf("skipping upgrade test of '%s' because no previous chart is available", chrt.Yaml().Name)),
@@ -146,37 +147,37 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 		}
 		breakingChangeAllowed, err := util.BreakingChangeAllowed(oldChrt.Yaml().Version, chrt.Yaml().Version)
 		if !breakingChangeAllowed {
-			tool.LogError("End chart install and test check with BreakingChangeAllowed not allowed")
+			utils.LogError("End chart install and test check with BreakingChangeAllowed not allowed")
 			return NewResult(
 					false,
 					fmt.Sprintf("Skipping upgrade test of '%s' because breaking changes are not allowed for chart", chrt)),
 				nil
 		} else if err != nil {
-			tool.LogError(fmt.Sprintf("End chart install and test check with BreakingChangeAllowed error: %v", err))
+			utils.LogError(fmt.Sprintf("End chart install and test check with BreakingChangeAllowed error: %v", err))
 			return NewResult(false, err.Error()), nil
 		}
 		result := upgradeAndTestChart(cfg, oldChrt, chrt, helm, kubectl, configRelease)
 
 		if result.Error != nil {
-			tool.LogError(fmt.Sprintf("End chart install and test check with upgradeAndTestChart error: %v", result.Error))
+			utils.LogError(fmt.Sprintf("End chart install and test check with upgradeAndTestChart error: %v", result.Error))
 			return NewResult(false, result.Error.Error()), nil
 		}
 	} else {
 		result := installAndTestChartRelease(cfg, chrt, helm, kubectl, opts.Values, configRelease)
 		if result.Error != nil {
-			tool.LogError(fmt.Sprintf("End chart install and test check with installAndTestChartRelease error: %v", result.Error))
+			utils.LogError(fmt.Sprintf("End chart install and test check with installAndTestChartRelease error: %v", result.Error))
 			return NewResult(false, result.Error.Error()), nil
 		}
 	}
 
 	if versionError := setOCVersion(opts.AnnotationHolder, opts.HelmEnvSettings, getVersion); versionError != nil {
 		if versionError != nil {
-			tool.LogWarning(fmt.Sprintf("End chart install and test check with version error: %v", versionError))
+			utils.LogWarning(fmt.Sprintf("End chart install and test check with version error: %v", versionError))
 		}
 		return NewResult(false, versionError.Error()), nil
 	}
 
-	tool.LogInfo("End chart install and test check")
+	utils.LogInfo("End chart install and test check")
 	return NewResult(true, ChartTestingSuccess), nil
 }
 
@@ -262,7 +263,7 @@ func upgradeAndTestChart(
 			if cfg.SkipMissingValues && !chrt.HasCIValuesFile(valuesFile) {
 				// TODO: do not assume STDOUT here; instead a writer
 				//       should be given to be written to.
-				fmt.Printf("Upgrade testing for values file '%s' skipped because a corresponding values file was not found in %s/ci", valuesFile, chrt.Path())
+				utils.LogWarning(fmt.Sprintf("Upgrade testing for values file '%s' skipped because a corresponding values file was not found in %s/ci", valuesFile, chrt.Path()))
 				continue
 			}
 		}
