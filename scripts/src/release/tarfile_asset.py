@@ -2,8 +2,7 @@ import tarfile
 import os
 
 
-tar_content_files = [ {"name": "config", "arc_name": "config"},
-            {"name": "out/chart-verifier", "arc_name": "chart-verifier"} ]
+tar_content_files = [ {"name": "out/chart-verifier", "arc_name": "chart-verifier"} ]
 
 
 def create(release):

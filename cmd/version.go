@@ -1,20 +1,19 @@
 package cmd
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
-	"path/filepath"
-	"runtime"
-	"strings"
 
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 	"github.com/spf13/cobra"
 )
 
 var Version = "0.0.0"
+
+//go:embed release/release_info.json
+var releaseFileContent []byte
 
 type Release struct {
 	Version string `json:"version"`
@@ -22,36 +21,10 @@ type Release struct {
 
 func init() {
 
-	var configDir string
-	if profiles.IsRunningInContainer() {
-		configDir = filepath.Join("/app", "releases")
-	} else {
-		_, fn, _, ok := runtime.Caller(0)
-		if !ok {
-			return
-		}
-		index := strings.LastIndex(fn, "chart-verifier/")
-		configDir = fn[0 : index+len("chart-verifier")]
-		configDir = filepath.Join(configDir, "cmd", "release")
-	}
-
-	jsonFile, err := os.Open(filepath.Join(configDir, "release_info.json"))
-	if err != nil {
-		Version = "0.0.1"
-		return
-	}
-
-	// read our opened jsonFile as a byte array.
-	byteValue, _ := ioutil.ReadAll(jsonFile)
-	if err != nil {
-		Version = "0.0.2"
-		return
-	}
-
 	var release Release
 	// we unmarshal our byteArray which contains our
 	// jsonFile's content into 'users' which we defined above
-	err = json.Unmarshal(byteValue, &release)
+	err := json.Unmarshal(releaseFileContent, &release)
 	if err != nil {
 		Version = "0.0.3"
 		return

@@ -25,10 +25,6 @@ FROM registry.access.redhat.com/ubi8/ubi-minimal
 
 COPY --from=build /tmp/src/out/chart-verifier /app/chart-verifier
 
-COPY ./config /app/config
-
-COPY cmd/release /app/releases
-
 WORKDIR /app
 
 ENV PATH "$PATH:/app"
