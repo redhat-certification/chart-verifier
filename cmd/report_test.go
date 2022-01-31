@@ -10,6 +10,7 @@ import (
 
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/utils"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 	helmchart "helm.sh/helm/v3/pkg/chart"
@@ -79,7 +80,7 @@ func TestReport(t *testing.T) {
 	t.Run("Should pass for subcommand annotations", func(t *testing.T) {
 		cmd := NewReportCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
-		cmd.SetOut(outBuf)
+		utils.CmdStdout = outBuf
 		errBuf := bytes.NewBufferString("")
 		cmd.SetErr(errBuf)
 
@@ -98,7 +99,7 @@ func TestReport(t *testing.T) {
 	t.Run("Should pass for subcommand results", func(t *testing.T) {
 		cmd := NewReportCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
-		cmd.SetOut(outBuf)
+		utils.CmdStdout = outBuf
 		errBuf := bytes.NewBufferString("")
 		cmd.SetErr(errBuf)
 
@@ -116,7 +117,7 @@ func TestReport(t *testing.T) {
 	t.Run("Should pass for subcommand metadata", func(t *testing.T) {
 		cmd := NewReportCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
-		cmd.SetOut(outBuf)
+		utils.CmdStdout = outBuf
 		errBuf := bytes.NewBufferString("")
 		cmd.SetErr(errBuf)
 
@@ -134,7 +135,7 @@ func TestReport(t *testing.T) {
 	t.Run("Should pass for subcommand digests", func(t *testing.T) {
 		cmd := NewReportCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
-		cmd.SetOut(outBuf)
+		utils.CmdStdout = outBuf
 		errBuf := bytes.NewBufferString("")
 		cmd.SetErr(errBuf)
 
@@ -152,7 +153,7 @@ func TestReport(t *testing.T) {
 	t.Run("Should pass for subcommand all", func(t *testing.T) {
 		cmd := NewReportCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
-		cmd.SetOut(outBuf)
+		utils.CmdStdout = outBuf
 		errBuf := bytes.NewBufferString("")
 		cmd.SetErr(errBuf)
 
@@ -173,7 +174,7 @@ func TestReport(t *testing.T) {
 	t.Run("Should pass for annotation prefix", func(t *testing.T) {
 		cmd := NewReportCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
-		cmd.SetOut(outBuf)
+		utils.CmdStdout = outBuf
 		errBuf := bytes.NewBufferString("")
 		cmd.SetErr(errBuf)
 
@@ -200,7 +201,7 @@ func TestReport(t *testing.T) {
 	t.Run("Should pass for community profile", func(t *testing.T) {
 		cmd := NewReportCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
-		cmd.SetOut(outBuf)
+		utils.CmdStdout = outBuf
 		errBuf := bytes.NewBufferString("")
 		cmd.SetErr(errBuf)
 
@@ -226,7 +227,7 @@ func TestReport(t *testing.T) {
 	t.Run("Should pass for invalid profile version", func(t *testing.T) {
 		cmd := NewReportCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
-		cmd.SetOut(outBuf)
+		utils.CmdStdout = outBuf
 		errBuf := bytes.NewBufferString("")
 		cmd.SetErr(errBuf)
 

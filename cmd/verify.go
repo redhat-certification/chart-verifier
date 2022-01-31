@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/utils"
 
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
@@ -33,7 +34,6 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier"
-	"github.com/redhat-certification/chart-verifier/pkg/tool"
 )
 
 func init() {
@@ -54,8 +54,10 @@ var (
 	setOverridesFlag []string
 	// openshiftVersionFlag set the value of `certifiedOpenShiftVersions` in the report
 	openshiftVersionFlag string
-	// output logs flag
-	outputLogs bool
+	// write report to file
+	reportToFile bool
+	// write an error log file
+	suppressErrorLog bool
 )
 
 func filterChecks(set profiles.FilteredRegistry, subset []string, setEnabled bool, subsetEnabled bool) (chartverifier.FilteredRegistry, error) {
@@ -116,9 +118,23 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 		Short: "Verifies a Helm chart by checking some of its characteristics",
 		RunE: func(cmd *cobra.Command, args []string) error {
 
+			reportName := ""
+			if reportToFile {
+				if outputFormatFlag == "json" {
+					reportName = "report.json"
+				} else {
+					reportName = "report.yaml"
+				}
+			}
+			utils.InitLog(cmd, reportName, suppressErrorLog)
+
+			utils.LogInfo(fmt.Sprintf("Chart Verifer %s.", Version))
+			utils.LogInfo(fmt.Sprintf("Verify : %s", args[0]))
+
 			// vals is a resulting map considering all the options the user has given.
 			vals, err := opts.MergeValues(getter.All(settings))
 			if err != nil {
+				utils.LogError(err.Error())
 				return err
 			}
 
@@ -129,6 +145,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 
 			checks, err := buildChecks(allChecks, verifierBuilder.GetConfig(), enabledChecksFlag, disabledChecksFlag)
 			if err != nil {
+				utils.LogError(err.Error())
 				return err
 			}
 
@@ -144,33 +161,29 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 
 			result, err := verifier.Verify(args[0])
 			if err != nil {
+				utils.LogError(err.Error())
 				return err
 			}
 
+			outputContent := ""
 			if outputFormatFlag == "json" {
 				b, err := json.Marshal(result)
 				if err != nil {
+					utils.LogError(err.Error())
 					return err
 				}
-
-				cmd.Println(string(b))
-
+				outputContent = string(b)
 			} else {
 				b, err := yaml.Marshal(result)
 				if err != nil {
 					return err
 				}
-				cmd.Println(string(b))
-
-				if outputLogs {
-					logs, err := tool.GetLogsOutput(outputFormatFlag)
-					if err != nil {
-						cmd.Println(fmt.Sprintf("LoggingError: %v", err))
-					} else if len(logs) > 0 {
-						cmd.Println(logs)
-					}
-				}
+				outputContent = string(b)
 			}
+			utils.WriteStdOut(outputContent)
+
+			utils.WriteLogs(outputFormatFlag)
+
 			return nil
 		},
 	}
@@ -195,8 +208,8 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 
 	cmd.Flags().StringSliceVarP(&verifyOpts.ValueFiles, "set-values", "f", nil, "specify application and check configuration values in a YAML file or a URL (can specify multiple)")
 	cmd.Flags().StringVarP(&openshiftVersionFlag, "openshift-version", "V", "", "version of OpenShift used in the cluster")
-	cmd.Flags().BoolVarP(&outputLogs, "log-output", "l", false, "output logs after report (default: false) ")
-
+	cmd.Flags().BoolVarP(&reportToFile, "write-to-file", "w", false, "write report to report.yaml (default: stdout)")
+	cmd.Flags().BoolVarP(&suppressErrorLog, "suppress-error-log", "E", false, "suppress the error log (default: written to ./chart-verifier.log)")
 	return cmd
 }
 

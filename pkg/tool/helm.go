@@ -5,6 +5,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/utils"
+
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
@@ -23,7 +25,7 @@ func NewHelm(envSettings *cli.EnvSettings, args map[string]interface{}) (*Helm, 
 	helm := &Helm{envSettings: envSettings, args: args}
 	config := new(action.Configuration)
 	if err := config.Init(envSettings.RESTClientGetter(), envSettings.Namespace(), os.Getenv("HELM_DRIVER"), func(format string, v ...interface{}) {
-		LogInfo(fmt.Sprintf(format, v))
+		utils.LogInfo(fmt.Sprintf(format, v))
 	}); err != nil {
 		return nil, err
 	}
@@ -32,7 +34,7 @@ func NewHelm(envSettings *cli.EnvSettings, args map[string]interface{}) (*Helm, 
 }
 
 func (h Helm) Install(namespace, chart, release, valuesFile string) error {
-	LogInfo(fmt.Sprintf("Execute helm install. namespace: %s, release: %s chart: %s", namespace, release, chart))
+	utils.LogInfo(fmt.Sprintf("Execute helm install. namespace: %s, release: %s chart: %s", namespace, release, chart))
 	client := action.NewInstall(h.config)
 	client.Namespace = namespace
 	client.ReleaseName = release
@@ -43,7 +45,7 @@ func (h Helm) Install(namespace, chart, release, valuesFile string) error {
 
 	cp, err := client.ChartPathOptions.LocateChart(chart, h.envSettings)
 	if err != nil {
-		LogError(fmt.Sprintf("Error LocateChart: %v", err))
+		utils.LogError(fmt.Sprintf("Error LocateChart: %v", err))
 		return err
 	}
 
@@ -54,81 +56,81 @@ func (h Helm) Install(namespace, chart, release, valuesFile string) error {
 	}
 	vals, err := valueOpts.MergeValues(p)
 	if err != nil {
-		LogError(fmt.Sprintf("Error MergeValues: %v", err))
+		utils.LogError(fmt.Sprintf("Error MergeValues: %v", err))
 		return err
 	}
 
 	if val, ok := h.args["set"]; ok {
 		if err := strvals.ParseInto(fmt.Sprintf("%v", val), vals); err != nil {
-			LogError(fmt.Sprintf("Error parsing --set values: %v", err))
+			utils.LogError(fmt.Sprintf("Error parsing --set values: %v", err))
 			return err
 		}
 	}
 
 	if val, ok := h.args["set-file"]; ok {
 		if err := strvals.ParseInto(fmt.Sprintf("%v", val), vals); err != nil {
-			LogError(fmt.Sprintf("Error parsing --set-file values: %v", err))
+			utils.LogError(fmt.Sprintf("Error parsing --set-file values: %v", err))
 			return err
 		}
 	}
 
 	if val, ok := h.args["set-string"]; ok {
 		if err := strvals.ParseInto(fmt.Sprintf("%v", val), vals); err != nil {
-			LogError(fmt.Sprintf("Error parsing --set-string values: %v", err))
+			utils.LogError(fmt.Sprintf("Error parsing --set-string values: %v", err))
 			return err
 		}
 	}
 
 	c, err := loader.Load(cp)
 	if err != nil {
-		LogError(fmt.Sprintf("Error loading chart path: %v", err))
+		utils.LogError(fmt.Sprintf("Error loading chart path: %v", err))
 		return err
 	}
 
 	// TODO: support other options if required
 	_, err = client.Run(c, vals)
 	if err != nil {
-		LogError(fmt.Sprintf("Error running chart install: %v", err))
+		utils.LogError(fmt.Sprintf("Error running chart install: %v", err))
 		return err
 	}
 
-	LogInfo("Helm install complete")
+	utils.LogInfo("Helm install complete")
 	return nil
 }
 
 func (h Helm) Test(namespace, release string) error {
-	LogInfo(fmt.Sprintf("Execute helm test. namespace: %s, release: %s, args: %+v", namespace, release, h.args))
+	utils.LogInfo(fmt.Sprintf("Execute helm test. namespace: %s, release: %s, args: %+v", namespace, release, h.args))
 	client := action.NewReleaseTesting(h.config)
 	client.Namespace = namespace
 
 	// TODO: support filter and timeout options if required
 	_, err := client.Run(release)
 	if err != nil {
-		LogError(fmt.Sprintf("Execute helm test. error %v", err))
+		utils.LogError(fmt.Sprintf("Execute helm test. error %v", err))
 		return err
 	}
 
-	LogInfo("Helm test complete")
+	utils.LogInfo("Helm test complete")
 	return nil
 }
 
 func (h Helm) Uninstall(namespace, release string) error {
-	LogInfo(fmt.Sprintf("Execute helm uninstall. namespace: %s, release: %s", namespace, release))
+	utils.LogInfo(fmt.Sprintf("Execute helm uninstall. namespace: %s, release: %s", namespace, release))
 	client := action.NewUninstall(h.config)
 	// TODO: support other options if required
 	_, err := client.Run(release)
 
 	if err != nil {
-		LogError(fmt.Sprintf("Error from helm uninstall : %v", err))
+		utils.LogError(fmt.Sprintf("Error from helm uninstall : %v", err))
 		return err
 	}
 
-	LogInfo("Delete release complete")
+	utils.LogInfo("Delete release complete")
 	return nil
 }
 
 func (h Helm) Upgrade(namespace, chart, release string) error {
-	LogInfo(fmt.Sprintf("Execute helm upgrade. namespace: %s, release: %s chart: %s", namespace, release, chart))
+	utils.LogInfo(fmt.Sprintf("Execute helm upgrade. namespace: %s, release: %s chart: %s", namespace, release, chart))
 	client := action.NewUpgrade(h.config)
 	client.Namespace = namespace
 	client.ReuseValues = true
@@ -136,7 +138,7 @@ func (h Helm) Upgrade(namespace, chart, release string) error {
 
 	cp, err := client.ChartPathOptions.LocateChart(chart, h.envSettings)
 	if err != nil {
-		LogError(fmt.Sprintf("Error LocateChart: %v", err))
+		utils.LogError(fmt.Sprintf("Error LocateChart: %v", err))
 		return err
 	}
 
@@ -144,23 +146,23 @@ func (h Helm) Upgrade(namespace, chart, release string) error {
 	valueOpts := &values.Options{}
 	vals, err := valueOpts.MergeValues(p)
 	if err != nil {
-		LogError(fmt.Sprintf("Error MergeValues: %v", err))
+		utils.LogError(fmt.Sprintf("Error MergeValues: %v", err))
 		return err
 	}
 
 	c, err := loader.Load(cp)
 	if err != nil {
-		LogError(fmt.Sprintf("Error loading chart path: %v", err))
+		utils.LogError(fmt.Sprintf("Error loading chart path: %v", err))
 		return err
 	}
 
 	// TODO: support other options if required
 	_, err = client.Run(release, c, vals)
 	if err != nil {
-		LogError(fmt.Sprintf("Error running chart upgrade: %v", err))
+		utils.LogError(fmt.Sprintf("Error running chart upgrade: %v", err))
 		return err
 	}
 
-	LogInfo("Helm upgrade complete")
+	utils.LogInfo("Helm upgrade complete")
 	return nil
 }

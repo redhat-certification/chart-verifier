@@ -9,6 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/utils"
 )
 
 func init() {
@@ -36,6 +37,16 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 		Short: "Provides information from a report",
 		RunE: func(cmd *cobra.Command, args []string) error {
 
+			reportName := ""
+			if reportToFile {
+				if outputFormatFlag == "json" {
+					reportName = "report-info.json"
+				} else {
+					reportName = "report-info.yaml"
+				}
+			}
+			utils.InitLog(cmd, reportName, true)
+
 			commandArg := args[0]
 			reportArg := args[1]
 
@@ -56,20 +67,24 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 				return errors.New(fmt.Sprintf("Error executing command: %v", err))
 			}
 
+			output := ""
 			if outputFormatFlag == "yaml" {
 				b, err := yaml.Marshal(result)
 				if err != nil {
+					utils.LogError(err.Error())
 					return err
 				}
-
-				cmd.Println(string(b))
+				output = string(b)
 			} else {
 				b, err := json.Marshal(result)
 				if err != nil {
+					utils.LogError(err.Error())
 					return err
 				}
-				cmd.Println(string(b))
+				output = string(b)
 			}
+			utils.WriteStdOut(output)
+
 			return nil
 		},
 	}
@@ -79,6 +94,8 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 	cmd.Flags().StringSliceVarP(&reportOpts.Values, "set", "s", []string{}, "set report configuration values: profile vendor type and version")
 
 	cmd.Flags().StringSliceVarP(&reportOpts.ValueFiles, "set-values", "f", nil, "specify report configuration values in a YAML file or a URL (can specify multiple)")
+
+	cmd.Flags().BoolVarP(&reportToFile, "write-to-file", "w", false, "write report to report-info.json (default: stdout)")
 
 	return cmd
 }
