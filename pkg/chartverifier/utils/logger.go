@@ -28,6 +28,7 @@ type LogEntry struct {
 }
 
 var CmdStdout io.Writer = os.Stdout
+var CmdStderr io.Writer = os.Stderr
 
 var verifierlog VerifierLog
 var cmd *cobra.Command
@@ -39,6 +40,7 @@ const outputDirectory string = "chartverifier"
 func InitLog(cobraCmd *cobra.Command, stdFilename string, suppressErrorLog bool) {
 	cmd = cobraCmd
 	stdoutFileName = stdFilename
+	cmd.SetErr(CmdStderr)
 	now := time.Now()
 	verifierlog = VerifierLog{Name: "Chart Verifier Log", Time: now.Format("01-02-2006-15-04-05")}
 	if suppressErrorLog {

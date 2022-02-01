@@ -57,7 +57,7 @@ func TestLogging(t *testing.T) {
 		outBuf := bytes.NewBufferString("")
 		CmdStdout = outBuf
 		errBuf := bytes.NewBufferString("")
-		tCmd.SetErr(errBuf)
+		CmdStderr = errBuf
 		tCmd.SetArgs([]string{"LogInfoOnly", "This should not be output"})
 		tCmd.Execute()
 
@@ -71,7 +71,7 @@ func TestLogging(t *testing.T) {
 		outBuf := bytes.NewBufferString("")
 		CmdStdout = outBuf
 		errBuf := bytes.NewBufferString("")
-		tCmd.SetErr(errBuf)
+		CmdStderr = errBuf
 
 		output := "This should be output in a log file"
 		tCmd.SetArgs([]string{"LogInfoFile", output})
@@ -93,7 +93,7 @@ func TestLogging(t *testing.T) {
 		outBuf := bytes.NewBufferString("")
 		CmdStdout = outBuf
 		errBuf := bytes.NewBufferString("")
-		tCmd.SetErr(errBuf)
+		CmdStderr = errBuf
 		output := "This should be output to file only"
 		tCmd.SetArgs([]string{"StdOutFile", output})
 		tCmd.Execute()
@@ -113,7 +113,7 @@ func TestLogging(t *testing.T) {
 		outBuf := bytes.NewBufferString("")
 		CmdStdout = outBuf
 		errBuf := bytes.NewBufferString("")
-		tCmd.SetErr(errBuf)
+		CmdStderr = errBuf
 		output := "This error should be output to stderr and log file"
 		tCmd.SetArgs([]string{"ErrorAndLog", output})
 		tCmd.Execute()
@@ -133,7 +133,7 @@ func TestLogging(t *testing.T) {
 		outBuf := bytes.NewBufferString("")
 		CmdStdout = outBuf
 		errBuf := bytes.NewBufferString("")
-		tCmd.SetErr(errBuf)
+		CmdStderr = errBuf
 		output := "This warning should be output to stderr and log file."
 		tCmd.SetArgs([]string{"WarningAndLog", output})
 		tCmd.Execute()
@@ -153,7 +153,7 @@ func TestLogging(t *testing.T) {
 		outBuf := bytes.NewBufferString("")
 		CmdStdout = outBuf
 		errBuf := bytes.NewBufferString("")
-		tCmd.SetErr(errBuf)
+		CmdStderr = errBuf
 
 		tCmd.SetArgs([]string{"testPrune"})
 		for i := 1; i <= 15; i++ {
