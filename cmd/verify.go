@@ -208,8 +208,8 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 
 	cmd.Flags().StringSliceVarP(&verifyOpts.ValueFiles, "set-values", "f", nil, "specify application and check configuration values in a YAML file or a URL (can specify multiple)")
 	cmd.Flags().StringVarP(&openshiftVersionFlag, "openshift-version", "V", "", "version of OpenShift used in the cluster")
-	cmd.Flags().BoolVarP(&reportToFile, "write-to-file", "w", false, "write report to report.yaml (default: stdout)")
-	cmd.Flags().BoolVarP(&suppressErrorLog, "suppress-error-log", "E", false, "suppress the error log (default: written to ./chart-verifier.log)")
+	cmd.Flags().BoolVarP(&reportToFile, "write-to-file", "w", false, "write report to ./chartverifier/report.yaml (default: stdout)")
+	cmd.Flags().BoolVarP(&suppressErrorLog, "suppress-error-log", "E", false, "suppress the error log (default: written to ./chartverifier/verifier-<timestamp>.log)")
 	return cmd
 }
 

@@ -11,6 +11,8 @@ Helm chart checks are a set of checks against which the Red Hat Helm chart-verif
 - When there are no error messages, the `helm-lint` check passes the verification and is successful. Messages such as `Warning` and `info` do not cause the check to fail.
 - Profiles define the checks needed based on the chart type: partner, redhat or community.
     - Profiles are versioned. Each new version may include updated checks, new checks, new annotations or chnaged annotations.
+- The generated report is written to stdout but can optionally be written to a file.
+- An error log is created for all verify commands but can be optionally suppressed.
 
 ## Types of Helm chart checks
 Helm chart checks are categorized into the following types:
@@ -112,7 +114,6 @@ This section provides help on the basic usage of Helm chart checks with the podm
         --kube-context string         name of the kubeconfig context to use
         --kube-token string           bearer token used for authentication
         --kubeconfig string           path to the kubeconfig file
-    -l, --log-output                  output logs after report (default: false)
     -n, --namespace string            namespace scope for this request
     -V, --openshift-version string    set the value of certifiedOpenShiftVersions in the report
     -o, --output string               the output format: default, json or yaml
@@ -121,7 +122,8 @@ This section provides help on the basic usage of Helm chart checks with the podm
         --repository-config string    path to the file containing repository names and URLs (default "/home/baiju/.config/helm/repositories.yaml")
     -s, --set strings                 overrides a configuration, e.g: dummy.ok=false
     -f, --set-values strings          specify application and check configuration values in a YAML file or a URL (can specify multiple)
-
+    -E, --suppress-error-log          suppress the error log (default: written to ./chartverifier/verifier-<timestamp>.log)
+    -w, --write-to-file               write report to ./chartverifier/report.yaml (default: stdout)
   Global Flags:
         --config string   config file (default is $HOME/.chart-verifier.yaml)
   ```
@@ -167,6 +169,57 @@ This section provides help on the basic usage of Helm chart checks with the podm
           verify -F /values/overrides.yaml              \
           <chart-uri>
   ```
+
+### Saving the report
+
+By default the report is written to stdout which can be redirected to a file. For example:
+
+```
+  $ podman run --rm -i                                  \
+          -e KUBECONFIG=/.kube/config                   \
+          -v "${HOME}/.kube":/.kube                     \
+          "quay.io/redhat-certification/chart-verifier" \
+          verify -e images-are-certified,helm-lint      \
+          <chart-uri> > report.yaml
+
+  ```
+
+Alternatively, use the ```-w```  option to write the report directly to the file ```./chartverifier/report.yaml```. To get this file a volume mount is required to ```/app/chartverifer```. For example:
+
+```
+  $ podman run --rm -i                                  \
+          -e KUBECONFIG=/.kube/config                   \
+          -v "${HOME}/.kube":/.kube                     \
+          -v $(pwd)/chartverifier:/app/chartverifier    \
+          -w                                            \
+          "quay.io/redhat-certification/chart-verifier" \
+          verify -e images-are-certified,helm-lint      \
+          <chart-uri> > report.yaml
+
+  ```
+If the file already exists it is overwritten.
+
+### The error log
+
+By default an error log is written to  file ```./chartverifier/verify-<timestamp>.yaml```. It includes any error messages, the results of each check and additional information around chart testing. To get a copy of the error log a volume mount is required to ```/app/chartverifer```. For example: 
+
+```
+  $ podman run --rm -i                                  \
+          -e KUBECONFIG=/.kube/config                   \
+          -v "${HOME}/.kube":/.kube                     \
+          -v $(pwd)/chartverifier:/app/chartverifier    \
+          "quay.io/redhat-certification/chart-verifier" \
+          verify -e images-are-certified,helm-lint      \
+          <chart-uri> > report.yaml
+
+  ```
+
+If multiple logs are added to the same directory a maximum of 10 will be kept. The files will be deleted oldest first.
+
+Use the ```-E``` flag to suppress error log output. 
+
+Note: Error and warning messages are also output to stderr and are not suppressed by the ```-E``` option.
+
 
 ### Using the `chart-verifier` binary for Helm chart checks (Linux only)
 
