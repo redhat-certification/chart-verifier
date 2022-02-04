@@ -1,12 +1,18 @@
 {
-    "version": "1.4.1",
+    "version": "1.5.0",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
         "<ul>",
-        "<li>Adds support for chart verifier binary (linux only):</li>",
+        "<li>Add version command (#231)</li>",
+        "<li>Report now output to stdout (#240):</li>",
         "<ul>",
-        "<li>Remove dependencies on helm, oc and kubectl clients (#221).</li>",
-        "<li>Include new chart verifier binary as part of a release (#222).</li>",
+        "<li>Option added to write directly to a file.</li>",
+        "<li>Added error log.</li>",
+        "</ul>",
+        "<li>Bug Fixes:</li>",
+        "<ul>",
+        "<li>Panic error running using podman(#237)</li>",
+        "<li>Chart verifier binary fails to find profiles(#238)</li>",
         "</ul>",
         "</ul>"
     ]
