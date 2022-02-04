@@ -31,6 +31,7 @@ type VerifierBuilder interface {
 	SetOverrides([]string) VerifierBuilder
 	SetToolVersion(string) VerifierBuilder
 	SetOpenShiftVersion(string) VerifierBuilder
+	SetProviderDelivery(bool) VerifierBuilder
 	SetSettings(settings *cli.EnvSettings) VerifierBuilder
 	Build() (Verifier, error)
 }

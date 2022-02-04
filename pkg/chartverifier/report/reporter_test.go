@@ -124,12 +124,14 @@ func TestReports_1_1(t *testing.T) {
 	testRedHatMetaDataReport.ProfileVendorType = "redhat"
 	testRedHatMetaDataReport.ChartUri = "pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
 	testRedHatMetaDataReport.Chart = &helmchart.Metadata{Name: "chart", Version: "0.1.0-v3.valid"}
+	testRedHatMetaDataReport.ProviderDelivery = false
 
 	testPartnerMetaDataReport := &MetadataReport{}
 	testPartnerMetaDataReport.ProfileVersion = version
 	testPartnerMetaDataReport.ProfileVendorType = "partner"
 	testPartnerMetaDataReport.ChartUri = "pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
 	testPartnerMetaDataReport.Chart = &helmchart.Metadata{Name: "chart", Version: "0.1.0-v3.valid"}
+	testRedHatMetaDataReport.ProviderDelivery = true
 
 	var testAnnotationsReport []Annotation
 	testAnnotationsReport = append(testAnnotationsReport, Annotation{Name: fmt.Sprintf("charts.openshift.io/%s", DigestsAnnotationName), Value: "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"})

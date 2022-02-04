@@ -154,6 +154,7 @@ func Metadata(opts *ReportOptions) (OutputReport, error) {
 	outputReport.MetadataReport.ProfileVersion = report.Metadata.ToolMetadata.Profile.Version
 	outputReport.MetadataReport.ChartUri = report.Metadata.ToolMetadata.ChartUri
 	outputReport.MetadataReport.Chart = report.Metadata.ChartData
+	outputReport.MetadataReport.ProviderDelivery = report.Metadata.ToolMetadata.ProviderDelivery
 	return outputReport, nil
 
 }

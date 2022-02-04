@@ -58,6 +58,8 @@ var (
 	reportToFile bool
 	// write an error log file
 	suppressErrorLog bool
+	// provider controls chart deliver mechanism.
+	providerDelivery bool
 )
 
 func filterChecks(set profiles.FilteredRegistry, subset []string, setEnabled bool, subsetEnabled bool) (chartverifier.FilteredRegistry, error) {
@@ -153,6 +155,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 				SetChecks(checks).
 				SetToolVersion(Version).
 				SetOpenShiftVersion(openshiftVersionFlag).
+				SetProviderDelivery(providerDelivery).
 				Build()
 
 			if err != nil {
@@ -210,6 +213,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 	cmd.Flags().StringVarP(&openshiftVersionFlag, "openshift-version", "V", "", "version of OpenShift used in the cluster")
 	cmd.Flags().BoolVarP(&reportToFile, "write-to-file", "w", false, "write report to ./chartverifier/report.yaml (default: stdout)")
 	cmd.Flags().BoolVarP(&suppressErrorLog, "suppress-error-log", "E", false, "suppress the error log (default: written to ./chartverifier/verifier-<timestamp>.log)")
+	cmd.Flags().BoolVarP(&providerDelivery, "provider-delivery", "d", false, "chart provider will provide the chart delivery mechanism (default: false)")
 	return cmd
 }
 
