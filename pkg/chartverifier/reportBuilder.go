@@ -44,6 +44,7 @@ type ReportBuilder interface {
 	SetChart(chart *helmchart.Chart) ReportBuilder
 	SetTestedOpenShiftVersion(version string) ReportBuilder
 	SetSupportedOpenShiftVersions(versions string) ReportBuilder
+	SetProviderDelivery(providerDelivery bool) ReportBuilder
 	Build() (*Report, error)
 }
 
@@ -94,6 +95,11 @@ func (r *reportBuilder) SetChartUri(uri string) ReportBuilder {
 func (r *reportBuilder) SetChart(chart *helmchart.Chart) ReportBuilder {
 	r.Chart = chart
 	r.Report.Metadata.ChartData = chart.Metadata
+	return r
+}
+
+func (r *reportBuilder) SetProviderDelivery(providerDelivery bool) ReportBuilder {
+	r.Report.Metadata.ToolMetadata.ProviderDelivery = providerDelivery
 	return r
 }
 

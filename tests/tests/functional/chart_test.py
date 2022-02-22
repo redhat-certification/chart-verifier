@@ -23,6 +23,7 @@ except ImportError:
     "features/chart_good.feature",
     "A chart provider verifies their chart using the chart verifier"
 )
+
 def test_chart_source():
     pass
 
@@ -38,45 +39,70 @@ def chart_location(location,helm_chart):
 def report_info_location(location,report_info):
     return os.path.join(location,report_info)
 
-@when(parsers.parse("I run the <image_type> chart-verifier verify command against the chart to generate a report"),target_fixture="run_verifier")
-def run_verifier(image_type, profile_type, chart_location):
-    print(f"\nrun {image_type} verifier  with profile : {profile_type}, and chart: {chart_location}")
+@given(parsers.parse("I will use the chart verifier <image_type> image"),target_fixture="image_type")
+def image_type(image_type):
+    return image_type
+
+@when(parsers.parse("I run the chart-verifier verify command against the chart to generate a report"),target_fixture="run_verify")
+def run_verify(image_type, profile_type, chart_location):
+    print(f"\nrun {image_type} verifier verify  with profile : {profile_type}, and chart: {chart_location}")
+    return run_verifier(image_type, profile_type, chart_location,"verify")
+
+def run_report(image_type, profile_type, report_location):
+    print(f"\nrun {image_type} verifier report  with profile : {profile_type}, and chart: {report_location}")
+    return run_verifier(image_type, profile_type, report_location,"report")
+
+def run_verifier(image_type, profile_type, target_location, command):
 
     if image_type == "tarball":
         tarball_name = os.environ.get("VERIFIER_TARBALL_NAME")
-        return run_tarball_image(tarball_name,profile_type,chart_location)
-    elif image_type == "docker":
-        image_tag  =  os.environ.get("VERIFER_IMAGE_TAG")
-        if not image_tag:
-            image_tag = "main"
-        image_name =  "quay.io/redhat-certification/chart-verifier"
-        return run_docker_image(image_name,image_tag,profile_type,chart_location)
-    else:
+        print(f"\nRun {command} using tarball: {tarball_name}")
+        if command == "verify":
+            return run_verify_tarball_image(tarball_name,profile_type,target_location)
+        else:
+            return run_report_tarball_image(tarball_name,profile_type,target_location)
+    elif image_type == "podman":
         image_tag = os.environ.get("PODMAN_IMAGE_TAG")
         if not image_tag:
             image_tag = "main"
         image_name =  "quay.io/redhat-certification/chart-verifier"
-        return run_podman_image(image_name,image_tag,profile_type,chart_location)
+        print(f"\nRun {command} using podman image {image_name}:{image_tag}")
+        if command == "verify":
+            return run_verify_podman_image(image_name,image_tag,profile_type,target_location)
+        else:
+            return run_report_podman_image(image_name,image_tag,profile_type,target_location)
+    else:
+        image_tag  =  os.environ.get("VERIFIER_IMAGE_TAG")
+        if not image_tag:
+            image_tag = "main"
+        image_name =  "quay.io/redhat-certification/chart-verifier"
+        print(f"\nRun {command} using docker image {image_name}:{image_tag}")
+        if command == "verify":
+            return run_verify_docker_image(image_name,image_tag,profile_type,target_location)
+        else:
+            return run_report_docker_image(image_name,image_tag,profile_type,target_location)
 
-def run_docker_image(verifier_image_name,verifier_image_tag,profile_type, chart_location):
+def run_verify_docker_image(verifier_image_name,verifier_image_tag,profile_type, chart_location):
 
     client = docker.from_env()
 
     try:
-        verifier_image=client.images.pull(verifier_image_name,tag=verifier_image_tag)
+        verifier_image=client.images.get(f'{verifier_image_name}:{verifier_image_tag}')
     except docker.errors.APIError as exc:
-        print(f'Error from docker loading image: {verifier_image_name}:{verifier_image_tag}')
-        return f"FAIL pulling image : docker.errors.APIError: {exc.args}"
+        try:
+            print(f'Error from docker get image: {verifier_image_name}:{verifier_image_tag}')
+            verifier_image=client.images.pull(verifier_image_name,tag=verifier_image_tag)
+        except:
+            print(f'Error from docker pulling image: {verifier_image_name}:{verifier_image_tag}')
+            return f"FAIL getting image : docker.errors.APIError: {exc.args}"
 
-    os.environ["VERIFIER_IMAGE"] = f"{verifier_image_name}:{verifier_image_tag}"
-
-    docker_command = "verify "
+    docker_command = "verify"
     local_chart = False
     if chart_location.startswith('http:/') or chart_location.startswith('https:/'):
-        docker_command = docker_command + chart_location
+        docker_command = f"{docker_command}  {chart_location}"
     else:
         if os.path.exists(chart_location):
-            docker_command = docker_command + f"/charts/{os.path.basename(chart_location)}"
+            docker_command = f"{docker_command} /charts/{os.path.basename(chart_location)}"
             local_chart = True
         else:
             return f"FAIL: chart does not exist: {os.path.abspath(chart_location)}"
@@ -98,7 +124,7 @@ def run_docker_image(verifier_image_name,verifier_image_tag,profile_type, chart_
             chart_directory = os.path.dirname(os.path.abspath(chart_location))
             docker_volumes[chart_directory] = {'bind': '/charts/', 'mode': 'rw'}
 
-        output = client.containers.run(verifier_image,docker_command,stdin_open=True,tty=True,stdout=True,volumes=docker_volumes,environment=docker_environment)
+        output = client.containers.run(verifier_image,docker_command,stdin_open=True,tty=True,stdout=True,remove=True,volumes=docker_volumes,environment=docker_environment)
 
     except docker.errors.ContainerError as exc:
         return f"FAIL: docker.errors.ContainerError: {exc.args}"
@@ -112,7 +138,35 @@ def run_docker_image(verifier_image_name,verifier_image_tag,profile_type, chart_
 
     return output.decode("utf-8")
 
-def run_tarball_image(tarball_name,profile_type, chart_location):
+def run_report_docker_image(verifier_image_name,verifier_image_tag,profile_type, report_location):
+
+    verifier_image = f"{verifier_image_name}:{verifier_image_tag}"
+
+    os.environ["VERIFIER_IMAGE"] = verifier_image
+    docker_command = f"report all /reports/"+os.path.basename(report_location)
+
+    if profile_type:
+        docker_command = f"{docker_command} --set profile.vendorType={profile_type}"
+
+    print(f'docker command: {docker_command}')
+
+    try:
+        client = docker.from_env()
+        report_directory = os.path.dirname(os.path.abspath(report_location))
+        output = client.containers.run(verifier_image,docker_command,stdin_open=True,tty=True,stdout=True,remove=True,volumes={report_directory: {'bind': '/reports/', 'mode': 'rw'}})
+    except docker.errors.ContainerError as exc:
+        return f"FAIL: docker.errors.ContainerError: {exc.args}"
+    except docker.errors.ImageNotFound as exc:
+        return f"FAIL: docker.errors.ImageNotFound: {exc.args}"
+    except docker.errors.APIError as exc:
+        return f"FAIL: docker.errors.APIError: {exc.args}"
+
+    if not output:
+        return f"FAIL: no report produced : {docker_command}"
+
+    return output.decode("utf-8")
+
+def run_verify_tarball_image(tarball_name,profile_type, chart_location):
     print(f"Run tarball image from {tarball_name}")
 
     tar = tarfile.open(tarball_name, "r:gz")
@@ -123,7 +177,18 @@ def run_tarball_image(tarball_name,profile_type, chart_location):
 
     return out.stdout.decode("utf-8")
 
-def run_podman_image(verifier_image_name,verifier_image_tag,profile_type, chart_location):
+def run_report_tarball_image(tarball_name,profile_type, chart_location):
+    print(f"Run tarball image from {tarball_name}")
+
+    tar = tarfile.open(tarball_name, "r:gz")
+
+    tar.extractall(path="./test_verifier")
+
+    out = subprocess.run(["./test_verifier/chart-verifier","report","all","--set",f"profile.vendorType={profile_type}",chart_location],capture_output=True)
+
+    return out.stdout.decode("utf-8")
+
+def run_verify_podman_image(verifier_image_name,verifier_image_tag,profile_type, chart_location):
 
     print(f"Run podman image - {verifier_image_name}:{verifier_image_tag}")
     kubeconfig = os.environ.get("KUBECONFIG")
@@ -141,15 +206,27 @@ def run_podman_image(verifier_image_name,verifier_image_tag,profile_type, chart_
 
     return out.stdout.decode("utf-8")
 
+def run_report_podman_image(verifier_image_name,verifier_image_tag,profile_type, report_location):
+
+    print(f"Run podman image - {verifier_image_name}:{verifier_image_tag}")
+
+    report_directory = os.path.dirname(os.path.abspath(report_location))
+    report_name = os.path.basename(os.path.abspath(report_location))
+    out = subprocess.run(["podman", "run", "-v", f"{report_directory}:/reports:z", "--rm",
+                        f"{verifier_image_name}:{verifier_image_tag}", "report", "all", "--set", f"profile.vendortype={profile_type}", f"/reports/{report_name}"], capture_output=True)
+
+    return out.stdout.decode("utf-8")
+
+
 @then("I should see the report-info from the generated report matching the expected report-info")
-def check_report(run_verifier, profile_type, report_info_location):
+def check_report(run_verify, profile_type, report_info_location, image_type):
 
-    if run_verifier.startswith("FAIL"):
-        pytest.fail(f'FAIL some tests failed: {run_verifier}')
+    if run_verify.startswith("FAIL"):
+        pytest.fail(f'FAIL some tests failed: {run_verify}')
 
-    print(f"Report data:\n{run_verifier}\ndone")
+    print(f"Report data:\n{run_verify}\ndone")
 
-    report_data = yaml.load(run_verifier, Loader=Loader)
+    report_data = yaml.load(run_verify, Loader=Loader)
 
     test_passed = True
 
@@ -157,8 +234,6 @@ def check_report(run_verifier, profile_type, report_info_location):
     if report_vendor_type != profile_type:
         print(f"FAIL: profiles do not match. Expected {profile_type}, but report has {report_vendor_type}")
         test_passed = False
-
-    report_version = report_data["metadata"]["tool"]["profile"]["version"]
 
     chart_name =  report_data["metadata"]["chart"]["name"]
     chart_version = report_data["metadata"]["chart"]["version"]
@@ -173,14 +248,16 @@ def check_report(run_verifier, profile_type, report_info_location):
     print(f'Report path : {report_path}')
 
     with open(report_path, "w") as fd:
-        fd.write(run_verifier)
-
-    test_reports = report_info.get_all_reports(report_path,report_vendor_type,report_version)
+        fd.write(run_verify)
 
     expected_reports_file = open(report_info_location,)
     expected_reports = json.load(expected_reports_file)
 
-    results_diff = DeepDiff(expected_reports[report_info.REPORT_RESULTS],test_reports[report_info.REPORT_RESULTS],ignore_order=True)
+    test_report_data = run_report(image_type, profile_type, report_path)
+    print(f"test_report_data : \n{test_report_data}")
+    test_report = json.loads(test_report_data)
+
+    results_diff = DeepDiff(expected_reports[report_info.REPORT_RESULTS],test_report[report_info.REPORT_RESULTS],ignore_order=True)
     if results_diff:
         print(f"difference found in results : {results_diff}")
         test_passed = False
@@ -190,7 +267,7 @@ def check_report(run_verifier, profile_type, report_info_location):
         expected_annotations[report_annotation["name"]] = report_annotation["value"]
 
     tested_annotations = {}
-    for report_annotation in test_reports[report_info.REPORT_ANNOTATIONS]:
+    for report_annotation in test_report[report_info.REPORT_ANNOTATIONS]:
         tested_annotations[report_annotation["name"]] = report_annotation["value"]
 
     missing_annotations = set(expected_annotations.keys()) - set(tested_annotations.keys())
@@ -212,14 +289,14 @@ def check_report(run_verifier, profile_type, report_info_location):
                 test_passed = False
                 print(f"{annotation} has different content, expected: {expected_annotations[annotation]}, got: {tested_annotations[annotation]}")
 
-    digests_diff = DeepDiff(expected_reports[report_info.REPORT_DIGESTS],test_reports[report_info.REPORT_DIGESTS],ignore_order=True)
+    digests_diff = DeepDiff(expected_reports[report_info.REPORT_DIGESTS],test_report[report_info.REPORT_DIGESTS],ignore_order=True)
     if digests_diff:
         print(f"difference found in digests : {digests_diff}")
         test_passed = False
 
     differing_metadata = {"chart-uri"}
     expected_metadata = expected_reports[report_info.REPORT_METADATA]
-    test_metadata = test_reports[report_info.REPORT_METADATA]
+    test_metadata = test_report[report_info.REPORT_METADATA]
     for metadata in expected_metadata.keys():
         if not metadata in differing_metadata:
             metadata_diff = DeepDiff(expected_metadata[metadata],test_metadata[metadata],ignore_order=True)
@@ -229,5 +306,4 @@ def check_report(run_verifier, profile_type, report_info_location):
 
     if not test_passed:
         pytest.fail('FAIL differences found in reports')
-
 

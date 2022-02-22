@@ -62,6 +62,7 @@ type verifierBuilder struct {
 	toolVersion                 string
 	openshiftVersion            string
 	suppportedOpenshiftVersions string
+	providerDelivery            bool
 	values                      map[string]interface{}
 	settings                    *cli.EnvSettings
 }
@@ -111,6 +112,11 @@ func (b *verifierBuilder) SetOpenShiftVersion(version string) VerifierBuilder {
 	return b
 }
 
+func (b *verifierBuilder) SetProviderDelivery(providerDelivery bool) VerifierBuilder {
+	b.providerDelivery = providerDelivery
+	return b
+}
+
 func (b *verifierBuilder) GetConfig() *viper.Viper {
 	return b.config
 }
@@ -148,6 +154,7 @@ func (b *verifierBuilder) Build() (Verifier, error) {
 		toolVersion:      b.toolVersion,
 		profile:          profile,
 		openshiftVersion: b.openshiftVersion,
+		providerDelivery: b.providerDelivery,
 		values:           b.values,
 	}, nil
 }

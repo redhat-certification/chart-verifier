@@ -25,6 +25,7 @@ type DigestReport struct {
 type MetadataReport struct {
 	ProfileVendorType profiles.VendorType `json:"vendorType" yaml:"vendorType"`
 	ProfileVersion    string              `json:"profileVersion" yaml:"profileVersion"`
+	ProviderDelivery  bool                `json:"providerControlledDelivery" yaml:"providerControlledDelivery,omitempty"`
 	ChartUri          string              `json:"chart-uri" yaml:"chart-uri"`
 	Chart             *helmchart.Metadata `json:"chart" yaml:"chart"`
 }

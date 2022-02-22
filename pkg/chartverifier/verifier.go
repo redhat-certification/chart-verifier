@@ -64,6 +64,7 @@ type verifier struct {
 	toolVersion      string
 	profile          *profiles.Profile
 	openshiftVersion string
+	providerDelivery bool
 	values           map[string]interface{}
 }
 
@@ -86,7 +87,8 @@ func (c *verifier) Verify(uri string) (*Report, error) {
 		SetToolVersion(c.toolVersion).
 		SetChartUri(uri).
 		SetChart(chrt).
-		SetProfile(c.profile.Vendor, c.profile.Version)
+		SetProfile(c.profile.Vendor, c.profile.Version).
+		SetProviderDelivery(c.providerDelivery)
 
 	for _, check := range c.requiredChecks {
 
