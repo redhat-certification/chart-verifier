@@ -2,6 +2,7 @@ package checks
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -416,9 +417,12 @@ func installAndTestChartRelease(
 			defer releaseCleanup()
 
 			if err := helm.Install(namespace, chrt.Path(), release, tmpValuesFile); err != nil {
-				return err
+				return errors.New(fmt.Sprintf("Chart Install failure: %v", err))
 			}
-			return testRelease(helm, kubectl, release, namespace, releaseSelector, false)
+			if err = testRelease(helm, kubectl, release, namespace, releaseSelector, false); err != nil {
+				return errors.New(fmt.Sprintf("Chart test failure: %v", err))
+			}
+			return nil
 		}
 
 		if err := fun(); err != nil {
