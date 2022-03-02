@@ -1,0 +1,67 @@
+name: Create dev release
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    build:
+        name: Create Dev Release
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Setup tmate session
+              uses: mxschmitt/action-tmate@v3
+
+            - name: Set up Python 3.x
+              uses: actions/setup-python@v2
+              with:
+                  python-version: '3.9'
+
+            - name: Set up Python scripts on PR branch
+              working-directory: ./chart-verifier
+              run: |
+                # set up python requirements and scripts on PR branch
+                python3 -m venv ve1
+                cd scripts && ../ve1/bin/pip3 install -r requirements.txt && cd ..
+                cd scripts && ../ve1/bin/python3 setup.py install && cd ..
+
+            - name: Build Binary
+              id: build-binary
+              working-directory: ./chart-verifier
+              run: make bin
+
+            - name: Create tarfile
+              id: create-tarfile
+              working-directory: ./chart-verifier
+              run: |
+                # check if release file only is included in PR
+                echo "buid binary outcome: {{ steps.build-binary.outcome }}"
+                echo "buid binary conclusion: {{ steps.build-binary.conclusion }}"
+                ve1/bin/tarfile --release="dev"
+
+            - uses: dev-drprasad/delete-tag-and-release@v0.2.0
+              if: {{ steps.create-tarfile.conclusion == "success" }}
+              with:
+                delete_release: true # default: false
+                tag_name: dev # tag name to delete
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Create the the release
+              id: create_release
+              if: {{ always() && steps.create-tarfile.conclusion == "success" }}
+              uses: softprops/action-gh-release@v1
+              with:
+                tag_name: dev
+                body: "Development release created with each merge into the main branch."
+                files: ${{ steps.check_version_in_PR.outputs.tarball_full_name }}
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+
