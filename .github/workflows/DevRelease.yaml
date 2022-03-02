@@ -37,11 +37,10 @@ jobs:
 
             - name: Create tarfile
               id: create-tarfile
+              if: {{ steps.build-binary.conclusion == "success" }}
               working-directory: ./chart-verifier
               run: |
                 # check if release file only is included in PR
-                echo "buid binary outcome: {{ steps.build-binary.outcome }}"
-                echo "buid binary conclusion: {{ steps.build-binary.conclusion }}"
                 ve1/bin/tarfile --release="dev"
 
             - uses: dev-drprasad/delete-tag-and-release@v0.2.0
