@@ -34,14 +34,14 @@ jobs:
               run: make bin
 
             - name: Create tarfile
-              if: ${{ steps.build-binary.outcome == "success" }}
+              if: ${{ steps.build-binary.outcome == 'success' }}
               id: create-tarfile
               run: |
                 # check if release file only is included in PR
                 ve1/bin/tarfile --release="dev"
 
             - name: Delete previous release and tag
-              if: ${{ steps.create-tarfile.outcome == "success" }}
+              if: ${{ steps.create-tarfile.outcome == 'success' }}
               uses: dev-drprasad/delete-tag-and-release@v0.2.0
               with:
                 delete_release: true # default: false
@@ -51,7 +51,7 @@ jobs:
 
             - name: Create the the release
               id: create_release
-              if: ${{ always() && steps.create-tarfile.outcome == "success" }}
+              if: ${{ always() && steps.create-tarfile.outcome == 'success' }}
               uses: softprops/action-gh-release@v1
               with:
                 tag_name: dev

@@ -124,6 +124,8 @@ jobs:
               run: |
                   # build a podman image
                   # sudo apt install qemu-system-x86
+                  echo "buid binary outcome: ${{ steps.build-binary.outcome }}"
+                  echo "buid binary conclusion: ${{ steps.build-binary.conclusion }}"
                   commit_sha=$(git rev-parse --short HEAD)
                   image_tag="podman-"$commit_sha
                   echo "use image tag $image_tag"
@@ -156,6 +158,8 @@ jobs:
               id: run_tetst
               run: |
                   # run pytest
+                  echo "buid binary outcome: ${{ steps.build-binary.outcome }}"
+                  echo "buid binary conclusion: ${{ steps.build-binary.conclusion }}"
                   ve1/bin/pytest -v --log-cli-level=WARNING --tb=short
 
             - name: Delete Namespace
@@ -211,7 +215,8 @@ jobs:
               run: |
                 ve1/bin/check-auto-merge --api-url=${{ github.event.pull_request._links.self.href }}
 
-            - name: Create the the release
+
+            - name: Create the release
               id: create_release
               if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
               uses: softprops/action-gh-release@v1
