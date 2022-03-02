@@ -23,7 +23,6 @@ jobs:
                   python-version: '3.9'
 
             - name: Set up Python scripts on PR branch
-              working-directory: ./chart-verifier
               run: |
                 # set up python requirements and scripts on PR branch
                 python3 -m venv ve1
@@ -32,13 +31,11 @@ jobs:
 
             - name: Build Binary
               id: build-binary
-              working-directory: ./chart-verifier
               run: make bin
 
             - name: Create tarfile
               id: create-tarfile
               if: {{ steps.build-binary.conclusion == "success" }}
-              working-directory: ./chart-verifier
               run: |
                 # check if release file only is included in PR
                 ve1/bin/tarfile --release="dev"
