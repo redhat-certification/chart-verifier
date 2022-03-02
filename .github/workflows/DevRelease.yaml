@@ -34,8 +34,8 @@ jobs:
               run: make bin
 
             - name: Create tarfile
-              if: {{ steps.build-binary.outcome == "success" }}
               id: create-tarfile
+              if: {{ steps.build-binary.outcome == "success" }}
               run: |
                 # check if release file only is included in PR
                 ve1/bin/tarfile --release="dev"
