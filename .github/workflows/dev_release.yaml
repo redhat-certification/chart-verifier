@@ -1,0 +1,68 @@
+name: Create dev release
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    build:
+        name: Create Dev Release
+        runs-on: ubuntu-latest
+        env:
+            DEV_RELEASE: 0.1.0
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: Setup Go
+              uses: actions/setup-go@v2
+              with:
+                  go-version: '1.17.2'
+
+            - name: Set up Python 3.x
+              uses: actions/setup-python@v2
+              with:
+                  python-version: '3.9'
+
+            - name: Set up Python scripts
+              run: |
+                # set up python requirements and scripts on PR branch
+                python3 -m venv ve1
+                cd scripts && ../ve1/bin/pip3 install -r requirements.txt && cd ..
+                cd scripts && ../ve1/bin/python3 setup.py install && cd ..
+
+            - name: Build Binary
+              id: build-binary
+              run: make bin
+
+            - name: Create tarfile
+              if: ${{ steps.build-binary.outcome == 'success' }}
+              id: create-tarfile
+              run: |
+                # check if release file only is included in PR
+                ve1/bin/tar-file --release=${DEV_RELEASE}
+
+            - name: Delete previous release and tag
+              if: ${{ steps.create-tarfile.outcome == 'success' }}
+              uses: dev-drprasad/delete-tag-and-release@v0.2.0
+              with:
+                delete_release: true # default: false
+                tag_name: ${{ env.DEV_RELEASE }} # tag name to delete
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Create the release
+              id: create_release
+              if: ${{ always() && steps.create-tarfile.outcome == 'success' }}
+              uses: softprops/action-gh-release@v1
+              with:
+                tag_name: ${{ env.DEV_RELEASE }}
+                body: "Development release created with each merge into the main branch."
+                files: ${{ steps.create-tarfile.outputs.tarball_full_name }}
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+
