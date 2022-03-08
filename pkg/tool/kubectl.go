@@ -16,6 +16,7 @@ import (
 
 // Based on https://access.redhat.com/solutions/4870701
 var kubeOpenShiftVersionMap map[string]string = map[string]string{
+	"1.23": "4.10",
 	"1.22": "4.9",
 	"1.21": "4.8",
 	"1.20": "4.7",
