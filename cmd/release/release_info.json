@@ -1,19 +1,9 @@
 {
-    "version": "1.5.0",
+    "version": "1.6.0",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
-        "<ul>",
-        "<li>Add version command (#231)</li>",
-        "<li>Report now output to stdout (#240):</li>",
-        "<ul>",
-        "<li>Option added to write directly to a file.</li>",
-        "<li>Added error log.</li>",
-        "</ul>",
-        "<li>Bug Fixes:</li>",
-        "<ul>",
-        "<li>Panic error running using podman(#237)</li>",
-        "<li>Chart verifier binary fails to find profiles(#238)</li>",
-        "</ul>",
-        "</ul>"
+        "Add support for OCP v10 (#250)",
+        "Add 30 minute timeout for helm test (#246)",
+        "Add support for provider delivery control (#244)"
     ]
 }
