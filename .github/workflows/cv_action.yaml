@@ -11,9 +11,9 @@ jobs:
         name: Verify Helm Chart
         runs-on: ubuntu-20.04
         steps:
-            - name: run env
+            - name: get env
               run: env
-            
+
             - name: Checkout
               uses: actions/checkout@v2
 
@@ -58,7 +58,9 @@ jobs:
               env:
                   API_SERVER: ${{ steps.login-params.outputs.API_SERVER }}
               run: |
-                  ve1/bin/sa-for-chart-testing --create charts-123 --token token.txt --server ${API_SERVER}
+                  CHARTS=$(echo "charts-${{ github.run_id }}-${{ github.run_attempt}}")
+                  echo "::set-output name=charts::${CHARTS}"
+                  ve1/bin/sa-for-chart-testing --create ${CHARTS} --token token.txt --server ${API_SERVER}
 
             # Install chart-verifier CLI
             - uses: redhat-actions/openshift-tools-installer@v1
@@ -70,17 +72,22 @@ jobs:
               with:
                   chart_uri: https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.9/psql-service-0.1.9.tgz?raw=true
                   verify_args: --set profile.vendortype=partner
+                  fail: false
 
             - name: echo outputs
               run: echo "${{ steps.verify.outputs.report_filename }}"
 
+            - uses: redhat-actions/oc-login@v1
+              if: ${{ always() && steps.oc-login.conclusion == 'success' }}
+              id: oc-login-again
+              with:
+                  openshift_server_url: ${{ steps.login-params.outputs.API_SERVER }}
+                  openshift_token: ${{ secrets.CLUSTER_TOKEN }}
+                  insecure_skip_tls_verify: ${{ steps.login-params.outputs.insecure_skip_tls_verify }}
+
             - name: Delete Namespace
               if: ${{ always() && steps.oc-login.conclusion == 'success' }}
-              env:
-                  KUBECONFIG: /tmp/ci-kubeconfig
               run: |
                   # delete the namespace
-                  API_SERVER=$( echo -n ${{ secrets.API_SERVER }} | base64 -d)
-                  ./oc login --token=${{ secrets.CLUSTER_TOKEN }} --server=${API_SERVER}
-                  ve1/bin/sa-for-chart-testing --delete charts-123
+                  ve1/bin/sa-for-chart-testing --delete ${{ steps.create_service_account.outputs.charts }}
 
