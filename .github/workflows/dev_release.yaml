@@ -9,6 +9,8 @@ jobs:
     build:
         name: Create Dev Release
         runs-on: ubuntu-latest
+        env:
+            DEV_RELEASE: 0.1.0
 
         steps:
             - name: Checkout code
@@ -40,23 +42,23 @@ jobs:
               id: create-tarfile
               run: |
                 # check if release file only is included in PR
-                ve1/bin/tar-file --release="dev"
+                ve1/bin/tar-file --release=${DEV_RELEASE}
 
             - name: Delete previous release and tag
               if: ${{ steps.create-tarfile.outcome == 'success' }}
               uses: dev-drprasad/delete-tag-and-release@v0.2.0
               with:
                 delete_release: true # default: false
-                tag_name: dev # tag name to delete
+                tag_name: ${{ env.DEV_RELEASE }} # tag name to delete
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-            - name: Create the the release
+            - name: Create the release
               id: create_release
               if: ${{ always() && steps.create-tarfile.outcome == 'success' }}
               uses: softprops/action-gh-release@v1
               with:
-                tag_name: dev
+                tag_name: ${{ env.DEV_RELEASE }}
                 body: "Development release created with each merge into the main branch."
                 files: ${{ steps.create-tarfile.outputs.tarball_full_name }}
               env:
