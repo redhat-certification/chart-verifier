@@ -11,6 +11,9 @@ jobs:
         name: Verify Helm Chart
         runs-on: ubuntu-20.04
         steps:
+            - name: run env
+              run: env
+            
             - name: Checkout
               uses: actions/checkout@v2
 
@@ -55,7 +58,7 @@ jobs:
               env:
                   API_SERVER: ${{ steps.login-params.outputs.API_SERVER }}
               run: |
-                  ve1/bin/sa-for-chart-testing --create charts-${{ github.event.number }} --token token.txt --server ${API_SERVER}
+                  ve1/bin/sa-for-chart-testing --create charts-123 --token token.txt --server ${API_SERVER}
 
             # Install chart-verifier CLI
             - uses: redhat-actions/openshift-tools-installer@v1
@@ -79,5 +82,5 @@ jobs:
                   # delete the namespace
                   API_SERVER=$( echo -n ${{ secrets.API_SERVER }} | base64 -d)
                   ./oc login --token=${{ secrets.CLUSTER_TOKEN }} --server=${API_SERVER}
-                  ve1/bin/sa-for-chart-testing --delete charts-${{ github.event.number }}
+                  ve1/bin/sa-for-chart-testing --delete charts-123
 
