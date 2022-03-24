@@ -34,4 +34,4 @@ jobs:
                   verify_args: --set profile.vendortype=partner
 
             - name: echo outputs
-              run: echo "${{ steps.verify.outputs.report_filename ) }}"
+              run: echo "${{ steps.verify.outputs.report_filename }}"
