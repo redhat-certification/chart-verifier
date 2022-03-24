@@ -11,16 +11,48 @@ jobs:
         name: Verify Helm Chart
         runs-on: ubuntu-20.04
         steps:
-            - name: prepare server url
-              id: server-url
+            - name: Set up Python 3.x
+              uses: actions/setup-python@v2
+              with:
+                  python-version: '3.9'
+
+            - name: Set up Python scripts on PR branch
               run: |
+                  # set up python requirements and scripts on PR branch
+                  python3 -m venv ve1
+                  cd scripts && ../ve1/bin/pip3 install -r requirements.txt && cd ..
+                  cd scripts && ../ve1/bin/python3 setup.py install && cd ..
+
+            - name: Install oc
+              uses: redhat-actions/openshift-tools-installer@v1
+              with:
+                  oc: latest
+
+            - name: Set cluster login params
+              id: login-params
+              run: |
+                  #calculate cluster params
                   API_SERVER=$( echo -n ${{ secrets.API_SERVER }} | base64 -d)
                   echo "::set-output name=API_SERVER::${API_SERVER}"
+                  if [ $GITHUB_REPOSITORY == "redhat-certification/chart-verifier" ]; then
+                      echo "::set-output name=insecure_skip_tls_verify::false"
+                  else
+                      echo "::set-output name=insecure_skip_tls_verify::true"
+                  fi
 
             - uses: redhat-actions/oc-login@v1
+              id: oc-login
               with:
-                  openshift_server_url: ${{ steps.server-url.outputs.API_SERVER }}
+                  openshift_server_url: ${{ steps.login-params.outputs.API_SERVER }}
                   openshift_token: ${{ secrets.CLUSTER_TOKEN }}
+                  insecure_skip_tls_verify: ${{ steps.login-params.outputs.insecure_skip_tls_verify }}
+
+            - name: create service account
+              id: create_service_account
+              env:
+                  API_SERVER: ${{ steps.login-params.outputs.API_SERVER }}
+              run: |
+                  ve1/bin/sa-for-chart-testing --create charts-${{ github.event.number }} --token token.txt --server ${API_SERVER}
 
             # Install chart-verifier CLI
             - uses: redhat-actions/openshift-tools-installer@v1
@@ -35,3 +67,14 @@ jobs:
 
             - name: echo outputs
               run: echo "${{ steps.verify.outputs.report_filename }}"
+
+            - name: Delete Namespace
+              if: ${{ always() && steps.oc-login.conclusion == 'success' }}
+              env:
+                  KUBECONFIG: /tmp/ci-kubeconfig
+              run: |
+                  # delete the namespace
+                  API_SERVER=$( echo -n ${{ secrets.API_SERVER }} | base64 -d)
+                  ./oc login --token=${{ secrets.CLUSTER_TOKEN }} --server=${API_SERVER}
+                  ve1/bin/sa-for-chart-testing --delete charts-${{ github.event.number }}
+
