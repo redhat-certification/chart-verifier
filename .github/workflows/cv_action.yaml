@@ -70,12 +70,21 @@ jobs:
 
             - uses: redhat-actions/chart-verifier@v1.0.0
               with:
+                chart_uri: ./tests/charts/psql-service/0.1.9/psql-service-0.1.9.tgz
+                verify_args: --set profile.vendortype=partner
+                fail: false
+
+
+            - uses: redhat-actions/chart-verifier@v1.0.0
+              with:
                   chart_uri: https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.9/psql-service-0.1.9.tgz?raw=true
                   verify_args: --set profile.vendortype=partner
                   fail: false
 
             - name: echo outputs
-              run: echo "${{ steps.verify.outputs.report_filename }}"
+              run: |
+                echo "${{ steps.verify.outputs.report_filename }}"
+                pwd
 
             - uses: redhat-actions/oc-login@v1
               if: ${{ always() && steps.oc-login.conclusion == 'success' }}
@@ -86,7 +95,7 @@ jobs:
                   insecure_skip_tls_verify: ${{ steps.login-params.outputs.insecure_skip_tls_verify }}
 
             - name: Delete Namespace
-              if: ${{ always() && steps.oc-login.conclusion == 'success' }}
+              if: ${{ always() && steps.oc-login-again.conclusion == 'success' }}
               run: |
                   # delete the namespace
                   ve1/bin/sa-for-chart-testing --delete ${{ steps.create_service_account.outputs.charts }}
