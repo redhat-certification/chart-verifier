@@ -120,7 +120,7 @@ def apply_config(tmpl, **values):
         config_path = os.path.join(tmpdir, "config.yaml")
         with open(config_path, "w") as fd:
             fd.write(content)
-        out = subprocess.run(["./oc", "apply", "-f", config_path], capture_output=True)
+        out = subprocess.run(["oc", "apply", "-f", config_path], capture_output=True)
         stdout = out.stdout.decode("utf-8")
         if out.returncode != 0:
             stderr = out.stderr.decode("utf-8")
@@ -135,7 +135,7 @@ def delete_config(tmpl, **values):
         config_path = os.path.join(tmpdir, "config.yaml")
         with open(config_path, "w") as fd:
             fd.write(content)
-        out = subprocess.run(["./oc", "delete", "-f", config_path], capture_output=True)
+        out = subprocess.run(["oc", "delete", "-f", config_path], capture_output=True)
         stdout = out.stdout.decode("utf-8")
         if out.returncode != 0:
             stderr = out.stderr.decode("utf-8")
@@ -213,7 +213,7 @@ def delete_clusterrolebinding(name):
 def write_sa_token(namespace, token):
     sa_found = False
     for i in range(7):
-        out = subprocess.run(["./oc", "get", "serviceaccount", namespace, "-n", namespace, "-o", "json"], capture_output=True)
+        out = subprocess.run(["oc", "get", "serviceaccount", namespace, "-n", namespace, "-o", "json"], capture_output=True)
         stdout = out.stdout.decode("utf-8")
         if out.returncode != 0:
             stderr = out.stderr.decode("utf-8")
@@ -232,7 +232,7 @@ def write_sa_token(namespace, token):
         sys.exit(1)
 
     for secret in sa["secrets"]:
-        out = subprocess.run(["./oc", "get", "secret", secret["name"], "-n", namespace, "-o", "json"], capture_output=True)
+        out = subprocess.run(["oc", "get", "secret", secret["name"], "-n", namespace, "-o", "json"], capture_output=True)
         stdout = out.stdout.decode("utf-8")
         if out.returncode != 0:
             stderr = out.stderr.decode("utf-8")
@@ -249,13 +249,13 @@ def write_sa_token(namespace, token):
 def switch_project_context(namespace, token, api_server):
     tkn = open(token).read()
     for i in range(7):
-        out = subprocess.run(["./oc", "login", "--token", tkn, "--server", api_server], capture_output=True)
+        out = subprocess.run(["oc", "login", "--token", tkn, "--server", api_server], capture_output=True)
         stdout = out.stdout.decode("utf-8")
         print(stdout)
-        out = subprocess.run(["./oc", "project", namespace], capture_output=True)
+        out = subprocess.run(["oc", "project", namespace], capture_output=True)
         stdout = out.stdout.decode("utf-8")
         print(stdout)
-        out = subprocess.run(["./oc", "config", "current-context"], capture_output=True)
+        out = subprocess.run(["oc", "config", "current-context"], capture_output=True)
         stdout = out.stdout.decode("utf-8").strip()
         print(stdout)
         if stdout.endswith(":".join((namespace, namespace))):
