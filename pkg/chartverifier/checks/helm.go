@@ -210,9 +210,9 @@ func getImageReferences(chartUri string, vals map[string]interface{}) ([]string,
 
 	if err == nil {
 		r := strings.NewReader(txt)
-		scanner := bufio.NewScanner(r)
-		for scanner.Scan() {
-			line := scanner.Text()
+		reader := bufio.NewReader(r)
+		line, err := Readln(reader)
+		for err == nil {
 			var imageRef ImageRef
 			yamlErr := yaml.Unmarshal([]byte(line), &imageRef)
 			if yamlErr == nil {
@@ -220,6 +220,7 @@ func getImageReferences(chartUri string, vals map[string]interface{}) ([]string,
 					imagesMap[imageRef.Ref] = true
 				}
 			}
+			line, err = Readln(reader)
 		}
 	}
 
@@ -229,4 +230,17 @@ func getImageReferences(chartUri string, vals map[string]interface{}) ([]string,
 	}
 
 	return images, err
+}
+
+func Readln(r *bufio.Reader) (string, error) {
+	var (
+		isPrefix bool  = true
+		err      error = nil
+		line, ln []byte
+	)
+	for isPrefix && err == nil {
+		line, isPrefix, err = r.ReadLine()
+		ln = append(ln, line...)
+	}
+	return string(ln), err
 }
