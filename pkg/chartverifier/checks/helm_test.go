@@ -18,6 +18,7 @@ package checks
 
 import (
 	"context"
+	"io/ioutil"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -106,4 +107,19 @@ func TestTemplate(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestLongLineTemplate(t *testing.T) {
+
+	content, err := ioutil.ReadFile("templates/test-template.yaml")
+	require.NoError(t, err)
+
+	images, err := getImagesFromContent(string(content))
+	require.NoError(t, err)
+
+	require.Equal(t, len(images), 2)
+
+	require.Contains(t, images, "1.1.1/cv-test/image1:tag-123")
+	require.Contains(t, images, "1.1.2/cv-test/image2:tag-223")
+
 }

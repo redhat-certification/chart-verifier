@@ -18,6 +18,7 @@ package checks
 
 import (
 	"bufio"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -200,26 +201,38 @@ func getImageReferences(chartUri string, vals map[string]interface{}) ([]string,
 	mem.SetNamespace("TestNamespace")
 	actionConfig.Releases = storage.Init(mem)
 
-	imagesMap := make(map[string]bool)
-
 	txt, err := actions.RenderManifests("testRelease", chartUri, vals, actionConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return getImagesFromContent(txt)
+
+}
+
+func getImagesFromContent(content string) ([]string, error) {
+
+	imagesMap := make(map[string]bool)
 
 	type ImageRef struct {
 		Ref string `yaml:"image"`
 	}
 
-	if err == nil {
-		r := strings.NewReader(txt)
-		scanner := bufio.NewScanner(r)
-		for scanner.Scan() {
-			line := scanner.Text()
-			var imageRef ImageRef
-			yamlErr := yaml.Unmarshal([]byte(line), &imageRef)
-			if yamlErr == nil {
-				if len(imageRef.Ref) > 0 && !imagesMap[imageRef.Ref] {
-					imagesMap[imageRef.Ref] = true
-				}
+	r := strings.NewReader(content)
+	reader := bufio.NewReader(r)
+	line, err := getNextLine(reader)
+	for err == nil {
+		var imageRef ImageRef
+		yamlErr := yaml.Unmarshal([]byte(line), &imageRef)
+		if yamlErr == nil {
+			if len(imageRef.Ref) > 0 && !imagesMap[imageRef.Ref] {
+				imagesMap[imageRef.Ref] = true
 			}
+		}
+		line, err = getNextLine(reader)
+		if err == io.EOF {
+			err = nil
+			break
 		}
 	}
 
@@ -229,4 +242,17 @@ func getImageReferences(chartUri string, vals map[string]interface{}) ([]string,
 	}
 
 	return images, err
+
+}
+
+func getNextLine(reader *bufio.Reader) (string, error) {
+	nextLine, isPrefix, err := reader.ReadLine()
+	if isPrefix && err == nil {
+		for isPrefix && err == nil {
+			var partLine []byte
+			partLine, isPrefix, err = reader.ReadLine()
+			nextLine = append(nextLine, partLine...)
+		}
+	}
+	return string(nextLine), err
 }
