@@ -1,6 +1,7 @@
 package tool
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"time"
@@ -33,7 +34,7 @@ func NewHelm(envSettings *cli.EnvSettings, args map[string]interface{}) (*Helm, 
 	return helm, nil
 }
 
-func (h Helm) Install(namespace, chart, release, valuesFile string) error {
+func (h Helm) Install(ctx context.Context, namespace, chart, release, valuesFile string) error {
 	utils.LogInfo(fmt.Sprintf("Execute helm install. namespace: %s, release: %s chart: %s", namespace, release, chart))
 	client := action.NewInstall(h.config)
 	client.Namespace = namespace
@@ -88,7 +89,7 @@ func (h Helm) Install(namespace, chart, release, valuesFile string) error {
 	}
 
 	// TODO: support other options if required
-	_, err = client.Run(c, vals)
+	_, err = client.RunWithContext(ctx, c, vals)
 	if err != nil {
 		utils.LogError(fmt.Sprintf("Error running chart install: %v", err))
 		return err
@@ -98,7 +99,7 @@ func (h Helm) Install(namespace, chart, release, valuesFile string) error {
 	return nil
 }
 
-func (h Helm) Test(namespace, release string) error {
+func (h Helm) Test(ctx context.Context, namespace, release string) error {
 	utils.LogInfo(fmt.Sprintf("Execute helm test. namespace: %s, release: %s, args: %+v", namespace, release, h.args))
 	client := action.NewReleaseTesting(h.config)
 	client.Namespace = namespace
