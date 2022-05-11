@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
-	"time"
 
 	"github.com/Masterminds/semver"
 	"github.com/helm/chart-testing/v3/pkg/chart"
@@ -108,7 +107,7 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 	utils.LogInfo("Start chart install and test check")
 
 	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Minute) // Timeout Hardcoded for now, will pe passing as parameter
+	ctx, cancel := context.WithTimeout(ctx, opts.Timeout)
 	defer cancel()
 
 	cfg := buildChartTestingConfiguration(opts)

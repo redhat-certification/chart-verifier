@@ -17,6 +17,8 @@
 package checks
 
 import (
+	"time"
+
 	"github.com/spf13/viper"
 	helmcli "helm.sh/helm/v3/pkg/cli"
 )
@@ -104,6 +106,8 @@ type CheckOptions struct {
 	HelmEnvSettings *helmcli.EnvSettings
 	// AnnotationHolder provides and API to set the OpenShift Version
 	AnnotationHolder AnnotationHolder
+	// client timeout
+	Timeout time.Duration
 }
 
 type CheckFunc func(options *CheckOptions) (Result, error)

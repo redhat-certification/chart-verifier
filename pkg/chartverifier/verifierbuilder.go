@@ -19,6 +19,7 @@ package chartverifier
 import (
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 
@@ -63,6 +64,7 @@ type verifierBuilder struct {
 	openshiftVersion            string
 	suppportedOpenshiftVersions string
 	providerDelivery            bool
+	timeout                     time.Duration
 	values                      map[string]interface{}
 	settings                    *cli.EnvSettings
 }
@@ -117,6 +119,11 @@ func (b *verifierBuilder) SetProviderDelivery(providerDelivery bool) VerifierBui
 	return b
 }
 
+func (b *verifierBuilder) SetTimeout(timeout time.Duration) VerifierBuilder {
+	b.timeout = timeout
+	return b
+}
+
 func (b *verifierBuilder) GetConfig() *viper.Viper {
 	return b.config
 }
@@ -155,6 +162,7 @@ func (b *verifierBuilder) Build() (Verifier, error) {
 		profile:          profile,
 		openshiftVersion: b.openshiftVersion,
 		providerDelivery: b.providerDelivery,
+		timeout:          b.timeout,
 		values:           b.values,
 	}, nil
 }

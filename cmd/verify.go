@@ -19,10 +19,11 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/utils"
-	"time"
 
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
@@ -135,6 +136,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 
 			utils.LogInfo(fmt.Sprintf("Chart Verifer %s.", Version))
 			utils.LogInfo(fmt.Sprintf("Verify : %s", args[0]))
+			utils.LogInfo(fmt.Sprintf("Client timeout: %s", clientTimeout))
 
 			// vals is a resulting map considering all the options the user has given.
 			vals, err := opts.MergeValues(getter.All(settings))
@@ -159,6 +161,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 				SetToolVersion(Version).
 				SetOpenShiftVersion(openshiftVersionFlag).
 				SetProviderDelivery(providerDelivery).
+				SetTimeout(clientTimeout).
 				Build()
 
 			if err != nil {
