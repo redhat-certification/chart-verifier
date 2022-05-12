@@ -288,7 +288,7 @@ func upgradeAndTestChart(
 				return fmt.Errorf("Upgrade testing for release '%s' skipped because of previous revision testing error", release)
 			}
 
-			if err := helm.Upgrade(namespace, oldChrt.Path(), release); err != nil {
+			if err := helm.Upgrade(ctx, namespace, oldChrt.Path(), release); err != nil {
 				return err
 			}
 

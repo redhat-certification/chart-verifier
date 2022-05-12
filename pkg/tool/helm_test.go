@@ -181,7 +181,9 @@ func TestUpgrade(t *testing.T) {
 					t.Error(err)
 				}
 			}
-			err := helm.Upgrade("default", tt.chartPath, tt.release.Name)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			err := helm.Upgrade(ctx, "default", tt.chartPath, tt.release.Name)
 			if err == nil {
 				require.Equal(t, tt.expected, "")
 			} else {

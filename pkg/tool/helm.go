@@ -132,7 +132,7 @@ func (h Helm) Uninstall(namespace, release string) error {
 	return nil
 }
 
-func (h Helm) Upgrade(namespace, chart, release string) error {
+func (h Helm) Upgrade(ctx context.Context, namespace, chart, release string) error {
 	utils.LogInfo(fmt.Sprintf("Execute helm upgrade. namespace: %s, release: %s chart: %s", namespace, release, chart))
 	client := action.NewUpgrade(h.config)
 	client.Namespace = namespace
@@ -160,7 +160,7 @@ func (h Helm) Upgrade(namespace, chart, release string) error {
 	}
 
 	// TODO: support other options if required
-	_, err = client.Run(release, c, vals)
+	_, err = client.RunWithContext(ctx, release, c, vals)
 	if err != nil {
 		utils.LogError(fmt.Sprintf("Error running chart upgrade: %v", err))
 		return err
