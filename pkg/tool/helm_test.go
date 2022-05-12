@@ -1,8 +1,10 @@
 package tool
 
 import (
+	"context"
 	"io/ioutil"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"helm.sh/helm/v3/pkg/action"
@@ -45,7 +47,11 @@ func TestInstall(t *testing.T) {
 				args:        map[string]interface{}{"set": "k8Project=default"},
 				envSettings: &cli.EnvSettings{},
 			}
-			err := helm.Install("default", tt.chartPath, tt.releaseName, "")
+
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			err := helm.Install(ctx, "default", tt.chartPath, tt.releaseName, "")
 			if err == nil {
 				require.Equal(t, tt.expected, "")
 			} else {
@@ -255,7 +261,10 @@ func TestReleaseTesting(t *testing.T) {
 					t.Error(err)
 				}
 			}
-			err := helm.Test("default", tt.release.Name)
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			err := helm.Test(ctx, "default", tt.release.Name)
 			if err == nil {
 				require.Equal(t, tt.expected, "")
 			} else {

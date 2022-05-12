@@ -101,9 +101,10 @@ func (h Helm) Install(ctx context.Context, namespace, chart, release, valuesFile
 
 func (h Helm) Test(ctx context.Context, namespace, release string) error {
 	utils.LogInfo(fmt.Sprintf("Execute helm test. namespace: %s, release: %s, args: %+v", namespace, release, h.args))
+	deadline, _ := ctx.Deadline()
 	client := action.NewReleaseTesting(h.config)
 	client.Namespace = namespace
-	client.Timeout = 30 * time.Minute
+	client.Timeout = deadline.Sub(time.Now())
 
 	// TODO: support filter
 	_, err := client.Run(release)

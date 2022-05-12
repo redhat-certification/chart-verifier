@@ -106,8 +106,7 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 
 	utils.LogInfo("Start chart install and test check")
 
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, opts.Timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), opts.Timeout)
 	defer cancel()
 
 	cfg := buildChartTestingConfiguration(opts)
