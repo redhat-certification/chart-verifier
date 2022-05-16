@@ -22,16 +22,19 @@ func TestInstall(t *testing.T) {
 		releaseName string
 		chartPath   string
 		expected    string
+		timeout     time.Duration
 	}{
 		{
 			releaseName: "valid chart",
 			chartPath:   "../chartverifier/checks/psql-service-0.1.7",
 			expected:    "",
+			timeout:     10 * time.Second,
 		},
 		{
 			releaseName: "invalid chart",
 			chartPath:   "../chartverifier/checks/psql-service-9.9.9",
 			expected:    "path \"../chartverifier/checks/psql-service-9.9.9\" not found",
+			timeout:     10 * time.Second,
 		},
 	}
 	for _, tt := range tests {
@@ -48,10 +51,12 @@ func TestInstall(t *testing.T) {
 				envSettings: &cli.EnvSettings{},
 			}
 
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), tt.timeout)
 			defer cancel()
 
+			before_install_time := time.Now()
 			err := helm.Install(ctx, "default", tt.chartPath, tt.releaseName, "")
+			require.WithinDuration(t, before_install_time, time.Now(), tt.timeout)
 			if err == nil {
 				require.Equal(t, tt.expected, "")
 			} else {
@@ -132,6 +137,7 @@ func TestUpgrade(t *testing.T) {
 		chartPath string
 		release   *release.Release
 		expected  string
+		timeout   time.Duration
 	}{
 		{
 			name:      "successful release upgrade should not return error",
@@ -145,6 +151,7 @@ func TestUpgrade(t *testing.T) {
 				Chart:     &chart.Chart{Values: testValues},
 			},
 			expected: "",
+			timeout:  10 * time.Second,
 		},
 		{
 			name:      "upgrade non-existent release should result in error",
@@ -158,6 +165,7 @@ func TestUpgrade(t *testing.T) {
 				Chart:     &chart.Chart{Values: testValues},
 			},
 			expected: "\"test-release-invalid\" has no deployed releases",
+			timeout:  10 * time.Second,
 		},
 	}
 
@@ -181,9 +189,11 @@ func TestUpgrade(t *testing.T) {
 					t.Error(err)
 				}
 			}
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), tt.timeout)
 			defer cancel()
+			before_upgrade_time := time.Now()
 			err := helm.Upgrade(ctx, "default", tt.chartPath, tt.release.Name)
+			require.WithinDuration(t, before_upgrade_time, time.Now(), tt.timeout)
 			if err == nil {
 				require.Equal(t, tt.expected, "")
 			} else {
