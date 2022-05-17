@@ -224,6 +224,7 @@ func TestReleaseTesting(t *testing.T) {
 		chartPath string
 		release   *release.Release
 		expected  string
+		timeout   time.Duration
 	}{
 		{
 			name:      "successful release test should not return error",
@@ -237,6 +238,7 @@ func TestReleaseTesting(t *testing.T) {
 				Hooks:     testHooks,
 			},
 			expected: "",
+			timeout:  10 * time.Second,
 		},
 		{
 			name:      "release test on non-existent release should result in error",
@@ -250,6 +252,7 @@ func TestReleaseTesting(t *testing.T) {
 				Hooks:     testHooks,
 			},
 			expected: "release: not found",
+			timeout:  10 * time.Second,
 		},
 	}
 
@@ -273,10 +276,11 @@ func TestReleaseTesting(t *testing.T) {
 					t.Error(err)
 				}
 			}
-			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			ctx, cancel := context.WithTimeout(context.Background(), tt.timeout)
 			defer cancel()
-
+			before_test_time := time.Now()
 			err := helm.Test(ctx, "default", tt.release.Name)
+			require.WithinDuration(t, before_test_time, time.Now(), tt.timeout)
 			if err == nil {
 				require.Equal(t, tt.expected, "")
 			} else {
