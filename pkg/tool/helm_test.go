@@ -254,6 +254,20 @@ func TestReleaseTesting(t *testing.T) {
 			expected: "release: not found",
 			timeout:  10 * time.Second,
 		},
+		{
+			name:      "release test with a zero or negative value should result in error",
+			chartPath: "../chartverifier/checks/psql-service-0.1.7",
+			release: &release.Release{
+				Name: "test-release-invalid-timeout",
+				Info: &release.Info{
+					Status: release.StatusDeployed,
+				},
+				Namespace: "default",
+				Hooks:     testHooks,
+			},
+			expected: "Helm test error : timeout has expired",
+			timeout:  -1 * time.Second,
+		},
 	}
 
 	for _, tt := range tests {
@@ -280,7 +294,11 @@ func TestReleaseTesting(t *testing.T) {
 			defer cancel()
 			before_test_time := time.Now()
 			err := helm.Test(ctx, "default", tt.release.Name)
-			require.WithinDuration(t, before_test_time, time.Now(), tt.timeout)
+			if tt.timeout <= 0 {
+				require.WithinDuration(t, before_test_time, time.Now(), 1*time.Second)
+			} else {
+				require.WithinDuration(t, before_test_time, time.Now(), tt.timeout)
+			}
 			if err == nil {
 				require.Equal(t, tt.expected, "")
 			} else {

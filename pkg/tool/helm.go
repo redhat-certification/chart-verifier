@@ -2,6 +2,7 @@ package tool
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -106,6 +107,9 @@ func (h Helm) Test(ctx context.Context, namespace, release string) error {
 	client.Namespace = namespace
 	client.Timeout = deadline.Sub(time.Now())
 
+	if client.Timeout <= 0 {
+		return errors.New("Helm test error : timeout has expired")
+	}
 	// TODO: support filter
 	_, err := client.Run(release)
 	if err != nil {
