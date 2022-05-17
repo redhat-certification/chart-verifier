@@ -17,10 +17,24 @@ The tool provides the following features:
 
 For more information see:
 
-- [The command line interface and checks performed.](docs/helm-chart-checks.md)
-- [Annotations in the report,  chart-verifier CLI tool, and submitter provided.](docs/helm-chart-annotations.md)
-- [Introduction to the submission process.](docs/helm-chart-submission.md)
-- [Troubleshooting check failures.](docs/helm-chart-troubleshooting.md)
+- [The command line interface and checks performed](docs/helm-chart-checks.md)
+    - [Key features](docs/helm-chart-checks.md#key-features)
+    - [Types of Helm chart checks](docs/helm-chart-checks.md#types-of-helm-chart-checks)
+    - [Default set of checks for a Helm chart](docs/helm-chart-checks.md#default-set-of-checks-for-a-helm-chart)
+    - [Run Helm chart checks](docs/helm-chart-checks.md#run-helm-chart-checks)
+    - [Profiles](docs/helm-chart-checks.md#profiles)
+    - [Chart Testing](docs/helm-chart-checks.md#chart-testing)
+- [Certification Annotations](docs/helm-chart-annotations.md)
+    - [Verifier added annotations](docs/helm-chart-annotations.md#verifier-added-annotations)
+    - [Annotations by profile](docs/helm-chart-annotations.md#annotations-by-profile)
+    - [Provider annotations](docs/helm-chart-annotations.md#provider-annotations)
+- [Introduction to the submission process](docs/helm-chart-submission.md)
+    - [Submission options](docs/helm-chart-submission.md#submission-options)
+    - [Provider controlled delivery](docs/helm-chart-submission.md#provider-controlled-delivery)
+- [Troubleshooting](docs/helm-chart-troubleshooting.md)
+    - [Check failures](docs/helm-chart-troubleshooting.md#troubleshooting-check-failures)
+    - [Report related submission failures](docs/helm-chart-troubleshooting.md#report-related-submission-failures)
+
 
 For developer specific information, see:
 

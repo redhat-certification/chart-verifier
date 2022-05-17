@@ -1,6 +1,25 @@
 # Certification Annotations
 
+- [Verifier added annotations](#verifier-added-annotations)
+- [Annotations by profile](#annotations-by-profile)
+  - [verifier-version](#verifier-version)
+  - [profile](#profile)  
+  - [chart-uri](#chart-uri)
+  - [digests](#digests) 
+  - [lastCertifiedTimestamp](#lastCertifiedTimestamp)  
+  - [certifiedOpenShiftVersions](#certifiedOpenShiftVersions)
+  - [testedOpenShiftVersion](#testedOpenShiftVersion)
+  - [supportedOpenShiftVersions](#supportedOpenShiftVersions)
+  - [providerControlledDelivery](#providerControlledDelivery)  
+- [Provider annotations](#provider-annotations)
+  - [charts.openshift.io/provider](#chartsopenshiftioprovider)
+  - [charts.openshift.io/name](#chartsopenshiftioname)
+  - [charts.openshift.io/supportURL](#chartsopenshiftiosupportURL)
+  - [charts.openshift.io/archs](#chartsopenshiftioarchs)  
+
+
 ## Verifier added annotations
+
 
 The chart-verifier tool adds annotations to a generated report, for example:
 
@@ -18,6 +37,7 @@ metadata:
         lastCertifiedTimestamp: "2021-11-01T17:12:37.148895-04:00"
         testedOpenShiftVersion: 4.8
         supportedOpenShiftVersions: 4.5 - 4.8
+        providerControlledDelivery: false
  
 ```
 
@@ -35,6 +55,7 @@ The annotations added differ based on the profiles version used:
 | [certifiedOpenShiftVersions](#certifiedOpenShiftVersions) | v1.0 
 | [testedOpenShiftVersion](#testedOpenShiftVersion)         | v1.1
 | [supportedOpenShiftVersions](#supportedOpenShiftVersions) | v1.1
+| [providerControlledDelivery](#providerControlledDelivery) | v1.0,v1.1 
 
 ### verifier-version
 
@@ -78,6 +99,13 @@ The time when the report was generated.
 
 The Open Shift versions supported by the chart based on the kubeVersion attribute in chart.yaml.
 
+### providerControlledDelivery
+
+Used to control publication of a certified chart:
+- True: provider will control publication of the chart
+- False (default): The chart will be published in the OpenShift Helm chart catalogue when certified.
+
+see: [Provider controlled delivery.](helm-chart-submission.md#provider-controlled-delivery)
 
 ## Provider annotations
 

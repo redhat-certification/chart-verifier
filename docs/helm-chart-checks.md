@@ -2,6 +2,23 @@
 
 Helm chart checks are a set of checks against which the Red Hat Helm chart-verifier tool verifies and validates whether a Helm chart is qualified for a certification from Red Hat. These checks contain metadata that have certain parameters and values with which a Helm chart must comply to be certified by Red Hat. A Red Hat-certified Helm chart qualifies in terms of readiness for distribution in the [OpenShift Helm Chart Repository](https://github.com/openshift-helm-charts).
 
+- [Key features](#key-features)
+- [Types of Helm chart checks](#types-of-helm-chart-checks)
+- [Default set of checks for a Helm chart](#default-set-of-checks-for-a-helm-chart)
+- [Run Helm chart checks](#run-helm-chart-checks) 
+    - [Using the podman or docker command for Helm chart checks](#using-the-podman-or-docker-command-for-helm-chart-checks)
+    - [Saving the report](#saving-the-report)
+    - [The error log](#the-error-log)
+    - [Using the chart-verifier binary for Helm chart checks (Linux only)](#using-the-chart-verifier-binary-for-helm-chart-checks-linux-only)
+- [Profiles](#profiles)
+    - [Profile v1.1](#profile-v11)
+    - [Profile v1.0](#profile-10)
+    - [Running the chart verifier with a specific profile](#running-the-chart-verifier-with-a-specific-profile)
+- [Chart Testing](#chart-testing)
+    - [Cluster Config](#cluster-config)
+    - [Override values](#override-values)
+    - [Check processing](#check-processing)
+
 ## Key features
 - You can execute all of the mandatory checks.
   - Include or exclude individual checks during the verification process by using the command line options.
@@ -13,6 +30,7 @@ Helm chart checks are a set of checks against which the Red Hat Helm chart-verif
     - Profiles are versioned. Each new version may include updated checks, new checks, new annotations or chnaged annotations.
 - The generated report is written to stdout but can optionally be written to a file.
 - An error log is created for all verify commands but can be optionally suppressed.
+- You can indicate that a chart is not to be published in the OpenShift catalogue 
 
 ## Types of Helm chart checks
 Helm chart checks are categorized into the following types:
@@ -117,6 +135,7 @@ This section provides help on the basic usage of Helm chart checks with the podm
     -n, --namespace string            namespace scope for this request
     -V, --openshift-version string    set the value of certifiedOpenShiftVersions in the report
     -o, --output string               the output format: default, json or yaml
+    -d, --provider-delivery           chart provider will provide the chart delivery mechanism (default: false)
         --registry-config string      path to the registry config file (default "/home/baiju/.config/helm/registry.json")
         --repository-cache string     path to the file containing cached repository indexes (default "/home/baiju/.cache/helm/repository")
         --repository-config string    path to the file containing repository names and URLs (default "/home/baiju/.config/helm/repositories.yaml")
@@ -194,7 +213,7 @@ Alternatively, use the ```-w```  option to write the report directly to the file
           -w                                            \
           "quay.io/redhat-certification/chart-verifier" \
           verify -e images-are-certified,helm-lint      \
-          <chart-uri> > report.yaml
+          <chart-uri>
 
   ```
 If the file already exists it is overwritten.
@@ -324,7 +343,7 @@ This table shows which checks are preformed and whether or not they ar mnandator
 | [chart-testing v1.0](helm-chart-troubleshooting.md#chart-testing-v10) | mandatory | mandatory | optional | mandatory
 | [contains-values v1.0](helm-chart-troubleshooting.md#contains-values-v10)  | mandatory | mandatory | optional | mandatory
 
-#### Running the chart verifier with a specific profile.
+### Running the chart verifier with a specific profile.
 
 To specify which profile to use the --set flag:
 ```
