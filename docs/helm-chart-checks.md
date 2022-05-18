@@ -27,7 +27,7 @@ Helm chart checks are a set of checks against which the Red Hat Helm chart-verif
 - The checks are configurable. For example, if a chart requires additional values to be compliant with the checks, configure the values using the available options. The options are similar to those used by the `helm lint` and `helm template` commands.
 - When there are no error messages, the `helm-lint` check passes the verification and is successful. Messages such as `Warning` and `info` do not cause the check to fail.
 - Profiles define the checks needed based on the chart type: partner, redhat or community.
-    - Profiles are versioned. Each new version may include updated checks, new checks, new annotations or chnaged annotations.
+    - Profiles are versioned. Each new version may include updated checks, new checks, new annotations or changed annotations.
 - The generated report is written to stdout but can optionally be written to a file.
 - An error log is created for all verify commands but can be optionally suppressed.
 - You can indicate that a chart is not to be published in the OpenShift catalogue 
@@ -142,6 +142,7 @@ This section provides help on the basic usage of Helm chart checks with the podm
     -s, --set strings                 overrides a configuration, e.g: dummy.ok=false
     -f, --set-values strings          specify application and check configuration values in a YAML file or a URL (can specify multiple)
     -E, --suppress-error-log          suppress the error log (default: written to ./chartverifier/verifier-<timestamp>.log)
+        --timeout duration            time to wait for completion of chart install and test (default 30m0s)
     -w, --write-to-file               write report to ./chartverifier/report.yaml (default: stdout)
   Global Flags:
         --config string   config file (default is $HOME/.chart-verifier.yaml)
@@ -188,6 +189,21 @@ This section provides help on the basic usage of Helm chart checks with the podm
           verify -F /values/overrides.yaml              \
           <chart-uri>
   ```
+
+### Timeout Option
+
+Increase the timeout value if chart-testing is going to take more time, default value is 30m.
+
+  ```
+  $ podman run --rm -i                                  \
+          -e KUBECONFIG=/.kube/config                   \
+          -v "${HOME}/.kube":/.kube                     \
+          -v $(pwd):/values                             \
+          "quay.io/redhat-certification/chart-verifier" \
+          verify --timeout 40m                          \
+          <chart-uri>
+  ```
+Note: In case chart-testing takes more time, it is advised to submit the report for certification since the certification process will use the default value of 30m. 
 
 ### Saving the report
 
