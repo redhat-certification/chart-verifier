@@ -19,6 +19,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/utils"
@@ -60,6 +62,8 @@ var (
 	suppressErrorLog bool
 	// provider controls chart deliver mechanism.
 	providerDelivery bool
+	//client timeout
+	clientTimeout time.Duration
 )
 
 func filterChecks(set profiles.FilteredRegistry, subset []string, setEnabled bool, subsetEnabled bool) (chartverifier.FilteredRegistry, error) {
@@ -132,6 +136,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 
 			utils.LogInfo(fmt.Sprintf("Chart Verifer %s.", Version))
 			utils.LogInfo(fmt.Sprintf("Verify : %s", args[0]))
+			utils.LogInfo(fmt.Sprintf("Client timeout: %s", clientTimeout))
 
 			// vals is a resulting map considering all the options the user has given.
 			vals, err := opts.MergeValues(getter.All(settings))
@@ -156,6 +161,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 				SetToolVersion(Version).
 				SetOpenShiftVersion(openshiftVersionFlag).
 				SetProviderDelivery(providerDelivery).
+				SetTimeout(clientTimeout).
 				Build()
 
 			if err != nil {
@@ -211,6 +217,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 
 	cmd.Flags().StringSliceVarP(&verifyOpts.ValueFiles, "set-values", "f", nil, "specify application and check configuration values in a YAML file or a URL (can specify multiple)")
 	cmd.Flags().StringVarP(&openshiftVersionFlag, "openshift-version", "V", "", "version of OpenShift used in the cluster")
+	cmd.Flags().DurationVar(&clientTimeout, "timeout", 30*time.Minute, "time to wait for completion of chart install and test")
 	cmd.Flags().BoolVarP(&reportToFile, "write-to-file", "w", false, "write report to ./chartverifier/report.yaml (default: stdout)")
 	cmd.Flags().BoolVarP(&suppressErrorLog, "suppress-error-log", "E", false, "suppress the error log (default: written to ./chartverifier/verifier-<timestamp>.log)")
 	cmd.Flags().BoolVarP(&providerDelivery, "provider-delivery", "d", false, "chart provider will provide the chart delivery mechanism (default: false)")

@@ -17,6 +17,8 @@
 package chartverifier
 
 import (
+	"time"
+
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
 	"github.com/spf13/viper"
@@ -65,6 +67,7 @@ type verifier struct {
 	profile          *profiles.Profile
 	openshiftVersion string
 	providerDelivery bool
+	timeout          time.Duration
 	values           map[string]interface{}
 }
 
@@ -104,6 +107,7 @@ func (c *verifier) Verify(uri string) (*Report, error) {
 			Values:           c.values,
 			ViperConfig:      c.subConfig(string(check.CheckId.Name)),
 			AnnotationHolder: &holder,
+			Timeout:          c.timeout,
 		})
 
 		if checkErr != nil {

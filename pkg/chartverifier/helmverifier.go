@@ -17,6 +17,8 @@
 package chartverifier
 
 import (
+	"time"
+
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/spf13/viper"
 	"helm.sh/helm/v3/pkg/cli"
@@ -32,6 +34,7 @@ type VerifierBuilder interface {
 	SetToolVersion(string) VerifierBuilder
 	SetOpenShiftVersion(string) VerifierBuilder
 	SetProviderDelivery(bool) VerifierBuilder
+	SetTimeout(time.Duration) VerifierBuilder
 	SetSettings(settings *cli.EnvSettings) VerifierBuilder
 	Build() (Verifier, error)
 }

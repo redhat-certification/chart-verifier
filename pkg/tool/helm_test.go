@@ -1,8 +1,10 @@
 package tool
 
 import (
+	"context"
 	"io/ioutil"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"helm.sh/helm/v3/pkg/action"
@@ -20,16 +22,19 @@ func TestInstall(t *testing.T) {
 		releaseName string
 		chartPath   string
 		expected    string
+		timeout     time.Duration
 	}{
 		{
 			releaseName: "valid chart",
 			chartPath:   "../chartverifier/checks/psql-service-0.1.7",
 			expected:    "",
+			timeout:     10 * time.Second,
 		},
 		{
 			releaseName: "invalid chart",
 			chartPath:   "../chartverifier/checks/psql-service-9.9.9",
 			expected:    "path \"../chartverifier/checks/psql-service-9.9.9\" not found",
+			timeout:     10 * time.Second,
 		},
 	}
 	for _, tt := range tests {
@@ -45,7 +50,13 @@ func TestInstall(t *testing.T) {
 				args:        map[string]interface{}{"set": "k8Project=default"},
 				envSettings: &cli.EnvSettings{},
 			}
-			err := helm.Install("default", tt.chartPath, tt.releaseName, "")
+
+			ctx, cancel := context.WithTimeout(context.Background(), tt.timeout)
+			defer cancel()
+
+			before_install_time := time.Now()
+			err := helm.Install(ctx, "default", tt.chartPath, tt.releaseName, "")
+			require.WithinDuration(t, before_install_time, time.Now(), tt.timeout)
 			if err == nil {
 				require.Equal(t, tt.expected, "")
 			} else {
@@ -126,6 +137,7 @@ func TestUpgrade(t *testing.T) {
 		chartPath string
 		release   *release.Release
 		expected  string
+		timeout   time.Duration
 	}{
 		{
 			name:      "successful release upgrade should not return error",
@@ -139,6 +151,7 @@ func TestUpgrade(t *testing.T) {
 				Chart:     &chart.Chart{Values: testValues},
 			},
 			expected: "",
+			timeout:  10 * time.Second,
 		},
 		{
 			name:      "upgrade non-existent release should result in error",
@@ -152,6 +165,7 @@ func TestUpgrade(t *testing.T) {
 				Chart:     &chart.Chart{Values: testValues},
 			},
 			expected: "\"test-release-invalid\" has no deployed releases",
+			timeout:  10 * time.Second,
 		},
 	}
 
@@ -175,7 +189,11 @@ func TestUpgrade(t *testing.T) {
 					t.Error(err)
 				}
 			}
-			err := helm.Upgrade("default", tt.chartPath, tt.release.Name)
+			ctx, cancel := context.WithTimeout(context.Background(), tt.timeout)
+			defer cancel()
+			before_upgrade_time := time.Now()
+			err := helm.Upgrade(ctx, "default", tt.chartPath, tt.release.Name)
+			require.WithinDuration(t, before_upgrade_time, time.Now(), tt.timeout)
 			if err == nil {
 				require.Equal(t, tt.expected, "")
 			} else {
@@ -206,6 +224,7 @@ func TestReleaseTesting(t *testing.T) {
 		chartPath string
 		release   *release.Release
 		expected  string
+		timeout   time.Duration
 	}{
 		{
 			name:      "successful release test should not return error",
@@ -219,6 +238,7 @@ func TestReleaseTesting(t *testing.T) {
 				Hooks:     testHooks,
 			},
 			expected: "",
+			timeout:  10 * time.Second,
 		},
 		{
 			name:      "release test on non-existent release should result in error",
@@ -232,6 +252,21 @@ func TestReleaseTesting(t *testing.T) {
 				Hooks:     testHooks,
 			},
 			expected: "release: not found",
+			timeout:  10 * time.Second,
+		},
+		{
+			name:      "release test with a zero or negative value should result in error",
+			chartPath: "../chartverifier/checks/psql-service-0.1.7",
+			release: &release.Release{
+				Name: "test-release-invalid-timeout",
+				Info: &release.Info{
+					Status: release.StatusDeployed,
+				},
+				Namespace: "default",
+				Hooks:     testHooks,
+			},
+			expected: "Helm test error : timeout has expired, please consider increasing the timeout using the chart-verifier timeout flag",
+			timeout:  -1 * time.Second,
 		},
 	}
 
@@ -255,7 +290,15 @@ func TestReleaseTesting(t *testing.T) {
 					t.Error(err)
 				}
 			}
-			err := helm.Test("default", tt.release.Name)
+			ctx, cancel := context.WithTimeout(context.Background(), tt.timeout)
+			defer cancel()
+			before_test_time := time.Now()
+			err := helm.Test(ctx, "default", tt.release.Name)
+			if tt.timeout <= 0 {
+				require.WithinDuration(t, before_test_time, time.Now(), 1*time.Second)
+			} else {
+				require.WithinDuration(t, before_test_time, time.Now(), tt.timeout)
+			}
 			if err == nil {
 				require.Equal(t, tt.expected, "")
 			} else {

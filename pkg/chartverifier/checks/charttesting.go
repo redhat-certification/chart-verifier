@@ -106,6 +106,9 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 
 	utils.LogInfo("Start chart install and test check")
 
+	ctx, cancel := context.WithTimeout(context.Background(), opts.Timeout)
+	defer cancel()
+
 	cfg := buildChartTestingConfiguration(opts)
 	helm, err := tool.NewHelm(opts.HelmEnvSettings, opts.Values)
 	if err != nil {
@@ -157,14 +160,14 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 			utils.LogError(fmt.Sprintf("End chart install and test check with BreakingChangeAllowed error: %v", err))
 			return NewResult(false, err.Error()), nil
 		}
-		result := upgradeAndTestChart(cfg, oldChrt, chrt, helm, kubectl, configRelease)
+		result := upgradeAndTestChart(ctx, cfg, oldChrt, chrt, helm, kubectl, configRelease)
 
 		if result.Error != nil {
 			utils.LogError(fmt.Sprintf("End chart install and test check with upgradeAndTestChart error: %v", result.Error))
 			return NewResult(false, result.Error.Error()), nil
 		}
 	} else {
-		result := installAndTestChartRelease(cfg, chrt, helm, kubectl, opts.Values, configRelease)
+		result := installAndTestChartRelease(ctx, cfg, chrt, helm, kubectl, opts.Values, configRelease)
 		if result.Error != nil {
 			utils.LogError(fmt.Sprintf("End chart install and test check with installAndTestChartRelease error: %v", result.Error))
 			return NewResult(false, result.Error.Error()), nil
@@ -218,15 +221,16 @@ func generateInstallConfig(
 
 // testRelease tests a release.
 func testRelease(
+	ctx context.Context,
 	helm *tool.Helm,
 	kubectl *tool.Kubectl,
 	release, namespace, releaseSelector string,
 	cleanupHelmTests bool,
 ) error {
-	if err := kubectl.WaitForDeployments(context.TODO(), namespace, releaseSelector); err != nil {
+	if err := kubectl.WaitForDeployments(ctx, namespace, releaseSelector); err != nil {
 		return err
 	}
-	if err := helm.Test(namespace, release); err != nil {
+	if err := helm.Test(ctx, namespace, release); err != nil {
 		return err
 	}
 	return nil
@@ -243,6 +247,7 @@ func getChartPreviousVersion(chrt *chart.Chart) (*chart.Chart, error) {
 // upgradeAndTestChart performs the installation of the given oldChrt,
 // and attempts to perform an upgrade from that state.
 func upgradeAndTestChart(
+	ctx context.Context,
 	cfg config.Configuration,
 	oldChrt, chrt *chart.Chart,
 	helm *tool.Helm,
@@ -276,18 +281,18 @@ func upgradeAndTestChart(
 			defer cleanup()
 
 			// Install previous version of chart. If installation fails, ignore this release.
-			if err := helm.Install(namespace, oldChrt.Path(), release, valuesFile); err != nil {
+			if err := helm.Install(ctx, namespace, oldChrt.Path(), release, valuesFile); err != nil {
 				return fmt.Errorf("Upgrade testing for release '%s' skipped because of previous revision installation error: %w", release, err)
 			}
-			if err := testRelease(helm, kubectl, release, namespace, releaseSelector, true); err != nil {
+			if err := testRelease(ctx, helm, kubectl, release, namespace, releaseSelector, true); err != nil {
 				return fmt.Errorf("Upgrade testing for release '%s' skipped because of previous revision testing error", release)
 			}
 
-			if err := helm.Upgrade(namespace, oldChrt.Path(), release); err != nil {
+			if err := helm.Upgrade(ctx, namespace, oldChrt.Path(), release); err != nil {
 				return err
 			}
 
-			return testRelease(helm, kubectl, release, namespace, releaseSelector, false)
+			return testRelease(ctx, helm, kubectl, release, namespace, releaseSelector, false)
 		}
 
 		if err := fun(); err != nil {
@@ -379,6 +384,7 @@ func newTempValuesFileWithOverrides(filename string, valuesOverrides map[string]
 
 // installAndTestChartRelease installs and tests a chart release.
 func installAndTestChartRelease(
+	ctx context.Context,
 	cfg config.Configuration,
 	chrt *chart.Chart,
 	helm *tool.Helm,
@@ -416,10 +422,10 @@ func installAndTestChartRelease(
 			namespace, release, releaseSelector, releaseCleanup := generateInstallConfig(cfg, chrt, helm, kubectl, configRelease)
 			defer releaseCleanup()
 
-			if err := helm.Install(namespace, chrt.Path(), release, tmpValuesFile); err != nil {
+			if err := helm.Install(ctx, namespace, chrt.Path(), release, tmpValuesFile); err != nil {
 				return errors.New(fmt.Sprintf("Chart Install failure: %v", err))
 			}
-			if err = testRelease(helm, kubectl, release, namespace, releaseSelector, false); err != nil {
+			if err = testRelease(ctx, helm, kubectl, release, namespace, releaseSelector, false); err != nil {
 				return errors.New(fmt.Sprintf("Chart test failure: %v", err))
 			}
 			return nil

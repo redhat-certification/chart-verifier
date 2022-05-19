@@ -1,6 +1,8 @@
 package tool
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -33,7 +35,7 @@ func NewHelm(envSettings *cli.EnvSettings, args map[string]interface{}) (*Helm, 
 	return helm, nil
 }
 
-func (h Helm) Install(namespace, chart, release, valuesFile string) error {
+func (h Helm) Install(ctx context.Context, namespace, chart, release, valuesFile string) error {
 	utils.LogInfo(fmt.Sprintf("Execute helm install. namespace: %s, release: %s chart: %s", namespace, release, chart))
 	client := action.NewInstall(h.config)
 	client.Namespace = namespace
@@ -88,7 +90,7 @@ func (h Helm) Install(namespace, chart, release, valuesFile string) error {
 	}
 
 	// TODO: support other options if required
-	_, err = client.Run(c, vals)
+	_, err = client.RunWithContext(ctx, c, vals)
 	if err != nil {
 		utils.LogError(fmt.Sprintf("Error running chart install: %v", err))
 		return err
@@ -98,12 +100,16 @@ func (h Helm) Install(namespace, chart, release, valuesFile string) error {
 	return nil
 }
 
-func (h Helm) Test(namespace, release string) error {
+func (h Helm) Test(ctx context.Context, namespace, release string) error {
 	utils.LogInfo(fmt.Sprintf("Execute helm test. namespace: %s, release: %s, args: %+v", namespace, release, h.args))
+	deadline, _ := ctx.Deadline()
 	client := action.NewReleaseTesting(h.config)
 	client.Namespace = namespace
-	client.Timeout = 30 * time.Minute
+	client.Timeout = deadline.Sub(time.Now())
 
+	if client.Timeout <= 0 {
+		return errors.New("Helm test error : timeout has expired, please consider increasing the timeout using the chart-verifier timeout flag")
+	}
 	// TODO: support filter
 	_, err := client.Run(release)
 	if err != nil {
@@ -130,7 +136,7 @@ func (h Helm) Uninstall(namespace, release string) error {
 	return nil
 }
 
-func (h Helm) Upgrade(namespace, chart, release string) error {
+func (h Helm) Upgrade(ctx context.Context, namespace, chart, release string) error {
 	utils.LogInfo(fmt.Sprintf("Execute helm upgrade. namespace: %s, release: %s chart: %s", namespace, release, chart))
 	client := action.NewUpgrade(h.config)
 	client.Namespace = namespace
@@ -158,7 +164,7 @@ func (h Helm) Upgrade(namespace, chart, release string) error {
 	}
 
 	// TODO: support other options if required
-	_, err = client.Run(release, c, vals)
+	_, err = client.RunWithContext(ctx, release, c, vals)
 	if err != nil {
 		utils.LogError(fmt.Sprintf("Error running chart upgrade: %v", err))
 		return err
