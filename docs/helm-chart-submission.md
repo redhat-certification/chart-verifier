@@ -29,9 +29,10 @@ For troubleshooting report related submission failures see: [Troubleshooting](./
 
 ## Provider controlled delivery
 
-By default a submitted chart will be made available in the OpenShift Helm Chart Catalogue on successful certification. In some cases this is undesirable and can be prevented based on two conditions:
+By default, a submitted chart will be made available in the OpenShift Helm Chart Catalog on successful certification. In some cases this is undesirable and can be prevented based on the following conditions:
 
-1. When generating the Verification report the ```--provider-delivery``` flag is used, for example:
+1. When generating the Verification report the ```--provider-delivery``` flag is used.
+   Example:
     ```
     $ podman run --rm -i                                  \
           -e KUBECONFIG=/.kube/config                   \
@@ -40,9 +41,10 @@ By default a submitted chart will be made available in the OpenShift Helm Chart 
           verify --provider-delivery                    \
           <chart-uri>
     ```
-    This ensures the [providerControlledDelivery annotation](helm-chart-annotations.md#providerControlledDelivery) is set to True in the verification report.
+    This ensures that the [providerControlledDelivery annotation](helm-chart-annotations.md#providerControlledDelivery) is set to the value True in the verification report.
 
-1. The OWNERS file for the submitted chart in the [openshift helm charts github repository](https://github.com/openshift-helm-charts/charts) includes a ```providerDelivery``` attribute which is set to True, for example:
+1. The OWNERS file for the submitted chart in the [openshift helm charts github repository](https://github.com/openshift-helm-charts/charts) includes a ```providerDelivery``` attribute which is set to the value True. 
+   Example:
 ```
 chart:
   name: mychart
@@ -56,4 +58,4 @@ vendor:
   name: Redhat
 ```
 
-If these two conditions are met when the chart is submitted for certification, successful certification will not result in the chart being published in the OpenShift catalogue.
+If these preceding conditions are met when the chart is submitted for certification, successful certification will not result in the chart being published in the OpenShift catalog.

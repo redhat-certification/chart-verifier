@@ -27,10 +27,11 @@ Helm chart checks are a set of checks against which the Red Hat Helm chart-verif
 - The checks are configurable. For example, if a chart requires additional values to be compliant with the checks, configure the values using the available options. The options are similar to those used by the `helm lint` and `helm template` commands.
 - When there are no error messages, the `helm-lint` check passes the verification and is successful. Messages such as `Warning` and `info` do not cause the check to fail.
 - Profiles define the checks needed based on the chart type: partner, redhat or community.
-    - Profiles are versioned. Each new version may include updated checks, new checks, new annotations or changed annotations.
-- The generated report is written to stdout but can optionally be written to a file.
+  - Profiles are versioned. Each new version can include updated checks, new checks, new annotations, or changed annotations.
+- The generated report, by default, is written to stdout. 
+  - Alternatively the ```--write-to-file``` flag can be used to write to a ```report.yaml``` file. 
 - An error log is created for all verify commands but can be optionally suppressed.
-- You can indicate that a chart is not to be published in the OpenShift catalogue 
+- You can indicate that a chart is not to be published in the OpenShift catalog.
 
 ## Types of Helm chart checks
 Helm chart checks are categorized into the following types:
@@ -359,7 +360,7 @@ This table shows which checks are preformed and whether or not they ar mnandator
 | [chart-testing v1.0](helm-chart-troubleshooting.md#chart-testing-v10) | mandatory | mandatory | optional | mandatory
 | [contains-values v1.0](helm-chart-troubleshooting.md#contains-values-v10)  | mandatory | mandatory | optional | mandatory
 
-### Running the chart verifier with a specific profile.
+#### Running the chart verifier with a specific profile
 
 To specify which profile to use the --set flag:
 ```

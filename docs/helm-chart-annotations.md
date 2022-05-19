@@ -21,7 +21,8 @@
 ## Verifier added annotations
 
 
-The chart-verifier tool adds annotations to a generated report, for example:
+The chart-verifier tool adds annotations to a generated report.
+Example:
 
 ```
 metadata:
@@ -41,7 +42,7 @@ metadata:
  
 ```
 
-The annotations added differ based on the profiles version used:
+The annotations added differ based on the profile version used.
 
 ## Annotations by profile
 
@@ -63,15 +64,15 @@ The version of the chart-verifier which generated the report.
 
 ### profile
 
-profile incluse information aboy the profile that was used to generate the report.
+This annotation includes the vendor type and version of the profile used to generate the report.
 
 ### chart-uri
 
-The location of the chart specified to the chart-verifier. For report-only submissions, this must be the public url of the chart.                                                                      |
+The location of the chart specified to the chart-verifier. For report-only submissions, this must be the public url of the chart.
 
 ### digests
 
-digests may includes two digests:
+This annotation can include the following digests:
 - digests.chart:
     - sha:256 value of the chart as calculated from the copy of the chart loaded into memory by the chart-verifier.  
     - When submitting a report, this value must match the value generated as part of the submission process.
@@ -85,27 +86,28 @@ The time when the report was generated.
 
 ### certifiedOpenShiftVersions
 
-- The version of OCP that `chart-testing` check was performed on. If the role of the logged-in user prevents this from being accessed, the value must be specified using the `--openshift-version` flag.
-- If the certifiedOpenShiftVersions is not set to a valid OpenShift version, the submission will fail.
-- Renamed to testedOpenShiftVersions in profile version v1.1
+- The version of OpenShift Container Platform (OCP) that the ```chart-testing``` check was performed on. If the role of the logged-in user prevents this annotation from being accessed, the value must be specified using the ```--openshift-version``` flag.
+- If the ```certifiedOpenShiftVersions``` annotation is not set to a valid OpenShift version, the submission will fail.
+- Renamed to the ```testedOpenShiftVersion``` annotation in the v1.1 profile version.
 
 ### testedOpenShiftVersion
 
-- The version of OCP that `chart-testing` check was performed on. If the role of the logged-in user prevents this from being accessed, the value must be specified using the `--openshift-version` flag.
-- If the certifiedOpenShiftVersions is not set to a valid OpenShift version, the submission will fail.
-- Renamed from certifiedOpenShiftVersions in profile version v1.1
+- The version of OpenShift Container Platform (OCP) that the ```chart-testing``` check was performed on. If the role of the logged-in user prevents this annotation from being accessed, the value must be specified using the ```--openshift-version``` flag.
+- If the ```testedOpenShiftVersion``` annotation is not set to a valid OpenShift version, the submission will fail.
+- Renamed from ```certifiedOpenShiftVersions``` in profile version v1.1
 
 ### supportedOpenShiftVersions 
 
-The Open Shift versions supported by the chart based on the kubeVersion attribute in chart.yaml.
+The OpenShift versions supported by the chart, based on the ```kubeVersion``` attribute in the ```chart.yaml``` file.
 
 ### providerControlledDelivery
 
-Used to control publication of a certified chart:
-- True: provider will control publication of the chart
-- False (default): The chart will be published in the OpenShift Helm chart catalogue when certified.
+Used to control the publication of a certified chart:
 
-see: [Provider controlled delivery.](helm-chart-submission.md#provider-controlled-delivery)
+- True: provider controls the publication of the chart.
+- False (default): The chart is published in the OpenShift Helm chart catalog when certified.
+
+For more information, see: [Provider controlled delivery.](helm-chart-submission.md#provider-controlled-delivery)
 
 ## Provider annotations
 
