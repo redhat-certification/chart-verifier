@@ -201,7 +201,7 @@ func getImageReferences(chartUri string, vals map[string]interface{}) ([]string,
 	mem.SetNamespace("TestNamespace")
 	actionConfig.Releases = storage.Init(mem)
 
-	txt, err := actions.RenderManifests("testRelease", chartUri, vals, actionConfig)
+	txt, err := actions.RenderManifests("test-release", chartUri, vals, actionConfig)
 	if err != nil {
 		return nil, err
 	}

@@ -2,6 +2,7 @@ package tool
 
 import (
 	"context"
+	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"testing"
 	"time"
@@ -25,13 +26,13 @@ func TestInstall(t *testing.T) {
 		timeout     time.Duration
 	}{
 		{
-			releaseName: "valid chart",
+			releaseName: "valid-chart",
 			chartPath:   "../chartverifier/checks/psql-service-0.1.7",
 			expected:    "",
 			timeout:     10 * time.Second,
 		},
 		{
-			releaseName: "invalid chart",
+			releaseName: "invalid-chart",
 			chartPath:   "../chartverifier/checks/psql-service-9.9.9",
 			expected:    "path \"../chartverifier/checks/psql-service-9.9.9\" not found",
 			timeout:     10 * time.Second,
@@ -132,6 +133,13 @@ func TestUpgrade(t *testing.T) {
 		t.Error(err)
 	}
 	testValues.AsMap()["k8Project"] = "default"
+
+	var chartMetadata chart.Metadata
+	yamlFile, err := ioutil.ReadFile("../chartverifier/checks/psql-service-0.1.7/Chart.yaml")
+	require.NoError(t, err)
+	err = yaml.Unmarshal(yamlFile, &chartMetadata)
+	require.NoError(t, err)
+
 	tests := []struct {
 		name      string
 		chartPath string
@@ -148,7 +156,7 @@ func TestUpgrade(t *testing.T) {
 					Status: release.StatusDeployed,
 				},
 				Namespace: "default",
-				Chart:     &chart.Chart{Values: testValues},
+				Chart:     &chart.Chart{Metadata: &chartMetadata, Values: testValues},
 			},
 			expected: "",
 			timeout:  10 * time.Second,
