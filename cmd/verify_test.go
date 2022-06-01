@@ -189,7 +189,7 @@ func TestCertify(t *testing.T) {
 
 	})
 
-	t.Run("should see providerControlledDelivery is true for -d flag", func(t *testing.T) {
+	t.Run("should see providerControlledDelivery is true for -d flag and chart-uri is not set", func(t *testing.T) {
 
 		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
@@ -211,10 +211,11 @@ func TestCertify(t *testing.T) {
 		err := yaml.Unmarshal([]byte(outBuf.String()), &certificate)
 		require.NoError(t, err)
 		require.True(t, certificate.Metadata.ToolMetadata.ProviderDelivery)
+		require.True(t, certificate.Metadata.ToolMetadata.ChartUri == "N/A")
 
 	})
 
-	t.Run("should see providerControlledDelivery is false if no -d flag", func(t *testing.T) {
+	t.Run("should see providerControlledDelivery is false if no -d flag and chart-uri is set", func(t *testing.T) {
 
 		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
@@ -235,6 +236,7 @@ func TestCertify(t *testing.T) {
 		err := yaml.Unmarshal([]byte(outBuf.String()), &certificate)
 		require.NoError(t, err)
 		require.False(t, certificate.Metadata.ToolMetadata.ProviderDelivery)
+		require.True(t, certificate.Metadata.ToolMetadata.ChartUri == "../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz")
 
 	})
 
