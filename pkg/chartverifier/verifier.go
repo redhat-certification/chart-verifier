@@ -81,6 +81,12 @@ func (c *verifier) subConfig(name string) *viper.Viper {
 
 func (c *verifier) Verify(uri string) (*Report, error) {
 
+	if c.providerDelivery {
+		if len(GetPackageDigest(uri)) == 0 {
+			return nil, CheckErr("Provider delivery control requires chart input which is a tarball.")
+		}
+	}
+
 	chrt, _, err := checks.LoadChartFromURI(uri)
 	if err != nil {
 		return nil, err

@@ -144,6 +144,10 @@ func (r *reportBuilder) Build() (*Report, error) {
 
 	r.Report.Metadata.ToolMetadata.Digests.Package = GetPackageDigest(r.Report.Metadata.ToolMetadata.ChartUri)
 
+	if r.Report.Metadata.ToolMetadata.ProviderDelivery {
+		r.SetChartUri(("N/A"))
+	}
+
 	return &r.Report, nil
 }
 

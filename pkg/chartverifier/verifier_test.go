@@ -113,11 +113,12 @@ func TestVerifier_Verify(t *testing.T) {
 	t.Run("Result should be positive if check exists and returns positive", func(t *testing.T) {
 		dummyCheck.Func = positiveCheck
 		c := &verifier{
-			settings:       cli.New(),
-			config:         viper.New(),
-			profile:        profiles.Get(),
-			registry:       checks.NewRegistry().Add(dummyCheck.CheckId.Name, "v1.0", positiveCheck),
-			requiredChecks: []checks.Check{dummyCheck},
+			settings:         cli.New(),
+			config:           viper.New(),
+			profile:          profiles.Get(),
+			registry:         checks.NewRegistry().Add(dummyCheck.CheckId.Name, "v1.0", positiveCheck),
+			requiredChecks:   []checks.Check{dummyCheck},
+			providerDelivery: true,
 		}
 
 		r, err := c.Verify(validChartUri)
@@ -126,5 +127,20 @@ func TestVerifier_Verify(t *testing.T) {
 		require.True(t, r.isOk())
 	})
 
+	t.Run("Result should be negative is provider deliver is set and uri is not a tarball", func(t *testing.T) {
+		dummyCheck.Func = positiveCheck
+		c := &verifier{
+			settings:         cli.New(),
+			config:           viper.New(),
+			profile:          profiles.Get(),
+			registry:         checks.NewRegistry().Add(dummyCheck.CheckId.Name, "v1.0", positiveCheck),
+			requiredChecks:   []checks.Check{dummyCheck},
+			providerDelivery: true,
+		}
+
+		r, err := c.Verify("./checks/psql-service-0.1.7")
+		require.Error(t, err)
+		require.Nil(t, r)
+	})
 	cancel()
 }

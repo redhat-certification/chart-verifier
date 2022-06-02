@@ -29,7 +29,13 @@ For troubleshooting report related submission failures see: [Troubleshooting](./
 
 ## Provider controlled delivery
 
-By default, a submitted chart will be made available in the OpenShift Helm Chart Catalog on successful certification. In some cases this is undesirable and can be prevented based on the following conditions:
+By default, a submitted chart will be made available in the OpenShift Helm Chart Catalog on successful certification. In some cases this is undesirable and can be prevented using provider controlled delivery. With provider controlled delivery the provider of the chart controls access to the chart and this impacts report generation:
+
+- The report must be generated using a tarball so that a package digest can be determined and included in the report.
+  - if a tarball is not used the report will fail to generate.
+- The chart URL may be considered private to the provider so the chart URL is not included in the report.
+
+Provider controlled delivery is then based on the following conditions: 
 
 1. When generating the Verification report the ```--provider-delivery``` flag is used.
    Example:
