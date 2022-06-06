@@ -51,12 +51,8 @@ type RegistriesBody struct {
 
 type PyxisRegistry struct {
 	Id           string               `json:"_id"`
-	ParsedData   ImageData            `json:"parsed_data"`
+	ImageId      string               `json:"image_id"`
 	Repositories []RegistryRepository `json:"repositories"`
-}
-
-type ImageData struct {
-	Digest string `json:"docker_image_digest"`
 }
 
 type RegistryRepository struct {
@@ -190,13 +186,13 @@ Loops:
 						found = false
 						for _, reg := range registriesBody.PyxisRegistries {
 							if len(imageRef.Sha) > 0 {
-								if imageRef.Sha == reg.ParsedData.Digest {
+								if imageRef.Sha == reg.ImageId {
 									utils.LogInfo(fmt.Sprintf("sha found: %s", imageRef.Sha))
 									found = true
 									err = nil
 									continue Loops
 								} else {
-									shas = append(shas, reg.ParsedData.Digest)
+									shas = append(shas, reg.ImageId)
 								}
 							} else {
 								for _, repo := range reg.Repositories {
