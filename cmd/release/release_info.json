@@ -1,9 +1,17 @@
 {
-    "version": "1.6.0",
+    "version": "1.7.0",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
-        "Add support for OCP v10 (#250)",
-        "Add 30 minute timeout for helm test (#246)",
-        "Add support for provider delivery control (#244)"
+        "<ul>",
+        "<li>Provider delivery: Require a tarball and omit chart-uri from report (#264)</li>",
+        "<li>Upgrade to helm 3.9.0 (#263)</li>",
+        "<li>Add flag to set timeout for chart install and test (#261)</li>",
+        "<li>Bug Fixes:</li>",
+        "<ul>",
+        "<li>Fix error where certified images were not found using sha value (#265)</li>",
+        "<li>Allow for pyxis responses spanning more than one page (#265)</li>",
+        "<li>Allow for long lines when reading output from helm template (#256)</li>",
+        "</ul>",
+        "</ul>"
     ]
 }
