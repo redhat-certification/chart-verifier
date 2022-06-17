@@ -19,7 +19,7 @@ func RenderManifests(name string, url string, vals map[string]interface{}, conf 
 	response := make(map[string]string)
 	validate := false
 	client := action.NewInstall(conf)
-	client.DryRun = false
+	client.DryRun = true
 	includeCrds := true
 	client.ReleaseName = "RELEASE-NAME"
 	client.Replace = true // Skip the releaseName check
