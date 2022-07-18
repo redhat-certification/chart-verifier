@@ -34,7 +34,14 @@ For more information see:
 - [Troubleshooting](docs/helm-chart-troubleshooting.md)
     - [Check failures](docs/helm-chart-troubleshooting.md#troubleshooting-check-failures)
     - [Report related submission failures](docs/helm-chart-troubleshooting.md#report-related-submission-failures)
-
+- [Chart Verifier API](docs/helm-chart-api.md)
+    - [Overview](docs/helm-chart-api.md#overview)
+    - [Verifier](docs/helm-chart-api.md#verifier)
+    - [Report](docs/helm-chart-api.md#report)
+    - [Report Summary](docs/helm-chart-api.md#reportsummary)
+    - [Checks](docs/helm-chart-api.md#checks)  
+    - [Example](docs/helm-chart-api.md#example)
+    
 
 For developer specific information, see:
 
