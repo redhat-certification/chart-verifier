@@ -19,16 +19,16 @@ package cmd
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier"
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/utils"
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/utils"
+	apiChecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	apiReport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 )
 
 func TestCertify(t *testing.T) {
@@ -50,7 +50,7 @@ func TestCertify(t *testing.T) {
 		errBuf := bytes.NewBufferString("")
 		cmd.SetErr(errBuf)
 
-		cmd.SetArgs([]string{"-E", "../pkg/chartverifier/checks/chart-0.1.0-v3.non-existing.tgz"})
+		cmd.SetArgs([]string{"-E", "../internal/chartverifier/checks/chart-0.1.0-v3.non-existing.tgz"})
 
 		err := cmd.Execute()
 		require.Error(t, err)
@@ -64,7 +64,7 @@ func TestCertify(t *testing.T) {
 		errBuf := bytes.NewBufferString("")
 		cmd.SetErr(errBuf)
 
-		cmd.SetArgs([]string{"-E", "../pkg/chartverifier/checks/chart-0.1.0-v3.non-existing.tgz", "-o"})
+		cmd.SetArgs([]string{"-E", "../internal/chartverifier/checks/chart-0.1.0-v3.non-existing.tgz", "-o"})
 		err := cmd.Execute()
 		require.Error(t, err)
 		require.False(t, checks.IsChartNotFound(err))
@@ -80,7 +80,7 @@ func TestCertify(t *testing.T) {
 		cmd.SetArgs([]string{
 			"-e", "is-helm-vv3",
 			"-E",
-			"../pkg/chartverifier/checks/chart-0.1.0-v3.non-existing.tgz",
+			"../internal/chartverifier/checks/chart-0.1.0-v3.non-existing.tgz",
 		})
 		err := cmd.Execute()
 		require.Error(t, err)
@@ -97,7 +97,7 @@ func TestCertify(t *testing.T) {
 		cmd.SetArgs([]string{
 			"-e", "is-helm-vv3",
 			"-E",
-			"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
+			"../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 		})
 		err := cmd.Execute()
 		require.Error(t, err)
@@ -116,7 +116,7 @@ func TestCertify(t *testing.T) {
 			"-e", "is-helm-v3",
 			"-V", "4.9",
 			"-E",
-			"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
+			"../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 		})
 
 		require.NoError(t, cmd.Execute())
@@ -142,21 +142,21 @@ func TestCertify(t *testing.T) {
 			"-V", "4.9",
 			"-o", "json",
 			"-E",
-			"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
+			"../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 		})
 
 		require.NoError(t, cmd.Execute())
 		require.NotEmpty(t, outBuf.String())
 
 		// attempts to deserialize the command's output, expecting a json string
-		certificate := chartverifier.Report{}
+		certificate := apiReport.Report{}
 
 		err := json.Unmarshal([]byte(outBuf.String()), &certificate)
 		require.NoError(t, err)
 		require.True(t, len(certificate.Results) == 1, "Expected only 1 result")
-		require.Equal(t, certificate.Results[0].Check, checks.CheckName("v1.0/is-helm-v3"))
-		require.Equal(t, certificate.Results[0].Outcome, chartverifier.PassOutcomeType)
-		require.Equal(t, certificate.Results[0].Type, checks.MandatoryCheckType)
+		require.Equal(t, certificate.Results[0].Check, apiChecks.CheckName("v1.0/is-helm-v3"))
+		require.Equal(t, certificate.Results[0].Outcome, apiReport.PassOutcomeType)
+		require.Equal(t, certificate.Results[0].Type, apiChecks.MandatoryCheckType)
 		require.Equal(t, certificate.Results[0].Reason, checks.Helm3Reason)
 	})
 
@@ -171,20 +171,20 @@ func TestCertify(t *testing.T) {
 			"-e", "is-helm-v3", // only consider a single check, perhaps more checks in the future
 			"-V", "4.9",
 			"-o", "yaml",
-			"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
+			"../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 			"-E",
 		})
 		require.NoError(t, cmd.Execute())
 		require.NotEmpty(t, outBuf.String())
 
 		// attempts to deserialize the command's output, expecting a json string
-		certificate := chartverifier.Report{}
+		certificate := apiReport.Report{}
 		err := yaml.Unmarshal([]byte(outBuf.String()), &certificate)
 		require.NoError(t, err)
 		require.True(t, len(certificate.Results) == 1, "Expected only 1 result")
-		require.Equal(t, certificate.Results[0].Check, checks.CheckName("v1.0/is-helm-v3"))
-		require.Equal(t, certificate.Results[0].Outcome, chartverifier.PassOutcomeType)
-		require.Equal(t, certificate.Results[0].Type, checks.MandatoryCheckType)
+		require.Equal(t, certificate.Results[0].Check, apiChecks.CheckName("v1.0/is-helm-v3"))
+		require.Equal(t, certificate.Results[0].Outcome, apiReport.PassOutcomeType)
+		require.Equal(t, certificate.Results[0].Type, apiChecks.MandatoryCheckType)
 		require.Equal(t, certificate.Results[0].Reason, checks.Helm3Reason)
 
 	})
@@ -199,7 +199,7 @@ func TestCertify(t *testing.T) {
 
 		cmd.SetArgs([]string{
 			"-e", "has-readme", // only consider a single check, perhaps more checks in the future
-			"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
+			"../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 			"-d",
 			"-E"})
 
@@ -207,7 +207,7 @@ func TestCertify(t *testing.T) {
 		require.NotEmpty(t, outBuf.String())
 
 		// attempts to deserialize the command's output, expecting a json string
-		certificate := chartverifier.Report{}
+		certificate := apiReport.Report{}
 		err := yaml.Unmarshal([]byte(outBuf.String()), &certificate)
 		require.NoError(t, err)
 		require.True(t, certificate.Metadata.ToolMetadata.ProviderDelivery)
@@ -225,18 +225,18 @@ func TestCertify(t *testing.T) {
 
 		cmd.SetArgs([]string{
 			"-e", "has-readme", // only consider a single check, perhaps more checks in the future
-			"../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
+			"../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 			"-E"})
 
 		require.NoError(t, cmd.Execute())
 		require.NotEmpty(t, outBuf.String())
 
 		// attempts to deserialize the command's output, expecting a json string
-		certificate := chartverifier.Report{}
+		certificate := apiReport.Report{}
 		err := yaml.Unmarshal([]byte(outBuf.String()), &certificate)
 		require.NoError(t, err)
 		require.False(t, certificate.Metadata.ToolMetadata.ProviderDelivery)
-		require.True(t, certificate.Metadata.ToolMetadata.ChartUri == "../pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz")
+		require.True(t, certificate.Metadata.ToolMetadata.ChartUri == "../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz")
 
 	})
 
@@ -245,61 +245,58 @@ func TestCertify(t *testing.T) {
 func TestBuildChecks(t *testing.T) {
 	t.Run("Should fail when enabledChecks and disabledChecks have more than one item at the same time", func(t *testing.T) {
 		var (
-			all      = make(checks.DefaultRegistry)
-			enabled  = []string{string(checks.HasReadmeName)}
-			disabled = []string{string(checks.ChartTestingName)}
+			enabled  = []string{string(apiChecks.HasReadme)}
+			disabled = []string{string(apiChecks.ChartTesting)}
 		)
-		all.Add(checks.HasReadmeName, "v1.0", nil)
-		all.Add(checks.ChartTestingName, "v1.0", nil)
-		all.Add(checks.ContainsTestName, "v1.0", nil)
-		selected, err := buildChecks(all, viper.New(), enabled, disabled)
+		enabledSet, disabledSet, err := buildChecks(enabled, disabled)
 		require.Error(t, err)
-		require.Nil(t, selected)
+		require.Nil(t, enabledSet)
+		require.Nil(t, disabledSet)
 	})
 
 	t.Run("Should fail when enabled check is unknown", func(t *testing.T) {
 		var (
-			all      = make(checks.DefaultRegistry)
 			disabled = []string{}
 			enabled  = []string{"d"}
 		)
-		all.Add(checks.HasReadmeName, "v1.0", nil)
-		all.Add(checks.ChartTestingName, "v1.0", nil)
-		all.Add(checks.ContainsTestName, "v1.0", nil)
-		selected, err := buildChecks(all, viper.New(), enabled, disabled)
+		enabledSet, disabledSet, err := buildChecks(enabled, disabled)
 		require.Error(t, err)
-		require.Nil(t, selected)
+		require.Nil(t, enabledSet)
+		require.Nil(t, disabledSet)
 	})
 
 	t.Run("Should fail when disabled check is unknown", func(t *testing.T) {
 		var (
-			all      = make(checks.DefaultRegistry)
 			disabled = []string{"e"}
 			enabled  = []string{}
 		)
-		all.Add(checks.HasReadmeName, "v1.0", checks.HasReadme)
-		all.Add(checks.ChartTestingName, "v1.0", checks.ChartTesting)
-		all.Add(checks.ContainsTestName, "v1.0", checks.ContainsTest)
-		selected, err := buildChecks(all, viper.New(), enabled, disabled)
+
+		enabledSet, disabledSet, err := buildChecks(enabled, disabled)
 		require.Error(t, err)
-		require.Nil(t, selected)
+		require.Nil(t, enabledSet)
+		require.Nil(t, disabledSet)
 	})
 
-	t.Run("Should return all checks when neither enabled or disabled checks have been informed", func(t *testing.T) {
+	t.Run("Should return no checks when neither enabled or disabled checks have been informed", func(t *testing.T) {
 		var (
 			enabled  = []string{}
 			disabled = []string{}
-			all      = make(checks.DefaultRegistry)
 		)
-		all.Add(checks.HasReadmeName, "v1.0", nil)
-		all.Add(checks.ChartTestingName, "v1.0", nil)
-		all.Add(checks.ContainsTestName, "v1.0", nil)
-		selected, err := buildChecks(all, viper.New(), enabled, disabled)
+		enabledSet, disabledSet, err := buildChecks(enabled, disabled)
 		require.NoError(t, err)
-		for k, _ := range all {
-			_, ok := selected[k.Name]
-			require.True(t, ok, fmt.Sprintf("Missing Check: %s", k.Name))
-		}
+		require.Nil(t, enabledSet)
+		require.Nil(t, disabledSet)
+	})
+
+	t.Run("Should return enabled checks", func(t *testing.T) {
+		var (
+			enabled  = []string{"has-readme", "has-kubeversion", "images-are-certified"}
+			disabled = []string{}
+		)
+		enabledSet, disabledSet, err := buildChecks(enabled, disabled)
+		require.NoError(t, err)
+		require.True(t, len(enabledSet) == 3)
+		require.Nil(t, disabledSet)
 	})
 
 }

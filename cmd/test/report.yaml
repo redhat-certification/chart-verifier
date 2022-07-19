@@ -6,7 +6,7 @@ metadata:
         profile:
             VendorType: redhat
             version: v1.1
-        chart-uri: pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz
+        chart-uri: internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz
         digests:
             chart: sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0
             package: 4f29f2a95bf2b9a1c62fd215b079a01bdc5a38e9b4ff874d0fa21d0afca2e76d

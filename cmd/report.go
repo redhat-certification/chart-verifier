@@ -1,23 +1,22 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
+	"io/ioutil"
+	"os"
+	"strings"
 
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/utils"
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/utils"
+	apireport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
+	apireportsummary "github.com/redhat-certification/chart-verifier/pkg/chartverifier/reportsummary"
 )
 
 func init() {
 	rootCmd.AddCommand(NewReportCmd(viper.GetViper()))
-	allSubCommands = report.ReportCommandRegistry().AllCommands()
 }
-
-var allSubCommands report.DefaultReportRegistry
 
 type reportOptions struct {
 	ValueFiles []string
@@ -31,18 +30,20 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 	reportOpts := &reportOptions{}
 
 	cmd := &cobra.Command{
-		Use: fmt.Sprintf("report {%s,%s,%s,%s,%s} <report-uri>", report.AllCommandsName, report.AnnotationsCommandName, report.DigestsCommandName,
-			report.MetadataCommandName, report.ResultsCommandName),
+		Use: fmt.Sprintf("report {%s,%s,%s,%s,%s} <report-uri>", apireportsummary.AllSummary, apireportsummary.AnnotationsSummary, apireportsummary.DigestsSummary,
+			apireportsummary.MetadataSummary, apireportsummary.ResultsSummary),
 		Args:  cobra.ExactArgs(2),
 		Short: "Provides information from a report",
 		RunE: func(cmd *cobra.Command, args []string) error {
 
 			reportName := ""
+			reportFormat := apireportsummary.JsonReport
 			if reportToFile {
 				if outputFormatFlag == "json" {
 					reportName = "report-info.json"
 				} else {
 					reportName = "report-info.yaml"
+					reportFormat = apireportsummary.YamlReport
 				}
 			}
 			utils.InitLog(cmd, reportName, true)
@@ -50,41 +51,58 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 			commandArg := args[0]
 			reportArg := args[1]
 
-			subCommand := report.ReportCommandRegistry().Get(commandArg)
-
-			if subCommand == nil {
+			var reportType apireportsummary.SummaryType
+			switch commandArg {
+			case string(apireportsummary.MetadataSummary):
+				reportType = apireportsummary.MetadataSummary
+			case string(apireportsummary.DigestsSummary):
+				reportType = apireportsummary.DigestsSummary
+			case string(apireportsummary.AnnotationsSummary):
+				reportType = apireportsummary.AnnotationsSummary
+			case string(apireportsummary.ResultsSummary):
+				reportType = apireportsummary.ResultsSummary
+			case string(apireportsummary.AllSummary):
+				reportType = apireportsummary.AllSummary
+			default:
 				return errors.New(fmt.Sprintf("Error: command %s not recognized", commandArg))
 			}
 
-			commandOptions := &report.ReportOptions{}
-			commandOptions.AddURI(reportArg)
-			commandOptions.AddConfig(config)
-			commandOptions.AddValues(reportOpts.Values)
-
-			result, err := subCommand(commandOptions)
-
-			if err != nil {
-				return errors.New(fmt.Sprintf("Error executing command: %v", err))
+			valueMap := make(map[string]interface{})
+			for _, val := range reportOpts.Values {
+				parts := strings.Split(val, "=")
+				valueMap[parts[0]] = parts[1]
+			}
+			for key, val := range viper.AllSettings() {
+				valueMap[key] = val
 			}
 
-			output := ""
-			if outputFormatFlag == "yaml" {
-				b, err := yaml.Marshal(result)
-				if err != nil {
-					utils.LogError(err.Error())
-					return err
-				}
-				output = string(b)
-			} else {
-				b, err := json.Marshal(result)
-				if err != nil {
-					utils.LogError(err.Error())
-					return err
-				}
-				output = string(b)
+			reportFile, openErr := os.Open(reportArg)
+			if openErr != nil {
+				return errors.New(fmt.Sprintf("report path %s: error opening file  %v", reportArg, openErr))
 			}
-			utils.WriteStdOut(output)
 
+			reportBytes, readErr := ioutil.ReadAll(reportFile)
+			if readErr != nil {
+				errors.New(fmt.Sprintf("report path %s: error reading file  %v", reportArg, readErr))
+			}
+
+			report, loadErr := apireport.NewReport().
+				SetContent(string(reportBytes)).
+				Load()
+			if loadErr != nil {
+				return loadErr
+			}
+
+			reportSummary, summaryErr := apireportsummary.NewReportSummary().
+				SetValues(valueMap).
+				SetReport(report).
+				GetContent(reportType, reportFormat)
+
+			if summaryErr != nil {
+				return errors.New(fmt.Sprintf("Error executing command: %v", summaryErr))
+			}
+
+			utils.WriteStdOut(reportSummary)
 			return nil
 		},
 	}

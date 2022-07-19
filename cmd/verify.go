@@ -17,35 +17,32 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/utils"
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/utils"
+	apiChecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
+	apireport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
+	apiverifier "github.com/redhat-certification/chart-verifier/pkg/chartverifier/verifier"
 
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
-	"helm.sh/helm/v3/pkg/getter"
+	//"helm.sh/helm/v3/pkg/getter"
 
 	"github.com/pkg/errors"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v3"
-
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier"
+	//"github.com/redhat-certification/chart-verifier/internal/chartverifier"
 )
 
-func init() {
-	allChecks = chartverifier.DefaultRegistry().AllChecks()
-}
+//func init() {
+//	allChecks = chartverifier.DefaultRegistry().AllChecks()
+//}
 
 //goland:noinspection GoUnusedGlobalVariable
 var (
-	// allChecks contains all available checks to be executed by the program.
-	allChecks checks.DefaultRegistry
 	// enabledChecksFlag are the checks that should be performed, after the command initialization has happened.
 	enabledChecksFlag []string
 	// disabledChecksFlag are the checks that should not be performed.
@@ -66,39 +63,53 @@ var (
 	clientTimeout time.Duration
 )
 
-func filterChecks(set profiles.FilteredRegistry, subset []string, setEnabled bool, subsetEnabled bool) (chartverifier.FilteredRegistry, error) {
+func buildChecks(enabled []string, unEnabled []string) ([]apiChecks.CheckName, []apiChecks.CheckName, error) {
 
-	selected := make(chartverifier.FilteredRegistry, 0)
-	seen := map[checks.CheckName]bool{}
-	for k, _ := range set {
-		seen[k] = setEnabled
-	}
-	for _, v := range subset {
-		if _, ok := seen[checks.CheckName(v)]; !ok {
-			return nil, errors.Errorf("check %q is unknown", v)
+	var enabledChecks []apiChecks.CheckName
+	var unEnabledChecks []apiChecks.CheckName
+	var convertErr error
+	if len(enabled) > 0 && len(unEnabled) > 0 {
+		return enabledChecks, unEnabledChecks, errors.New("--enable and --disable can't be used at the same time")
+	} else if len(enabled) > 0 {
+		enabledChecks, convertErr = convertChecks(enabled)
+		if convertErr != nil {
+			return enabledChecks, unEnabledChecks, convertErr
 		}
-		seen[checks.CheckName(v)] = subsetEnabled
-	}
-	for k, v := range seen {
-		if v {
-			selected[k] = set[k]
+	} else if len(unEnabled) > 0 {
+		unEnabledChecks, convertErr = convertChecks(unEnabled)
+		if convertErr != nil {
+			return enabledChecks, unEnabledChecks, convertErr
 		}
 	}
-	return selected, nil
+	return enabledChecks, unEnabledChecks, nil
+
 }
 
-func buildChecks(all checks.DefaultRegistry, config *viper.Viper, enabled, disabled []string) (chartverifier.FilteredRegistry, error) {
-	profileChecks := profiles.New(config).FilterChecks(all)
-	switch {
-	case len(enabled) > 0 && len(disabled) > 0:
-		return nil, errors.New("--enable and --disable can't be used at the same time")
-	case len(enabled) > 0:
-		return filterChecks(profileChecks, enabled, false, true)
-	case len(disabled) > 0:
-		return filterChecks(profileChecks, disabled, true, false)
-	default:
-		return chartverifier.FilteredRegistry(profileChecks), nil
+func convertChecks(checks []string) ([]apiChecks.CheckName, error) {
+	var apiCheckSet []apiChecks.CheckName
+	for _, check := range checks {
+		checkFound := false
+		for _, checkName := range apiChecks.GetChecks() {
+			if apiChecks.CheckName(check) == checkName {
+				apiCheckSet = append(apiCheckSet, checkName)
+				checkFound = true
+			}
+		}
+		if !checkFound {
+			return apiCheckSet, errors.New(fmt.Sprintf("enabled check is invalid :%s", check))
+		}
 	}
+	return apiCheckSet, nil
+
+}
+
+func convertToMap(values []string) map[string]interface{} {
+	valueMap := make(map[string]interface{})
+	for _, val := range values {
+		parts := strings.Split(val, "=")
+		valueMap[strings.ToLower(parts[0])] = parts[1]
+	}
+	return valueMap
 }
 
 // settings comes from Helm, to extract the same configuration values Helm uses.
@@ -124,6 +135,11 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 		Short: "Verifies a Helm chart by checking some of its characteristics",
 		RunE: func(cmd *cobra.Command, args []string) error {
 
+			reportFormat := apireport.YamlReport
+			if outputFormatFlag == "json" {
+				reportFormat = apireport.JsonReport
+			}
+
 			reportName := ""
 			if reportToFile {
 				if outputFormatFlag == "json" {
@@ -132,64 +148,64 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 					reportName = "report.yaml"
 				}
 			}
+
+			enabledChecks, unEnabledChecks, checksErr := buildChecks(enabledChecksFlag, disabledChecksFlag)
+			if checksErr != nil {
+				return checksErr
+			}
+
 			utils.InitLog(cmd, reportName, suppressErrorLog)
 
 			utils.LogInfo(fmt.Sprintf("Chart Verifer %s.", Version))
 			utils.LogInfo(fmt.Sprintf("Verify : %s", args[0]))
 			utils.LogInfo(fmt.Sprintf("Client timeout: %s", clientTimeout))
 
-			// vals is a resulting map considering all the options the user has given.
-			vals, err := opts.MergeValues(getter.All(settings))
-			if err != nil {
-				utils.LogError(err.Error())
-				return err
+			valueMap := convertToMap(verifyOpts.Values)
+			for key, val := range viper.AllSettings() {
+				valueMap[strings.ToLower(key)] = val
 			}
 
-			verifierBuilder := chartverifier.NewVerifierBuilder().
-				SetValues(vals).
-				SetConfig(config).
-				SetOverrides(verifyOpts.Values)
+			verifier := apiverifier.NewVerifier()
 
-			checks, err := buildChecks(allChecks, verifierBuilder.GetConfig(), enabledChecksFlag, disabledChecksFlag)
-			if err != nil {
-				utils.LogError(err.Error())
-				return err
+			if len(enabledChecks) > 0 {
+				verifier = verifier.EnableChecks(enabledChecks)
+			} else if len(unEnabledChecks) > 0 {
+				verifier = verifier.UnEnableChecks(unEnabledChecks)
 			}
 
-			verifier, err := verifierBuilder.
-				SetChecks(checks).
-				SetToolVersion(Version).
-				SetOpenShiftVersion(openshiftVersionFlag).
-				SetProviderDelivery(providerDelivery).
-				SetTimeout(clientTimeout).
-				Build()
+			var runErr error
+			verifier, runErr = verifier.SetBoolean(apiverifier.ProviderDelivery, providerDelivery).
+				SetBoolean(apiverifier.SuppressErrorLog, suppressErrorLog).
+				SetDuration(apiverifier.Timeout, clientTimeout).
+				SetString(apiverifier.OpenshiftVersion, []string{openshiftVersionFlag}).
+				SetString(apiverifier.ChartValues, opts.ValueFiles).
+				SetString(apiverifier.KubeApiServer, []string{settings.KubeAPIServer}).
+				SetString(apiverifier.KubeAsUser, []string{settings.KubeAsUser}).
+				SetString(apiverifier.KubeCaFile, []string{settings.KubeCaFile}).
+				SetString(apiverifier.KubeConfig, []string{settings.KubeConfig}).
+				SetString(apiverifier.KubeContext, []string{settings.KubeContext}).
+				SetString(apiverifier.Namespace, []string{settings.Namespace()}).
+				SetString(apiverifier.KubeApiServer, []string{settings.KubeAPIServer}).
+				SetString(apiverifier.RegistryConfig, []string{settings.RegistryConfig}).
+				SetString(apiverifier.RepositoryConfig, []string{settings.RepositoryConfig}).
+				SetString(apiverifier.RepositoryCache, []string{settings.RepositoryCache}).
+				SetString(apiverifier.KubeAsGroups, settings.KubeAsGroups).
+				SetValues(apiverifier.CommandSet, valueMap).
+				SetValues(apiverifier.ChartSet, convertToMap(opts.Values)).
+				SetValues(apiverifier.ChartSetFile, convertToMap(opts.FileValues)).
+				SetValues(apiverifier.ChartSetString, convertToMap(opts.StringValues)).
+				Run(args[0])
 
-			if err != nil {
-				return err
+			if runErr != nil {
+				return runErr
 			}
 
-			result, err := verifier.Verify(args[0])
-			if err != nil {
-				utils.LogError(err.Error())
-				return err
+			report, reportErr := verifier.GetReport().GetContent(reportFormat)
+			if reportErr != nil {
+				return reportErr
 			}
 
-			outputContent := ""
-			if outputFormatFlag == "json" {
-				b, err := json.Marshal(result)
-				if err != nil {
-					utils.LogError(err.Error())
-					return err
-				}
-				outputContent = string(b)
-			} else {
-				b, err := yaml.Marshal(result)
-				if err != nil {
-					return err
-				}
-				outputContent = string(b)
-			}
-			utils.WriteStdOut(outputContent)
+			utils.WriteStdOut(report)
 
 			utils.WriteLogs(outputFormatFlag)
 

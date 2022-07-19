@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/profiles"
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
-	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/utils"
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/utils"
+	apireportsummary "github.com/redhat-certification/chart-verifier/pkg/chartverifier/reportsummary"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 	helmchart "helm.sh/helm/v3/pkg/chart"
@@ -18,25 +18,25 @@ import (
 
 func TestReport(t *testing.T) {
 
-	var expectedAnnotations []report.Annotation
-	annotation1 := report.Annotation{Name: fmt.Sprintf("%s/%s", report.DefaultAnnotationsPrefix, report.DigestsAnnotationName), Value: "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"}
-	annotation2 := report.Annotation{Name: fmt.Sprintf("%s/%s", report.DefaultAnnotationsPrefix, report.TestedOCPVersionAnnotationName), Value: "4.7.8"}
-	annotation3 := report.Annotation{Name: fmt.Sprintf("%s/%s", report.DefaultAnnotationsPrefix, report.LastCertifiedTimestampAnnotationName), Value: "2021-07-06T10:28:01.09604-04:00"}
-	annotation4 := report.Annotation{Name: fmt.Sprintf("%s/%s", report.DefaultAnnotationsPrefix, report.SupportedOCPVersionsAnnotationName), Value: "4.7.8"}
+	var expectedAnnotations []apireportsummary.Annotation
+	annotation1 := apireportsummary.Annotation{Name: fmt.Sprintf("%s/%s", apireportsummary.DefaultAnnotationsPrefix, apireportsummary.DigestsAnnotationName), Value: "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"}
+	annotation2 := apireportsummary.Annotation{Name: fmt.Sprintf("%s/%s", apireportsummary.DefaultAnnotationsPrefix, apireportsummary.TestedOCPVersionAnnotationName), Value: "4.7.8"}
+	annotation3 := apireportsummary.Annotation{Name: fmt.Sprintf("%s/%s", apireportsummary.DefaultAnnotationsPrefix, apireportsummary.LastCertifiedTimestampAnnotationName), Value: "2021-07-06T10:28:01.09604-04:00"}
+	annotation4 := apireportsummary.Annotation{Name: fmt.Sprintf("%s/%s", apireportsummary.DefaultAnnotationsPrefix, apireportsummary.SupportedOCPVersionsAnnotationName), Value: "4.7.8"}
 	expectedAnnotations = append(expectedAnnotations, annotation1, annotation2, annotation3, annotation4)
 
-	expectedResults := &report.ResultsReport{}
+	expectedResults := &apireportsummary.ResultsReport{}
 	expectedResults.Passed = "11"
 	expectedResults.Failed = "1"
 
-	expectedMetadata := &report.MetadataReport{}
+	expectedMetadata := &apireportsummary.MetadataReport{}
 	expectedMetadata.ProfileVersion = "v1.1"
 	expectedMetadata.ProfileVendorType = "redhat"
-	expectedMetadata.ChartUri = "pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
+	expectedMetadata.ChartUri = "internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
 	expectedMetadata.Chart = &helmchart.Metadata{Name: "chart", Version: "0.1.0-v3.valid"}
 	expectedMetadata.ProviderDelivery = false
 
-	expectedDigests := &report.DigestReport{}
+	expectedDigests := &apireportsummary.DigestReport{}
 	expectedDigests.PackageDigest = "4f29f2a95bf2b9a1c62fd215b079a01bdc5a38e9b4ff874d0fa21d0afca2e76d"
 	expectedDigests.ChartDigest = "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"
 
@@ -86,12 +86,12 @@ func TestReport(t *testing.T) {
 		cmd.SetErr(errBuf)
 
 		cmd.SetArgs([]string{
-			report.AnnotationsCommandName,
+			string(apireportsummary.AnnotationsSummary),
 			"test/report.yaml",
 		})
 		require.NoError(t, cmd.Execute())
 
-		testReport := report.OutputReport{}
+		testReport := apireportsummary.ReportSummary{}
 		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
 		require.True(t, compareAnnotations(expectedAnnotations, testReport.AnnotationsReport))
 
@@ -105,12 +105,12 @@ func TestReport(t *testing.T) {
 		cmd.SetErr(errBuf)
 
 		cmd.SetArgs([]string{
-			report.ResultsCommandName,
+			string(apireportsummary.ResultsSummary),
 			"test/report.yaml",
 		})
 		require.NoError(t, cmd.Execute())
 
-		testReport := report.OutputReport{}
+		testReport := apireportsummary.ReportSummary{}
 		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
 		require.True(t, compareResults(expectedResults, testReport.ResultsReport))
 	})
@@ -123,12 +123,12 @@ func TestReport(t *testing.T) {
 		cmd.SetErr(errBuf)
 
 		cmd.SetArgs([]string{
-			report.MetadataCommandName,
+			string(apireportsummary.MetadataSummary),
 			"test/report.yaml",
 		})
 		require.NoError(t, cmd.Execute())
 
-		testReport := report.OutputReport{}
+		testReport := apireportsummary.ReportSummary{}
 		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
 		require.True(t, compareMetadata(expectedMetadata, testReport.MetadataReport))
 	})
@@ -141,12 +141,12 @@ func TestReport(t *testing.T) {
 		cmd.SetErr(errBuf)
 
 		cmd.SetArgs([]string{
-			report.DigestsCommandName,
+			string(apireportsummary.DigestsSummary),
 			"test/report.yaml",
 		})
 		require.NoError(t, cmd.Execute())
 
-		testReport := report.OutputReport{}
+		testReport := apireportsummary.ReportSummary{}
 		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
 		require.True(t, compareDigests(expectedDigests, testReport.DigestsReport))
 	})
@@ -159,12 +159,12 @@ func TestReport(t *testing.T) {
 		cmd.SetErr(errBuf)
 
 		cmd.SetArgs([]string{
-			report.AllCommandsName,
+			string(apireportsummary.AllSummary),
 			"test/report.yaml",
 		})
 		require.NoError(t, cmd.Execute())
 
-		testReport := report.OutputReport{}
+		testReport := apireportsummary.ReportSummary{}
 		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
 		require.True(t, compareAnnotations(expectedAnnotations, testReport.AnnotationsReport))
 		require.True(t, compareDigests(expectedDigests, testReport.DigestsReport))
@@ -181,20 +181,20 @@ func TestReport(t *testing.T) {
 
 		annotationPrefix := "charts.testing.io"
 		cmd.SetArgs([]string{
-			"--set", fmt.Sprintf("%s=%s", report.AnnotationsPrefixConfigName, annotationPrefix),
-			report.AnnotationsCommandName,
+			"--set", fmt.Sprintf("%s=%s", apireportsummary.AnnotationsPrefixConfigName, annotationPrefix),
+			string(apireportsummary.AnnotationsSummary),
 			"test/report.yaml",
 		})
 		require.NoError(t, cmd.Execute())
 
-		var expectedPrefixAnnotations []report.Annotation
-		annotationP1 := report.Annotation{Name: fmt.Sprintf("%s/%s", annotationPrefix, report.DigestsAnnotationName), Value: "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"}
-		annotationP2 := report.Annotation{Name: fmt.Sprintf("%s/%s", annotationPrefix, report.TestedOCPVersionAnnotationName), Value: "4.7.8"}
-		annotationP3 := report.Annotation{Name: fmt.Sprintf("%s/%s", annotationPrefix, report.LastCertifiedTimestampAnnotationName), Value: "2021-07-06T10:28:01.09604-04:00"}
-		annotationP4 := report.Annotation{Name: fmt.Sprintf("%s/%s", annotationPrefix, report.SupportedOCPVersionsAnnotationName), Value: "4.7.8"}
+		var expectedPrefixAnnotations []apireportsummary.Annotation
+		annotationP1 := apireportsummary.Annotation{Name: fmt.Sprintf("%s/%s", annotationPrefix, apireportsummary.DigestsAnnotationName), Value: "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"}
+		annotationP2 := apireportsummary.Annotation{Name: fmt.Sprintf("%s/%s", annotationPrefix, apireportsummary.TestedOCPVersionAnnotationName), Value: "4.7.8"}
+		annotationP3 := apireportsummary.Annotation{Name: fmt.Sprintf("%s/%s", annotationPrefix, apireportsummary.LastCertifiedTimestampAnnotationName), Value: "2021-07-06T10:28:01.09604-04:00"}
+		annotationP4 := apireportsummary.Annotation{Name: fmt.Sprintf("%s/%s", annotationPrefix, apireportsummary.SupportedOCPVersionsAnnotationName), Value: "4.7.8"}
 		expectedPrefixAnnotations = append(expectedPrefixAnnotations, annotationP1, annotationP2, annotationP3, annotationP4)
 
-		testReport := report.OutputReport{}
+		testReport := apireportsummary.ReportSummary{}
 		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
 		require.True(t, compareAnnotations(expectedPrefixAnnotations, testReport.AnnotationsReport))
 	})
@@ -208,16 +208,16 @@ func TestReport(t *testing.T) {
 
 		cmd.SetArgs([]string{
 			"--set", fmt.Sprintf("%s=%s", profiles.VendorTypeConfigName, "community"),
-			report.AllCommandsName,
+			string(apireportsummary.AllSummary),
 			"test/report.yaml",
 		})
 		require.NoError(t, cmd.Execute())
 
-		expectedCommunityResults := &report.ResultsReport{}
+		expectedCommunityResults := &apireportsummary.ResultsReport{}
 		expectedCommunityResults.Passed = "1"
 		expectedCommunityResults.Failed = "0"
 
-		testReport := report.OutputReport{}
+		testReport := apireportsummary.ReportSummary{}
 		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
 
 		require.True(t, compareMetadata(expectedMetadata, testReport.MetadataReport))
@@ -234,12 +234,12 @@ func TestReport(t *testing.T) {
 
 		cmd.SetArgs([]string{
 			"--set", fmt.Sprintf("%s=%s", profiles.VersionConfigName, "2.1"),
-			report.MetadataCommandName,
+			string(apireportsummary.MetadataSummary),
 			"test/report.yaml",
 		})
 		require.NoError(t, cmd.Execute())
 
-		testReport := report.OutputReport{}
+		testReport := apireportsummary.ReportSummary{}
 		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
 
 		require.True(t, compareMetadata(expectedMetadata, testReport.MetadataReport))
@@ -248,7 +248,7 @@ func TestReport(t *testing.T) {
 
 }
 
-func compareMetadata(expected *report.MetadataReport, result *report.MetadataReport) bool {
+func compareMetadata(expected *apireportsummary.MetadataReport, result *apireportsummary.MetadataReport) bool {
 	outcome := true
 	if strings.Compare(expected.ProfileVersion, result.ProfileVersion) != 0 {
 		fmt.Println(fmt.Sprintf("profile version mistmatch %s : %s", expected.ProfileVersion, result.ProfileVersion))
@@ -278,7 +278,7 @@ func compareMetadata(expected *report.MetadataReport, result *report.MetadataRep
 	return outcome
 }
 
-func compareDigests(expected *report.DigestReport, result *report.DigestReport) bool {
+func compareDigests(expected *apireportsummary.DigestReport, result *apireportsummary.DigestReport) bool {
 	outcome := true
 	if strings.Compare(expected.PackageDigest, result.PackageDigest) != 0 {
 		fmt.Println(fmt.Sprintf("package digest mistmatch %s : %s", expected.PackageDigest, result.PackageDigest))
@@ -291,7 +291,7 @@ func compareDigests(expected *report.DigestReport, result *report.DigestReport) 
 	return outcome
 }
 
-func compareResults(expected *report.ResultsReport, result *report.ResultsReport) bool {
+func compareResults(expected *apireportsummary.ResultsReport, result *apireportsummary.ResultsReport) bool {
 	outcome := true
 	if strings.Compare(expected.Passed, result.Passed) != 0 {
 		fmt.Println(fmt.Sprintf("results passed mistmatch %s : %s", expected.Passed, result.Passed))
@@ -312,7 +312,7 @@ func compareResults(expected *report.ResultsReport, result *report.ResultsReport
 	return outcome
 }
 
-func compareAnnotations(expected []report.Annotation, result []report.Annotation) bool {
+func compareAnnotations(expected []apireportsummary.Annotation, result []apireportsummary.Annotation) bool {
 	outcome := true
 	if len(expected) != len(result) {
 		fmt.Println(fmt.Sprintf("num of annotation mismtatch %d : %d", len(expected), len(result)))
