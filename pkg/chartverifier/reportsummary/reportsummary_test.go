@@ -42,7 +42,7 @@ func TestAddUrlReport(t *testing.T) {
 	url, loadUrlErr := url.Parse(yamlUrlReport)
 	require.NoError(t, loadUrlErr)
 
-	chartUri := "pkg/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
+	chartUri := "internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
 	report, loadErr := apireport.NewReport().SetURL(url).Load()
 	require.NoError(t, loadErr)
 	reportSummary := NewReportSummary().SetReport(report)
