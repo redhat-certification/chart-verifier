@@ -38,22 +38,20 @@ func init() {
 
 	yamlFile, err := content.ReadFile("kubeOpenShiftVersionMap.yaml")
 
-	if err == nil {
-
-		versions := versionMap{}
-
-		err = yaml.Unmarshal(yamlFile, &versions)
-
-		if err == nil {
-
-			for _, versionMap := range versions.Versions {
-				kubeOpenShiftVersionMap[versionMap.KubeVersion] = versionMap.OcpVersion
-			}
-		} else {
-			utils.LogError(fmt.Sprintf("Unmarshall error reading kubeOpenShiftVersionMap.yaml: %v", err))
-		}
-	} else {
+	if err != nil {
 		utils.LogError(fmt.Sprintf("Error reading content of kubeOpenShiftVersionMap.yaml: %v", err))
+		return
+	}
+
+	versions := versionMap{}
+	err = yaml.Unmarshal(yamlFile, &versions)
+	if err != nil {
+		utils.LogError(fmt.Sprintf("Error reading content of kubeOpenShiftVersionMap.yaml: %v", err))
+		return
+	}
+
+	for _, versionMap := range versions.Versions {
+		kubeOpenShiftVersionMap[versionMap.KubeVersion] = versionMap.OcpVersion
 	}
 
 }
