@@ -2,8 +2,10 @@ package tool
 
 import (
 	"context"
+	"embed"
 	"fmt"
 
+	"gopkg.in/yaml.v3"
 	"helm.sh/helm/v3/pkg/cli"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -12,20 +14,46 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/kubectl/pkg/scheme"
+
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/utils"
 )
 
+//go:embed kubeOpenShiftVersionMap.yaml
+var content embed.FS
+
 // Based on https://access.redhat.com/solutions/4870701
-var kubeOpenShiftVersionMap map[string]string = map[string]string{
-	"1.23": "4.10",
-	"1.22": "4.9",
-	"1.21": "4.8",
-	"1.20": "4.7",
-	"1.19": "4.6",
-	"1.18": "4.5",
-	"1.17": "4.4",
-	"1.16": "4.3",
-	"1.14": "4.2",
-	"1.13": "4.1",
+var kubeOpenShiftVersionMap map[string]string
+
+type versionMap struct {
+	Versions []*versionMapping `yaml:"versions"`
+}
+
+type versionMapping struct {
+	KubeVersion string `yaml:"kube-version"`
+	OcpVersion  string `yaml:"ocp-version"`
+}
+
+func init() {
+	kubeOpenShiftVersionMap = make(map[string]string)
+
+	yamlFile, err := content.ReadFile("kubeOpenShiftVersionMap.yaml")
+
+	if err != nil {
+		utils.LogError(fmt.Sprintf("Error reading content of kubeOpenShiftVersionMap.yaml: %v", err))
+		return
+	}
+
+	versions := versionMap{}
+	err = yaml.Unmarshal(yamlFile, &versions)
+	if err != nil {
+		utils.LogError(fmt.Sprintf("Error reading content of kubeOpenShiftVersionMap.yaml: %v", err))
+		return
+	}
+
+	for _, versionMap := range versions.Versions {
+		kubeOpenShiftVersionMap[versionMap.KubeVersion] = versionMap.OcpVersion
+	}
+
 }
 
 type Kubectl struct {
