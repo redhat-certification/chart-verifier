@@ -1,4 +1,6 @@
 versions:
+    - kube-version: "1.24"
+      ocp-version: "4.11"
     - kube-version: "1.23"
       ocp-version: "4.10"
     - kube-version: "1.22"
