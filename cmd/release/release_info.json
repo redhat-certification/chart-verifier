@@ -1,16 +1,13 @@
 {
-    "version": "1.7.0",
+    "version": "1.8.0",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
         "<ul>",
-        "<li>Provider delivery: Require a tarball and omit chart-uri from report (#264)</li>",
-        "<li>Upgrade to helm 3.9.0 (#263)</li>",
-        "<li>Add flag to set timeout for chart install and test (#261)</li>",
+        "<li>Chart Verifier API: add new api stage 1 and doc (#271)</li>",
+        "<li>Add support for OCP 4.11, (#273)</li>",
         "<li>Bug Fixes:</li>",
         "<ul>",
-        "<li>Fix error where certified images were not found using sha value (#265)</li>",
-        "<li>Allow for pyxis responses spanning more than one page (#265)</li>",
-        "<li>Allow for long lines when reading output from helm template (#256)</li>",
+        "<li>Set dry-run when running helm template (#268)</li>",
         "</ul>",
         "</ul>"
     ]
