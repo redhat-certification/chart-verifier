@@ -1,21 +1,29 @@
-# Chart Verifier API
+# Chart Verifier go language API
 
-Important Notes:
-- The API is not published in a chart verifier release as of release 1.7.0
-- The API is not currently finalized and is subject to change.
-- The API is available in development release 0.1.0.
+IMPORTANT:
+- The API was first published in chart verifier release 1.8.0
+- The API in release 1.8.0 is not finalized and is subject to change.
+- The API is also available in development release 0.1.0.
 
 ## Overview
 
-The API includes 4 types: Verifier, Report, ReportSummary and Checks:
+The API is written using the go language and was created to enable services to run the chart verifier and obtain a report. 
+It can be used in the same way as any go package, import and invoke. 
 
-- [verifier](#verifier) : Provides an api to set chart verifier verify flags and run the verifier to generate a report.
-- [report](#report): Provides an api to get and set report content as a string in json or yaml format.
-- [reportSummary](#reportsummary): Provides an api to set chart verifier report flags and generate a report summary.
-- [checks](#checks): Provides an api to get a set containing all available checks.
+The API includes the following 4 go language packages: verifier, report, reportSummary and checks:
 
-## Verifier
+| Package | Description 
+| --------| -------------
+| [verifier](#verifier) | Provides an API to set the verify flags for the chart-verifier and run the verifier to generate a report. 
+| [report](#report) | Provides an api to get and set report content as a string in json or yaml format. 
+| [reportSummary](#reportsummary) | Provides an api to set chart verifier report flags and generate a report summary. 
+| [checks](#checks) | Provides an api to get a set containing all available checks. 
 
+Each of these packages are now described in more detail. These are followed by an [example](#example) of use.
+
+## verifier
+
+### Go definition of the APIVerifier interface
 ```
 func NewVerifier() ApiVerifier
 type ApiVerifier interface {
@@ -29,6 +37,7 @@ type ApiVerifier interface {
 	GetReport() *report.Report
 }
 ```
+### Description of each function of the APIVerifier interface
 
 - NewVerifier - Used to create a new ```Verifier```.
   
@@ -71,6 +80,7 @@ type ApiVerifier interface {
 
 ## Report
 
+### Go definition of the APIReport interface
 ```
 func NewReport() APIReport
 type APIReport interface {
@@ -80,6 +90,8 @@ type APIReport interface {
     Load() (*Report, error)
 }
 ```
+
+### Description of each function of the APIVerifier interface
 
 - NewReport: Used to create a new ```Report```.
   
@@ -94,6 +106,8 @@ type APIReport interface {
 - Load: Can be used to load a report based on content set using ```SetContent``` or ```SetUrl```. This will be called internally when the report is needed but can be used to check if a report will load without error.
 
 ## ReportSummary
+
+### Go definition of the APIReportSummary interface
 ```
 func NewReportSummary() APIReportSummary
 type APIReportSummary interface {
@@ -103,6 +117,8 @@ type APIReportSummary interface {
 }
 
 ```
+
+### Description of each function of the APIVerifier interface
 
 - NewReportSummary: Used to create a ```ReportSummary```.
   
@@ -116,9 +132,11 @@ type APIReportSummary interface {
 
 ## Checks
 
+### Go definition of the GetChecks function
 ```
 func GetChecks() []CheckName
 ```
+### Description of the GetChecks function
 
 - GetChecks: Used to get an array of ```CheckName``` types. The array content provide value with can be used for ```verifier.EnableChecks``` and ```verifier.UnEnableChecks```:
     - ```ChartTesting```
@@ -137,9 +155,13 @@ func GetChecks() []CheckName
 
 # Example:
 
-Note: Example does not include error checking for clarity.
+Note: 
+- The following example does not include error checking code for clarity purposes.
+- For full use of the chart-verifier see:
+    - [https://github.com/redhat-certification/chart-verifier/blob/main/cmd/verify.go](https://github.com/redhat-certification/chart-verifier/blob/main/cmd/verify.go)
+    - [https://github.com/redhat-certification/chart-verifier/blob/main/cmd/report.go](https://github.com/redhat-certification/chart-verifier/blob/main/cmd/report.go)
 
-1. import the api:
+1. import the packages of the chart-verifier API:
 ```
 import (
 	"fmt"
@@ -150,7 +172,7 @@ import (
 )
 ```
 
-2. Create a verifier, set a profile vendortype of redhat, un-enable the chart testing check, and run verify:
+2. Set a profile vendortype of redhat, un-enable the chart testing check, and run verify:
 ```
 	// Run verify command for a chart, but omit the chart testing check and run checks based on the redhat profile
 	commandSet := make(map[string]interface{})
@@ -162,14 +184,14 @@ import (
 		Run("https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.9/psql-service-0.1.9.tgz?raw=true")
 
 ```
-3. Get and print, in yaml format, the report created by ```verifier.Verify``` in step 2.
+3. Get and print the report created from the previous step in YAML format:
 ```
 	// Get and print the report from the verify command
 	report, reportErr := verifier.GetReport().
 		GetContent(report.YamlReport)
 	fmt.Println("report content:\n", report)
 ```
-4. Get and print, in json format, a report summary which is based on a report from ```verifier.GetReport``, and using a profile vendor type of partner.
+4. Use the vendortype value of the profile as partner to get and print a report summary of the previous report in JSON format. 
 ```
 	// Get and print the report summary  of the report, but using the partnet profile.
 	values := make(map[string]interface{})
@@ -182,3 +204,8 @@ import (
 
 	fmt.Println("report summary content:\n", reportSummary)
 ```
+
+The above example shows a basic invocation of the chart verifier, getting and printing the resulting report and the report summary of the report. 
+- For full use of the chart-verifier API see:
+    - [https://github.com/redhat-certification/chart-verifier/blob/main/cmd/verify.go](https://github.com/redhat-certification/chart-verifier/blob/main/cmd/verify.go)
+    - [https://github.com/redhat-certification/chart-verifier/blob/main/cmd/report.go](https://github.com/redhat-certification/chart-verifier/blob/main/cmd/report.go)
