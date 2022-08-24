@@ -23,7 +23,7 @@ except ImportError:
 
 
 OWNERS_FILE = "OWNERS"
-VERSION_FILE = "cmd/release/release_info.json"
+VERSION_FILE = "pkg/chartverifier/version/version_info.json"
 THIS_FILE = "scripts/src/owners/checkuser.py"
 
 

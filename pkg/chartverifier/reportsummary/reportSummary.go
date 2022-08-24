@@ -107,6 +107,7 @@ func (r *ReportSummary) GetContent(summary SummaryType, format SummaryFormat) (s
 			return "", err
 		}
 	}
+
 	return reportContent, nil
 }
 

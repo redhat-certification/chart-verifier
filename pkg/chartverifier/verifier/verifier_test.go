@@ -9,6 +9,7 @@ import (
 	apichecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	apireport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 	apireportsummary "github.com/redhat-certification/chart-verifier/pkg/chartverifier/reportsummary"
+	apiversion "github.com/redhat-certification/chart-verifier/pkg/chartverifier/version"
 )
 
 func TestVerifyApi(t *testing.T) {
@@ -22,6 +23,7 @@ func TestVerifyApi(t *testing.T) {
 
 	reportSummary := apireportsummary.NewReportSummary().SetReport(verifier.GetReport())
 	checkReportSummaries(reportSummary, chartUri, t)
+	require.True(t, verifier.GetReport().Metadata.ToolMetadata.Version == apiversion.GetVersion())
 
 }
 

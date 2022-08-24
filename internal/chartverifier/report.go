@@ -43,13 +43,13 @@ func newReport() InternalReport {
 	return report
 }
 
-func (c *InternalReport) AddCheck(check checks.Check) *InternalCheckReport {
+func (ir *InternalReport) AddCheck(check checks.Check) *InternalCheckReport {
 	newCheck := InternalCheckReport{}
 	newCheck.APICheckReport = apiReport.CheckReport{}
 	newCheck.APICheckReport.Check = apiChecks.CheckName(fmt.Sprintf("%s/%s", check.CheckId.Version, check.CheckId.Name))
 	newCheck.APICheckReport.Type = apiChecks.CheckType(check.Type)
 	newCheck.APICheckReport.Outcome = apiReport.UnknownOutcomeType
-	c.APIReport.Results = append(c.APIReport.Results, &newCheck.APICheckReport)
+	ir.APIReport.Results = append(ir.APIReport.Results, &newCheck.APICheckReport)
 	return &newCheck
 }
 
@@ -62,10 +62,20 @@ func (cr *InternalCheckReport) SetResult(outcome bool, reason string) {
 	cr.APICheckReport.Reason = reason
 }
 
-func (c *InternalReport) GetApiReport() *apiReport.Report {
-	return &c.APIReport
+func (ir *InternalReport) GetApiReport() *apiReport.Report {
+	return &ir.APIReport
 }
 
 func (cr *InternalCheckReport) GetApiCheckReport() *apiReport.CheckReport {
 	return &cr.APICheckReport
+}
+
+func (ir *InternalReport) SetReportDigest() {
+
+	var err error
+	ir.APIReport.Metadata.ToolMetadata.ReportDigest, err = ir.APIReport.GetReportDigest()
+	if err != nil {
+		ir.APIReport.Metadata.ToolMetadata.ReportDigest = err.Error()
+	}
+
 }
