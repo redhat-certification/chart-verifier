@@ -7,6 +7,7 @@ import (
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
+	"golang.org/x/mod/semver"
 	"gopkg.in/yaml.v3"
 	"strings"
 )
@@ -29,9 +30,15 @@ const (
 
 	JsonReport SummaryFormat = "json"
 	YamlReport SummaryFormat = "yaml"
+
+	// SkipDigestCheck: Use for testing purpose only
+	SkipDigestCheck BooleanKey = "skipDigestCheck"
 )
 
+var setBooleanKeys = [...]BooleanKey{SkipDigestCheck}
+
 type APIReportSummary interface {
+	SetBoolean(key BooleanKey, value bool) APIReportSummary
 	SetReport(report *report.Report) APIReportSummary
 	GetContent(SummaryType, SummaryFormat) (string, error)
 	SetValues(values map[string]interface{}) APIReportSummary
@@ -41,6 +48,8 @@ func NewReportSummary() APIReportSummary {
 	r := &ReportSummary{}
 	r.options = &reportOptions{}
 	r.options.values = make(map[string]interface{})
+	r.options.booleanFlags = make(map[BooleanKey]bool)
+	r.options.booleanFlags[SkipDigestCheck] = false
 	return r
 }
 
@@ -60,6 +69,14 @@ func (r *ReportSummary) SetValues(values map[string]interface{}) APIReportSummar
 	return r
 }
 
+/*
+ * Set a boolean flag. Overwrites any previous setting.
+ */
+func (r *ReportSummary) SetBoolean(key BooleanKey, value bool) APIReportSummary {
+	r.options.booleanFlags[key] = value
+	return r
+}
+
 func (r *ReportSummary) GetContent(summary SummaryType, format SummaryFormat) (string, error) {
 
 	generateSummary := (r.MetadataReport == nil) || (r.ResultsReport == nil) || (r.AnnotationsReport == nil) || (r.DigestsReport == nil)
@@ -76,6 +93,13 @@ func (r *ReportSummary) GetContent(summary SummaryType, format SummaryFormat) (s
 	_, err := r.options.report.Load()
 	if err != nil {
 		return "", err
+	}
+
+	if !r.options.booleanFlags[SkipDigestCheck] {
+		err = r.checkReportDigest()
+		if err != nil {
+			return "", err
+		}
 	}
 
 	switch summary {
@@ -251,5 +275,30 @@ func (r *ReportSummary) addResults() {
 	r.ResultsReport.Passed = fmt.Sprintf("%d", passed)
 	r.ResultsReport.Failed = fmt.Sprintf("%d", failed)
 	r.ResultsReport.Messages = messages
+
+}
+
+func (r *ReportSummary) checkReportDigest() error {
+
+	toolMetadata := r.options.report.Metadata.ToolMetadata
+	reportVersion := fmt.Sprintf("v%s", toolMetadata.Version)
+
+	if semver.Compare(reportVersion, report.ReportShaVersion) >= 0 {
+
+		digestFromReport := toolMetadata.ReportDigest
+		if digestFromReport == "" {
+			return errors.New("Report does not contain expected report digest. ")
+		}
+
+		calculatedDigest, err := r.options.report.GetReportDigest()
+		if err != nil {
+			return errors.New(fmt.Sprintf("error calculating report digest: %v", err))
+		}
+		if calculatedDigest != digestFromReport {
+			return errors.New("Digest in report did not match report content.")
+		}
+
+	}
+	return nil
 
 }

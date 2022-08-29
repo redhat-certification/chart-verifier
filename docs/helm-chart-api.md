@@ -100,6 +100,7 @@ type APIReportSummary interface {
 	SetReport(report *apireport.Report) APIReportSummary
 	GetContent(SummaryType, SummaryFormat) (string, error)
 	SetValues(values map[string]interface{}) APIReportSummary
+	SetBoolean(key BooleanKey, value bool) APIReportSummary
 }
 
 ```
@@ -113,6 +114,9 @@ type APIReportSummary interface {
     - ```YamlReport``` - for yaml format.
   
 - SetValues: Used to set value flags to tailor content of the report sumary. Can be used to set a profile vendorType and/or version which by default are the values set in the report.
+
+- SetBoolean: Used to set a boolean flag. ```BooleanKey``` values are defined in the reportsummary package and include:
+    - ```SkipDigestCheck``` - Intended for testing purpoises only.
 
 ## Checks
 

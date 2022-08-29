@@ -121,7 +121,7 @@ func (r *Report) loadReport() error {
 		}
 	}
 
-	return r.checkReportDigest()
+	return nil
 }
 
 func loadReportFromRemote(url *url.URL) (string, error) {

@@ -23,6 +23,8 @@ type reportOptions struct {
 	Values     []string
 }
 
+var skipDigestCheck bool
+
 // NewReportCmd creates a command that sanity checks report.
 func NewReportCmd(config *viper.Viper) *cobra.Command {
 
@@ -96,6 +98,7 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 			reportSummary, summaryErr := apireportsummary.NewReportSummary().
 				SetValues(valueMap).
 				SetReport(report).
+				SetBoolean(apireportsummary.SkipDigestCheck, skipDigestCheck).
 				GetContent(reportType, reportFormat)
 
 			if summaryErr != nil {
@@ -114,6 +117,8 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 	cmd.Flags().StringSliceVarP(&reportOpts.ValueFiles, "set-values", "f", nil, "specify report configuration values in a YAML file or a URL (can specify multiple)")
 
 	cmd.Flags().BoolVarP(&reportToFile, "write-to-file", "w", false, "write report to report-info.json (default: stdout)")
+
+	cmd.Flags().BoolVarP(&skipDigestCheck, "skip-digest-check", "d", false, "FOR TESTING PURPOSES ONLY: skip the check that the digest in the report matches the report content")
 
 	return cmd
 }
