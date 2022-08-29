@@ -32,7 +32,7 @@ Helm chart checks are a set of checks against which the Red Hat Helm chart-verif
   - Alternatively the ```--write-to-file``` flag can be used to write to a ```report.yaml``` file. 
 - An error log is created for all verify commands but can be optionally suppressed.
 - You can indicate that a chart is not to be published in the OpenShift catalog.
-- From chart verifier version 1.9.0 the generated report includes a sha value based on the report content. This is used during the submission process to verify the egrity of the report.
+- From chart verifier version 1.9.0 the generated report includes a sha value based on the report content. This is used during the submission process to verify the integrity of the report.
 
 ## Types of Helm chart checks
 Helm chart checks are categorized into the following types:

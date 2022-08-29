@@ -1,1 +1,100 @@
-{"apiversion":"v1","kind":"verify-report","metadata":{"tool":{"verifier-version":"1.9.0","profile":{"vendorType":"partner","version":"v1.1"},"report-digest":"uint64:6132714415651448455","chart-uri":"https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.9/psql-service-0.1.9.tgz?raw=true","digests":{"chart":"sha256:9f4d290c9a89f2900c3ffe9c1680c2ac2e61a34619e526de4652e2f2dbf4609b","package":"89589ab22f10f5a91411145c1a4855e88091b7ff316255e8fceb2044db0b31e7"},"lastCertifiedTimestamp":"2022-07-11T12:29:50.630869-04:00","testedOpenShiftVersion":"4.10","supportedOpenShiftVersions":"\u003e=4.7","providerControlledDelivery":false},"chart":{"name":"psql-service","version":"0.1.9","description":"A Helm chart for a RedHat Certified PSQL","apiVersion":"v2","appVersion":"10.0.0","annotations":{"charts.openshift.io/archs":"x86_64","charts.openshift.io/name":"PSQL RedHat Demo Chart","charts.openshift.io/provider":"RedHat","charts.openshift.io/supportURL":"https://github.com/dperaza4dustbit/helm-chart"},"kubeVersion":"\u003e=1.20","type":"application"},"chart-overrides":""},"results":[{"check":"v1.0/helm-lint","type":"Mandatory","outcome":"PASS","reason":"Helm lint successful"},{"check":"v1.0/images-are-certified","type":"Mandatory","outcome":"PASS","reason":"Image is Red Hat certified : registry.access.redhat.com/rhscl/postgresql-10-rhel7:1-66"},{"check":"v1.0/chart-testing","type":"Mandatory","outcome":"PASS","reason":"Chart tests have passed"},{"check":"v1.0/has-readme","type":"Mandatory","outcome":"PASS","reason":"Chart has a README"},{"check":"v1.0/is-helm-v3","type":"Mandatory","outcome":"PASS","reason":"API version is V2, used in Helm 3"},{"check":"v1.0/contains-test","type":"Mandatory","outcome":"PASS","reason":"Chart test files exist"},{"check":"v1.0/contains-values","type":"Mandatory","outcome":"PASS","reason":"Values file exist"},{"check":"v1.0/required-annotations-present","type":"Mandatory","outcome":"PASS","reason":"All required annotations present"},{"check":"v1.0/contains-values-schema","type":"Mandatory","outcome":"PASS","reason":"Values schema file exist"},{"check":"v1.1/has-kubeversion","type":"Mandatory","outcome":"PASS","reason":"Kubernetes version specified"},{"check":"v1.0/not-contains-crds","type":"Mandatory","outcome":"PASS","reason":"Chart does not contain CRDs"},{"check":"v1.0/not-contain-csi-objects","type":"Mandatory","outcome":"PASS","reason":"CSI objects do not exist"}]}
+{
+    "apiversion": "v1",
+    "kind": "verify-report",
+    "metadata": {
+        "tool": {
+            "verifier-version": "1.9.0",
+            "profile": {
+                "vendorType": "partner",
+                "version": "v1.1"
+            },
+            "reportDigest": "uint64:6132714415651448455",
+            "chart-uri": "https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.9/psql-service-0.1.9.tgz?raw=true",
+            "digests": {
+                "chart": "sha256:9f4d290c9a89f2900c3ffe9c1680c2ac2e61a34619e526de4652e2f2dbf4609b",
+                "package": "89589ab22f10f5a91411145c1a4855e88091b7ff316255e8fceb2044db0b31e7"
+            },
+            "lastCertifiedTimestamp": "2022-07-11T12:29:50.630869-04:00",
+            "testedOpenShiftVersion": "4.10",
+            "supportedOpenShiftVersions": "\u003e=4.7",
+            "providerControlledDelivery": false
+        },
+        "chart": {
+            "name": "psql-service",
+            "version": "0.1.9",
+            "description": "A Helm chart for a RedHat Certified PSQL",
+            "apiVersion": "v2",
+            "appVersion": "10.0.0",
+            "annotations": {
+                "charts.openshift.io/archs": "x86_64",
+                "charts.openshift.io/name": "PSQL RedHat Demo Chart",
+                "charts.openshift.io/provider": "RedHat",
+                "charts.openshift.io/supportURL": "https://github.com/dperaza4dustbit/helm-chart"
+            },
+            "kubeVersion": "\u003e=1.20",
+            "type": "application"
+        },
+        "chart-overrides": ""
+    },
+    "results": [{
+        "check": "v1.0/helm-lint",
+        "type": "Mandatory",
+        "outcome": "PASS",
+        "reason": "Helm lint successful"
+    }, {
+        "check": "v1.0/images-are-certified",
+        "type": "Mandatory",
+        "outcome": "PASS",
+        "reason": "Image is Red Hat certified : registry.access.redhat.com/rhscl/postgresql-10-rhel7:1-66"
+    }, {
+        "check": "v1.0/chart-testing",
+        "type": "Mandatory",
+        "outcome": "PASS",
+        "reason": "Chart tests have passed"
+    }, {
+        "check": "v1.0/has-readme",
+        "type": "Mandatory",
+        "outcome": "PASS",
+        "reason": "Chart has a README"
+    }, {
+        "check": "v1.0/is-helm-v3",
+        "type": "Mandatory",
+        "outcome": "PASS",
+        "reason": "API version is V2, used in Helm 3"
+    }, {
+        "check": "v1.0/contains-test",
+        "type": "Mandatory",
+        "outcome": "PASS",
+        "reason": "Chart test files exist"
+    }, {
+        "check": "v1.0/contains-values",
+        "type": "Mandatory",
+        "outcome": "PASS",
+        "reason": "Values file exist"
+    }, {
+        "check": "v1.0/required-annotations-present",
+        "type": "Mandatory",
+        "outcome": "PASS",
+        "reason": "All required annotations present"
+    }, {
+        "check": "v1.0/contains-values-schema",
+        "type": "Mandatory",
+        "outcome": "PASS",
+        "reason": "Values schema file exist"
+    }, {
+        "check": "v1.1/has-kubeversion",
+        "type": "Mandatory",
+        "outcome": "PASS",
+        "reason": "Kubernetes version specified"
+    }, {
+        "check": "v1.0/not-contains-crds",
+        "type": "Mandatory",
+        "outcome": "PASS",
+        "reason": "Chart does not contain CRDs"
+    }, {
+        "check": "v1.0/not-contain-csi-objects",
+        "type": "Mandatory",
+        "outcome": "PASS",
+        "reason": "CSI objects do not exist"
+    }]
+}

@@ -171,7 +171,7 @@ func (r *Report) checkReportDigest() error {
 
 		digestFromReport := r.Metadata.ToolMetadata.ReportDigest
 		if digestFromReport == "" {
-			return errors.New("Report does not contain expected report digest.")
+			return errors.New("Report does not contain expected report digest. ")
 		}
 
 		calculatedDigest, err := r.GetReportDigest()
@@ -179,7 +179,7 @@ func (r *Report) checkReportDigest() error {
 			return errors.New(fmt.Sprintf("error calculating report digest: %v", err))
 		}
 		if calculatedDigest != digestFromReport {
-			return errors.New("Digest in report did not match report content")
+			return errors.New("Digest in report did not match report content.")
 		}
 
 	}

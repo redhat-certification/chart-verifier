@@ -26,7 +26,7 @@ type ReportMetadata struct {
 type ToolMetadata struct {
 	Version                    string  `json:"verifier-version" yaml:"verifier-version"`
 	Profile                    Profile `json:"profile" yaml:"profile"`
-	ReportDigest               string  `json:"report-digest" yaml:"report-digest"`
+	ReportDigest               string  `json:"reportDigest" yaml:"reportDigest"`
 	ChartUri                   string  `json:"chart-uri" yaml:"chart-uri"`
 	Digests                    Digests `json:"digests" yaml:"digests"`
 	LastCertifiedTimestamp     string  `json:"lastCertifiedTimestamp,omitempty" yaml:"lastCertifiedTimestamp,omitempty"`
