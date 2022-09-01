@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	hashstructure "github.com/mitchellh/hashstructure/v2"
+	"golang.org/x/mod/semver"
 	"gopkg.in/yaml.v3"
 	"io"
 	"net/http"
@@ -18,6 +20,8 @@ const (
 
 	JsonReport ReportFormat = "json"
 	YamlReport ReportFormat = "yaml"
+
+	ReportShaVersion string = "v1.9.0"
 )
 
 type APIReport interface {
@@ -25,6 +29,7 @@ type APIReport interface {
 	SetContent(string) APIReport
 	SetURL(url *url.URL) APIReport
 	Load() (*Report, error)
+	GetReportDigest() (string, error)
 }
 
 func NewReport() APIReport {
@@ -141,4 +146,43 @@ func loadReportFromRemote(url *url.URL) (string, error) {
 	}
 
 	return string(reportBytes), nil
+}
+
+func (r *Report) GetReportDigest() (string, error) {
+
+	savedDigest := r.Metadata.ToolMetadata.ReportDigest
+	r.Metadata.ToolMetadata.ReportDigest = ""
+
+	hash, err := hashstructure.Hash(r, hashstructure.FormatV2, nil)
+	if err != nil {
+		return "", errors.New(fmt.Sprintf("error calculating report digest: %v", err))
+	}
+
+	r.Metadata.ToolMetadata.ReportDigest = savedDigest
+	return fmt.Sprintf("uint64:%d", hash), nil
+
+}
+
+func (r *Report) checkReportDigest() error {
+
+	reportVersion := fmt.Sprintf("v%s", r.Metadata.ToolMetadata.Version)
+
+	if semver.Compare(reportVersion, ReportShaVersion) >= 0 {
+
+		digestFromReport := r.Metadata.ToolMetadata.ReportDigest
+		if digestFromReport == "" {
+			return errors.New("Report does not contain expected report digest. ")
+		}
+
+		calculatedDigest, err := r.GetReportDigest()
+		if err != nil {
+			return errors.New(fmt.Sprintf("error calculating report digest: %v", err))
+		}
+		if calculatedDigest != digestFromReport {
+			return errors.New("Digest in report did not match report content.")
+		}
+
+	}
+	return nil
+
 }

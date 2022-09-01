@@ -27,6 +27,7 @@ import (
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
+	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/version"
 
 	"github.com/spf13/viper"
 
@@ -41,7 +42,6 @@ import (
 // add go test
 
 const (
-	APIVersion              = "1.0.0"
 	JsonReport ReportFormat = "json"
 	YamlReport ReportFormat = "yaml"
 
@@ -346,7 +346,7 @@ func (v *Verifier) Run(chart_uri string) (ApiVerifier, error) {
 		runOptions.ClientTimeout = durationValue
 	}
 
-	runOptions.APIVersion = APIVersion
+	runOptions.APIVersion = version.GetVersion()
 
 	report, runErr := api.Run(runOptions)
 

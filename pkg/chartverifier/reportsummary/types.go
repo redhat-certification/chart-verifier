@@ -8,6 +8,7 @@ import (
 
 type SummaryType string
 type SummaryFormat string
+type BooleanKey string
 
 type ReportSummary struct {
 	options           *reportOptions
@@ -42,6 +43,7 @@ type ResultsReport struct {
 }
 
 type reportOptions struct {
-	report *apireport.Report
-	values map[string]interface{}
+	report       *apireport.Report
+	values       map[string]interface{}
+	booleanFlags map[BooleanKey]bool
 }

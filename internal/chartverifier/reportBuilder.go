@@ -151,6 +151,8 @@ func (r *reportBuilder) Build() (*apiReport.Report, error) {
 		r.SetChartUri(("N/A"))
 	}
 
+	r.Report.SetReportDigest()
+
 	return apiReport, nil
 }
 

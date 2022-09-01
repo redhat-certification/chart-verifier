@@ -20,6 +20,7 @@ require (
 
 require (
 	github.com/google/uuid v1.3.0
+	github.com/mitchellh/hashstructure/v2 v2.0.2
 	k8s.io/apimachinery v0.24.0
 	k8s.io/client-go v0.24.0
 	k8s.io/helm v2.17.0+incompatible

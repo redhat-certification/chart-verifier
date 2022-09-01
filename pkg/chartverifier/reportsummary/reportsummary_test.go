@@ -36,6 +36,99 @@ func TestAddStringReport(t *testing.T) {
 
 }
 
+func TestBadDigestReport(t *testing.T) {
+
+	yamlFileReport := "test-reports/baddigest/report.yaml"
+	jsonFileReport := "test-reports/baddigest/report.json"
+
+	yamlFileReportBytes, yamlReportErr := loadChartFromAbsPath(yamlFileReport)
+	require.NoError(t, yamlReportErr)
+	jsonFileReportBytes, jsonReportErr := loadChartFromAbsPath(jsonFileReport)
+	require.NoError(t, jsonReportErr)
+
+	report, loadErr := apireport.NewReport().SetContent(string(yamlFileReportBytes)).Load()
+	require.NoError(t, loadErr)
+	_, summaryErr := NewReportSummary().SetReport(report).GetContent(AllSummary, YamlReport)
+	require.Error(t, summaryErr)
+	require.Contains(t, fmt.Sprintf("%v", summaryErr), "Digest in report did not match report content")
+
+	report, loadErr = apireport.NewReport().SetContent(string(jsonFileReportBytes)).Load()
+	require.NoError(t, loadErr)
+	_, summaryErr = NewReportSummary().SetReport(report).GetContent(AllSummary, JsonReport)
+	require.Error(t, summaryErr)
+	require.Contains(t, fmt.Sprintf("%v", summaryErr), "Digest in report did not match report content")
+
+}
+
+func TestSkipBadDigestReport(t *testing.T) {
+
+	chartUri := "https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.9/psql-service-0.1.9.tgz?raw=true"
+	yamlFileReport := "test-reports/baddigest/report.yaml"
+	jsonFileReport := "test-reports/baddigest/report.json"
+
+	yamlFileReportBytes, yamlReportErr := loadChartFromAbsPath(yamlFileReport)
+	require.NoError(t, yamlReportErr)
+	jsonFileReportBytes, jsonReportErr := loadChartFromAbsPath(jsonFileReport)
+	require.NoError(t, jsonReportErr)
+
+	report, loadErr := apireport.NewReport().SetContent(string(yamlFileReportBytes)).Load()
+	require.NoError(t, loadErr)
+	reportSummary := NewReportSummary().SetReport(report).SetBoolean(SkipDigestCheck, true)
+	checkReportSummaries(reportSummary, chartUri, t)
+
+	report, loadErr = apireport.NewReport().SetContent(string(jsonFileReportBytes)).Load()
+	require.NoError(t, loadErr)
+	reportSummary = NewReportSummary().SetReport(report).SetBoolean(SkipDigestCheck, true)
+	checkReportSummaries(reportSummary, chartUri, t)
+}
+
+func TestMissingDigestReport(t *testing.T) {
+
+	yamlFileReport := "test-reports/missingdigest/report.yaml"
+	jsonFileReport := "test-reports/missingdigest/report.json"
+
+	yamlFileReportBytes, yamlReportErr := loadChartFromAbsPath(yamlFileReport)
+	require.NoError(t, yamlReportErr)
+	jsonFileReportBytes, jsonReportErr := loadChartFromAbsPath(jsonFileReport)
+	require.NoError(t, jsonReportErr)
+
+	report, loadErr := apireport.NewReport().SetContent(string(yamlFileReportBytes)).Load()
+	require.NoError(t, loadErr)
+	_, summaryErr := NewReportSummary().SetReport(report).GetContent(AllSummary, YamlReport)
+	require.Error(t, summaryErr)
+	require.Contains(t, fmt.Sprintf("%v", summaryErr), "Report does not contain expected report digest.")
+
+	report, loadErr = apireport.NewReport().SetContent(string(jsonFileReportBytes)).Load()
+	require.NoError(t, loadErr)
+	_, summaryErr = NewReportSummary().SetReport(report).GetContent(AllSummary, JsonReport)
+	require.Error(t, summaryErr)
+	require.Contains(t, fmt.Sprintf("%v", summaryErr), "Report does not contain expected report digest.")
+
+}
+
+func TestPreDigestReport(t *testing.T) {
+
+	chartUri := "https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.9/psql-service-0.1.9.tgz?raw=true"
+	yamlFileReport := "test-reports/predigest/report.yaml"
+	jsonFileReport := "test-reports/predigest/report.json"
+
+	yamlFileReportBytes, yamlReportErr := loadChartFromAbsPath(yamlFileReport)
+	require.NoError(t, yamlReportErr)
+	jsonFileReportBytes, jsonReportErr := loadChartFromAbsPath(jsonFileReport)
+	require.NoError(t, jsonReportErr)
+
+	report, loadErr := apireport.NewReport().SetContent(string(yamlFileReportBytes)).Load()
+	require.NoError(t, loadErr)
+	reportSummary := NewReportSummary().SetReport(report)
+	checkReportSummaries(reportSummary, chartUri, t)
+
+	report, loadErr = apireport.NewReport().SetContent(string(jsonFileReportBytes)).Load()
+	require.NoError(t, loadErr)
+	reportSummary = NewReportSummary().SetReport(report)
+	checkReportSummaries(reportSummary, chartUri, t)
+
+}
+
 func TestAddUrlReport(t *testing.T) {
 
 	yamlUrlReport := "https://github.com/redhat-certification/chart-verifier/blob/main/cmd/test/report.yaml?raw=true"

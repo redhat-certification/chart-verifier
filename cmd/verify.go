@@ -25,6 +25,7 @@ import (
 	apiChecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	apireport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 	apiverifier "github.com/redhat-certification/chart-verifier/pkg/chartverifier/verifier"
+	apiversion "github.com/redhat-certification/chart-verifier/pkg/chartverifier/version"
 
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
@@ -156,7 +157,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 
 			utils.InitLog(cmd, reportName, suppressErrorLog)
 
-			utils.LogInfo(fmt.Sprintf("Chart Verifer %s.", Version))
+			utils.LogInfo(fmt.Sprintf("Chart Verifer %s.", apiversion.GetVersion()))
 			utils.LogInfo(fmt.Sprintf("Verify : %s", args[0]))
 			utils.LogInfo(fmt.Sprintf("Client timeout: %s", clientTimeout))
 

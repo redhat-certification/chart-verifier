@@ -31,14 +31,14 @@ import sys
 sys.path.append('./scripts/src/')
 from release import tarfile_asset
 
-VERSION_FILE = "cmd/release/release_info.json"
+VERSION_FILE = 'pkg/chartverifier/version/version_info.json'
 
 def check_if_only_version_file_is_modified(api_url):
     # api_url https://api.github.com/repos/<organization-name>/<repository-name>/pulls/<pr_number>
 
     files_api_url = f'{api_url}/files'
     headers = {'Accept': 'application/vnd.github.v3+json'}
-    pattern_versionfile = re.compile(r"cmd/release/release_info.json")
+    pattern_versionfile = re.compile(r"pkg/chartverifier/version/version_info.json")
     page_number = 1
     max_page_size,page_size = 100,100
 

@@ -246,6 +246,43 @@ func TestReport(t *testing.T) {
 
 	})
 
+	t.Run("Should pass for skip digest check", func(t *testing.T) {
+		cmd := NewReportCmd(viper.New())
+		outBuf := bytes.NewBufferString("")
+		utils.CmdStdout = outBuf
+		errBuf := bytes.NewBufferString("")
+		cmd.SetErr(errBuf)
+
+		cmd.SetArgs([]string{
+			"-d",
+			string(apireportsummary.MetadataSummary),
+			"test/badDigestReport.yaml",
+		})
+		require.NoError(t, cmd.Execute())
+
+		testReport := apireportsummary.ReportSummary{}
+		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
+
+		require.True(t, compareMetadata(expectedMetadata, testReport.MetadataReport))
+
+	})
+
+	t.Run("Should error with bad digest check", func(t *testing.T) {
+		cmd := NewReportCmd(viper.New())
+		outBuf := bytes.NewBufferString("")
+		utils.CmdStdout = outBuf
+		errBuf := bytes.NewBufferString("")
+		cmd.SetErr(errBuf)
+
+		cmd.SetArgs([]string{
+			string(apireportsummary.MetadataSummary),
+			"test/badDigestReport.yaml",
+		})
+
+		require.Error(t, cmd.Execute())
+
+	})
+
 }
 
 func compareMetadata(expected *apireportsummary.MetadataReport, result *apireportsummary.MetadataReport) bool {
