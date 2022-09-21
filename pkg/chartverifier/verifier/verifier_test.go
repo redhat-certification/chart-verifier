@@ -44,6 +44,22 @@ func TestProfiles(t *testing.T) {
 
 }
 
+func TestProfilesDeveloperConsole(t *testing.T) {
+	commandSet := make(map[string]interface{})
+	commandSet["profile.vendortype"] = "developer-console"
+
+	verifier, RunErr := NewVerifier().
+		SetValues(CommandSet, commandSet).
+		Run("../../../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz")
+	require.NoError(t, RunErr)
+
+	report, reportErr := verifier.GetReport().GetContent(apireport.YamlReport)
+	require.NoError(t, reportErr)
+	require.Contains(t, report, "VendorType: developer-console")
+	require.NotContains(t, report, "check: v1.0/chart-testing")
+	require.NotContains(t, report, "check: v1.0/images-are-certified")
+}
+
 func TestProviderDelivery(t *testing.T) {
 
 	commandSet := make(map[string]interface{})
