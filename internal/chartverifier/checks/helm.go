@@ -119,10 +119,18 @@ func (c *chartCache) Get(uri string) (ChartCacheItem, bool, error) {
 	}
 }
 
-func (c *chartCache) Add(uri string, chrt *chart.Chart) (ChartCacheItem, error) {
-	userCacheDir, err := os.UserCacheDir()
-	if err != nil {
-		return ChartCacheItem{}, err
+func (c *chartCache) Add(uri string, repositoryCache string, chrt *chart.Chart) (ChartCacheItem, error) {
+	var (
+		err          error
+		userCacheDir string
+	)
+	if repositoryCache == "" {
+		userCacheDir, err = os.UserCacheDir()
+		if err != nil {
+			return ChartCacheItem{}, err
+		}
+	} else {
+		userCacheDir = repositoryCache
 	}
 	cacheDir := path.Join(userCacheDir, "chart-verifier")
 	key := c.MakeKey(uri)
@@ -143,17 +151,17 @@ func init() {
 
 // LoadChartFromURI attempts to retrieve a chart from the given uri string. It accepts "http", "https", "file" schemes,
 // and defaults to "file" if there isn't one.
-func LoadChartFromURI(uri string) (*chart.Chart, string, error) {
+func LoadChartFromURI(opts *CheckOptions) (*chart.Chart, string, error) {
 	var (
 		chrt *chart.Chart
 		err  error
 	)
 
-	if cached, ok, _ := defaultChartCache.Get(uri); ok {
+	if cached, ok, _ := defaultChartCache.Get(opts.URI); ok {
 		return cached.Chart, cached.Path, nil
 	}
 
-	u, err := url.Parse(uri)
+	u, err := url.Parse(opts.URI)
 	if err != nil {
 		return nil, "", err
 	}
@@ -171,7 +179,7 @@ func LoadChartFromURI(uri string) (*chart.Chart, string, error) {
 		return nil, "", err
 	}
 
-	if cached, err := defaultChartCache.Add(uri, chrt); err != nil {
+	if cached, err := defaultChartCache.Add(opts.URI, opts.HelmEnvSettings.RepositoryCache, chrt); err != nil {
 		return nil, "", err
 	} else {
 		return cached.Chart, cached.Path, nil

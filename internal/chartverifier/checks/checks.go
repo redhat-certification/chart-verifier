@@ -71,7 +71,7 @@ func notImplemented() (Result, error) {
 }
 
 func IsHelmV3(opts *CheckOptions) (Result, error) {
-	c, _, err := LoadChartFromURI(opts.URI)
+	c, _, err := LoadChartFromURI(opts)
 	if err != nil {
 		return Result{}, err
 	}
@@ -85,7 +85,7 @@ func IsHelmV3(opts *CheckOptions) (Result, error) {
 }
 
 func HasReadme(opts *CheckOptions) (Result, error) {
-	c, _, err := LoadChartFromURI(opts.URI)
+	c, _, err := LoadChartFromURI(opts)
 	if err != nil {
 		return Result{}, err
 	}
@@ -101,7 +101,7 @@ func HasReadme(opts *CheckOptions) (Result, error) {
 }
 
 func ContainsTest(opts *CheckOptions) (Result, error) {
-	c, _, err := LoadChartFromURI(opts.URI)
+	c, _, err := LoadChartFromURI(opts)
 	if err != nil {
 		return Result{}, err
 	}
@@ -120,7 +120,7 @@ func ContainsTest(opts *CheckOptions) (Result, error) {
 }
 
 func ContainsValues(opts *CheckOptions) (Result, error) {
-	c, _, err := LoadChartFromURI(opts.URI)
+	c, _, err := LoadChartFromURI(opts)
 	if err != nil {
 		return Result{}, err
 	}
@@ -135,7 +135,7 @@ func ContainsValues(opts *CheckOptions) (Result, error) {
 }
 
 func ContainsValuesSchema(opts *CheckOptions) (Result, error) {
-	c, _, err := LoadChartFromURI(opts.URI)
+	c, _, err := LoadChartFromURI(opts)
 	if err != nil {
 		return Result{}, err
 	}
@@ -162,7 +162,7 @@ func IsCommunityChart(opts *CheckOptions) (Result, error) {
 }
 
 func HasKubeVersion(opts *CheckOptions) (Result, error) {
-	c, _, err := LoadChartFromURI(opts.URI)
+	c, _, err := LoadChartFromURI(opts)
 	if err != nil {
 		return NewResult(false, err.Error()), err
 	}
@@ -177,7 +177,7 @@ func HasKubeVersion(opts *CheckOptions) (Result, error) {
 
 func HasKubeVersion_V1_1(opts *CheckOptions) (Result, error) {
 
-	c, _, err := LoadChartFromURI(opts.URI)
+	c, _, err := LoadChartFromURI(opts)
 	if err != nil {
 		return NewResult(false, err.Error()), err
 	}
@@ -197,7 +197,7 @@ func HasKubeVersion_V1_1(opts *CheckOptions) (Result, error) {
 }
 
 func NotContainCRDs(opts *CheckOptions) (Result, error) {
-	c, _, err := LoadChartFromURI(opts.URI)
+	c, _, err := LoadChartFromURI(opts)
 	if err != nil {
 		return NewResult(false, err.Error()), err
 	}
@@ -213,7 +213,7 @@ func NotContainCRDs(opts *CheckOptions) (Result, error) {
 }
 
 func HelmLint(opts *CheckOptions) (Result, error) {
-	_, p, err := LoadChartFromURI(opts.URI)
+	_, p, err := LoadChartFromURI(opts)
 	if err != nil {
 		return NewResult(false, err.Error()), err
 	}
@@ -234,7 +234,7 @@ func NotContainsInfraPluginsAndDrivers(opts *CheckOptions) (Result, error) {
 }
 
 func NotContainCSIObjects(opts *CheckOptions) (Result, error) {
-	c, _, err := LoadChartFromURI(opts.URI)
+	c, _, err := LoadChartFromURI(opts)
 	if err != nil {
 		return Result{}, err
 	}
@@ -306,7 +306,7 @@ func ImagesAreCertified(opts *CheckOptions) (Result, error) {
 }
 
 func RequiredAnnotationsPresent(opts *CheckOptions) (Result, error) {
-	c, _, err := LoadChartFromURI(opts.URI)
+	c, _, err := LoadChartFromURI(opts)
 	if err != nil {
 		return NewResult(false, err.Error()), err
 	}
