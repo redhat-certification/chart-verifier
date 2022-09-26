@@ -17,12 +17,13 @@
 package chartverifier
 
 import (
+	"time"
+
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
 	apiReport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 	"github.com/spf13/viper"
 	helmcli "helm.sh/helm/v3/pkg/cli"
-	"time"
 )
 
 type CheckNotFoundErr string
@@ -87,7 +88,7 @@ func (c *verifier) Verify(uri string) (*apiReport.Report, error) {
 		}
 	}
 
-	chrt, _, err := checks.LoadChartFromURI(uri)
+	chrt, _, err := checks.LoadChartFromURI(&checks.CheckOptions{HelmEnvSettings: c.settings, URI: uri})
 	if err != nil {
 		return nil, err
 	}

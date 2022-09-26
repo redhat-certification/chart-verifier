@@ -55,8 +55,9 @@ func TestIsHelmV3(t *testing.T) {
 
 	for _, tc := range negativeTestCases {
 		config := viper.New()
+		settings := cli.New()
 		t.Run(tc.description, func(t *testing.T) {
-			r, err := IsHelmV3(&CheckOptions{URI: tc.uri, ViperConfig: config})
+			r, err := IsHelmV3(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: settings})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			require.False(t, r.Ok)

@@ -123,7 +123,7 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 		return NewResult(false, err.Error()), nil
 	}
 
-	_, path, err := LoadChartFromURI(opts.URI)
+	_, path, err := LoadChartFromURI(opts)
 	if err != nil {
 		utils.LogError("End chart install and test check with LoadChartFromURI error")
 		return NewResult(false, err.Error()), nil

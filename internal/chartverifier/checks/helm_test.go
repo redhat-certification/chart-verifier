@@ -21,7 +21,9 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
+	"helm.sh/helm/v3/pkg/cli"
 
 	"github.com/redhat-certification/chart-verifier/internal/testutil"
 )
@@ -56,12 +58,38 @@ func TestLoadChartFromURI(t *testing.T) {
 		},
 	}
 
+	repositoryCacheSetCases := []testCase{
+		{
+			uri:         "chart-0.1.0-v3.valid.tgz",
+			description: "temporary cache defined",
+		},
+	}
+
+	negativeCasesRepositoryCache := []testCase{
+		{
+			uri:         "chart-0.1.0-v3.non-existing.tgz",
+			description: "non existing file with repository cache set",
+		},
+		{
+			uri:         "http://" + addr + "/charts/chart-0.1.0-v3.non-existing.tgz",
+			description: "non existing remote file with repository cache set",
+		},
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	require.NoError(t, testutil.ServeCharts(ctx, addr, "./"))
 
 	for _, tc := range positiveCases {
 		t.Run(tc.description, func(t *testing.T) {
-			c, _, err := LoadChartFromURI(tc.uri)
+			opts := CheckOptions{
+				URI: tc.uri,
+				Values: map[string]interface{}{
+					"k8Project": "bogus",
+				},
+				ViperConfig:     viper.New(),
+				HelmEnvSettings: cli.New(),
+			}
+			c, _, err := LoadChartFromURI(&opts)
 			require.NoError(t, err)
 			require.NotNil(t, c)
 		})
@@ -69,7 +97,15 @@ func TestLoadChartFromURI(t *testing.T) {
 
 	for _, tc := range negativeCases {
 		t.Run(tc.description, func(t *testing.T) {
-			c, _, err := LoadChartFromURI(tc.uri)
+			opts := CheckOptions{
+				URI: tc.uri,
+				Values: map[string]interface{}{
+					"k8Project": "bogus",
+				},
+				ViperConfig:     viper.New(),
+				HelmEnvSettings: cli.New(),
+			}
+			c, _, err := LoadChartFromURI(&opts)
 			require.Error(t, err)
 			require.True(t, IsChartNotFound(err))
 			require.Equal(t, "chart not found: "+tc.uri, err.Error())
@@ -77,6 +113,36 @@ func TestLoadChartFromURI(t *testing.T) {
 		})
 	}
 
+	for _, tc := range repositoryCacheSetCases {
+		t.Run(tc.description, func(t *testing.T) {
+			settings := cli.New()
+			settings.RepositoryCache = "/tmp"
+			opts := CheckOptions{
+				URI:             tc.uri,
+				ViperConfig:     viper.New(),
+				HelmEnvSettings: settings,
+			}
+			c, _, err := LoadChartFromURI(&opts)
+			require.NoError(t, err)
+			require.NotNil(t, c)
+		})
+	}
+	for _, tc := range negativeCasesRepositoryCache {
+		t.Run(tc.description, func(t *testing.T) {
+			settings := cli.New()
+			settings.RepositoryCache = "/tmp"
+			opts := CheckOptions{
+				URI:             tc.uri,
+				ViperConfig:     viper.New(),
+				HelmEnvSettings: settings,
+			}
+			c, _, err := LoadChartFromURI(&opts)
+			require.Error(t, err)
+			require.True(t, IsChartNotFound(err))
+			require.Equal(t, "chart not found: "+tc.uri, err.Error())
+			require.Nil(t, c)
+		})
+	}
 	cancel()
 }
 

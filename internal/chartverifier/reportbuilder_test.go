@@ -7,7 +7,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+	"helm.sh/helm/v3/pkg/cli"
 
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
 	"github.com/stretchr/testify/require"
@@ -26,7 +28,12 @@ func TestSha(t *testing.T) {
 	// get shas for each file
 	for _, chart := range charts {
 		t.Run("Sha generation : "+chart, func(t *testing.T) {
-			helmChart, _, err := checks.LoadChartFromURI(chart)
+			opts := checks.CheckOptions{
+				URI:             chart,
+				ViperConfig:     viper.New(),
+				HelmEnvSettings: cli.New(),
+			}
+			helmChart, _, err := checks.LoadChartFromURI(&opts)
 			require.NoError(t, err)
 			sha := GenerateSha(helmChart.Raw)
 			require.NotNil(t, sha)
@@ -39,7 +46,12 @@ func TestSha(t *testing.T) {
 		for _, chart := range charts {
 
 			t.Run("Sha must not change : "+chart, func(t *testing.T) {
-				helmChart, _, err := checks.LoadChartFromURI(chart)
+				opts := checks.CheckOptions{
+					URI:             chart,
+					ViperConfig:     viper.New(),
+					HelmEnvSettings: cli.New(),
+				}
+				helmChart, _, err := checks.LoadChartFromURI(&opts)
 				require.NoError(t, err)
 				sha := GenerateSha(helmChart.Raw)
 				require.NotNil(t, sha)

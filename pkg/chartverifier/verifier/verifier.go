@@ -299,6 +299,7 @@ func (v *Verifier) Run(chart_uri string) (ApiVerifier, error) {
 	settings := cli.New()
 
 	setHelmEnv(settings, v.Inputs.Flags.StringFlags)
+	runOptions.Settings = settings
 
 	if valueMap, ok := v.Inputs.Flags.ValuesFlags[ChartSet]; ok {
 		opts.Values = mapToStringSlice(valueMap)

@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/spf13/viper"
+	"helm.sh/helm/v3/pkg/cli"
 
 	"time"
 
@@ -29,6 +30,7 @@ type RunOptions struct {
 	SuppressErrorLog bool
 	ClientTimeout    time.Duration
 	ChartUri         string
+	Settings         *cli.EnvSettings
 }
 
 func Run(options RunOptions) (*apireport.Report, error) {
@@ -39,7 +41,8 @@ func Run(options RunOptions) (*apireport.Report, error) {
 
 	verifierBuilder.SetValues(options.Values).
 		SetConfig(options.ViperConfig).
-		SetOverrides(options.Overrides)
+		SetOverrides(options.Overrides).
+		SetSettings(options.Settings)
 
 	profileChecks := profiles.New(options.Overrides).FilterChecks(allChecks)
 
@@ -59,6 +62,7 @@ func Run(options RunOptions) (*apireport.Report, error) {
 		SetOpenShiftVersion(options.OpenShiftVersion).
 		SetProviderDelivery(options.ProviderDelivery).
 		SetTimeout(options.ClientTimeout).
+		SetSettings(options.Settings).
 		Build()
 
 	if err != nil {
