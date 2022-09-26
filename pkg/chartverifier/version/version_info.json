@@ -1,14 +1,9 @@
 {
-    "version": "1.8.0",
+    "version": "1.9.0",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
         "<ul>",
-        "<li>Chart Verifier API: add new api stage 1 and doc (#271)</li>",
-        "<li>Add support for OCP 4.11, (#273)</li>",
-        "<li>Bug Fixes:</li>",
-        "<ul>",
-        "<li>Set dry-run when running helm template (#268)</li>",
-        "</ul>",
+        "<li>None - temp for testing</li>",
         "</ul>"
     ]
 }
