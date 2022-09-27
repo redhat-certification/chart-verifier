@@ -5,7 +5,7 @@ Helm chart checks are a set of checks against which the Red Hat Helm chart-verif
 - [Key features](#key-features)
 - [Types of Helm chart checks](#types-of-helm-chart-checks)
 - [Default set of checks for a Helm chart](#default-set-of-checks-for-a-helm-chart)
-- [Run Helm chart checks](#run-helm-chart-checks) 
+- [Run Helm chart checks](#run-helm-chart-checks)
     - [Using the podman or docker command for Helm chart checks](#using-the-podman-or-docker-command-for-helm-chart-checks)
     - [Saving the report](#saving-the-report)
     - [The error log](#the-error-log)
@@ -28,8 +28,8 @@ Helm chart checks are a set of checks against which the Red Hat Helm chart-verif
 - When there are no error messages, the `helm-lint` check passes the verification and is successful. Messages such as `Warning` and `info` do not cause the check to fail.
 - Profiles define the checks needed based on the chart type: partner, redhat or community.
   - Profiles are versioned. Each new version can include updated checks, new checks, new annotations, or changed annotations.
-- The generated report, by default, is written to stdout. 
-  - Alternatively the ```--write-to-file``` flag can be used to write to a ```report.yaml``` file. 
+- The generated report, by default, is written to stdout.
+  - Alternatively the ```--write-to-file``` flag can be used to write to a ```report.yaml``` file.
 - An error log is created for all verify commands but can be optionally suppressed.
 - You can indicate that a chart is not to be published in the OpenShift catalog.
 - From chart verifier version 1.9.0 the generated report includes a sha value based on the report content. This is used during the submission process to verify the integrity of the report.
@@ -205,7 +205,7 @@ Increase the timeout value if chart-testing is going to take more time, default 
           verify --timeout 40m                          \
           <chart-uri>
   ```
-Note: In case chart-testing takes more time, it is advised to submit the report for certification since the certification process will use the default value of 30m. 
+Note: In case chart-testing takes more time, it is advised to submit the report for certification since the certification process will use the default value of 30m.
 
 ### Saving the report
 
@@ -238,7 +238,7 @@ If the file already exists it is overwritten.
 
 ### The error log
 
-By default an error log is written to  file ```./chartverifier/verify-<timestamp>.yaml```. It includes any error messages, the results of each check and additional information around chart testing. To get a copy of the error log a volume mount is required to ```/app/chartverifer```. For example: 
+By default an error log is written to  file ```./chartverifier/verify-<timestamp>.yaml```. It includes any error messages, the results of each check and additional information around chart testing. To get a copy of the error log a volume mount is required to ```/app/chartverifer```. For example:
 
 ```
   $ podman run --rm -i                                  \
@@ -253,7 +253,7 @@ By default an error log is written to  file ```./chartverifier/verify-<timestamp
 
 If multiple logs are added to the same directory a maximum of 10 will be kept. The files will be deleted oldest first.
 
-Use the ```-E``` flag to suppress error log output. 
+Use the ```-E``` flag to suppress error log output.
 
 Note: Error and warning messages are also output to stderr and are not suppressed by the ```-E``` option.
 
@@ -281,7 +281,7 @@ By default, `chart-verifier` will assume kubeconfig is under $HOME/.kube, set en
 
 ## Profiles
 
-A profile defines a set of checks to run and an indication of whether each check is mandatory or optional. Four profiles are currently available:
+A profile defines a set of checks to run and an indication of whether each check is mandatory or optional. Following profiles are currently available:
 - partner
   - Defines the requirements for a partner chart to pass helm chart certfication.
   - All checks are mandatory, that is they must all pass for a partner helm chart to be certified.
@@ -291,11 +291,14 @@ A profile defines a set of checks to run and an indication of whether each check
 - community
   - Defines the requirements for a community chart to pass helm chart certfication.
   - The ```helm-lint``` check is the only mandatory check with all other checks optional.
+- developer-console
+  - Defines the requirements for a developer-console chart to be validated.
+  - The checks which are enabled for this profile are ```helm-lint```,```is-helm-v3```,```contains-values```,```contains-values-schema```,```has-kubeversion``` and ```has-readme```. All these checks are mandatory.
 - default
   - The default is the same as the partner profile and is used if a specific one is not specified.
   - All checks are mandatory.
 
-Each profile also has a version and currently there are two profile versions: v1.0 and v1.1.
+Each profile also has a version and currently there are two profile versions: v1.0 and v1.1. The `developer-console` just has one profile version v1.0.
 
 ### Profile v1.1
 
