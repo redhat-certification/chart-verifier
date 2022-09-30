@@ -7,7 +7,7 @@ GitPython==3.1.18
 glob2==0.7
 idna==2.10
 iniconfig==1.1.1
-Mako==1.1.4
+mako==1.2.3
 MarkupSafe==2.0.1
 packaging==21.0
 parse==1.19.0
