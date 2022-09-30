@@ -15,7 +15,7 @@ The chart-verifier API consists of the following Go language packages:
 | Package | Description 
 | --------| -------------
 | [verifier](#verifier) | Provides an API to set the verify flags for the chart-verifier and run the verifier to generate a report. 
-| [report](#report) | Provides an API to get and set report content as a string in JSON or YAML format. 
+| [report](#report) | Provides an API to get and set report content as a string in the JSON or YAML format. 
 | [reportSummary](#reportsummary) | Provides an API to set the report flags for the chart-verifier and generate a report summary. 
 | [checks](#checks) | Provides an API to get a set containing all available checks. 
 
@@ -101,13 +101,13 @@ type APIReport interface {
 
 - NewReport: Creates a new ```Report```.
   
-- GetContent: Gets the report as a string in either json or yaml format. ReportFormat values are defined and available in the report package:
-  - ```JsonReport``` - for json format.
-  - ```YamlReport``` - for yaml format.
+- GetContent: Gets the report as a string in either the JSON or YAML format. ReportFormat values are defined and available in the report package:
+  - ```JsonReport``` - for the JSON format.
+  - ```YamlReport``` - for the YAML format.
     
-- SetContent: Sets the report content from a string, for example a string as returned by ```GetContent```. The format of the report yaml/json will be determined based on the report content.
+- SetContent: Sets the report content from a string, for example a string as returned by ```GetContent```. The format of the report YAML/JSON will be determined based on the report content.
   
-- SetUrl: Sets the URL of a report, the report being in string format, for example a string as returned by ```GetContent```. The format of the report yaml/json will be determined based on the report content. 
+- SetUrl: Sets the URL of a report, the report being in string format, for example a string as returned by ```GetContent```. The format of the report YAML/JSON will be determined based on the report content. 
   
 - Load: Loads a report based on content set using ```SetContent``` or ```SetUrl```. This will be called internally when the report is needed but can be used to check if a report will load without error.
 
@@ -130,9 +130,9 @@ type APIReportSummary interface {
   
 - SetReport: Sets the report from which the summary should be generated. For example a report as returned by ```report.NewReport```.
   
-- GetContent: Gets the report summary as a string in either json or yaml format. ReportFormat values are defined and availalble in the reportsummary package:
-    - ```JsonReport``` - for json format.
-    - ```YamlReport``` - for yaml format.
+- GetContent: Gets the report summary as a string in either the JSON or YAML format. ReportFormat values are defined and availalble in the reportsummary package:
+    - ```JsonReport``` - for the JSON format.
+    - ```YamlReport``` - for the YAML format.
   
 - SetValues: Sets value flags to customize content of the report summary. 
   - For example, to customize the result summary to be for a different profile.vendortype than is in the report:
@@ -196,14 +196,14 @@ import (
 		Run("https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.9/psql-service-0.1.9.tgz?raw=true")
 
 ```
-3. Get and print the report, created from the previous step, in YAML format:
+3. Get and print the report, created from the previous step, in the YAML format:
 ```
 	// Get and print the report from the verify command
 	report, reportErr := verifier.GetReport().
 		GetContent(report.YamlReport)
 	fmt.Println("report content:\n", report)
 ```
-4. Set the `profile.vendortype` value to `partner`, get and print a report summary of the previous report in JSON format. 
+4. Set the `profile.vendortype` value to `partner`, get and print a report summary of the previous report in the JSON format. 
 ```
 	// Get and print the report summary  of the report, but using the partner profile.
 	values := make(map[string]interface{})
