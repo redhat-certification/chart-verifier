@@ -131,7 +131,7 @@ $ podman run --rm -i \
 Requires the following annotation to be present in chart.yaml:
 - ```charts.openshift.io/name```
 
-The value of thet annotation will be used in the Open Shift catalogue as the name of the chart.
+The value of that annotation will be used in the Open Shift catalogue as the name of the chart.
 
 ## Report related submission failures
 
