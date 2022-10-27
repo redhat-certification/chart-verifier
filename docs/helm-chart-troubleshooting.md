@@ -13,7 +13,8 @@
   - [helm-lint v1.0](#helm-lint-v10)  
   - [images-are-certified v1.0](#images-are-certified-v10)
   - [chart-testing v1.0](#chart-testing-v10)
-  - [required-annotations-present v1.0](#required-annotations-present-v10)  
+  - [required-annotations-present v1.0](#required-annotations-present-v10) 
+  - [signature-is-valid v1.0](#signature-is-valid-v10)  
 - [Report related submission failures](#report-related-submission-failures)   
   - [One or more mandatory checks have failed or are missing from the report.](#one-or-more-mandatory-checks-have-failed-or-are-missing-from-the-report.)
   - [The digest in the report does not match the digest calculated for the submitted chart.](#the-digest-in-the-report-does-not-match-the-digest-calculated-for-the-submitted-chart)
@@ -131,7 +132,19 @@ $ podman run --rm -i \
 Requires the following annotation to be present in chart.yaml:
 - ```charts.openshift.io/name```
 
-The value of that annotation will be used in the Open Shift catalogue as the name of the chart.
+The value of the annotation will be used in the Open Shift catalogue as the name of the chart.
+
+
+### `signature-is-valid` v1.0
+
+This check requires that the public key provided to the chart verifier is from a user that has access to the signed chart. The check can fail for a variety of reasons, including:
+- pgp public key file specified does not exist.
+- pgp public key file is not an ascii public key file.
+    - create using, for example: ```gpg --export -a <User-Name> > <public-key-file>```
+      - User-Name is the user name of the secret key used to sign the chart.
+- pgp public key file does not have access to the signed chart.
+    - ensure the public key matches the secret key used to sign the chart. 
+    
 
 ## Report related submission failures
 

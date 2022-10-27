@@ -11,6 +11,7 @@ Helm chart checks are a set of checks against which the Red Hat Helm chart-verif
     - [The error log](#the-error-log)
     - [Using the chart-verifier binary for Helm chart checks (Linux only)](#using-the-chart-verifier-binary-for-helm-chart-checks-linux-only)
 - [Profiles](#profiles)
+    - [Profile v1.2](#profile-v12)
     - [Profile v1.1](#profile-v11)
     - [Profile v1.0](#profile-10)
     - [Running the chart verifier with a specific profile](#running-the-chart-verifier-with-a-specific-profile)
@@ -18,6 +19,7 @@ Helm chart checks are a set of checks against which the Red Hat Helm chart-verif
     - [Cluster Config](#cluster-config)
     - [Override values](#override-values)
     - [Check processing](#check-processing)
+- [Signed Charts](#signed-charts)
 
 ## Key features
 - You can execute all of the mandatory checks.
@@ -33,6 +35,7 @@ Helm chart checks are a set of checks against which the Red Hat Helm chart-verif
 - An error log is created for all verify commands but can be optionally suppressed.
 - You can indicate that a chart is not to be published in the OpenShift catalog.
 - From chart verifier version 1.9.0 the generated report includes a sha value based on the report content. This is used during the submission process to verify the integrity of the report.
+- You can verify a signed chart. See: [Signed Charts](#signed-charts).
 
 ## Types of Helm chart checks
 Helm chart checks are categorized into the following types:
@@ -52,21 +55,21 @@ The following table lists the set of checks for each profile version with detail
 
 #### Table 2: Helm chart default checks
 
-| Profile v1.1 | Profile v1.0 | Description |
-|:-------------------------------:|:-------------------------------:|---------------
-| [is-helm-v3 v1.0](helm-chart-troubleshooting.md#is-helm-v3-v10) | [is-helm-v3 v1.0](helm-chart-troubleshooting.md#is-helm-v3-v10) | Checks that the given `uri` points to a Helm v3 chart.
-| [has-readme v1.0](helm-chart-troubleshooting.md#has-readme-v10) | [has-readme v1.0](helm-chart-troubleshooting.md#has-readme-v10) | Checks that the Helm chart contains the `README.md` file.
-| [contains-test V1.0](helm-chart-troubleshooting.md#contains-test-v10) | [contains-test v1.0](helm-chart-troubleshooting.md#contains-test-v10) | Checks that the Helm chart contains at least one test file.
-| [has-kubeversion v1.1](helm-chart-troubleshooting.md#has-kubeversion-v11) | [has-kubeversion v1.0](helm-chart-troubleshooting.md#has-kubeversion-v10) | Checks that the `Chart.yaml` file of the Helm chart includes the `kubeVersion` field (v1.0) and is a valid semantic version (v1.1).
-| [contains-values-schema v1.0](helm-chart-troubleshooting.md#contains-values-schema-v10) | [contains-values-schema v1.0](helm-chart-troubleshooting.md#contains-values-schema-v10) | Checks that the Helm chart contains a JSON schema file (`values.schema.json`) to validate the `values.yaml` file in the chart.
-| [not-contains-crds v1.0](helm-chart-troubleshooting.md#not-contains-crds-v10) | [not-contains-crds v1.0](helm-chart-troubleshooting.md#not-contains-crds-v10) | Checks that the Helm chart does not include custom resource definitions (CRDs).
-| [not-contain-csi-objects v1.0](helm-chart-troubleshooting.md#not-contain-csi-objects-v10) | [not-contain-csi-objects v1.0](helm-chart-troubleshooting.md#not-contain-csi-objects-v10) | Checks that the Helm chart does not include Container Storage Interface (CSI) objects.
-| [images-are-certified v1.0](helm-chart-troubleshooting.md#images-are-certified-v10) | [images-are-certified v1.0](helm-chart-troubleshooting.md#images-are-certified-v10) | Checks that the images referenced by the Helm chart are Red Hat-certified.
-| [helm-lint v1.0](helm-chart-troubleshooting.md#helm-lint-v10) | [helm-lint v1.0](helm-chart-troubleshooting.md#helm-lint-v10) | Checks that the chart is well formed by running the `helm lint` command.
-| [chart-testing v1.0](helm-chart-troubleshooting.md#chart-testing-v10) | [chart-testing v1.0](helm-chart-troubleshooting.md#chart-testing-v10)  | Installs the chart and verifies it on a Red Hat OpenShift Container Platform cluster.
-| [contains-values v1.0](helm-chart-troubleshooting.md#contains-values-v10)  | [contains-values  v1.0](helm-chart-troubleshooting.md#contains-values-v10) | Checks that the Helm chart contains the `values`[¹](https://github.com/redhat-certification/chart-verifier/blob/main/docs/helm-chart-checks.md#-for-more-information-on-the-values-file-see-values-and-best-practices-for-using-values) file.
-| [required-annotations-present v1.0](helm-chart-troubleshooting.md#required-annotations-present-v10) | - | Checks that the Helm chart contains the annotation: ```charts.openshift.io/name```.
-
+| Porfile v1.2 | Profile v1.1 | Profile v1.0 | Description |
+|:-------------------------------:|:-------------------------------:|:-------------------------------:|---------------
+| [is-helm-v3 v1.0](helm-chart-troubleshooting.md#is-helm-v3-v10) | [is-helm-v3 v1.0](helm-chart-troubleshooting.md#is-helm-v3-v10) | [is-helm-v3 v1.0](helm-chart-troubleshooting.md#is-helm-v3-v10) | Checks that the given `uri` points to a Helm v3 chart.
+| [has-readme v1.0](helm-chart-troubleshooting.md#has-readme-v10) | [has-readme v1.0](helm-chart-troubleshooting.md#has-readme-v10) | [has-readme v1.0](helm-chart-troubleshooting.md#has-readme-v10) | Checks that the Helm chart contains the `README.md` file.
+| [contains-test V1.0](helm-chart-troubleshooting.md#contains-test-v10) | [contains-test V1.0](helm-chart-troubleshooting.md#contains-test-v10) | [contains-test v1.0](helm-chart-troubleshooting.md#contains-test-v10) | Checks that the Helm chart contains at least one test file.
+| [has-kubeversion v1.1](helm-chart-troubleshooting.md#has-kubeversion-v11) | [has-kubeversion v1.1](helm-chart-troubleshooting.md#has-kubeversion-v11) | [has-kubeversion v1.0](helm-chart-troubleshooting.md#has-kubeversion-v10) | Checks that the `Chart.yaml` file of the Helm chart includes the `kubeVersion` field (v1.0) and is a valid semantic version (v1.1).
+| [contains-values-schema v1.0](helm-chart-troubleshooting.md#contains-values-schema-v10) | [contains-values-schema v1.0](helm-chart-troubleshooting.md#contains-values-schema-v10) | [contains-values-schema v1.0](helm-chart-troubleshooting.md#contains-values-schema-v10) | Checks that the Helm chart contains a JSON schema file (`values.schema.json`) to validate the `values.yaml` file in the chart.
+| [not-contains-crds v1.0](helm-chart-troubleshooting.md#not-contains-crds-v10) | [not-contains-crds v1.0](helm-chart-troubleshooting.md#not-contains-crds-v10) | [not-contains-crds v1.0](helm-chart-troubleshooting.md#not-contains-crds-v10) | Checks that the Helm chart does not include custom resource definitions (CRDs).
+| [not-contain-csi-objects v1.0](helm-chart-troubleshooting.md#not-contain-csi-objects-v10) | [not-contain-csi-objects v1.0](helm-chart-troubleshooting.md#not-contain-csi-objects-v10) | [not-contain-csi-objects v1.0](helm-chart-troubleshooting.md#not-contain-csi-objects-v10) | Checks that the Helm chart does not include Container Storage Interface (CSI) objects.
+| [images-are-certified v1.0](helm-chart-troubleshooting.md#images-are-certified-v10) | [images-are-certified v1.0](helm-chart-troubleshooting.md#images-are-certified-v10) | [images-are-certified v1.0](helm-chart-troubleshooting.md#images-are-certified-v10) | Checks that the images referenced by the Helm chart are Red Hat-certified.
+| [helm-lint v1.0](helm-chart-troubleshooting.md#helm-lint-v10) | [helm-lint v1.0](helm-chart-troubleshooting.md#helm-lint-v10) | [helm-lint v1.0](helm-chart-troubleshooting.md#helm-lint-v10) | Checks that the chart is well formed by running the `helm lint` command.
+| [chart-testing v1.0](helm-chart-troubleshooting.md#chart-testing-v10) | [chart-testing v1.0](helm-chart-troubleshooting.md#chart-testing-v10) | [chart-testing v1.0](helm-chart-troubleshooting.md#chart-testing-v10)  | Installs the chart and verifies it on a Red Hat OpenShift Container Platform cluster.
+| [contains-values v1.0](helm-chart-troubleshooting.md#contains-values-v10) | [contains-values v1.0](helm-chart-troubleshooting.md#contains-values-v10)  | [contains-values  v1.0](helm-chart-troubleshooting.md#contains-values-v10) | Checks that the Helm chart contains the `values`[¹](https://github.com/redhat-certification/chart-verifier/blob/main/docs/helm-chart-checks.md#-for-more-information-on-the-values-file-see-values-and-best-practices-for-using-values) file.
+| [required-annotations-present v1.0](helm-chart-troubleshooting.md#required-annotations-present-v10) | [required-annotations-present v1.0](helm-chart-troubleshooting.md#required-annotations-present-v10) | - | Checks that the Helm chart contains the annotation: ```charts.openshift.io/name```.
+| [signature-is-valid v1.0](helm-chart-troubleshooting.md#signature-is-valid-v10) | - | - | Verifies a signed chart based on a provided public key |  
 #
 ###### ¹ For more information on the `values` file, see [`values`](https://helm.sh/docs/chart_template_guide/values_files/) and [Best Practices for using values](https://helm.sh/docs/chart_best_practices/values/).
 
@@ -137,6 +140,7 @@ This section provides help on the basic usage of Helm chart checks with the podm
     -n, --namespace string            namespace scope for this request
     -V, --openshift-version string    set the value of certifiedOpenShiftVersions in the report
     -o, --output string               the output format: default, json or yaml
+    -k, --pgp-public-key string       file containing gpg public key of the key used to sign the chart  
     -d, --provider-delivery           chart provider will provide the chart delivery mechanism (default: false)
         --registry-config string      path to the registry config file (default "/home/baiju/.config/helm/registry.json")
         --repository-cache string     path to the file containing cached repository indexes (default "/home/baiju/.cache/helm/repository")
@@ -298,7 +302,15 @@ A profile defines a set of checks to run and an indication of whether each check
   - The default is the same as the partner profile and is used if a specific one is not specified.
   - All checks are mandatory.
 
-Each profile also has a version and currently there are two profile versions: v1.0 and v1.1. The `developer-console` just has one profile version v1.0.
+Each profile also has a version and currently there are three profile versions: v1.0, v1.1 and v1.2. The `developer-console` just has one profile version v1.0.
+
+### Profile v1.2
+
+Compared to profile v1.1, adds a new check:
+
+| check | partner | RedHat | community | default |
+|-------|---------|--------|-----------|---------
+| [signature-is-valid v1.0](helm-chart-troubleshooting.md#signature-is-valid-v10) | mandatory | mandatory | optional | mandatory
 
 ### Profile v1.1
 
@@ -332,6 +344,7 @@ This table shows which checks are preformed and whether or not they ar mnandator
 | [chart-testing v1.0](helm-chart-troubleshooting.md#chart-testing-v10) | mandatory | mandatory | optional | mandatory
 | [contains-values v1.0](helm-chart-troubleshooting.md#contains-values-v10)  | mandatory | mandatory | optional | mandatory
 | [required-annotations-present v1.0](helm-chart-troubleshooting.md#required-annotations-present-v10) | mandatory | mandatory | optional | mandatory
+
 
 ### Profile 1.0
 
@@ -446,3 +459,23 @@ The `chart-testing` check performs the following actions, keeping the semantics 
 1. Test: once a release is installed for the chart being verified, performs the same actions as helm test would, which installing all chart resources containing the "helm.sh/hook": test annotation.
 
 The check will be considered successful when the chart's installation and tests are all successful.
+
+## Signed charts
+
+In profile v1.2 a new mandatory check is added for signed charts. For information on signed charts see [helm provenance and integrity](https://helm.sh/docs/topics/provenance/).
+- For a signed chart:
+  - The check requires a pgp public key file to run.
+    - Ensures a signed chart is validly signed for the public key which will be provided to users to verify the chart.
+    - Specify the public key file using the flag: ```--pgp-public-key <public-key-file>```
+    - The check runs ```helm verify``` using the public key
+       - If ```helm verify``` fails the check will fail.
+       - For information on ```helm verify``` see [helm verify](https://helm.sh/docs/helm/helm_verify) 
+    - To create the pgp public key file:
+      - run: ```gpg --export -a <User-Name> > <public-key-file>```
+        - User-Name is the user name of the secret key used to sign the chart.
+  - If a pgp public key is not provided the check result will be "SKIPPED" which is considered a PASS for chart certification purposes.
+- For a non-signed chart:
+  - the check result will be "SKIPPED" which is considered a PASS for chart certification purposes.
+    
+For troubleshooting this check see: [signature-is-valid v1.0](helm-chart-troubleshooting.md#signature-is-valid-v10).
+    

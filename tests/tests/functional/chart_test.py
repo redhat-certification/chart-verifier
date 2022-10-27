@@ -21,10 +21,16 @@ except ImportError:
 
 @scenario(
     "features/chart_good.feature",
-    "A chart provider verifies their chart using the chart verifier"
+    "A chart provider verifies their chart using the chart verifier",
 )
-
 def test_chart_source():
+    pass
+
+@scenario(
+    "features/chart_good.feature",
+    "A chart provider verifies their signed chart using the chart verifier",
+)
+def test_chart_signed():
     pass
 
 @given(parsers.parse("I would like to use the <type> profile"),target_fixture="profile_type")
@@ -39,6 +45,10 @@ def chart_location(location,helm_chart):
 def report_info_location(location,report_info):
     return os.path.join(location,report_info)
 
+@given(parsers.parse("I will provide a <location> of a <public_key> to verify the signature"),target_fixture="public_key_location")
+def public_key_location(location,public_key):
+    return os.path.join(location,public_key)
+
 @given(parsers.parse("I will use the chart verifier <image_type> image"),target_fixture="image_type")
 def image_type(image_type):
     return image_type
@@ -48,17 +58,22 @@ def run_verify(image_type, profile_type, chart_location):
     print(f"\nrun {image_type} verifier verify  with profile : {profile_type}, and chart: {chart_location}")
     return run_verifier(image_type, profile_type, chart_location,"verify")
 
+@when(parsers.parse("I run the chart-verifier verify command against the signed chart to generate a report"),target_fixture="run_signed_verify")
+def run_signed_verify(image_type, profile_type, chart_location, public_key_location):
+    print(f"\nrun {image_type} verifier verify  with profile : {profile_type}, and signed chart: {chart_location}")
+    return run_verifier(image_type, profile_type, chart_location,"verify",public_key_location)
+
 def run_report(image_type, profile_type, report_location):
     print(f"\nrun {image_type} verifier report  with profile : {profile_type}, and chart: {report_location}")
     return run_verifier(image_type, profile_type, report_location,"report")
 
-def run_verifier(image_type, profile_type, target_location, command):
+def run_verifier(image_type, profile_type, target_location, command,pgp_key_location=None):
 
     if image_type == "tarball":
         tarball_name = os.environ.get("VERIFIER_TARBALL_NAME")
         print(f"\nRun {command} using tarball: {tarball_name}")
         if command == "verify":
-            return run_verify_tarball_image(tarball_name,profile_type,target_location)
+            return run_verify_tarball_image(tarball_name,profile_type,target_location,pgp_key_location)
         else:
             return run_report_tarball_image(tarball_name,profile_type,target_location)
     elif image_type == "podman":
@@ -68,7 +83,7 @@ def run_verifier(image_type, profile_type, target_location, command):
         image_name =  "quay.io/redhat-certification/chart-verifier"
         print(f"\nRun {command} using podman image {image_name}:{image_tag}")
         if command == "verify":
-            return run_verify_podman_image(image_name,image_tag,profile_type,target_location)
+            return run_verify_podman_image(image_name,image_tag,profile_type,target_location,pgp_key_location)
         else:
             return run_report_podman_image(image_name,image_tag,profile_type,target_location)
     else:
@@ -78,11 +93,11 @@ def run_verifier(image_type, profile_type, target_location, command):
         image_name =  "quay.io/redhat-certification/chart-verifier"
         print(f"\nRun {command} using docker image {image_name}:{image_tag}")
         if command == "verify":
-            return run_verify_docker_image(image_name,image_tag,profile_type,target_location)
+            return run_verify_docker_image(image_name,image_tag,profile_type,target_location,pgp_key_location)
         else:
             return run_report_docker_image(image_name,image_tag,profile_type,target_location)
 
-def run_verify_docker_image(verifier_image_name,verifier_image_tag,profile_type, chart_location):
+def run_verify_docker_image(verifier_image_name,verifier_image_tag,profile_type, chart_location, pgp_key_location=None):
 
     client = docker.from_env()
 
@@ -97,6 +112,16 @@ def run_verify_docker_image(verifier_image_name,verifier_image_tag,profile_type,
             return f"FAIL getting image : docker.errors.APIError: {exc.args}"
 
     docker_command = "verify"
+
+    if pgp_key_location:
+        if pgp_key_location.startswith('http:/') or pgp_key_location.startswith('https:/'):
+            docker_command = f"{docker_command}  --pgp-public-key {pgp_key_location}"
+        else:
+            if os.path.exists(pgp_key_location):
+                docker_command = f"{docker_command} --pgp-public-key /charts/{os.path.basename(pgp_key_location)}"
+            else:
+                return f"FAIL: pgp public key not exist: {os.path.abspath(pgp_key_location)}"
+
     local_chart = False
     if chart_location.startswith('http:/') or chart_location.startswith('https:/'):
         docker_command = f"{docker_command}  {chart_location}"
@@ -166,14 +191,17 @@ def run_report_docker_image(verifier_image_name,verifier_image_tag,profile_type,
 
     return output.decode("utf-8")
 
-def run_verify_tarball_image(tarball_name,profile_type, chart_location):
+def run_verify_tarball_image(tarball_name,profile_type, chart_location,pgp_key_location=None):
     print(f"Run tarball image from {tarball_name}")
 
     tar = tarfile.open(tarball_name, "r:gz")
 
     tar.extractall(path="./test_verifier")
 
-    out = subprocess.run(["./test_verifier/chart-verifier","verify","--set",f"profile.vendorType={profile_type}",chart_location],capture_output=True)
+    if pgp_key_location:
+        out = subprocess.run(["./test_verifier/chart-verifier","verify","--set",f"profile.vendorType={profile_type}","--pgp-public-key",pgp_key_location,chart_location],capture_output=True)
+    else:
+        out = subprocess.run(["./test_verifier/chart-verifier","verify","--set",f"profile.vendorType={profile_type}",chart_location],capture_output=True)
 
     return out.stdout.decode("utf-8")
 
@@ -188,7 +216,7 @@ def run_report_tarball_image(tarball_name,profile_type, chart_location):
 
     return out.stdout.decode("utf-8")
 
-def run_verify_podman_image(verifier_image_name,verifier_image_tag,profile_type, chart_location):
+def run_verify_podman_image(verifier_image_name,verifier_image_tag,profile_type, chart_location,pgp_key_location=None):
 
     print(f"Run podman image - {verifier_image_name}:{verifier_image_tag}")
     kubeconfig = os.environ.get("KUBECONFIG")
@@ -196,12 +224,21 @@ def run_verify_podman_image(verifier_image_name,verifier_image_tag,profile_type,
         return "FAIL: missing KUBECONFIG environment variable"
 
     if chart_location.startswith('http:/') or chart_location.startswith('https:/'):
-        out = subprocess.run(["podman", "run", "-v", f"{kubeconfig}:/kubeconfig", "-e", "KUBECONFIG=/kubeconfig", "--rm",
+        if pgp_location:
+            out = subprocess.run(["podman", "run", "-v", f"{kubeconfig}:/kubeconfig", "-e", "KUBECONFIG=/kubeconfig", "--rm",
+                                  f"{verifier_image_name}:{verifier_image_tag}", "verify", "--set", f"profile.vendortype={profile_type}","--pgp-public-key",public_key_location,chart_location], capture_output=True)
+        else:
+            out = subprocess.run(["podman", "run", "-v", f"{kubeconfig}:/kubeconfig", "-e", "KUBECONFIG=/kubeconfig", "--rm",
                           f"{verifier_image_name}:{verifier_image_tag}", "verify", "--set", f"profile.vendortype={profile_type}", chart_location], capture_output=True)
     else:
         chart_directory = os.path.dirname(os.path.abspath(chart_location))
         chart_name = os.path.basename(os.path.abspath(chart_location))
-        out = subprocess.run(["podman", "run", "-v", f"{chart_directory}:/charts:z", "-v", f"{kubeconfig}:/kubeconfig", "-e", "KUBECONFIG=/kubeconfig", "--rm",
+        if pgp_key_location:
+            pgp_key_name = os.path.basename(os.path.abspath(pgp_key_location))
+            out = subprocess.run(["podman", "run", "-v", f"{chart_directory}:/charts:z", "-v", f"{kubeconfig}:/kubeconfig", "-e", "KUBECONFIG=/kubeconfig", "--rm",
+                                  f"{verifier_image_name}:{verifier_image_tag}", "verify", "--set", f"profile.vendortype={profile_type}","--pgp-public-key",f"/charts/{pgp_key_name}",f"/charts/{chart_name}"], capture_output=True)
+        else:
+            out = subprocess.run(["podman", "run", "-v", f"{chart_directory}:/charts:z", "-v", f"{kubeconfig}:/kubeconfig", "-e", "KUBECONFIG=/kubeconfig", "--rm",
                               f"{verifier_image_name}:{verifier_image_tag}", "verify", "--set", f"profile.vendortype={profile_type}", f"/charts/{chart_name}"], capture_output=True)
 
     return out.stdout.decode("utf-8")
@@ -217,16 +254,23 @@ def run_report_podman_image(verifier_image_name,verifier_image_tag,profile_type,
 
     return out.stdout.decode("utf-8")
 
+@then("I should see the report-info from the report for the signed chart matching the expected report-info")
+def signed_chart_report(run_signed_verify, profile_type, report_info_location, image_type):
+    check_report(run_signed_verify, profile_type, report_info_location, image_type)
+
 
 @then("I should see the report-info from the generated report matching the expected report-info")
-def check_report(run_verify, profile_type, report_info_location, image_type):
+def chart_report(run_verify, profile_type, report_info_location, image_type):
+    check_report(run_verify, profile_type, report_info_location, image_type)
 
-    if run_verify.startswith("FAIL"):
-        pytest.fail(f'FAIL some tests failed: {run_verify}')
+def check_report(verify_result, profile_type, report_info_location, image_type):
 
-    print(f"Report data:\n{run_verify}\ndone")
+    if verify_result.startswith("FAIL"):
+        pytest.fail(f'FAIL some tests failed: {verify_result}')
 
-    report_data = yaml.load(run_verify, Loader=Loader)
+    print(f"Report data:\n{verify_result}\ndone")
+
+    report_data = yaml.load(verify_result, Loader=Loader)
 
     test_passed = True
 
@@ -248,7 +292,7 @@ def check_report(run_verify, profile_type, report_info_location, image_type):
     print(f'Report path : {report_path}')
 
     with open(report_path, "w") as fd:
-        fd.write(run_verify)
+        fd.write(verify_result)
 
     expected_reports_file = open(report_info_location,)
     expected_reports = json.load(expected_reports_file)

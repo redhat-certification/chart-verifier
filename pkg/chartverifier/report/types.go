@@ -9,6 +9,9 @@ import (
 type ReportFormat string
 type OutcomeType string
 
+type ShaValue struct {
+}
+
 type Report struct {
 	options    *reportOptions
 	Apiversion string         `json:"apiversion" yaml:"apiversion"`
@@ -37,8 +40,9 @@ type ToolMetadata struct {
 }
 
 type Digests struct {
-	Chart   string `json:"chart" yaml:"chart"`
-	Package string `json:"package,omitempty" yaml:"package,omitempty"`
+	Chart     string `json:"chart" yaml:"chart"`
+	Package   string `json:"package,omitempty" yaml:"package,omitempty"`
+	PublicKey string `hash:"ignore" json:"publicKey,omitempty" yaml:"publicKey,omitempty"`
 }
 
 type Profile struct {

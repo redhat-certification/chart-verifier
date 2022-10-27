@@ -53,8 +53,10 @@ func (ir *InternalReport) AddCheck(check checks.Check) *InternalCheckReport {
 	return &newCheck
 }
 
-func (cr *InternalCheckReport) SetResult(outcome bool, reason string) {
-	if outcome {
+func (cr *InternalCheckReport) SetResult(outcome bool, skipped bool, reason string) {
+	if skipped {
+		cr.APICheckReport.Outcome = apiReport.SkippedOutcomeType
+	} else if outcome {
 		cr.APICheckReport.Outcome = apiReport.PassOutcomeType
 	} else {
 		cr.APICheckReport.Outcome = apiReport.FailOutcomeType

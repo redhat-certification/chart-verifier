@@ -59,6 +59,7 @@ const (
 	Config           StringKey = "config"
 	ChartValues      StringKey = "chart-values"
 	KubeAsGroups     StringKey = "kube-as-group"
+	PGPPublicKey     StringKey = "pgp-public-key"
 
 	ChartSet       ValuesKey = "chart-set"
 	ChartSetFile   ValuesKey = "chart-set-file"
@@ -84,7 +85,8 @@ var setStringKeys = [...]StringKey{KubeApiServer,
 	RepositoryCache,
 	Config,
 	ChartValues,
-	KubeAsGroups}
+	KubeAsGroups,
+	PGPPublicKey}
 
 var setValuesKeys = [...]ValuesKey{CommandSet,
 	ChartSet,
@@ -345,6 +347,10 @@ func (v *Verifier) Run(chart_uri string) (ApiVerifier, error) {
 
 	if durationValue, ok := v.Inputs.Flags.DurationFlags[Timeout]; ok {
 		runOptions.ClientTimeout = durationValue
+	}
+
+	if stringsValue, ok := v.Inputs.Flags.StringFlags[PGPPublicKey]; ok {
+		runOptions.PublicKeys = stringsValue
 	}
 
 	runOptions.APIVersion = version.GetVersion()

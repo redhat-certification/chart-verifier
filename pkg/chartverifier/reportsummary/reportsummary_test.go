@@ -50,13 +50,13 @@ func TestBadDigestReport(t *testing.T) {
 	require.NoError(t, loadErr)
 	_, summaryErr := NewReportSummary().SetReport(report).GetContent(AllSummary, YamlReport)
 	require.Error(t, summaryErr)
-	require.Contains(t, fmt.Sprintf("%v", summaryErr), "Digest in report did not match report content")
+	require.Contains(t, fmt.Sprintf("%v", summaryErr), "digest in report did not match report content")
 
 	report, loadErr = apireport.NewReport().SetContent(string(jsonFileReportBytes)).Load()
 	require.NoError(t, loadErr)
 	_, summaryErr = NewReportSummary().SetReport(report).GetContent(AllSummary, JsonReport)
 	require.Error(t, summaryErr)
-	require.Contains(t, fmt.Sprintf("%v", summaryErr), "Digest in report did not match report content")
+	require.Contains(t, fmt.Sprintf("%v", summaryErr), "digest in report did not match report content")
 
 }
 

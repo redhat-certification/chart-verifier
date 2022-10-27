@@ -18,11 +18,17 @@ package checks
 
 import (
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"os"
+	"path"
 	"strings"
 
 	"github.com/Masterminds/sprig"
 	"github.com/pkg/errors"
 	"golang.org/x/mod/semver"
+	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/lint"
 	"helm.sh/helm/v3/pkg/lint/support"
 
@@ -60,6 +66,12 @@ const (
 	MetadataFailure              = "Empty metadata in chart"
 	RequiredAnnotationsSuccess   = "All required annotations present"
 	RequiredAnnotationsFailure   = "Missing required annotations"
+	ChartSigned                  = "Chart is signed"
+	ChartNotSigned               = "Chart is not signed"
+	SignatureIsNotPresentSuccess = "Signature verification not required"
+	SignatureIsValidSuccess      = "Signature verification passed"
+	SignatureFailure             = "Signature verification failed"
+	SignatureNoKey               = "Signature verification skipped, a public key was not specified"
 )
 
 var (
@@ -330,6 +342,90 @@ func RequiredAnnotationsPresent(opts *CheckOptions) (Result, error) {
 	return NewResult(true, RequiredAnnotationsSuccess), nil
 }
 
+func SignatureIsValid(opts *CheckOptions) (Result, error) {
+
+	chartPath := opts.URI
+
+	chartUrl, err := url.Parse(chartPath)
+	if err != nil {
+		return NewResult(false, fmt.Sprintf("Failed to parse chart location: %s", chartPath)), nil
+	}
+	var provFile string
+	switch chartUrl.Scheme {
+	case "http", "https":
+		if strings.HasSuffix(chartPath, ".tgz") {
+			provFile = chartPath + ".prov"
+		} else if strings.HasSuffix(chartPath, ".tgz?raw=true") {
+			provFile = strings.Replace(chartPath, ".tgz?", ".tgz.prov?", 1)
+		} else {
+			return NewSkippedResult(fmt.Sprintf("%s : %s", ChartNotSigned, SignatureIsNotPresentSuccess)), nil
+		}
+		provFileUrl, err := url.Parse(provFile)
+		if err != nil {
+			return NewResult(false, fmt.Sprintf("%s : Failed to parse prov file location: %s", SignatureFailure, provFile)), nil
+		}
+		resp, err := http.Get(provFile)
+		if err != nil {
+			return NewResult(false, fmt.Sprintf("%s : get error was %v", SignatureFailure, err)), nil
+		} else if resp.StatusCode == 404 {
+			return NewSkippedResult(fmt.Sprintf("%s : %s", ChartNotSigned, SignatureIsNotPresentSuccess)), nil
+		} else if resp.StatusCode != 200 {
+			return NewResult(false, fmt.Sprintf("%s. get prov file response code was %d", SignatureFailure, resp.StatusCode)), nil
+		}
+
+		downloadDir, err := os.UserCacheDir()
+		if err != nil {
+			return NewResult(false, fmt.Sprintf("%s : %s : error getting cache dir:  %v", ChartSigned, SignatureFailure, err)), nil
+		}
+
+		chartPath, err = downloadFile(chartUrl, downloadDir)
+		if err != nil {
+			return NewResult(false, fmt.Sprintf("%s : %s. error downloading %s:  %v", ChartSigned, SignatureIsNotPresentSuccess, chartUrl.String(), err)), nil
+		}
+		_, err = downloadFile(provFileUrl, downloadDir)
+		if err != nil {
+			return NewResult(false, fmt.Sprintf("%s : %s. error downloading %s:  %v", ChartSigned, SignatureIsNotPresentSuccess, provFileUrl.String(), err)), nil
+		}
+	case "file", "":
+		if strings.HasSuffix(chartPath, ".tgz") {
+			provFile = chartPath + ".prov"
+			if _, err := os.Stat(provFile); err != nil {
+				return NewSkippedResult(fmt.Sprintf("%s : %s", ChartNotSigned, SignatureIsNotPresentSuccess)), nil
+			}
+		} else {
+			return NewSkippedResult(fmt.Sprintf("%s : %s", ChartNotSigned, SignatureIsNotPresentSuccess)), nil
+		}
+	default:
+		return NewResult(false, fmt.Sprintf("%s: scheme %q not supported", SignatureFailure, chartUrl.Scheme)), nil
+	}
+
+	verify := action.NewVerify()
+	var keyringFilename string
+	if len(opts.PublicKeys) > 0 && len(opts.PublicKeys[0]) > 0 {
+		keryingDir := path.Join(getCacheDir(opts), "pgp")
+		keyringFilename, err = tool.GetKeyRing(keryingDir, opts.PublicKeys)
+		if err != nil {
+			return NewResult(false, fmt.Sprintf("%s : %s : failed to create keyring : %v", ChartSigned, SignatureFailure, err)), nil
+		}
+	} else {
+		return NewSkippedResult(fmt.Sprintf("%s : %s", ChartSigned, SignatureNoKey)), nil
+	}
+
+	if _, err := os.Stat(keyringFilename); err != nil {
+		return NewResult(false, fmt.Sprintf("%s : %s : failed to create keyring.", ChartSigned, SignatureFailure)), nil
+	}
+	verify.Keyring = keyringFilename
+
+	err = verify.Run(chartPath)
+	if err != nil {
+		failureMsg := fmt.Sprintf("%s : %s : %v", ChartSigned, SignatureFailure, err)
+		return NewResult(false, failureMsg), nil
+	}
+
+	return NewResult(true, fmt.Sprintf("%s : %s", ChartSigned, SignatureIsValidSuccess)), nil
+
+}
+
 func parseImageReference(image string) pyxis.ImageReference {
 
 	imageRef := pyxis.ImageReference{}
@@ -399,4 +495,39 @@ func getOCPRange(kubeVersionRange string) (string, error) {
 
 	return "", fmt.Errorf("%s : Failed to determine a minimum OCP version", KuberVersionProcessingError)
 
+}
+
+func downloadFile(fileURL *url.URL, directory string) (string, error) {
+
+	urlPath := fileURL.Path
+	segments := strings.Split(urlPath, "/")
+	fileName := segments[len(segments)-1]
+
+	// Create blank file
+	filePath := path.Join(directory, fileName)
+	file, err := os.Create(filePath)
+	if err != nil {
+		return "", err
+	}
+	client := http.Client{
+		CheckRedirect: func(r *http.Request, via []*http.Request) error {
+			r.URL.Opaque = r.URL.Path
+			return nil
+		},
+	}
+	// Put content on file
+	resp, err := client.Get(fileURL.String())
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	_, err = io.Copy(file, resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	defer file.Close()
+
+	return filePath, nil
 }

@@ -27,6 +27,8 @@ import (
 type Result struct {
 	// Ok indicates whether the result was successful or not.
 	Ok bool
+	// Skipped indicates is test was skipped
+	Skipped bool
 	// Reason for the result value.  This is a message indicating
 	// the reason for the value of Ok became true or false.
 	Reason string
@@ -35,12 +37,29 @@ type Result struct {
 func NewResult(outcome bool, reason string) Result {
 	result := Result{}
 	result.Ok = outcome
+	result.Skipped = false
+	result.Reason = reason
+	return result
+}
+
+func NewSkippedResult(reason string) Result {
+	result := Result{}
+	result.Ok = true
+	result.Skipped = true
 	result.Reason = reason
 	return result
 }
 
 func (r *Result) SetResult(outcome bool, reason string) Result {
 	r.Ok = outcome
+	r.Skipped = false
+	r.Reason = reason
+	return *r
+}
+
+func (r *Result) SetSkipped(reason string) Result {
+	r.Ok = true
+	r.Skipped = true
 	r.Reason = reason
 	return *r
 }
@@ -85,6 +104,8 @@ type CheckOptions struct {
 	AnnotationHolder AnnotationHolder
 	// client timeout
 	Timeout time.Duration
+	// keyring - public gpg for signed chart
+	PublicKeys []string
 }
 
 type CheckFunc func(options *CheckOptions) (Result, error)

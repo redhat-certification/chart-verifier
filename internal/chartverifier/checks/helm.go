@@ -119,22 +119,18 @@ func (c *chartCache) Get(uri string) (ChartCacheItem, bool, error) {
 	}
 }
 
-func (c *chartCache) Add(uri string, repositoryCache string, chrt *chart.Chart) (ChartCacheItem, error) {
+func (c *chartCache) Add(opts *CheckOptions, chrt *chart.Chart) (ChartCacheItem, error) {
 	var (
 		err          error
 		userCacheDir string
 	)
-	if repositoryCache == "" {
-		userCacheDir, err = os.UserCacheDir()
-		if err != nil {
-			return ChartCacheItem{}, err
-		}
-	} else {
-		userCacheDir = repositoryCache
+
+	userCacheDir = getCacheDir(opts)
+	if userCacheDir == "" {
+		return ChartCacheItem{}, err
 	}
-	cacheDir := path.Join(userCacheDir, "chart-verifier")
-	key := c.MakeKey(uri)
-	chartCacheDir := path.Join(cacheDir, key)
+	key := c.MakeKey(opts.URI)
+	chartCacheDir := path.Join(userCacheDir, key)
 	cacheItem := ChartCacheItem{Chart: chrt, Path: path.Join(chartCacheDir, chrt.Name())}
 	if err = chartutil.SaveDir(chrt, chartCacheDir); err != nil {
 		return ChartCacheItem{}, err
@@ -179,7 +175,7 @@ func LoadChartFromURI(opts *CheckOptions) (*chart.Chart, string, error) {
 		return nil, "", err
 	}
 
-	if cached, err := defaultChartCache.Add(opts.URI, opts.HelmEnvSettings.RepositoryCache, chrt); err != nil {
+	if cached, err := defaultChartCache.Add(opts, chrt); err != nil {
 		return nil, "", err
 	} else {
 		return cached.Chart, cached.Path, nil
@@ -263,4 +259,17 @@ func getNextLine(reader *bufio.Reader) (string, error) {
 		}
 	}
 	return string(nextLine), err
+}
+
+func getCacheDir(opts *CheckOptions) string {
+	var err error
+	cacheDir := opts.HelmEnvSettings.RepositoryCache
+	if cacheDir == "" {
+		cacheDir, err = os.UserCacheDir()
+		if err != nil {
+			return ""
+		}
+	}
+	return path.Join(cacheDir, "chart-verifier")
+
 }

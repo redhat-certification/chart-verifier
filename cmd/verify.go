@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/utils"
+	"github.com/redhat-certification/chart-verifier/internal/tool"
 	apiChecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	apireport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 	apiverifier "github.com/redhat-certification/chart-verifier/pkg/chartverifier/verifier"
@@ -62,6 +63,8 @@ var (
 	providerDelivery bool
 	//client timeout
 	clientTimeout time.Duration
+	// pgp public key file
+	pgpPublicKeyFile string
 )
 
 func buildChecks(enabled []string, unEnabled []string) ([]apiChecks.CheckName, []apiChecks.CheckName, error) {
@@ -174,6 +177,11 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 				verifier = verifier.UnEnableChecks(unEnabledChecks)
 			}
 
+			encodedKey, err := tool.GetEncodedKey(pgpPublicKeyFile)
+			if err != nil {
+				return err
+			}
+
 			var runErr error
 			verifier, runErr = verifier.SetBoolean(apiverifier.ProviderDelivery, providerDelivery).
 				SetBoolean(apiverifier.SuppressErrorLog, suppressErrorLog).
@@ -195,6 +203,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 				SetValues(apiverifier.ChartSet, convertToMap(opts.Values)).
 				SetValues(apiverifier.ChartSetFile, convertToMap(opts.FileValues)).
 				SetValues(apiverifier.ChartSetString, convertToMap(opts.StringValues)).
+				SetString(apiverifier.PGPPublicKey, []string{encodedKey}).
 				Run(args[0])
 
 			if runErr != nil {
@@ -238,6 +247,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 	cmd.Flags().BoolVarP(&reportToFile, "write-to-file", "w", false, "write report to ./chartverifier/report.yaml (default: stdout)")
 	cmd.Flags().BoolVarP(&suppressErrorLog, "suppress-error-log", "E", false, "suppress the error log (default: written to ./chartverifier/verifier-<timestamp>.log)")
 	cmd.Flags().BoolVarP(&providerDelivery, "provider-delivery", "d", false, "chart provider will provide the chart delivery mechanism (default: false)")
+	cmd.Flags().StringVarP(&pgpPublicKeyFile, "pgp-public-key", "k", "", "file containing gpg public key of the key used to sign the chart")
 	return cmd
 }
 
