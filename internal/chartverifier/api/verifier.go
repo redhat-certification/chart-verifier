@@ -31,6 +31,7 @@ type RunOptions struct {
 	ClientTimeout    time.Duration
 	ChartUri         string
 	Settings         *cli.EnvSettings
+	PublicKeys       []string
 }
 
 func Run(options RunOptions) (*apireport.Report, error) {
@@ -63,6 +64,7 @@ func Run(options RunOptions) (*apireport.Report, error) {
 		SetProviderDelivery(options.ProviderDelivery).
 		SetTimeout(options.ClientTimeout).
 		SetSettings(options.Settings).
+		SetPublicKeys(options.PublicKeys).
 		Build()
 
 	if err != nil {

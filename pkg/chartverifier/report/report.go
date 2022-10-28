@@ -16,6 +16,7 @@ import (
 const (
 	FailOutcomeType    OutcomeType = "FAIL"
 	PassOutcomeType    OutcomeType = "PASS"
+	SkippedOutcomeType OutcomeType = "SKIPPED"
 	UnknownOutcomeType OutcomeType = "UNKNOWN"
 
 	JsonReport ReportFormat = "json"

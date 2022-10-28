@@ -2,10 +2,12 @@ package verifier
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/redhat-certification/chart-verifier/internal/tool"
 	apichecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	apireport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 	apireportsummary "github.com/redhat-certification/chart-verifier/pkg/chartverifier/reportsummary"
@@ -137,6 +139,59 @@ func TestBadFlags(t *testing.T) {
 		Run("")
 	require.Error(t, runErr)
 	require.Contains(t, fmt.Sprint(runErr), "run error: chart_uri is required")
+
+}
+
+func TestSignedChart(t *testing.T) {
+
+	chartUri := "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz"
+	key1 := "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz.key"
+	encodedKey1, err1 := tool.GetEncodedKey(key1)
+	require.NoError(t, err1)
+
+	key2 := "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz.badkey"
+	encodedKey2, err2 := tool.GetEncodedKey(key2)
+	require.NoError(t, err2)
+
+	// good key first
+	verifier, reportErr := NewVerifier().
+		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified}).
+		SetString(PGPPublicKey, []string{encodedKey1, encodedKey2}).
+		Run(chartUri)
+
+	require.NoError(t, reportErr)
+	report := verifier.GetReport()
+
+	sigResultFound := false
+	for _, checkResult := range report.Results {
+		if strings.Contains((string)(checkResult.Check), (string)(apichecks.SignatureIsValid)) {
+			require.Equal(t, checkResult.Outcome, apireport.PassOutcomeType)
+			require.Contains(t, checkResult.Reason, "Chart is signed")
+			require.Contains(t, checkResult.Reason, "Signature verification passed")
+			sigResultFound = true
+		}
+	}
+	require.True(t, sigResultFound)
+
+	// bad key first
+	verifier, reportErr = NewVerifier().
+		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified}).
+		SetString(PGPPublicKey, []string{encodedKey2, encodedKey1}).
+		Run(chartUri)
+
+	require.NoError(t, reportErr)
+	report = verifier.GetReport()
+
+	sigResultFound = false
+	for _, checkResult := range report.Results {
+		if strings.Contains((string)(checkResult.Check), (string)(apichecks.SignatureIsValid)) {
+			require.Equal(t, checkResult.Outcome, apireport.PassOutcomeType)
+			require.Contains(t, checkResult.Reason, "Chart is signed")
+			require.Contains(t, checkResult.Reason, "Signature verification passed")
+			sigResultFound = true
+		}
+	}
+	require.True(t, sigResultFound)
 
 }
 

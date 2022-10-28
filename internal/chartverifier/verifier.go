@@ -17,10 +17,13 @@
 package chartverifier
 
 import (
+	"strings"
 	"time"
 
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
+	"github.com/redhat-certification/chart-verifier/internal/tool"
+	apiChecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	apiReport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 	"github.com/spf13/viper"
 	helmcli "helm.sh/helm/v3/pkg/cli"
@@ -69,6 +72,7 @@ type verifier struct {
 	openshiftVersion string
 	providerDelivery bool
 	timeout          time.Duration
+	publicKeys       []string
 	values           map[string]interface{}
 }
 
@@ -115,6 +119,7 @@ func (c *verifier) Verify(uri string) (*apiReport.Report, error) {
 			ViperConfig:      c.subConfig(string(check.CheckId.Name)),
 			AnnotationHolder: &holder,
 			Timeout:          c.timeout,
+			PublicKeys:       c.publicKeys,
 		})
 
 		if checkErr != nil {
@@ -122,6 +127,15 @@ func (c *verifier) Verify(uri string) (*apiReport.Report, error) {
 		}
 		_ = result.AddCheck(check, r)
 
+		if check.CheckId.Name == apiChecks.SignatureIsValid {
+			if len(c.publicKeys) == 1 && strings.Contains(r.Reason, checks.ChartSigned) {
+				publicKeyDigest, digestErr := tool.GetPublicKeyDigest(c.publicKeys[0])
+				if digestErr != nil {
+					return nil, err
+				}
+				result.SetPublicKeyDigest(publicKeyDigest)
+			}
+		}
 	}
 
 	return result.Build()

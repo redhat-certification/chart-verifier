@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/pyxis"
+	"github.com/redhat-certification/chart-verifier/internal/tool"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 	"helm.sh/helm/v3/pkg/cli"
@@ -334,8 +335,8 @@ func TestHelmLint(t *testing.T) {
 
 	positiveTestCases := []testCase{
 		{description: "Helm lint works for valid chart", uri: "chart-0.1.0-v3.valid.tgz"},
-		{description: "Helm lint works for chart with lint INFO message", uri: "chart-0.1.0-v2.lint-info.tgz"},
-		{description: "Helm lint works for chart with lint WARNING message", uri: "chart-0.1.0-v2.lint-warning.tgz"},
+		{description: "Helm lint works for chart with lint INFO reason", uri: "chart-0.1.0-v2.lint-info.tgz"},
+		{description: "Helm lint works for chart with lint WARNING reason", uri: "chart-0.1.0-v2.lint-warning.tgz"},
 	}
 
 	for _, tc := range positiveTestCases {
@@ -516,6 +517,70 @@ func TestSemVers(t *testing.T) {
 			} else {
 				require.Equal(t, test.OCPRange, OCPRange)
 			}
+		})
+	}
+
+}
+
+func TestSignatureIsValid(t *testing.T) {
+	type testCase struct {
+		description string
+		uri         string
+		keyFile     string
+		reason      string
+		ok          bool
+		skipped     bool
+	}
+
+	testCases := []testCase{
+		{description: "unsigned chart",
+			uri:     "chart-0.1.0-v3.no-missing-annotations.tgz",
+			keyFile: "",
+			reason:  fmt.Sprintf("%s : %s", ChartNotSigned, SignatureIsNotPresentSuccess),
+			ok:      true, skipped: true,
+		},
+		{description: "unsigned chart with key provided",
+			uri:     "chart-0.1.0-v3.no-missing-annotations.tgz",
+			keyFile: "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz.key",
+			reason:  fmt.Sprintf("%s : %s", ChartNotSigned, SignatureIsNotPresentSuccess),
+			ok:      true, skipped: true,
+		},
+
+		{description: "signed chart with valid key",
+			uri:     "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz",
+			keyFile: "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz.key",
+			reason:  fmt.Sprintf("%s : %s", ChartSigned, SignatureIsValidSuccess),
+			ok:      true, skipped: false,
+		},
+		{description: "signed chart with no key",
+			uri:     "https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz?raw=true",
+			keyFile: "",
+			reason:  fmt.Sprintf("%s : %s", ChartSigned, SignatureNoKey),
+			ok:      true, skipped: true,
+		},
+		{description: "signed chart with bad key",
+			uri:     "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz",
+			keyFile: "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz.badkey",
+			reason:  fmt.Sprintf("%s : %s", ChartSigned, SignatureFailure),
+			ok:      false, skipped: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			config := viper.New()
+			base64Key := ""
+			var encodeErr error
+			if len(tc.keyFile) > 0 {
+				base64Key, encodeErr = tool.GetEncodedKey(tc.keyFile)
+				require.NoError(t, encodeErr)
+			}
+			r, err := SignatureIsValid(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New(), PublicKeys: []string{base64Key}})
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.Equal(t, r.Ok, tc.ok, fmt.Sprintf("%s : outcome mismatch", tc.description))
+			require.Equal(t, r.Skipped, tc.skipped, fmt.Sprintf("%s : skipped mismatch", tc.description))
+			require.Contains(t, r.Reason, tc.reason, fmt.Sprintf("%s : reason mismatch", tc.description))
 		})
 	}
 

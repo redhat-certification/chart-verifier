@@ -24,8 +24,9 @@ type Annotation struct {
 }
 
 type DigestReport struct {
-	ChartDigest   string `json:"chart" yaml:"chart"`
-	PackageDigest string `json:"package" yaml:"package"`
+	ChartDigest     string `json:"chart" yaml:"chart"`
+	PackageDigest   string `json:"package" yaml:"package"`
+	PublicKeyDigest string `json:"publicKey,omitempty" yaml:"publicKey,omitempty"`
 }
 
 type MetadataReport struct {

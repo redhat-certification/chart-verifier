@@ -48,6 +48,7 @@ func init() {
 	defaultRegistry.Add(apiChecks.ImagesAreCertified, "v1.0", checks.ImagesAreCertified)
 	defaultRegistry.Add(apiChecks.ChartTesting, "v1.0", checks.ChartTesting)
 	defaultRegistry.Add(apiChecks.RequiredAnnotationsPresent, "v1.0", checks.RequiredAnnotationsPresent)
+	defaultRegistry.Add(apiChecks.SignatureIsValid, "v1.0", checks.SignatureIsValid)
 }
 
 func DefaultRegistry() checks.Registry {
@@ -65,6 +66,7 @@ type verifierBuilder struct {
 	suppportedOpenshiftVersions string
 	providerDelivery            bool
 	timeout                     time.Duration
+	publicKeys                  []string
 	values                      map[string]interface{}
 	settings                    *cli.EnvSettings
 }
@@ -123,6 +125,11 @@ func (b *verifierBuilder) SetTimeout(timeout time.Duration) VerifierBuilder {
 	return b
 }
 
+func (b *verifierBuilder) SetPublicKeys(publicKey []string) VerifierBuilder {
+	b.publicKeys = publicKey
+	return b
+}
+
 func (b *verifierBuilder) GetConfig() *viper.Viper {
 	return b.config
 }
@@ -162,6 +169,7 @@ func (b *verifierBuilder) Build() (Verifier, error) {
 		openshiftVersion: b.openshiftVersion,
 		providerDelivery: b.providerDelivery,
 		timeout:          b.timeout,
+		publicKeys:       b.publicKeys,
 		values:           b.values,
 	}, nil
 }

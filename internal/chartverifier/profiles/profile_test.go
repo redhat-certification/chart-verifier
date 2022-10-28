@@ -31,7 +31,7 @@ const (
 func TestProfile(t *testing.T) {
 
 	testProfile := getDefaultProfile("test")
-	testProfile.Name = "profile-partner-1.1"
+	testProfile.Name = "profile-partner-1.2"
 	config := make(map[string]interface{})
 	config[VendorTypeConfigName] = PartnerVendorType
 
@@ -77,14 +77,14 @@ func TestGetProfiles(t *testing.T) {
 	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion11, configVersion11)
 	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion11, configVersion11)
 	getAndCheckProfile(t, NoVendorType, PartnerVendorType, configVersion11, configVersion11)
-	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, NoVersion, configVersion11)
-	getAndCheckProfile(t, NoVendorType, PartnerVendorType, NoVersion, configVersion11)
-	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion12, configVersion11)
-	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion00, configVersion11)
-	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion12, configVersion11)
-	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion00, configVersion11)
-	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion00, configVersion11)
-	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion12, configVersion11)
+	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, NoVersion, configVersion12)
+	getAndCheckProfile(t, NoVendorType, PartnerVendorType, NoVersion, configVersion12)
+	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion12, configVersion12)
+	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion00, configVersion12)
+	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion12, configVersion12)
+	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion00, configVersion12)
+	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion00, configVersion12)
+	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion12, configVersion12)
 }
 
 func getAndCheckProfile(t *testing.T, configVendorType, expectVendorType VendorType, configVersion, expectVersion string) {
