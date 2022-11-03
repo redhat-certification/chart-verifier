@@ -36,6 +36,7 @@ type VerifierBuilder interface {
 	SetProviderDelivery(bool) VerifierBuilder
 	SetTimeout(time.Duration) VerifierBuilder
 	SetPublicKeys([]string) VerifierBuilder
+	SetHelmInstallTimeout(time.Duration) VerifierBuilder
 	SetSettings(settings *cli.EnvSettings) VerifierBuilder
 	Build() (Verifier, error)
 }

@@ -117,6 +117,9 @@ values are set using chart-verifier flags when generating a report.
 Also note that if chart-verifier flags are required for the chart-verifier chart-testing check to pass 
 a verifier report must be included in the chart submission.
 
+If the check fails due to a timeout, increase the timeout values. If increased timeouts are required for the chart-verifier chart-testing check to pass
+a verifier report must be included in the chart submission. See: [Chart testing timeouts](./helm-chart-checks.md#chart-testing-timeouts)
+
 Run the chart verifier and set log_ouput to true to get additional information:
 ```
 $ podman run --rm -i \

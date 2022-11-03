@@ -106,6 +106,8 @@ type CheckOptions struct {
 	Timeout time.Duration
 	// keyring - public gpg for signed chart
 	PublicKeys []string
+	// helm install timeout
+	HelmInstallTimeout time.Duration
 }
 
 type CheckFunc func(options *CheckOptions) (Result, error)

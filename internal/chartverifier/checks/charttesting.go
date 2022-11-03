@@ -110,7 +110,7 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 	defer cancel()
 
 	cfg := buildChartTestingConfiguration(opts)
-	helm, err := tool.NewHelm(opts.HelmEnvSettings, opts.Values)
+	helm, err := tool.NewHelm(opts.HelmEnvSettings, opts.Values, opts.HelmInstallTimeout)
 	if err != nil {
 		utils.LogError("End chart install and test check with NewHelm error")
 		return NewResult(false, err.Error()), nil

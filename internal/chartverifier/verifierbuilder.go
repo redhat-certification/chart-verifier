@@ -67,6 +67,7 @@ type verifierBuilder struct {
 	providerDelivery            bool
 	timeout                     time.Duration
 	publicKeys                  []string
+	helmInstallTimeout          time.Duration
 	values                      map[string]interface{}
 	settings                    *cli.EnvSettings
 }
@@ -130,6 +131,11 @@ func (b *verifierBuilder) SetPublicKeys(publicKey []string) VerifierBuilder {
 	return b
 }
 
+func (b *verifierBuilder) SetHelmInstallTimeout(timeout time.Duration) VerifierBuilder {
+	b.helmInstallTimeout = timeout
+	return b
+}
+
 func (b *verifierBuilder) GetConfig() *viper.Viper {
 	return b.config
 }
@@ -160,17 +166,18 @@ func (b *verifierBuilder) Build() (Verifier, error) {
 	profile := profiles.Get()
 
 	return &verifier{
-		config:           b.config,
-		registry:         b.registry,
-		requiredChecks:   requiredChecks,
-		settings:         b.settings,
-		toolVersion:      b.toolVersion,
-		profile:          profile,
-		openshiftVersion: b.openshiftVersion,
-		providerDelivery: b.providerDelivery,
-		timeout:          b.timeout,
-		publicKeys:       b.publicKeys,
-		values:           b.values,
+		config:             b.config,
+		registry:           b.registry,
+		requiredChecks:     requiredChecks,
+		settings:           b.settings,
+		toolVersion:        b.toolVersion,
+		profile:            profile,
+		openshiftVersion:   b.openshiftVersion,
+		providerDelivery:   b.providerDelivery,
+		timeout:            b.timeout,
+		helmInstallTimeout: b.helmInstallTimeout,
+		publicKeys:         b.publicKeys,
+		values:             b.values,
 	}, nil
 }
 
