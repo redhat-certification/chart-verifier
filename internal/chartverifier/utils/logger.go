@@ -54,12 +54,12 @@ func LogWarning(message string) {
 	if cmd != nil {
 		cmd.PrintErrln(message)
 	}
-	warning_log_entry := LogEntry{Entry: fmt.Sprintf("[WARNING] %s", message)}
+	warning_log_entry := LogEntry{Entry: fmt.Sprintf("[WARNING] %s : %s", getTimeStamp(), message)}
 	verifierlog.Entries = append(verifierlog.Entries, &warning_log_entry)
 }
 
 func LogInfo(message string) {
-	info_log_entry := LogEntry{Entry: fmt.Sprintf("[INFO] %s", message)}
+	info_log_entry := LogEntry{Entry: fmt.Sprintf("[INFO] %s : %s", getTimeStamp(), message)}
 	verifierlog.Entries = append(verifierlog.Entries, &info_log_entry)
 }
 
@@ -67,7 +67,7 @@ func LogError(message string) {
 	if cmd != nil {
 		cmd.PrintErrln(message)
 	}
-	error_log_entry := LogEntry{Entry: fmt.Sprintf("[ERROR] %s", message)}
+	error_log_entry := LogEntry{Entry: fmt.Sprintf("[ERROR] %s : %s", getTimeStamp(), message)}
 	verifierlog.Entries = append(verifierlog.Entries, &error_log_entry)
 }
 
@@ -221,4 +221,10 @@ func pruneLogFiles() {
 
 	}
 
+}
+
+func getTimeStamp() string {
+	t := time.Now()
+	year, month, day := t.Date()
+	return fmt.Sprintf("[%d-%s-%d %d:%d:%d.%d]", year, month, day, t.Hour(), t.Minute(), t.Second(), t.Nanosecond())
 }

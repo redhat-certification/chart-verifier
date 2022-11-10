@@ -21,6 +21,7 @@ require (
 require (
 	github.com/google/uuid v1.3.0
 	github.com/mitchellh/hashstructure/v2 v2.0.2
+	k8s.io/api v0.24.2
 	k8s.io/apimachinery v0.24.2
 	k8s.io/client-go v0.24.2
 	k8s.io/helm v2.17.0+incompatible
@@ -146,7 +147,6 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/api v0.24.2 // indirect
 	k8s.io/apiextensions-apiserver v0.24.2 // indirect
 	k8s.io/apiserver v0.24.2 // indirect
 	k8s.io/cli-runtime v0.24.2 // indirect

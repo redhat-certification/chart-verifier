@@ -20,18 +20,19 @@ func init() {
 }
 
 type RunOptions struct {
-	APIVersion       string
-	Values           map[string]interface{}
-	ViperConfig      *viper.Viper
-	Overrides        map[string]interface{}
-	ChecksToRun      []apichecks.CheckName
-	OpenShiftVersion string
-	ProviderDelivery bool
-	SuppressErrorLog bool
-	ClientTimeout    time.Duration
-	ChartUri         string
-	Settings         *cli.EnvSettings
-	PublicKeys       []string
+	APIVersion         string
+	Values             map[string]interface{}
+	ViperConfig        *viper.Viper
+	Overrides          map[string]interface{}
+	ChecksToRun        []apichecks.CheckName
+	OpenShiftVersion   string
+	ProviderDelivery   bool
+	SuppressErrorLog   bool
+	ClientTimeout      time.Duration
+	HelmInstallTimeout time.Duration
+	ChartUri           string
+	Settings           *cli.EnvSettings
+	PublicKeys         []string
 }
 
 func Run(options RunOptions) (*apireport.Report, error) {
@@ -63,6 +64,7 @@ func Run(options RunOptions) (*apireport.Report, error) {
 		SetOpenShiftVersion(options.OpenShiftVersion).
 		SetProviderDelivery(options.ProviderDelivery).
 		SetTimeout(options.ClientTimeout).
+		SetHelmInstallTimeout(options.HelmInstallTimeout).
 		SetSettings(options.Settings).
 		SetPublicKeys(options.PublicKeys).
 		Build()

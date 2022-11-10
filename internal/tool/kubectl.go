@@ -3,10 +3,13 @@ package tool
 import (
 	"context"
 	"embed"
+	"errors"
 	"fmt"
+	"time"
 
 	"gopkg.in/yaml.v3"
 	"helm.sh/helm/v3/pkg/cli"
+	v1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
@@ -22,7 +25,10 @@ import (
 var content embed.FS
 
 // Based on https://access.redhat.com/solutions/4870701
-var kubeOpenShiftVersionMap map[string]string
+var (
+	kubeOpenShiftVersionMap map[string]string
+	listDeployments         = getDeploymentsList
+)
 
 type versionMap struct {
 	Versions []*versionMapping `yaml:"versions"`
@@ -31,6 +37,11 @@ type versionMap struct {
 type versionMapping struct {
 	KubeVersion string `yaml:"kube-version"`
 	OcpVersion  string `yaml:"ocp-version"`
+}
+
+type deploymentNotReady struct {
+	Name        string
+	Unavailable int32
 }
 
 func init() {
@@ -79,20 +90,50 @@ func NewKubectl(kubeConfig clientcmd.ClientConfig) (*Kubectl, error) {
 }
 
 func (k Kubectl) WaitForDeployments(context context.Context, namespace string, selector string) error {
-	deployments, err := k.clientset.AppsV1().Deployments(namespace).List(context, metav1.ListOptions{
-		LabelSelector: selector,
-	})
-	if err != nil {
-		return err
+	deadline, _ := context.Deadline()
+	unavailableDeployments := []deploymentNotReady{{Name: "none", Unavailable: 1}}
+	getDeploymentsError := ""
+
+	utils.LogInfo(fmt.Sprintf("Start wait for deployments. --timeout time left: %s ", deadline.Sub(time.Now()).String()))
+
+	for deadline.After(time.Now()) && len(unavailableDeployments) > 0 {
+		unavailableDeployments = []deploymentNotReady{}
+		deployments, err := listDeployments(k, context, namespace, selector)
+		if err != nil {
+			unavailableDeployments = []deploymentNotReady{{Name: "none", Unavailable: 1}}
+			getDeploymentsError = fmt.Sprintf("error getting deployments from namespace %s : %v", namespace, err)
+			utils.LogWarning(getDeploymentsError)
+			time.Sleep(time.Second)
+		} else {
+			getDeploymentsError = ""
+			for _, deployment := range deployments {
+				// Just after rollout, pods from the previous deployment revision may still be in a
+				// terminating state.
+				if deployment.Status.UnavailableReplicas > 0 {
+					unavailableDeployments = append(unavailableDeployments, deploymentNotReady{Name: deployment.Name, Unavailable: deployment.Status.UnavailableReplicas})
+				}
+			}
+			if len(unavailableDeployments) > 0 {
+				utils.LogInfo(fmt.Sprintf("Wait for %d deployments:", len(unavailableDeployments)))
+				for _, unavailableDeployment := range unavailableDeployments {
+					utils.LogInfo(fmt.Sprintf("    - %s with %d unavailable replicas", unavailableDeployment.Name, unavailableDeployment.Unavailable))
+				}
+				time.Sleep(time.Second)
+			} else {
+				utils.LogInfo(fmt.Sprintf("Finish wait for deployments, --timeout time left %s", deadline.Sub(time.Now()).String()))
+			}
+		}
 	}
 
-	for _, deployment := range deployments.Items {
-		// Just after rollout, pods from the previous deployment revision may still be in a
-		// terminating state.
-		unavailable := deployment.Status.UnavailableReplicas
-		if unavailable != 0 {
-			return fmt.Errorf("%d replicas unavailable", unavailable)
-		}
+	if len(getDeploymentsError) > 0 {
+		errorMsg := fmt.Sprintf("Time out retrying after %s", getDeploymentsError)
+		utils.LogError(errorMsg)
+		return errors.New(errorMsg)
+	}
+	if len(unavailableDeployments) > 0 {
+		errorMsg := fmt.Sprintf("Error unavailable deployments, timeout has expired, please consider increasing the timeout using the chart-verifier --timeout flag")
+		utils.LogError(errorMsg)
+		return errors.New(errorMsg)
 	}
 
 	return nil
@@ -126,4 +167,12 @@ func GetClientConfig(envSettings *cli.EnvSettings) clientcmd.ClientConfig {
 	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 		loadingRules,
 		&clientcmd.ConfigOverrides{})
+}
+
+func getDeploymentsList(k Kubectl, context context.Context, namespace string, selector string) ([]v1.Deployment, error) {
+	list, err := k.clientset.AppsV1().Deployments(namespace).List(context, metav1.ListOptions{LabelSelector: selector})
+	if err != nil {
+		return nil, err
+	}
+	return list.Items, err
 }

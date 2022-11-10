@@ -19,6 +19,7 @@ Helm chart checks are a set of checks against which the Red Hat Helm chart-verif
     - [Cluster Config](#cluster-config)
     - [Override values](#override-values)
     - [Check processing](#check-processing)
+    - [Chart testing timeouts](#chart-testing-timeouts)
 - [Signed Charts](#signed-charts)
 
 ## Key features
@@ -129,6 +130,7 @@ This section provides help on the basic usage of Helm chart checks with the podm
         --debug                       enable verbose output
     -x, --disable strings             all checks will be enabled except the informed ones
     -e, --enable strings              only the informed checks will be enabled
+        --helm-install-timeout duration   helm install timeout (default 5m0s)
     -h, --help                        help for verify
         --kube-apiserver string       the address and the port for the Kubernetes API server
         --kube-as-group stringArray   group to impersonate for the operation, this flag can be repeated to specify multiple groups.
@@ -459,6 +461,32 @@ The `chart-testing` check performs the following actions, keeping the semantics 
 1. Test: once a release is installed for the chart being verified, performs the same actions as helm test would, which installing all chart resources containing the "helm.sh/hook": test annotation.
 
 The check will be considered successful when the chart's installation and tests are all successful.
+
+### Chart testing timeouts
+
+For the chart install and test check there are two configurable timeout options:
+
+- ```--helm-install-timeout```
+    - limits how long the `chart-testing` check waits for chart install to complete.
+    - default is 5 minutes
+    - set for example:
+      ```--helm-install-timeout  10m0s```
+- ```--timeout```
+    - limits how long the check waits for the `chart-testing` check to complete: 
+        1. chart install
+        2. wait for deployments to be available
+        3. run the test
+    - default is 30 minutes
+    - set for example:
+        ```--timeout  60m0s```
+      
+Notes: 
+- The timeouts are independent. 
+  - Changing one timeout does not impact the other.
+  - If ```helm-install-timeout``` is increased, consider also increasing ```timeout```
+- The [helm chart certification process](./helm-chart-submission.md#submission-of-helm-charts-for-red-hat-openShift-certification) uses default timeout values.
+  - If a helm chart can only pass the chart testing check with modified timeouts a verifier report must be included in the chart submission.  
+
 
 ## Signed charts
 
