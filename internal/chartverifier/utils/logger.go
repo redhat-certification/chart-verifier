@@ -125,6 +125,7 @@ func writeToFile(output string, fileName string) bool {
 	outputDir := path.Join(currentDir, outputDirectory)
 	outputFile := path.Join(outputDir, fileName)
 	if _, err := os.Stat(outputDir); err != nil {
+		// #nosec G301
 		if err = os.MkdirAll(outputDir, 0777); err != nil {
 			LogError(fmt.Sprintf("error creating directory : %s : %s", outputDir, err))
 			return false
@@ -138,7 +139,7 @@ func writeToFile(output string, fileName string) bool {
 	} else {
 		LogError(fmt.Sprintf("Error removing existing file %s: %s", fileName, err))
 	}
-
+	// #nosec G304
 	if outfile, open_err := os.OpenFile(outputFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600); open_err == nil {
 		outfile.WriteString(output)
 		outfile.Close()

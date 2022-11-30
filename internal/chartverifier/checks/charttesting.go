@@ -307,6 +307,7 @@ func upgradeAndTestChart(
 
 // readObjectFromYamlFile unmarshals the given filename and returns an object with its contents.
 func readObjectFromYamlFile(filename string) (map[string]interface{}, error) {
+	// #nosec G304
 	objBytes, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("reading values file: %w", err)

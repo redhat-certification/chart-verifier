@@ -14,6 +14,7 @@ import (
 func GetKeyRing(targetDir string, publicKeys []string) (string, error) {
 
 	if _, err := os.Stat(targetDir); err != nil {
+		// #nosec G301
 		if err = os.MkdirAll(targetDir, 0777); err != nil {
 			return "", err
 		}
@@ -36,6 +37,7 @@ func GetKeyRing(targetDir string, publicKeys []string) (string, error) {
 	for numKeyFile, keyFile := range publicKeyFiles {
 
 		if numKeyFile > 0 {
+			// #nosec G204
 			cmd := exec.Command("gpg", "--no-default-keyring", "--keyring", ringFile, "--import", keyFile)
 			err := cmd.Run()
 			if err != nil {
@@ -45,6 +47,7 @@ func GetKeyRing(targetDir string, publicKeys []string) (string, error) {
 				return "", err
 			}
 		} else {
+			// #nosec G204
 			cmd := exec.Command("gpg", "-o", ringFile, "--dearmor", keyFile)
 			err := cmd.Run()
 			if err != nil {
@@ -70,6 +73,7 @@ func GetEncodedKey(publicKeyFileName string) (string, error) {
 	if len(publicKeyFileName) == 0 {
 		return "", nil
 	}
+	// #nosec G304
 	keyBytes, err := ioutil.ReadFile(publicKeyFileName)
 	if err != nil {
 		return "", err
@@ -101,7 +105,7 @@ func createKeyFiles(targetDir string, publicKeys []string) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-
+		// #nosec G306
 		err = ioutil.WriteFile(keyFileName, decodedKey, 0644)
 		if err != nil {
 			return nil, err
