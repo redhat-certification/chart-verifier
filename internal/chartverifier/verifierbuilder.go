@@ -46,6 +46,7 @@ func init() {
 	defaultRegistry.Add(apiChecks.HelmLint, "v1.0", checks.HelmLint)
 	defaultRegistry.Add(apiChecks.NotContainCsiObjects, "v1.0", checks.NotContainCSIObjects)
 	defaultRegistry.Add(apiChecks.ImagesAreCertified, "v1.0", checks.ImagesAreCertified)
+	defaultRegistry.Add(apiChecks.ImagesAreCertified, "v1.1", checks.ImagesAreCertified_V1_1)
 	defaultRegistry.Add(apiChecks.ChartTesting, "v1.0", checks.ChartTesting)
 	defaultRegistry.Add(apiChecks.RequiredAnnotationsPresent, "v1.0", checks.RequiredAnnotationsPresent)
 	defaultRegistry.Add(apiChecks.SignatureIsValid, "v1.0", checks.SignatureIsValid)

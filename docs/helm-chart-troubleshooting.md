@@ -104,7 +104,31 @@ Requires any images referenced in a chart to be Red Hat Certified.
       match is not found the check fails.
     - if the image specified a tag value it is compared with the `repositories.tags.name` attributes. If a match is
       not found the check fails.
-- If the check fails use the point fo failure to determine how to address the issue. 
+- If the check fails use the point of failure to determine how to address the issue. 
+
+### `images-are-certified` v1.1
+
+Requires any images referenced in a chart to be Red Hat Certified.
+- The list of image references is found by running `helm template` and if this fails the error output from `helm template`
+  will be output. Run `helm template` on your chart for additional information. If the chart requires specification of additional
+  attributes to pass `helm template` use one of the `chart-set` flags of the verifier tool for this check to pass. If additional
+  attributes are required a verifier report must be included in the chart submission.
+- Each image reference found from helm template is parsed to determine the registry, repository and tag or digest value.
+    - registry is the string before the first "/" in the image reference but only if it includes a "." character.
+    - the repository is what remains in the image reference, after the registry is removed and before ":" or "@sha"
+    - tag is what is set after the ":" character
+    - digest is what is set after the "@" character in "@sha"
+- If a registry is not found the pyxis swagger api is used to find the repository and from it, extract the registry
+    - `https://catalog.redhat.com/api/containers/v1/repositories?filter=repository==<repository>`
+    - if the repository is not found the check will fail.
+- The registry and repository are then used to find images:
+    - `https://catalog.redhat.com/api/containers/v1/repositories/registry/<registry>/repository/<repository>/images`
+    - if the image specified a sha value it is compared with the `parsed_data.docker_image_digest` attribute. If a
+      match is not found and the registry is not registry.redhat.io, the check fails.
+    - if the image specified a tag value it is compared with the `repositories.tags.name` attributes. If a match is
+      not found and the registry is not registry.redhat.io, the check fails.
+    - if the registry is registry.redhat.io, the check will skip the image.
+- If the check fails use the point of failure to determine how to address the issue. 
 
 For information on certifying images see: [Red Hat container certification](https://connect.redhat.com/partner-with-us/red-hat-container-certification)
 
