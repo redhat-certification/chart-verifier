@@ -155,7 +155,7 @@ func TestTemplate(t *testing.T) {
 	}
 
 	TestCases := []testCase{
-		{description: "chart-0.1.0-v3.valid.tgz images ", uri: "chart-0.1.0-v3.valid.tgz", images: []string{"registry.access.redhat.com/rhscl/postgresql-10-rhel7:1-66",
+		{description: "chart-0.1.0-v3.valid.tgz images ", uri: "chart-0.1.0-v3.valid.tgz", images: []string{"registry.access.redhat.com/rhscl/postgresql-10-rhel7:latest",
 			"snyk/kubernetes-operator", "rhscl/mongodb-36-rhel7:1-65",
 			"icr.io/cpopen/ibmcloud-object-storage-driver@sha256:fc17bb3e89d00b3eb0f50b3ea83aa75c52e43d8e56cf2e0f17475e934eeeeb5f",
 			"icr.io/cpopen/ibmcloud-object-storage-plugin@sha256:cf654987c38d048bc9e654f3928e9ce9a2a4fd47ce0283bb5f339c1b99298e6e"}},

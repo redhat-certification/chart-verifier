@@ -24,7 +24,9 @@ results:
 
 import re
 import argparse
+from github import Github
 import json
+import os
 import requests
 import semver
 import sys
@@ -79,6 +81,15 @@ def get_version_info():
         data = json.load(json_file)
     return data
 
+def release_exists(version):
+    g = Github(os.environ.get("GITHUB_TOKEN"))
+    releases = g.get_repo(os.environ.get("GITHUB_REPOSITORY")).get_releases()
+    for release in releases:
+        if release.title == version or release.tag_name == version:
+            return True
+    return False
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--api-url", dest="api_url", type=str, required=False,
@@ -104,11 +115,15 @@ def main():
         version_info = get_version_info()
         if args.version:
             # should be on main branch
-            if semver.compare(args.version,version_info["version"]) > 0 :
+            version_compare = semver.compare(args.version,version_info["version"])
+            if version_compare > 0 :
                 print(f'[INFO] Release {args.version} found in PR files is newer than: {version_info["version"]}.')
                 print("::set-output name=updated::true")
+            elif version_compare == 0 and not release_exists(args.version):
+                print(f'[INFO] Release {args.version} found in PR files is not new but no release exists yet.')
+                print("::set-output name=updated::true")
             else:
-                print(f'[INFO] Release found in PR files is not new  : {version_info["version"]}.')
+                print(f'[INFO] Release found in PR files is not new  : {version_info["version"]} already exists.')
         else:
             print(f'::set-output name=PR_version::{version_info["version"]}')
             print(f'::set-output name=PR_release_image::{version_info["quay-image"]}')
