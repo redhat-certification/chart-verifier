@@ -148,6 +148,10 @@ Loops:
 		nextPage := 0
 		allDataRead := false
 
+		// All Red Hat images are stored in pyxis under the registry.access.redhat.com URL
+		if registry == "registry.redhat.io" {
+			registry = "registry.access.redhat.com"
+		}
 		requestUrl := fmt.Sprintf("%s/registry/%s/repository/%s/images", pyxisBaseUrl, registry, imageRef.Repository)
 		utils.LogInfo(fmt.Sprintf("Search url: %s, tag: %s, sha: %s ", requestUrl, imageRef.Tag, imageRef.Sha))
 
