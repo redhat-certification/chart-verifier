@@ -369,48 +369,13 @@ func TestHelmLint(t *testing.T) {
 
 func TestImageCertify(t *testing.T) {
 
-	type testCase struct {
-		description string
-		uri         string
-		numErrors   int
-		numPasses   int
-	}
+	checkImages(t, ImagesAreCertified, false)
 
-	testCases := []testCase{
-		{description: "chart-0.1.0-v3.valid.tgz check images passes", uri: "chart-0.1.0-v3.valid.tgz", numErrors: 0, numPasses: 5},
-		{description: "Helm check images fails", uri: "chart-0.1.0-v3.with-crd.tgz", numErrors: 2, numPasses: 0},
-		{description: "Helm check images fails", uri: "chart-0.1.0-v3.with-csi.tgz", numErrors: 1, numPasses: 0},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.description, func(t *testing.T) {
-			config := viper.New()
-			r, err := ImagesAreCertified(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
-			require.NoError(t, err)
-			require.NotNil(t, r)
-			if tc.numErrors == 0 {
-				require.True(t, r.Ok)
-			} else {
-				require.False(t, r.Ok)
-				for i := 0; i < tc.numErrors; i++ {
-					require.Contains(t, r.Reason, ImageNotCertified)
-					r.Reason = strings.Replace(r.Reason, ImageNotCertified, "_replaced_", 1)
-				}
-				require.False(t, strings.Contains(r.Reason, ImageNotCertified))
-			}
-			if tc.numPasses > 0 {
-				for i := 0; i < tc.numPasses; i++ {
-					require.Contains(t, r.Reason, ImageCertified)
-					r.Reason = strings.Replace(r.Reason, ImageCertified, "_replaced_", 1)
-				}
-				require.False(t, strings.Contains(r.Reason, ImageCertified))
-			}
-		})
-	}
+	checkImages(t, ImagesAreCertified_V1_1, true)
 
 }
 
-func TestImageCertifyV11(t *testing.T) {
+func checkImages(t *testing.T, fn func(*CheckOptions) (Result, error), version1_1 bool) {
 
 	type testCase struct {
 		description string
@@ -420,19 +385,29 @@ func TestImageCertifyV11(t *testing.T) {
 		numSkips    int
 	}
 
-	testCases := []testCase{
-		{description: "chart-0.1.0-v3.valid.tgz check images passes", uri: "chart-0.1.0-v3.valid.tgz", numErrors: 0, numPasses: 5, numSkips: 0},
-		{description: "chart-0.1.0-v3.valid-skipped-images.tgz check images passes", uri: "chart-0.1.0-v3.valid-skipped-images.tgz", numErrors: 0, numPasses: 3, numSkips: 2},
-		{description: "chart-0.1.0-v3.failed-skipped-images.tgz check images passes", uri: "chart-0.1.0-v3.failed-skipped-images.tgz", numErrors: 1, numPasses: 0, numSkips: 4},
-		{description: "chart-0.1.0-v3.skipped-images.tgz check images passes", uri: "chart-0.1.0-v3.skipped-images.tgz", numErrors: 0, numPasses: 0, numSkips: 5},
-		{description: "Helm check images fails", uri: "chart-0.1.0-v3.with-crd.tgz", numErrors: 2, numPasses: 0, numSkips: 0},
-		{description: "Helm check images fails", uri: "chart-0.1.0-v3.with-csi.tgz", numErrors: 1, numPasses: 0, numSkips: 0},
+	var testCases []testCase
+
+	if !version1_1 {
+		testCases = []testCase{
+			{description: "chart-0.1.0-v3.valid.tgz check images passes", uri: "chart-0.1.0-v3.valid.tgz", numErrors: 0, numPasses: 5},
+			{description: "Helm check images fails", uri: "chart-0.1.0-v3.with-crd.tgz", numErrors: 2, numPasses: 0},
+			{description: "Helm check images fails", uri: "chart-0.1.0-v3.with-csi.tgz", numErrors: 1, numPasses: 0},
+		}
+	} else {
+		testCases = []testCase{
+			{description: "chart-0.1.0-v3.valid.tgz check images passes", uri: "chart-0.1.0-v3.valid.tgz", numErrors: 0, numPasses: 5, numSkips: 0},
+			{description: "chart-0.1.0-v3.valid-skipped-images.tgz check images passes", uri: "chart-0.1.0-v3.valid-skipped-images.tgz", numErrors: 0, numPasses: 3, numSkips: 2},
+			{description: "chart-0.1.0-v3.failed-skipped-images.tgz check images passes", uri: "chart-0.1.0-v3.failed-skipped-images.tgz", numErrors: 1, numPasses: 0, numSkips: 4},
+			{description: "chart-0.1.0-v3.skipped-images.tgz check images passes", uri: "chart-0.1.0-v3.skipped-images.tgz", numErrors: 0, numPasses: 0, numSkips: 5},
+			{description: "Helm check images fails", uri: "chart-0.1.0-v3.with-crd.tgz", numErrors: 2, numPasses: 0, numSkips: 0},
+			{description: "Helm check images fails", uri: "chart-0.1.0-v3.with-csi.tgz", numErrors: 1, numPasses: 0, numSkips: 0},
+		}
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
 			config := viper.New()
-			r, err := ImagesAreCertified_V1_1(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
+			r, err := fn(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
 			require.NoError(t, err)
 			require.NotNil(t, r)
 			if tc.numErrors == 0 {
@@ -461,7 +436,6 @@ func TestImageCertifyV11(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func TestImageParsing(t *testing.T) {
