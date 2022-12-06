@@ -30,6 +30,7 @@ import (
 
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/cli/values"
+
 	//"helm.sh/helm/v3/pkg/getter"
 
 	"github.com/pkg/errors"
@@ -250,7 +251,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 	cmd.Flags().DurationVar(&clientTimeout, "timeout", 30*time.Minute, "time to wait for completion of chart install and test")
 	cmd.Flags().BoolVarP(&reportToFile, "write-to-file", "w", false, "write report to ./chartverifier/report.yaml (default: stdout)")
 	cmd.Flags().BoolVarP(&suppressErrorLog, "suppress-error-log", "E", false, "suppress the error log (default: written to ./chartverifier/verifier-<timestamp>.log)")
-	cmd.Flags().BoolVarP(&providerDelivery, "provider-delivery", "d", false, "chart provider will provide the chart delivery mechanism (default: false)")
+	cmd.Flags().BoolVarP(&providerDelivery, "web-catalog-only", "W", false, "set this to indicate that the distribution method is web catalog only (default: false)")
 	cmd.Flags().StringVarP(&pgpPublicKeyFile, "pgp-public-key", "k", "", "file containing gpg public key of the key used to sign the chart")
 	cmd.Flags().DurationVar(&helmInstallTimeout, "helm-install-timeout", 5*time.Minute, "helm install timeout")
 	return cmd
