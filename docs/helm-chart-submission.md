@@ -65,14 +65,14 @@ Web catalog only delivery is then based on the following conditions:
     ```
     This ensures that the [providerControlledDelivery annotation](helm-chart-annotations.md#providerControlledDelivery) is set to the value True in the verification report.
 
-1. The OWNERS file for the submitted chart in the [openshift helm charts github repository](https://github.com/openshift-helm-charts/charts) includes a ```webCatalogOnly``` attribute which is set to the value True. 
+1. The OWNERS file for the submitted chart in the [openshift helm charts github repository](https://github.com/openshift-helm-charts/charts) includes a ```providerDelivery``` attribute which is set to the value True. 
    Example:
 ```
 chart:
   name: mychart
   shortDescription: Test chart for testing chart submission workflows.
 publicPgpKey: null
-webCatalogOnly: True
+providerDelivery: True
 users:
 - githubUsername: myusername
 vendor:
