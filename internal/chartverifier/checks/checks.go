@@ -73,7 +73,7 @@ const (
 	SignatureFailure             = "Signature verification failed"
 	SignatureNoKey               = "Signature verification skipped, a public key was not specified"
 	ImageCertifySkipped          = "Image certification skipped"
-	RedHatRegistry               = "registry.redhat.io"
+	RedHatRegistry               = "registry.redhat.io/"
 )
 
 var (
@@ -290,7 +290,7 @@ func ImagesAreCertified_V1_1(opts *CheckOptions) (Result, error) {
 
 	r := NewResult(true, "")
 
-	r = certifyImages(r, opts, "registry.redhat.io")
+	r = certifyImages(r, opts, RedHatRegistry)
 
 	return r, nil
 }
