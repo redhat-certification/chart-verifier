@@ -126,7 +126,7 @@ func TestProfileFilter(t *testing.T) {
 	defaultRegistry.Add(apiChecks.NotContainsCRDs, checkVersion11, checks.NotContainCRDs)
 	defaultRegistry.Add(apiChecks.HelmLint, checkVersion11, checks.HelmLint)
 	defaultRegistry.Add(apiChecks.NotContainsCRDs, checkVersion11, checks.NotContainCSIObjects)
-	defaultRegistry.Add(apiChecks.ImagesAreCertified, checkVersion11, checks.ImagesAreCertified)
+	defaultRegistry.Add(apiChecks.ImagesAreCertified, checkVersion11, checks.ImagesAreCertified_V1_1)
 	defaultRegistry.Add(apiChecks.ChartTesting, checkVersion11, checks.ChartTesting)
 
 	defaultRegistry.Add("BadHasReadme", checkVersion10, checks.HasReadme)
@@ -139,6 +139,7 @@ func TestProfileFilter(t *testing.T) {
 	expectedChecks[apiChecks.ContainsTest] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.ContainsTest, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.ContainsTest}
 	expectedChecks[apiChecks.ContainsValues] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.ContainsValues, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.ContainsValues}
 	expectedChecks[apiChecks.HasKubeVersion] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.HasKubeVersion, Version: checkVersion11}, Type: apiChecks.MandatoryCheckType, Func: checks.HasKubeVersion_V1_1}
+	expectedChecks[apiChecks.ImagesAreCertified] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.ImagesAreCertified, Version: checkVersion11}, Type: apiChecks.MandatoryCheckType, Func: checks.ImagesAreCertified_V1_1}
 
 	config := make(map[string]interface{})
 	t.Run("Checks filtered using profile subset", func(t *testing.T) {
@@ -159,7 +160,6 @@ func TestProfileFilter(t *testing.T) {
 	expectedChecks[apiChecks.NotContainsCRDs] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.NotContainsCRDs, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.NotContainCRDs}
 	expectedChecks[apiChecks.HelmLint] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.HelmLint, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.HelmLint}
 	expectedChecks[apiChecks.NotContainCsiObjects] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.NotContainCsiObjects, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.NotContainCSIObjects}
-	expectedChecks[apiChecks.ImagesAreCertified] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.ImagesAreCertified, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.ImagesAreCertified}
 	expectedChecks[apiChecks.ChartTesting] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.ChartTesting, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.ChartTesting}
 	expectedChecks[apiChecks.RequiredAnnotationsPresent] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.RequiredAnnotationsPresent, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.RequiredAnnotationsPresent}
 

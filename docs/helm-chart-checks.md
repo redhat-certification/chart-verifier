@@ -65,7 +65,7 @@ The following table lists the set of checks for each profile version with detail
 | [contains-values-schema v1.0](helm-chart-troubleshooting.md#contains-values-schema-v10) | [contains-values-schema v1.0](helm-chart-troubleshooting.md#contains-values-schema-v10) | [contains-values-schema v1.0](helm-chart-troubleshooting.md#contains-values-schema-v10) | Checks that the Helm chart contains a JSON schema file (`values.schema.json`) to validate the `values.yaml` file in the chart.
 | [not-contains-crds v1.0](helm-chart-troubleshooting.md#not-contains-crds-v10) | [not-contains-crds v1.0](helm-chart-troubleshooting.md#not-contains-crds-v10) | [not-contains-crds v1.0](helm-chart-troubleshooting.md#not-contains-crds-v10) | Checks that the Helm chart does not include custom resource definitions (CRDs).
 | [not-contain-csi-objects v1.0](helm-chart-troubleshooting.md#not-contain-csi-objects-v10) | [not-contain-csi-objects v1.0](helm-chart-troubleshooting.md#not-contain-csi-objects-v10) | [not-contain-csi-objects v1.0](helm-chart-troubleshooting.md#not-contain-csi-objects-v10) | Checks that the Helm chart does not include Container Storage Interface (CSI) objects.
-| [images-are-certified v1.0](helm-chart-troubleshooting.md#images-are-certified-v10) | [images-are-certified v1.0](helm-chart-troubleshooting.md#images-are-certified-v10) | [images-are-certified v1.0](helm-chart-troubleshooting.md#images-are-certified-v10) | Checks that the images referenced by the Helm chart are Red Hat-certified.
+| [images-are-certified v1.1](helm-chart-troubleshooting.md#images-are-certified-v10) | [images-are-certified v1.0](helm-chart-troubleshooting.md#images-are-certified-v10) | [images-are-certified v1.0](helm-chart-troubleshooting.md#images-are-certified-v10) | Checks that the images referenced by the Helm chart are Red Hat-certified.
 | [helm-lint v1.0](helm-chart-troubleshooting.md#helm-lint-v10) | [helm-lint v1.0](helm-chart-troubleshooting.md#helm-lint-v10) | [helm-lint v1.0](helm-chart-troubleshooting.md#helm-lint-v10) | Checks that the chart is well formed by running the `helm lint` command.
 | [chart-testing v1.0](helm-chart-troubleshooting.md#chart-testing-v10) | [chart-testing v1.0](helm-chart-troubleshooting.md#chart-testing-v10) | [chart-testing v1.0](helm-chart-troubleshooting.md#chart-testing-v10)  | Installs the chart and verifies it on a Red Hat OpenShift Container Platform cluster.
 | [contains-values v1.0](helm-chart-troubleshooting.md#contains-values-v10) | [contains-values v1.0](helm-chart-troubleshooting.md#contains-values-v10)  | [contains-values  v1.0](helm-chart-troubleshooting.md#contains-values-v10) | Checks that the Helm chart contains the `values`[¹](https://github.com/redhat-certification/chart-verifier/blob/main/docs/helm-chart-checks.md#-for-more-information-on-the-values-file-see-values-and-best-practices-for-using-values) file.
@@ -313,6 +313,7 @@ Compared to profile v1.1, adds a new check:
 | check | partner | RedHat | community | default |
 |-------|---------|--------|-----------|---------
 | [signature-is-valid v1.0](helm-chart-troubleshooting.md#signature-is-valid-v10) | mandatory | mandatory | optional | mandatory
+| [images-are-certified v1.1](helm-chart-troubleshooting.md#images-are-certified-v11) | mandatory | mandatory | optional | mandatory
 
 ### Profile v1.1
 

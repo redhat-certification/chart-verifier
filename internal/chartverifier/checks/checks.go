@@ -72,6 +72,8 @@ const (
 	SignatureIsValidSuccess      = "Signature verification passed"
 	SignatureFailure             = "Signature verification failed"
 	SignatureNoKey               = "Signature verification skipped, a public key was not specified"
+	ImageCertifySkipped          = "Image certification skipped"
+	RedHatRegistry               = "registry.redhat.io/"
 )
 
 var (
@@ -279,40 +281,16 @@ func ImagesAreCertified(opts *CheckOptions) (Result, error) {
 
 	r := NewResult(true, "")
 
-	images, err := getImageReferences(opts.URI, opts.Values)
+	r = certifyImages(r, opts, "")
 
-	if err != nil {
-		r.SetResult(false, fmt.Sprintf("%s : Failed to get images, error running helm template : %v", ImageCertifyFailed, err))
-	} else if len(images) == 0 {
-		r.SetResult(true, NoImagesToCertify)
-	} else {
-		for _, image := range images {
+	return r, nil
+}
 
-			err = nil
-			imageRef := parseImageReference(image)
+func ImagesAreCertified_V1_1(opts *CheckOptions) (Result, error) {
 
-			if len(imageRef.Registries) == 0 {
-				imageRef.Registries, err = pyxis.GetImageRegistries(imageRef.Repository)
-			}
+	r := NewResult(true, "")
 
-			if err != nil {
-				r.AddResult(false, fmt.Sprintf("%s : %s : %v", ImageNotCertified, image, err))
-			} else if len(imageRef.Registries) == 0 {
-				r.AddResult(false, fmt.Sprintf("%s : %s", ImageNotCertified, image))
-			} else {
-				certified, checkImageErr := pyxis.IsImageInRegistry(imageRef)
-				if !certified {
-					if checkImageErr != nil {
-						r.AddResult(false, fmt.Sprintf("%s : %s : %v", ImageNotCertified, image, checkImageErr))
-					} else {
-						r.AddResult(false, fmt.Sprintf("%s : %s", ImageNotCertified, image))
-					}
-				} else {
-					r.AddResult(true, fmt.Sprintf("%s : %s", ImageCertified, image))
-				}
-			}
-		}
-	}
+	r = certifyImages(r, opts, RedHatRegistry)
 
 	return r, nil
 }
@@ -530,4 +508,49 @@ func downloadFile(fileURL *url.URL, directory string) (string, error) {
 	defer file.Close()
 
 	return filePath, nil
+}
+
+func certifyImages(r Result, opts *CheckOptions, registry string) Result {
+
+	images, err := getImageReferences(opts.URI, opts.Values)
+
+	if err != nil {
+		r.SetResult(false, fmt.Sprintf("%s : Failed to get images, error running helm template : %v", ImageCertifyFailed, err))
+	} else if len(images) == 0 {
+		r.SetResult(true, NoImagesToCertify)
+	} else {
+		for _, image := range images {
+
+			err = nil
+			imageRef := parseImageReference(image)
+
+			if len(imageRef.Registries) == 0 {
+				imageRef.Registries, err = pyxis.GetImageRegistries(imageRef.Repository)
+			}
+
+			if err != nil {
+				r.AddResult(false, fmt.Sprintf("%s : %s : %v", ImageNotCertified, image, err))
+			} else if len(imageRef.Registries) == 0 {
+				r.AddResult(false, fmt.Sprintf("%s : %s", ImageNotCertified, image))
+			} else {
+				certified, checkImageErr := pyxis.IsImageInRegistry(imageRef)
+				if !certified {
+
+					if strings.Contains(checkImageErr.Error(), "No images found for Registry/Repository") && registry != "" {
+						if strings.HasPrefix(image, registry) {
+							r.SetSkipped(fmt.Sprintf("%s : %s", ImageCertifySkipped, image))
+						} else {
+							r.AddResult(false, fmt.Sprintf("%s : %s", ImageNotCertified, image))
+						}
+					} else {
+						r.AddResult(false, fmt.Sprintf("%s : %s : %v", ImageCertifyFailed, image, checkImageErr))
+					}
+				} else {
+					r.AddResult(true, fmt.Sprintf("%s : %s", ImageCertified, image))
+				}
+			}
+		}
+	}
+
+	return r
 }

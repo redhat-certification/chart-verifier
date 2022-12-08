@@ -58,14 +58,18 @@ func (r *Result) SetResult(outcome bool, reason string) Result {
 }
 
 func (r *Result) SetSkipped(reason string) Result {
-	r.Ok = true
-	r.Skipped = true
-	r.Reason = reason
+	if len(r.Reason) == 0 {
+		r.Skipped = true
+		r.Reason = reason
+	} else {
+		r.Reason += "\n" + reason
+	}
 	return *r
 }
 
 func (r *Result) AddResult(outcome bool, reason string) Result {
 	r.Ok = r.Ok && outcome
+	r.Skipped = false
 	if len(r.Reason) > 0 {
 		r.Reason += "\n"
 	}
