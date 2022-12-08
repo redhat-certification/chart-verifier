@@ -143,7 +143,7 @@ This section provides help on the basic usage of Helm chart checks with the podm
     -V, --openshift-version string    set the value of certifiedOpenShiftVersions in the report
     -o, --output string               the output format: default, json or yaml
     -k, --pgp-public-key string       file containing gpg public key of the key used to sign the chart  
-    -d, --provider-delivery           chart provider will provide the chart delivery mechanism (default: false)
+    -W, --web-catalog-only            set this to indicate that the distribution method is web catalog only (default: false)
         --registry-config string      path to the registry config file (default "/home/baiju/.config/helm/registry.json")
         --repository-cache string     path to the file containing cached repository indexes (default "/home/baiju/.cache/helm/repository")
         --repository-config string    path to the file containing repository names and URLs (default "/home/baiju/.config/helm/repositories.yaml")

@@ -1,6 +1,7 @@
 
 # Submission of Helm charts for Red Hat OpenShift certification
  - [Submission options](#submission-options)
+ - [Helm Chart Distribution methods](#helm-chart-distribution-methods)
  - [Provider controlled delivery](#provider-controlled-delivery)
 
 ## Submission options
@@ -29,24 +30,37 @@ For more information on the submission process, see: [OpenShift Helm Charts Repo
 
 For troubleshooting report related submission failures see: [Troubleshooting](./helm-chart-troubleshooting.md)
 
-## Provider controlled delivery
+## Helm Chart Distribution methods:
 
-By default, a submitted chart will be made available in the OpenShift Helm Chart Catalog on successful certification. In some cases this is undesirable and can be prevented using provider controlled delivery. With provider controlled delivery the provider of the chart controls access to the chart and this impacts report generation:
+There are three methods of distribution for certified helm charts.
+
+- Publish your chart in the Red Hat Helm Chart repository
+  - Submissions should include either a chart or chart and report.
+- Publish you chart in your own Helm Chart repository
+  - Submissions should be report only using a publicly available chart URL.
+- Web catalog only
+  - This submission should be report only using a private chart URL.
+
+For more information on the different Helm Chart Distribution methods, see: [Creating a Helm Chart Certification Project](https://redhat-connect.gitbook.io/partner-guide-for-red-hat-openshift-and-container/helm-chart-certification/creating-a-helm-chart-certification-project)
+
+## Web catalog only delivery
+
+Web catalog only delivery was previously described as provider delivery. Chart submissions will be made available within the Helm Chart Catalog on successful certifications. In the event that this case is undisirable, the provider should consider the web catalog only option if they wish not to make the chart publicly available. With web catalog only delivery the provider of the chart controls access to the chart and this will impact report generation:
 
 - The report must be generated using a tarball so that a package digest can be determined and included in the report.
   - if a tarball is not used the report will fail to generate.
 - The chart URL may be considered private to the provider so the chart URL is not included in the report.
 
-Provider controlled delivery is then based on the following conditions: 
+Web catalog only delivery is then based on the following conditions: 
 
-1. When generating the Verification report the ```--provider-delivery``` flag is used.
+1. When generating the Verification report the ```--web-catalog-only``` flag is used.
    Example:
     ```
     $ podman run --rm -i                                  \
           -e KUBECONFIG=/.kube/config                   \
           -v "${HOME}/.kube":/.kube                     \
           "quay.io/redhat-certification/chart-verifier" \
-          verify --provider-delivery                    \
+          verify --web-catalog-only                     \
           <chart-uri>
     ```
     This ensures that the [providerControlledDelivery annotation](helm-chart-annotations.md#providerControlledDelivery) is set to the value True in the verification report.

@@ -189,7 +189,7 @@ func TestCertify(t *testing.T) {
 
 	})
 
-	t.Run("should see providerControlledDelivery is true for -d flag and chart-uri is not set", func(t *testing.T) {
+	t.Run("should see providerControlledDelivery is true for -W flag and chart-uri is not set", func(t *testing.T) {
 
 		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
@@ -200,7 +200,7 @@ func TestCertify(t *testing.T) {
 		cmd.SetArgs([]string{
 			"-e", "has-readme", // only consider a single check, perhaps more checks in the future
 			"../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
-			"-d",
+			"-W",
 			"-E"})
 
 		require.NoError(t, cmd.Execute())
@@ -215,7 +215,7 @@ func TestCertify(t *testing.T) {
 
 	})
 
-	t.Run("should see providerControlledDelivery is false if no -d flag and chart-uri is set", func(t *testing.T) {
+	t.Run("should see providerControlledDelivery is false if no -W flag and chart-uri is set", func(t *testing.T) {
 
 		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
