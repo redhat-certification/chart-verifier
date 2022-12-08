@@ -8,7 +8,7 @@ on:
 jobs:
     build:
         name: Create Dev Release
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-20.04
         env:
             DEV_RELEASE: 0.1.0
 
