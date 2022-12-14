@@ -27,3 +27,10 @@ test:
 .PHONY: build-image
 build-image:
 	hack/build-image.sh
+
+.PHONY: gosec
+gosec:
+	# Run this command to install gosec, if not installed:
+	# export PATH=$PATH:$(go env GOPATH)/bin
+	# go install github.com/securego/gosec/v2/cmd/gosec@latest
+	gosec -no-fail -fmt=sarif -out=gosec.sarif -exclude-dir tests ./...

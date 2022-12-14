@@ -77,7 +77,7 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 			for key, val := range viper.AllSettings() {
 				valueMap[key] = val
 			}
-
+			// #nosec G304
 			reportFile, openErr := os.Open(reportArg)
 			if openErr != nil {
 				return errors.New(fmt.Sprintf("report path %s: error opening file  %v", reportArg, openErr))

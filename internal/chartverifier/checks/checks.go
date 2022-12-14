@@ -342,6 +342,7 @@ func SignatureIsValid(opts *CheckOptions) (Result, error) {
 		if err != nil {
 			return NewResult(false, fmt.Sprintf("%s : Failed to parse prov file location: %s", SignatureFailure, provFile)), nil
 		}
+		// #nosec G107
 		resp, err := http.Get(provFile)
 		if err != nil {
 			return NewResult(false, fmt.Sprintf("%s : get error was %v", SignatureFailure, err)), nil
@@ -483,6 +484,7 @@ func downloadFile(fileURL *url.URL, directory string) (string, error) {
 
 	// Create blank file
 	filePath := path.Join(directory, fileName)
+	// #nosec G304
 	file, err := os.Create(filePath)
 	if err != nil {
 		return "", err
@@ -504,7 +506,7 @@ func downloadFile(fileURL *url.URL, directory string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
+	// #nosec G307
 	defer file.Close()
 
 	return filePath, nil

@@ -35,7 +35,7 @@ func ServeCharts(ctx context.Context, addr string, path string) error {
 	prefix := "/charts/"
 	chartHandler := http.StripPrefix(prefix, http.FileServer(http.Dir(path)))
 	mux.Handle(prefix, chartHandler)
-
+	// #nosec G112
 	srv := &http.Server{Addr: addr, Handler: mux}
 
 	// listen and server are separated here to catch listen issues before serve executes, otherwise listen errors can't
