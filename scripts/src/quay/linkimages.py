@@ -46,7 +46,7 @@ DEFAULT_TAG_TO_LINK= "test"
 QUAY_TAG_PAGE_URL = 'https://quay.io/api/v1/repository/redhat-certification/chart-verifier/tag/'
 
 # try every 15 seconds for 15 minutes
-@retry(Exception,tries=60, delay=15)
+@retry(Exception,tries=150, delay=15)
 def get_image_id(tag_value, do_retry):
 
     print(f"[INFO] look for tag : {tag_value}, retry : {do_retry}")
