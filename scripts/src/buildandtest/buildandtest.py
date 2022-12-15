@@ -23,6 +23,7 @@ except ImportError:
 
 sys.path.append('./scripts/src/')
 from report import report_info
+from utils import utils
 
 def build_image(image_id):
     print(f"Build Image : {image_id}")
@@ -103,7 +104,7 @@ def test_image(image_id,chart,verifier_version):
 
 def main():
 
-    print("::set-output name=result::failure")
+    utils.add_output("result","failure")
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--image-name", dest="image_name", type=str, required=True,
@@ -122,7 +123,7 @@ def main():
 
     if build_image(image_id):
 
-        print(f'::set-output name=verifier-image-tag::{args.sha_value}')
+        utils.add_output("verifier-image-tag",args.sha_value)
 
         if not args.build_only:
 
