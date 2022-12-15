@@ -3,7 +3,7 @@
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
         "<ul>",
-        "<li>Update provider deliver flag to web catalog only (#294)</li>",
+        "<li>Update provider delivery flag to web catalog only (#294)</li>",
         "<li>Update images are certified check to skip registry.redhat.io images (#293)",
         "<li>Add new helm install timeout flag and deployment wait (#288)</li>",
         "<li>New check and support for signed charts (#287)</li>",
