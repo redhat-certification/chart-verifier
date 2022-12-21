@@ -32,6 +32,7 @@ import semver
 import sys
 sys.path.append('./scripts/src/')
 from release import tarfile_asset
+from utils import utils
 
 VERSION_FILE = 'pkg/chartverifier/version/version_info.json'
 
@@ -73,7 +74,7 @@ def make_release_body(version, image_name, release_info):
             body += f"- {info}<br>"
 
     print(f"[INFO] Release body: {body}")
-    print(f"::set-output name=PR_release_body::{body}")
+    utils.add_output("PR_release_body",body)
 
 def get_version_info():
     data = {}
@@ -102,14 +103,14 @@ def main():
         version_info = get_version_info()
         asset_file = tarfile_asset.create(version_info["version"])
         print(f'[INFO] Verifier tarball created : {asset_file}.')
-        print(f'::set-output name=PR_tarball_name::{asset_file}')
+        utils.add_output("PR_tarball_name",asset_file)
         if check_if_only_version_file_is_modified(args.api_url):
             ## should be on PR branch
             print(f'[INFO] Release found in PR files : {version_info["version"]}.')
-            print(f'::set-output name=PR_version::{version_info["version"]}')
-            print(f'::set-output name=PR_release_image::{version_info["quay-image"]}')
-            print(f'::set-output name=PR_release_info::{version_info["release-info"]}')
-            print(f'::set-output name=PR_includes_release::true')
+            utils.add_output("PR_version",version_info["version"])
+            utils.add_output("PR_release_image",version_info["quay-image"])
+            utils.add_output("PR_release_info",version_info["release-info"])
+            utils.add_output("PR_includes_release","true")
             make_release_body(version_info["version"],version_info["quay-image"],version_info["release-info"])
     else:
         version_info = get_version_info()
@@ -118,13 +119,13 @@ def main():
             version_compare = semver.compare(args.version,version_info["version"])
             if version_compare > 0 :
                 print(f'[INFO] Release {args.version} found in PR files is newer than: {version_info["version"]}.')
-                print("::set-output name=updated::true")
+                utils.add_output("updated","true")
             elif version_compare == 0 and not release_exists(args.version):
                 print(f'[INFO] Release {args.version} found in PR files is not new but no release exists yet.')
-                print("::set-output name=updated::true")
+                utils.add_output("updated","true")
             else:
                 print(f'[INFO] Release found in PR files is not new  : {version_info["version"]} already exists.')
         else:
-            print(f'::set-output name=PR_version::{version_info["version"]}')
-            print(f'::set-output name=PR_release_image::{version_info["quay-image"]}')
+            utils.add_output("PR_version",version_info["version"])
+            utils.add_output("PR_release_image",version_info["quay-image"])
             print("[INFO] PR contains non-release files.")
