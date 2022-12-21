@@ -64,7 +64,7 @@ def get_image_id(tag_value, do_retry):
         print("[INFO] loaded the tags")
         for tag in tags["tags"]:
             if tag['name'] == tag_value:
-                image_id = tag['image_id']
+                image_id = tag['manifest_digest']
                 print(f"[INFO] Found tag {tag_value}. image_id : {image_id}")
                 break
             else:
