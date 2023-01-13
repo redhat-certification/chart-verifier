@@ -42,7 +42,8 @@ type ApiVerifier interface {
 - NewVerifier - Creates a new ```Verifier```.
   
 - SetBoolean: Sets a boolean flag. ```BooleanKey``` values are defined in the verifier package and include:
-  - ```ProviderDelivery```
+  - ```WebCatalogOnly```
+  - ```Provider Delivery``` (deprecated - replaced by ```WebCatalogOnly```)  
   - ```SuppressErrorLog```
     
 - SetDuration: Sets a duration flag. ```DurationKey``` values are defined in the verifier package and include:

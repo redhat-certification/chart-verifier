@@ -129,6 +129,29 @@ func TestPreDigestReport(t *testing.T) {
 
 }
 
+func TestProviderDeliveryReport(t *testing.T) {
+
+	chartUri := "N/A"
+	yamlFileReport := "test-reports/providerdelivery/report.yaml"
+	jsonFileReport := "test-reports/providerdelivery/report.json"
+
+	yamlFileReportBytes, yamlReportErr := loadChartFromAbsPath(yamlFileReport)
+	require.NoError(t, yamlReportErr)
+	jsonFileReportBytes, jsonReportErr := loadChartFromAbsPath(jsonFileReport)
+	require.NoError(t, jsonReportErr)
+
+	report, loadErr := apireport.NewReport().SetContent(string(yamlFileReportBytes)).Load()
+	require.NoError(t, loadErr)
+	reportSummary := NewReportSummary().SetReport(report)
+	checkReportSummaries(reportSummary, chartUri, t)
+
+	report, loadErr = apireport.NewReport().SetContent(string(jsonFileReportBytes)).Load()
+	require.NoError(t, loadErr)
+	reportSummary = NewReportSummary().SetReport(report)
+	checkReportSummaries(reportSummary, chartUri, t)
+
+}
+
 func TestAddUrlReport(t *testing.T) {
 
 	yamlUrlReport := "https://github.com/redhat-certification/chart-verifier/blob/main/cmd/test/report.yaml?raw=true"
@@ -143,6 +166,7 @@ func TestAddUrlReport(t *testing.T) {
 	checkReportSummaries(reportSummary, chartUri, t)
 
 }
+
 func checkReportSummaries(summary APIReportSummary, chartUri string, t *testing.T) {
 	checkReportSummariesFormat(YamlReport, summary, chartUri, t)
 	checkReportSummariesFormat(JsonReport, summary, chartUri, t)
@@ -249,6 +273,7 @@ func checkSummaryMetadata(fullReport bool, format SummaryFormat, reportSummary s
 		}
 		require.Contains(t, reportSummary, "\"metadata\":{")
 		require.Contains(t, reportSummary, "\"chart-uri\":\""+chartUri+"\"")
+		require.Contains(t, reportSummary, "\"webCatalogOnly\":")
 	} else {
 		if !fullReport {
 			require.NotContains(t, reportSummary, "digests:")

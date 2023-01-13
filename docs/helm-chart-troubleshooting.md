@@ -188,6 +188,7 @@ If a check is failing and you are unsure as to why see [Trouble shooting check f
 Common causes:
 
 - The chart was updated after the report was generated.
+    - Note: you can modify the webCatalogOnly attribute without affecting the report sha value.
 - The Report was generated against a different form to the chart submitted.
     - For example report was generated from the chart source but the chart tarball was used for submission.
 

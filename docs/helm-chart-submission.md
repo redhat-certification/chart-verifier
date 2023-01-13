@@ -2,7 +2,7 @@
 # Submission of Helm charts for Red Hat OpenShift certification
  - [Submission options](#submission-options)
  - [Helm Chart Distribution methods](#helm-chart-distribution-methods)
- - [Provider controlled delivery](#provider-controlled-delivery)
+ - [Web Catalog Only](#web_catalog_only)
 
 ## Submission options
 
@@ -45,7 +45,9 @@ For more information on the different Helm Chart Distribution methods, see: [Cre
 
 ## Web catalog only delivery
 
-Web catalog only delivery was previously described as provider delivery. Chart submissions will be made available within the Helm Chart Catalog on successful certifications. In the event that this case is undisirable, the provider should consider the web catalog only option if they wish not to make the chart publicly available. With web catalog only delivery the provider of the chart controls access to the chart and this will impact report generation:
+Web catalog only delivery was previously described as provider delivery. 
+
+Chart submissions will be made available within the Helm Chart Catalog on successful certifications. In the event that this case is undesirable, the provider should consider the web catalog only option if they wish not to make the chart publicly available. With web catalog only delivery the provider of the chart controls access to the chart and this will impact report generation:
 
 - The report must be generated using a tarball so that a package digest can be determined and included in the report.
   - if a tarball is not used the report will fail to generate.

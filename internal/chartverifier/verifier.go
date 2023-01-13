@@ -70,7 +70,7 @@ type verifier struct {
 	toolVersion        string
 	profile            *profiles.Profile
 	openshiftVersion   string
-	providerDelivery   bool
+	webCatalogOnly     bool
 	timeout            time.Duration
 	helmInstallTimeout time.Duration
 	publicKeys         []string
@@ -87,7 +87,7 @@ func (c *verifier) subConfig(name string) *viper.Viper {
 
 func (c *verifier) Verify(uri string) (*apiReport.Report, error) {
 
-	if c.providerDelivery {
+	if c.webCatalogOnly {
 		if len(GetPackageDigest(uri)) == 0 {
 			return nil, CheckErr("Provider delivery control requires chart input which is a tarball.")
 		}
@@ -103,7 +103,7 @@ func (c *verifier) Verify(uri string) (*apiReport.Report, error) {
 		SetChartUri(uri).
 		SetChart(chrt).
 		SetProfile(c.profile.Vendor, c.profile.Version).
-		SetProviderDelivery(c.providerDelivery)
+		SetWebCatalogOnly(c.webCatalogOnly)
 
 	for _, check := range c.requiredChecks {
 

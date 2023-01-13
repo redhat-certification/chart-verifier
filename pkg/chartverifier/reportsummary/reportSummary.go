@@ -217,7 +217,7 @@ func (r *ReportSummary) addMetadata() {
 	r.MetadataReport.ProfileVersion = r.options.report.Metadata.ToolMetadata.Profile.Version
 	r.MetadataReport.ChartUri = r.options.report.Metadata.ToolMetadata.ChartUri
 	r.MetadataReport.Chart = r.options.report.Metadata.ChartData
-	r.MetadataReport.ProviderDelivery = r.options.report.Metadata.ToolMetadata.ProviderDelivery
+	r.MetadataReport.WebCatalogOnly = r.options.report.Metadata.ToolMetadata.ProviderDelivery || r.options.report.Metadata.ToolMetadata.WebCatalogOnly
 
 }
 
@@ -298,7 +298,6 @@ func (r *ReportSummary) checkReportDigest() error {
 			return errors.New(fmt.Sprintf("error calculating report digest: %v", err))
 		}
 		if calculatedDigest != digestFromReport {
-			//return errors.New(fmt.Sprintf("Digest in report %s did not match report content %s", digestFromReport, calculatedDigest))
 			return errors.New("digest in report did not match report content")
 		}
 

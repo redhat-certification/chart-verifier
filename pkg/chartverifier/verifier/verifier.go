@@ -66,7 +66,8 @@ const (
 	ChartSetString ValuesKey = "chart-set-string"
 	CommandSet     ValuesKey = "set"
 
-	ProviderDelivery BooleanKey = "provider-delivery"
+	WebCatalogOnly   BooleanKey = "web-catalog-only"
+	ProviderDelivery BooleanKey = "provider-delivery" // Deprecated in 1.10
 	SuppressErrorLog BooleanKey = "suppress-error-log"
 
 	Timeout            DurationKey = "timeout"
@@ -94,7 +95,7 @@ var setValuesKeys = [...]ValuesKey{CommandSet,
 	ChartSetFile,
 	ChartSetString}
 
-var setBooleanKeys = [...]BooleanKey{ProviderDelivery, SuppressErrorLog}
+var setBooleanKeys = [...]BooleanKey{WebCatalogOnly, SuppressErrorLog}
 
 var setDurationKeys = [...]DurationKey{Timeout, HelmInstallTimeout}
 
@@ -338,8 +339,10 @@ func (v *Verifier) Run(chart_uri string) (ApiVerifier, error) {
 		runOptions.OpenShiftVersion = stringsValue[0]
 	}
 
-	if booleanValue, ok := v.Inputs.Flags.BooleanFlags[ProviderDelivery]; ok {
-		runOptions.ProviderDelivery = booleanValue
+	if booleanValue, ok := v.Inputs.Flags.BooleanFlags[WebCatalogOnly]; ok {
+		runOptions.WebCatalogOnly = booleanValue
+	} else if booleanValue, ok := v.Inputs.Flags.BooleanFlags[ProviderDelivery]; ok {
+		runOptions.WebCatalogOnly = booleanValue
 	}
 
 	if booleanValue, ok := v.Inputs.Flags.BooleanFlags[SuppressErrorLog]; ok {
@@ -392,7 +395,7 @@ func (v *Verifier) initialize() {
 	v.Inputs.Flags.StringFlags = make(map[StringKey][]string)
 	v.Inputs.Flags.ValuesFlags = make(map[ValuesKey]map[string]interface{})
 	v.Inputs.Flags.BooleanFlags = make(map[BooleanKey]bool)
-	v.Inputs.Flags.BooleanFlags[ProviderDelivery] = false
+	v.Inputs.Flags.BooleanFlags[WebCatalogOnly] = false
 	v.Inputs.Flags.BooleanFlags[SuppressErrorLog] = false
 	v.Inputs.Flags.DurationFlags = make(map[DurationKey]time.Duration)
 	v.Inputs.Flags.Checks = make(map[checks.CheckName]CheckStatus)

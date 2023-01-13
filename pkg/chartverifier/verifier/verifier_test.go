@@ -62,41 +62,41 @@ func TestProfilesDeveloperConsole(t *testing.T) {
 	require.NotContains(t, report, "check: v1.0/images-are-certified")
 }
 
-func TestProviderDelivery(t *testing.T) {
+func TestWebCatalogOnly(t *testing.T) {
 
 	commandSet := make(map[string]interface{})
 	commandSet["profile.vendortype"] = "redhat"
 
 	verifier, RunErr := NewVerifier().
-		SetBoolean(ProviderDelivery, true).
+		SetBoolean(WebCatalogOnly, true).
 		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified}).
 		Run("../../../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz")
 	require.NoError(t, RunErr)
 
 	reportContent, reportErr := verifier.GetReport().GetContent(apireport.YamlReport)
 	require.NoError(t, reportErr)
-	require.Contains(t, reportContent, "providerControlledDelivery: true")
+	require.Contains(t, reportContent, "webCatalogOnly: true")
 	require.Contains(t, reportContent, "chart-uri:")
 	require.NotContains(t, reportContent, "chart-0.1.0-v3.valid.tgz")
 
 	report := verifier.GetReport()
-	require.True(t, report.Metadata.ToolMetadata.ProviderDelivery)
+	require.True(t, report.Metadata.ToolMetadata.WebCatalogOnly)
 	require.NotContains(t, report.Metadata.ToolMetadata.ChartUri, "chart-0.1.0-v3.valid.tgz")
 
 	verifier, RunErr = NewVerifier().
-		SetBoolean(ProviderDelivery, false).
+		SetBoolean(WebCatalogOnly, false).
 		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified}).
 		Run("../../../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz")
 	require.NoError(t, RunErr)
 
 	reportContent, reportErr = verifier.GetReport().GetContent(apireport.YamlReport)
 	require.NoError(t, reportErr)
-	require.Contains(t, reportContent, "providerControlledDelivery: false")
+	require.Contains(t, reportContent, "webCatalogOnly: false")
 	require.Contains(t, reportContent, "chart-uri:")
 	require.Contains(t, reportContent, "chart-0.1.0-v3.valid.tgz")
 
 	report = verifier.GetReport()
-	require.False(t, report.Metadata.ToolMetadata.ProviderDelivery)
+	require.False(t, report.Metadata.ToolMetadata.WebCatalogOnly)
 	require.Contains(t, report.Metadata.ToolMetadata.ChartUri, "chart-0.1.0-v3.valid.tgz")
 
 }

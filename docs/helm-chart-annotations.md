@@ -10,7 +10,7 @@
   - [certifiedOpenShiftVersions](#certifiedOpenShiftVersions)
   - [testedOpenShiftVersion](#testedOpenShiftVersion)
   - [supportedOpenShiftVersions](#supportedOpenShiftVersions)
-  - [providerControlledDelivery](#providerControlledDelivery)  
+  - [webCatalogOnly](#webCatalogOnly)  
 - [Provider annotations](#provider-annotations)
   - [charts.openshift.io/provider](#chartsopenshiftioprovider)
   - [charts.openshift.io/name](#chartsopenshiftioname)
@@ -56,7 +56,7 @@ The annotations added differ based on the profile version used.
 | [certifiedOpenShiftVersions](#certifiedOpenShiftVersions) | v1.0 
 | [testedOpenShiftVersion](#testedOpenShiftVersion)         | v1.1
 | [supportedOpenShiftVersions](#supportedOpenShiftVersions) | v1.1
-| [providerControlledDelivery](#providerControlledDelivery) | v1.0,v1.1 
+| [webCatalogOnly](#webCatalogOnly) | not specific to a profile 
 
 ### verifier-version
 
@@ -100,14 +100,14 @@ The time when the report was generated.
 
 The OpenShift versions supported by the chart, based on the ```kubeVersion``` attribute in the ```chart.yaml``` file.
 
-### providerControlledDelivery
+### webCatalogOnly
 
 Used to control the publication of a certified chart:
 
 - True: provider controls the publication of the chart.
 - False (default): The chart is published in the OpenShift Helm chart catalog when certified.
 
-For more information, see: [Provider controlled delivery.](helm-chart-submission.md#provider-controlled-delivery)
+For more information, see: [Web Catalog Only.](helm-chart-submission.md#web-catalog-only)
 
 ## Provider annotations
 

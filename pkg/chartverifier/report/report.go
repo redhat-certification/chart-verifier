@@ -160,6 +160,7 @@ func (r *Report) GetReportDigest() (string, error) {
 	}
 
 	r.Metadata.ToolMetadata.ReportDigest = savedDigest
+
 	return fmt.Sprintf("uint64:%d", hash), nil
 
 }
@@ -186,4 +187,8 @@ func (r *Report) checkReportDigest() error {
 	}
 	return nil
 
+}
+
+func (r *Report) dumpReport() {
+	fmt.Println("")
 }

@@ -33,7 +33,7 @@ type VerifierBuilder interface {
 	SetOverrides(map[string]interface{}) VerifierBuilder
 	SetToolVersion(string) VerifierBuilder
 	SetOpenShiftVersion(string) VerifierBuilder
-	SetProviderDelivery(bool) VerifierBuilder
+	SetWebCatalogOnly(bool) VerifierBuilder
 	SetTimeout(time.Duration) VerifierBuilder
 	SetPublicKeys([]string) VerifierBuilder
 	SetHelmInstallTimeout(time.Duration) VerifierBuilder

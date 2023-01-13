@@ -189,7 +189,7 @@ func TestCertify(t *testing.T) {
 
 	})
 
-	t.Run("should see providerControlledDelivery is true for -W flag and chart-uri is not set", func(t *testing.T) {
+	t.Run("should see webCatalogOnly is true for -W flag and chart-uri is not set", func(t *testing.T) {
 
 		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
@@ -210,12 +210,12 @@ func TestCertify(t *testing.T) {
 		certificate := apiReport.Report{}
 		err := yaml.Unmarshal([]byte(outBuf.String()), &certificate)
 		require.NoError(t, err)
-		require.True(t, certificate.Metadata.ToolMetadata.ProviderDelivery)
+		require.True(t, certificate.Metadata.ToolMetadata.WebCatalogOnly)
 		require.True(t, certificate.Metadata.ToolMetadata.ChartUri == "N/A")
 
 	})
 
-	t.Run("should see providerControlledDelivery is false if no -W flag and chart-uri is set", func(t *testing.T) {
+	t.Run("should see webCatalogOnly is false if no -W flag and chart-uri is set", func(t *testing.T) {
 
 		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
@@ -235,7 +235,7 @@ func TestCertify(t *testing.T) {
 		certificate := apiReport.Report{}
 		err := yaml.Unmarshal([]byte(outBuf.String()), &certificate)
 		require.NoError(t, err)
-		require.False(t, certificate.Metadata.ToolMetadata.ProviderDelivery)
+		require.False(t, certificate.Metadata.ToolMetadata.WebCatalogOnly)
 		require.True(t, certificate.Metadata.ToolMetadata.ChartUri == "../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz")
 
 	})

@@ -14,7 +14,7 @@ metadata:
         lastCertifiedTimestamp: "2022-07-11T12:31:05.853002-04:00"
         testedOpenShiftVersion: "4.10"
         supportedOpenShiftVersions: '>=4.7'
-        providerControlledDelivery: false
+        webCatalogOnly: false
     chart:
         name: psql-service
         home: ""
