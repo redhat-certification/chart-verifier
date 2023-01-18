@@ -46,6 +46,10 @@ var output124 = version.Info{
 	Minor: "24",
 }
 
+var output125 = version.Info{
+	Major: "1",
+	Minor: "25",
+}
 var testsData []testData
 
 func TestOCVersions(t *testing.T) {
@@ -55,6 +59,7 @@ func TestOCVersions(t *testing.T) {
 	testsData = append(testsData, testData{getVersionOut: output122, OCVersion: "4.9"})
 	testsData = append(testsData, testData{getVersionOut: output123, OCVersion: "4.10"})
 	testsData = append(testsData, testData{getVersionOut: output124, OCVersion: "4.11"})
+	testsData = append(testsData, testData{getVersionOut: output125, OCVersion: "4.12"})
 
 	for _, testdata := range testsData {
 		clientset := fake.NewSimpleClientset()
