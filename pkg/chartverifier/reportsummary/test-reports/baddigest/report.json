@@ -17,7 +17,7 @@
             "lastCertifiedTimestamp": "2022-07-11T12:29:50.630869-04:00",
             "testedOpenShiftVersion": "4.10",
             "supportedOpenShiftVersions": "\u003e=4.7",
-            "providerControlledDelivery": false
+            "webCatalogOnly": false
         },
         "chart": {
             "name": "psql-service",

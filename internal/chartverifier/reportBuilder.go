@@ -45,7 +45,7 @@ type ReportBuilder interface {
 	SetChart(chart *helmchart.Chart) ReportBuilder
 	SetTestedOpenShiftVersion(version string) ReportBuilder
 	SetSupportedOpenShiftVersions(versions string) ReportBuilder
-	SetProviderDelivery(providerDelivery bool) ReportBuilder
+	SetWebCatalogOnly(webCatalogOnly bool) ReportBuilder
 	SetPublicKeyDigest(digest string) ReportBuilder
 	Build() (*apiReport.Report, error)
 }
@@ -101,8 +101,8 @@ func (r *reportBuilder) SetChart(chart *helmchart.Chart) ReportBuilder {
 	return r
 }
 
-func (r *reportBuilder) SetProviderDelivery(providerDelivery bool) ReportBuilder {
-	r.Report.GetApiReport().Metadata.ToolMetadata.ProviderDelivery = providerDelivery
+func (r *reportBuilder) SetWebCatalogOnly(webCatalogOnly bool) ReportBuilder {
+	r.Report.GetApiReport().Metadata.ToolMetadata.WebCatalogOnly = webCatalogOnly
 	return r
 }
 
@@ -154,7 +154,7 @@ func (r *reportBuilder) Build() (*apiReport.Report, error) {
 
 	apiReport.Metadata.ToolMetadata.Digests.Package = GetPackageDigest(apiReport.Metadata.ToolMetadata.ChartUri)
 
-	if apiReport.Metadata.ToolMetadata.ProviderDelivery {
+	if apiReport.Metadata.ToolMetadata.WebCatalogOnly {
 		r.SetChartUri(("N/A"))
 	}
 

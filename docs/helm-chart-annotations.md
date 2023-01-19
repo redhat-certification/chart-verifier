@@ -10,7 +10,7 @@
   - [certifiedOpenShiftVersions](#certifiedOpenShiftVersions)
   - [testedOpenShiftVersion](#testedOpenShiftVersion)
   - [supportedOpenShiftVersions](#supportedOpenShiftVersions)
-  - [providerControlledDelivery](#providerControlledDelivery)  
+  - [webCatalogOnly](#webCatalogOnly)  
 - [Provider annotations](#provider-annotations)
   - [charts.openshift.io/provider](#chartsopenshiftioprovider)
   - [charts.openshift.io/name](#chartsopenshiftioname)
@@ -27,18 +27,19 @@ Example:
 ```
 metadata:
     tool:
-        verifier-version: 1.4.0
+        verifier-version: 1.10.0
         profile:
             VendorType: partner
             version: v1.1
+        reportDigest: uint64:13041017788004879705    
         chart-uri: https://github.com/mmulholla/development/blob/main/charts/partners/test-org/psql-service/0.1.9/psql-service-0.1.9.tgz?raw=true
         digests:
             chart: sha256:94cbcb63531bc4457e7b0314f781070bbfe4affbdca98f67acadc381bf0f0b4f
             package: 4e9592ea31c0509bec308905289491b7056b78bdde2ab71a85c72be0901759b8
-        lastCertifiedTimestamp: "2021-11-01T17:12:37.148895-04:00"
-        testedOpenShiftVersion: 4.8
-        supportedOpenShiftVersions: 4.5 - 4.8
-        providerControlledDelivery: false
+        lastCertifiedTimestamp: "2023-01-18T14:28:52.128965-05:00"
+        testedOpenShiftVersion: "4.11"
+        supportedOpenShiftVersions: '>=4.8'
+        webCatalogOnly: false
  
 ```
 
@@ -56,7 +57,7 @@ The annotations added differ based on the profile version used.
 | [certifiedOpenShiftVersions](#certifiedOpenShiftVersions) | v1.0 
 | [testedOpenShiftVersion](#testedOpenShiftVersion)         | v1.1
 | [supportedOpenShiftVersions](#supportedOpenShiftVersions) | v1.1
-| [providerControlledDelivery](#providerControlledDelivery) | v1.0,v1.1 
+| [webCatalogOnly](#webCatalogOnly) | not specific to a profile 
 
 ### verifier-version
 
@@ -100,14 +101,14 @@ The time when the report was generated.
 
 The OpenShift versions supported by the chart, based on the ```kubeVersion``` attribute in the ```chart.yaml``` file.
 
-### providerControlledDelivery
+### webCatalogOnly
 
-Used to control the publication of a certified chart:
+Used to control the distribution method of a certified chart:
 
-- True: provider controls the publication of the chart.
+- True: The chart is not published in the OpenShift Helm chart catalog when certified.
 - False (default): The chart is published in the OpenShift Helm chart catalog when certified.
 
-For more information, see: [Provider controlled delivery.](helm-chart-submission.md#provider-controlled-delivery)
+For more information, see: [Web Catalog Only.](helm-chart-submission.md#web-catalog-only)
 
 ## Provider annotations
 

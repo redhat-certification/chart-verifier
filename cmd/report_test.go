@@ -34,7 +34,7 @@ func TestReport(t *testing.T) {
 	expectedMetadata.ProfileVendorType = "redhat"
 	expectedMetadata.ChartUri = "internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
 	expectedMetadata.Chart = &helmchart.Metadata{Name: "chart", Version: "0.1.0-v3.valid"}
-	expectedMetadata.ProviderDelivery = false
+	expectedMetadata.WebCatalogOnly = false
 
 	expectedDigests := &apireportsummary.DigestReport{}
 	expectedDigests.PackageDigest = "4f29f2a95bf2b9a1c62fd215b079a01bdc5a38e9b4ff874d0fa21d0afca2e76d"
@@ -307,8 +307,8 @@ func compareMetadata(expected *apireportsummary.MetadataReport, result *apirepor
 		fmt.Println(fmt.Sprintf("chart version mistmatch %s : %s", expected.Chart.Version, result.Chart.Version))
 		outcome = false
 	}
-	if expected.ProviderDelivery != result.ProviderDelivery {
-		fmt.Println(fmt.Sprintf("provider delvery mistmatch %t : %t", expected.ProviderDelivery, result.ProviderDelivery))
+	if expected.WebCatalogOnly != result.WebCatalogOnly {
+		fmt.Println(fmt.Sprintf("web catalog only mistmatch %t : %t", expected.WebCatalogOnly, result.WebCatalogOnly))
 		outcome = false
 	}
 

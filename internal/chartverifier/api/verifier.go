@@ -26,7 +26,7 @@ type RunOptions struct {
 	Overrides          map[string]interface{}
 	ChecksToRun        []apichecks.CheckName
 	OpenShiftVersion   string
-	ProviderDelivery   bool
+	WebCatalogOnly     bool
 	SuppressErrorLog   bool
 	ClientTimeout      time.Duration
 	HelmInstallTimeout time.Duration
@@ -62,7 +62,7 @@ func Run(options RunOptions) (*apireport.Report, error) {
 		SetChecks(checkRegistry).
 		SetToolVersion(options.APIVersion).
 		SetOpenShiftVersion(options.OpenShiftVersion).
-		SetProviderDelivery(options.ProviderDelivery).
+		SetWebCatalogOnly(options.WebCatalogOnly).
 		SetTimeout(options.ClientTimeout).
 		SetHelmInstallTimeout(options.HelmInstallTimeout).
 		SetSettings(options.Settings).

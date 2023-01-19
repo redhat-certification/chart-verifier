@@ -65,7 +65,7 @@ type verifierBuilder struct {
 	toolVersion                 string
 	openshiftVersion            string
 	suppportedOpenshiftVersions string
-	providerDelivery            bool
+	webCatalogOnly              bool
 	timeout                     time.Duration
 	publicKeys                  []string
 	helmInstallTimeout          time.Duration
@@ -117,8 +117,8 @@ func (b *verifierBuilder) SetOpenShiftVersion(version string) VerifierBuilder {
 	return b
 }
 
-func (b *verifierBuilder) SetProviderDelivery(providerDelivery bool) VerifierBuilder {
-	b.providerDelivery = providerDelivery
+func (b *verifierBuilder) SetWebCatalogOnly(webCatalogOnly bool) VerifierBuilder {
+	b.webCatalogOnly = webCatalogOnly
 	return b
 }
 
@@ -174,7 +174,7 @@ func (b *verifierBuilder) Build() (Verifier, error) {
 		toolVersion:        b.toolVersion,
 		profile:            profile,
 		openshiftVersion:   b.openshiftVersion,
-		providerDelivery:   b.providerDelivery,
+		webCatalogOnly:     b.webCatalogOnly,
 		timeout:            b.timeout,
 		helmInstallTimeout: b.helmInstallTimeout,
 		publicKeys:         b.publicKeys,
