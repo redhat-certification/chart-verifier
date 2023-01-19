@@ -43,17 +43,17 @@ There are three methods of distribution for certified helm charts.
 
 For more information on the different Helm Chart Distribution methods, see: [Creating a Helm Chart Certification Project](https://redhat-connect.gitbook.io/partner-guide-for-red-hat-openshift-and-container/helm-chart-certification/creating-a-helm-chart-certification-project)
 
-## Web catalog only delivery
+## Web catalog only
 
-Web catalog only delivery was previously described as provider delivery. 
+Web catalog only distribution method was previously described as provider delivery. 
 
-Chart submissions will be made available within the Helm Chart Catalog on successful certifications. In the event that this case is undesirable, the provider should consider the web catalog only option if they wish not to make the chart publicly available. With web catalog only delivery the provider of the chart controls access to the chart and this will impact report generation:
+Generally chart submissions will be made available within the Helm Chart Catalog on successful certification. In the event that this case is undesirable, the provider should consider the web catalog only distribution method if they wish not to make the chart publicly available. With web catalog only distribution method the provider of the chart controls access to the chart. This will impact report generation:
 
 - The report must be generated using a tarball so that a package digest can be determined and included in the report.
   - if a tarball is not used the report will fail to generate.
 - The chart URL may be considered private to the provider so the chart URL is not included in the report.
 
-Web catalog only delivery is then based on the following conditions: 
+Web catalog only distribution method is then based on the following conditions: 
 
 1. When generating the Verification report the ```--web-catalog-only``` flag is used.
    Example:
@@ -65,7 +65,7 @@ Web catalog only delivery is then based on the following conditions:
           verify --web-catalog-only                     \
           <chart-uri>
     ```
-    This ensures that the [providerControlledDelivery annotation](helm-chart-annotations.md#providerControlledDelivery) is set to the value True in the verification report.
+    This ensures that the [webCatalogOnly annotation](helm-chart-annotations.md#webCatalogOnly) is set to the value True in the verification report.
 
 1. The OWNERS file for the submitted chart in the [openshift helm charts github repository](https://github.com/openshift-helm-charts/charts) includes a ```providerDelivery``` attribute which is set to the value True. 
    Example:
