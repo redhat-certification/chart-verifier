@@ -24,6 +24,7 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    if: github.repository == 'redhat-certification/chart-verifier'
 
     strategy:
       fail-fast: false
@@ -66,15 +67,28 @@ jobs:
       id: codeql_analysis
       uses: github/codeql-action/analyze@v2
 
-    - name: Send message to slack channel
-      id: notify
-      if: ${{ always() &&  github.event_name == 'schedule'}}
+    - name: Send message to helm_dev slack channel
+      id: notify_dev
+      if: ${{ always() &&  github.event_name == 'schedule' && steps.codeql_analysis.conclusion != 'success' }}
       uses: archive/github-actions-slack@v2.0.0
       with:
         slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
         slack-channel: C02979BDUPL
-        slack-text: ${{ steps.codeql_analysis.conclusion }}! CodeQL analysis for chart verifier. See '${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}'
+        slack-text: Failure! CodeQL analysis for chart verifier. See '${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}'
 
-    - name: Result from "Send Message to slack channel"
-      if: ${{ always() &&  github.event_name == 'schedule'}}
+    - name: Result from "Send Message to helm_dev slack channel"
+      if: ${{ always() &&  github.event_name == 'schedule' && steps.codeql_analysis.conclusion != 'success' }}
+      run: echo "The result was ${{ steps.notify_dev.outputs.slack-result }}"
+
+    - name: Send message to helm_notify slack channel
+      id: notify
+      if: ${{ always() &&  github.event_name == 'schedule' && steps.codeql_analysis.conclusion == 'success' }}
+      uses: archive/github-actions-slack@v2.0.0
+      with:
+        slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+        slack-channel: C04K1ARMH8A
+        slack-text: Success! CodeQL analysis for chart verifier. See '${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}'
+
+    - name: Result from "Send Message to helm_notify slack channel"
+      if: ${{ always() &&  github.event_name == 'schedule' && steps.codeql_analysis.conclusion == 'success' }}
       run: echo "The result was ${{ steps.notify.outputs.slack-result }}"
