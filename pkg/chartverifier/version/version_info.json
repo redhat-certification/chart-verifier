@@ -3,15 +3,8 @@
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
         "<ul>",
-        "<li>Update provider delivery flag to web catalog only (#294)</li>",
-        "<li>Update images are certified check to skip registry.redhat.io images (#293)",
-        "<li>Add new helm install timeout flag and deployment wait (#288)</li>",
-        "<li>New check and support for signed charts (#287)</li>",
-        "<ul>",
-        "<li>Introduces new profile version 1.2</li>",
-        "</ul>",
-        "<li>add sha to report and code to check it (#267)",
-        "<li>Various bug fixes and documentation updates</li>",
+        "<li>add support for OCP 4.12  (#306)</li>",
+        "<li>change report to webCatalogOnly  (#305)</li>",
         "</ul>"
     ]
 }
