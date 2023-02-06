@@ -56,7 +56,7 @@ The following table lists the set of checks for each profile version with detail
 
 #### Table 2: Helm chart default checks
 
-| Porfile v1.2 | Profile v1.1 | Profile v1.0 | Description |
+| Profile v1.2 | Profile v1.1 | Profile v1.0 | Description |
 |:-------------------------------:|:-------------------------------:|:-------------------------------:|---------------
 | [is-helm-v3 v1.0](helm-chart-troubleshooting.md#is-helm-v3-v10) | [is-helm-v3 v1.0](helm-chart-troubleshooting.md#is-helm-v3-v10) | [is-helm-v3 v1.0](helm-chart-troubleshooting.md#is-helm-v3-v10) | Checks that the given `uri` points to a Helm v3 chart.
 | [has-readme v1.0](helm-chart-troubleshooting.md#has-readme-v10) | [has-readme v1.0](helm-chart-troubleshooting.md#has-readme-v10) | [has-readme v1.0](helm-chart-troubleshooting.md#has-readme-v10) | Checks that the Helm chart contains the `README.md` file.
