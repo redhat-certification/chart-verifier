@@ -53,6 +53,38 @@ def public_key_location(location,public_key):
 def image_type(image_type):
     return image_type
 
+@given('The chart verifier version value',target_fixture='verifier_version')
+def verifier_version(image_type):
+    """Get the version of the chart verifier tool used to produce and verify reports.
+
+    This output comes directly from the output of `chart-verifier version`, which
+    is the normalized to match what we would expect to find in a report.
+
+    Parameters:
+    image_type (string): How chart verifier will run. Options: tarball, podman, docker
+
+    Returns:
+    string: a normalized semantic version, like 0.0.0
+    """
+    if image_type == "tarball":
+        tarball_name = os.environ.get("VERIFIER_TARBALL_NAME")
+        print(f"\nRun version using tarbal {tarball_name}")
+        return run_version_tarball_image(tarball_name)
+    elif image_type == "podman":
+        image_tag = os.environ.get("PODMAN_IMAGE_TAG")
+        if not image_tag:
+            image_tag = "main"
+        image_name =  "quay.io/redhat-certification/chart-verifier"
+        print(f"\nRun version using podman image {image_name}:{image_tag}")
+        return run_version_podman_image(image_name,image_tag)
+    else: # Fallback to Docker.
+        image_tag  =  os.environ.get("VERIFIER_IMAGE_TAG")
+        if not image_tag:
+            image_tag = "main"
+        image_name =  "quay.io/redhat-certification/chart-verifier"
+        print(f"\nRun version using docker image {image_name}:{image_tag}")
+        return run_version_docker_image(image_name, image_tag)
+
 @when(parsers.parse("I run the chart-verifier verify command against the chart to generate a report"),target_fixture="run_verify")
 def run_verify(image_type, profile_type, chart_location):
     print(f"\nrun {image_type} verifier verify  with profile : {profile_type}, and chart: {chart_location}")
@@ -191,6 +223,48 @@ def run_report_docker_image(verifier_image_name,verifier_image_tag,profile_type,
 
     return output.decode("utf-8")
 
+def run_version_tarball_image(tarball_name):
+    tar = tarfile.open(tarball_name, "r:gz")
+    tar.extractall(path="./test_verifier")
+    out = subprocess.run(["./test_verifier/chart-verifier","version"],capture_output=True)
+    return normalize_version(out.stdout.decode("utf-8"))
+
+def normalize_version(version):
+    """Trim trailing newlines and leading v from semantic versions.
+
+    Parameters:
+    version (string): a semver string like v0.0.0\n
+
+    Returns:
+    string: a normalized semver like 0.0.0.
+    """
+    print(f'version input to normalize_version function is: {version}')
+    return version.rstrip().lstrip('v')
+
+def run_version_docker_image(verifier_image_name,verifier_image_tag):
+    """Run chart verifier's version command using the Docker image."""
+    verifier_image = f"{verifier_image_name}:{verifier_image_tag}"
+    os.environ["VERIFIER_IMAGE"] = verifier_image
+    try:
+        client = docker.from_env()
+        output = client.containers.run(verifier_image,"version",stdin_open=True,tty=True,stdout=True,remove=True)
+    except docker.errors.ContainerError as exc:
+        return f"FAIL: docker.errors.ContainerError: {exc.args}"
+    except docker.errors.ImageNotFound as exc:
+        return f"FAIL: docker.errors.ImageNotFound: {exc.args}"
+    except docker.errors.APIError as exc:
+        return f"FAIL: docker.errors.APIError: {exc.args}"
+
+    if not output:
+        return f"FAIL: did not receive output from the chart verifier version subcommand."
+
+    return normalize_version(output.decode("utf-8"))
+
+def run_version_podman_image(verifier_image_name,verifier_image_tag):
+    """Run chart verifier's version command in Podman."""
+    out = subprocess.run(["podman", "run", "--rm", f"{verifier_image_name}:{verifier_image_tag}", "version"], capture_output=True)
+    return normalize_version(out.stdout.decode("utf-8"))
+
 def run_verify_tarball_image(tarball_name,profile_type, chart_location,pgp_key_location=None):
     print(f"Run tarball image from {tarball_name}")
 
@@ -255,15 +329,15 @@ def run_report_podman_image(verifier_image_name,verifier_image_tag,profile_type,
     return out.stdout.decode("utf-8")
 
 @then("I should see the report-info from the report for the signed chart matching the expected report-info")
-def signed_chart_report(run_signed_verify, profile_type, report_info_location, image_type):
-    check_report(run_signed_verify, profile_type, report_info_location, image_type)
+def signed_chart_report(run_signed_verify, profile_type, report_info_location, image_type, verifier_version):
+    check_report(run_signed_verify, profile_type, report_info_location, image_type, verifier_version)
 
 
 @then("I should see the report-info from the generated report matching the expected report-info")
-def chart_report(run_verify, profile_type, report_info_location, image_type):
-    check_report(run_verify, profile_type, report_info_location, image_type)
+def chart_report(run_verify, profile_type, report_info_location, image_type, verifier_version):
+    check_report(run_verify, profile_type, report_info_location, image_type, verifier_version)
 
-def check_report(verify_result, profile_type, report_info_location, image_type):
+def check_report(verify_result, profile_type, report_info_location, image_type, verifier_version):
 
     if verify_result.startswith("FAIL"):
         pytest.fail(f'FAIL some tests failed: {verify_result}')
@@ -272,7 +346,13 @@ def check_report(verify_result, profile_type, report_info_location, image_type):
 
     report_data = yaml.load(verify_result, Loader=Loader)
 
+
     test_passed = True
+
+    report_verifier_version = report_data['metadata']['tool']['verifier-version']
+    if report_verifier_version != verifier_version:
+        print(f"FAIL: verifier-version found in report does not match tool version. Expected {verifier_version}, but report has {report_verifier_version}")
+        test_passed = False
 
     report_vendor_type = report_data["metadata"]["tool"]["profile"]["VendorType"]
     if report_vendor_type != profile_type:

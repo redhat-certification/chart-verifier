@@ -13,6 +13,7 @@ Feature: Chart verification
         Given I will provide a <location> of a <helm_chart>
         Given I will provide a <location> of an expected <report_info>
         Given I will use the chart verifier <image_type> image
+        Given The chart verifier version value
         When I run the chart-verifier verify command against the chart to generate a report
         Then I should see the report-info from the generated report matching the expected report-info
 
@@ -31,6 +32,7 @@ Feature: Chart verification
         Given I will provide a <location> of an expected <report_info>
         Given I will use the chart verifier <image_type> image
         Given I will provide a <location> of a <public_key> to verify the signature
+        Given The chart verifier version value
         When I run the chart-verifier verify command against the signed chart to generate a report
         Then I should see the report-info from the report for the signed chart matching the expected report-info
 
