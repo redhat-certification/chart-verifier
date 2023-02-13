@@ -98,6 +98,7 @@ func GetImageRegistries(repository string) ([]string, error) {
 			err = errors.New(fmt.Sprintf("Error getting repository %s : %v\n", repository, err))
 		} else {
 			if resp.StatusCode == 200 {
+				// #nosec G307
 				defer resp.Body.Close()
 				body, _ := ioutil.ReadAll(resp.Body)
 				var repositoriesBody RepositoriesBody
@@ -165,6 +166,7 @@ Loops:
 
 			if reqErr == nil {
 				if resp.StatusCode == 200 {
+					// #nosec G307
 					defer resp.Body.Close()
 					body, _ := ioutil.ReadAll(resp.Body)
 					var registriesBody RegistriesBody

@@ -500,6 +500,7 @@ func downloadFile(fileURL *url.URL, directory string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	// #nosec G307
 	defer resp.Body.Close()
 
 	_, err = io.Copy(file, resp.Body)
