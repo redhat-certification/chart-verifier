@@ -29,6 +29,7 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/mod/semver"
 	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/lint"
 	"helm.sh/helm/v3/pkg/lint/support"
 
@@ -215,6 +216,8 @@ func NotContainCRDs(opts *CheckOptions) (Result, error) {
 	if err != nil {
 		return NewResult(false, err.Error()), err
 	}
+
+	chartutil.ProcessDependencies(c, c.Values)
 
 	r := NewResult(true, ChartDoesNotContainCRDs)
 
