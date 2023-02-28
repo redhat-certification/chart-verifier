@@ -1,0 +1,6 @@
+dependencies:
+- name: testchart
+  repository: file://../../chart-0.1.0-v3.with-crd/testchart
+  version: 0.1.0
+digest: sha256:12a5104c556ef2707f843181c0a156359e6edab238ff70dfde80eda5c34ccc07
+generated: "2023-02-28T08:55:10.964621187+01:00"
