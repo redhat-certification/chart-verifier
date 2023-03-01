@@ -38,8 +38,11 @@ def build_image(image_id):
     try:
         image = client.images.build(path="./",tag=image_id)
         print("images:",image)
-    except docker.errors.BuildError:
+    except docker.errors.BuildError as buildError:
         print("docker build error")
+        for line in buildError.build_log:
+            if 'stream' in line:
+                logger.error(line['stream'].strip())
         return False
     except  docker.errors.APIError:
         print ("docker API error")
