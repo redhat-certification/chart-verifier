@@ -42,6 +42,7 @@ import (
 	"helm.sh/helm/v3/pkg/storage/driver"
 
 	"github.com/redhat-certification/chart-verifier/internal/helm/actions"
+	"github.com/redhat-certification/chart-verifier/internal/tool"
 )
 
 // loadChartFromRemote attempts to retrieve a Helm chart from the given remote url. Returns an error if the given url
@@ -193,12 +194,24 @@ func IsChartNotFound(err error) bool {
 	return ok
 }
 
-func getImageReferences(chartUri string, vals map[string]interface{}) ([]string, error) {
+func getImageReferences(chartUri string, vals map[string]interface{}, kubeVersionString string) ([]string, error) {
+
+	capabilities := chartutil.DefaultCapabilities
+
+	if kubeVersionString == "" {
+		kubeVersionString = tool.GetLatestKubeVersion()
+	}
+	kubeVersion, err := chartutil.ParseKubeVersion(kubeVersionString)
+	if err != nil {
+		return nil, err
+	}
+
+	capabilities.KubeVersion = *kubeVersion
 
 	actionConfig := &action.Configuration{
 		Releases:     nil,
 		KubeClient:   &kubefake.PrintingKubeClient{Out: ioutil.Discard},
-		Capabilities: chartutil.DefaultCapabilities,
+		Capabilities: capabilities,
 		Log:          func(format string, v ...interface{}) {},
 	}
 	mem := driver.NewMemory()

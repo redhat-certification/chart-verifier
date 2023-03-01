@@ -50,6 +50,9 @@ var output125 = version.Info{
 	Major: "1",
 	Minor: "25",
 }
+
+var latestVersion = output125
+
 var testsData []testData
 
 func TestOCVersions(t *testing.T) {
@@ -80,6 +83,12 @@ func TestOCVersions(t *testing.T) {
 		if ocVersion != testdata.OCVersion {
 			t.Error(fmt.Sprintf("version mismatch, expected: %s, got: %s", testdata.OCVersion, ocVersion))
 		}
+	}
+
+	latestKV := GetLatestKubeVersion()
+	expectedLatestKV := fmt.Sprintf("%s.%s.0", latestVersion.Major, latestVersion.Minor)
+	if latestKV != expectedLatestKV {
+		t.Error(fmt.Sprintf("latest kubversion mismatch, expected: %s, got: %s", expectedLatestKV, latestKV))
 	}
 }
 

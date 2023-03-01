@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Masterminds/semver"
 	"gopkg.in/yaml.v3"
 	"helm.sh/helm/v3/pkg/cli"
 	v1 "k8s.io/api/apps/v1"
@@ -28,6 +29,7 @@ var content embed.FS
 var (
 	kubeOpenShiftVersionMap map[string]string
 	listDeployments         = getDeploymentsList
+	latestKubeVersion       *semver.Version
 )
 
 type versionMap struct {
@@ -61,7 +63,12 @@ func init() {
 		return
 	}
 
+	latestKubeVersion, _ = semver.NewVersion("0.0")
 	for _, versionMap := range versions.Versions {
+		currentVersion, _ := semver.NewVersion(versionMap.KubeVersion)
+		if currentVersion.GreaterThan(latestKubeVersion) {
+			latestKubeVersion = currentVersion
+		}
 		kubeOpenShiftVersionMap[versionMap.KubeVersion] = versionMap.OcpVersion
 	}
 
@@ -175,4 +182,8 @@ func getDeploymentsList(k Kubectl, context context.Context, namespace string, se
 		return nil, err
 	}
 	return list.Items, err
+}
+
+func GetLatestKubeVersion() string {
+	return latestKubeVersion.String()
 }
