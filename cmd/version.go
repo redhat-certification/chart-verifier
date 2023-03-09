@@ -11,10 +11,10 @@ import (
 )
 
 func init() {
-	rootCmd.AddCommand(newVersionCmd())
+	rootCmd.AddCommand(NewVersionCmd())
 }
 
-func newVersionCmd() *cobra.Command {
+func NewVersionCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "version",
 		Short: "print the chart-verifier version information",
