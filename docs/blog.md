@@ -22,14 +22,14 @@ Then a cluster for the verifier to run tests on. There are lots of choices avail
 - Basic podman/docker commands and the output to expect 
 
 ### Specify chart values
-- using the varu=ious optin for setting chart values.
+- using the various option for setting chart values.
 
 ### Running a subset of tests
 - how to run a subset and why you might do it.
 
 ## Dealing with failures
 - basically point to troubleshooting on doc.
-- what it you can't fix them all
+- what if, you can't fix them all
   - exceptions
   - community  
     
