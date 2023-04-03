@@ -32,7 +32,6 @@ import (
 )
 
 func TestCertify(t *testing.T) {
-
 	t.Run("Should fail when no argument is given", func(t *testing.T) {
 		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
@@ -186,11 +185,9 @@ func TestCertify(t *testing.T) {
 		require.Equal(t, certificate.Results[0].Outcome, apiReport.PassOutcomeType)
 		require.Equal(t, certificate.Results[0].Type, apiChecks.MandatoryCheckType)
 		require.Equal(t, certificate.Results[0].Reason, checks.Helm3Reason)
-
 	})
 
 	t.Run("should see webCatalogOnly is true for -W flag and chart-uri is not set", func(t *testing.T) {
-
 		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
 		utils.CmdStdout = outBuf
@@ -201,7 +198,8 @@ func TestCertify(t *testing.T) {
 			"-e", "has-readme", // only consider a single check, perhaps more checks in the future
 			"../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
 			"-W",
-			"-E"})
+			"-E",
+		})
 
 		require.NoError(t, cmd.Execute())
 		require.NotEmpty(t, outBuf.String())
@@ -212,11 +210,9 @@ func TestCertify(t *testing.T) {
 		require.NoError(t, err)
 		require.True(t, certificate.Metadata.ToolMetadata.WebCatalogOnly)
 		require.True(t, certificate.Metadata.ToolMetadata.ChartUri == "N/A")
-
 	})
 
 	t.Run("should see webCatalogOnly is false if no -W flag and chart-uri is set", func(t *testing.T) {
-
 		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
 		utils.CmdStdout = outBuf
@@ -226,7 +222,8 @@ func TestCertify(t *testing.T) {
 		cmd.SetArgs([]string{
 			"-e", "has-readme", // only consider a single check, perhaps more checks in the future
 			"../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
-			"-E"})
+			"-E",
+		})
 
 		require.NoError(t, cmd.Execute())
 		require.NotEmpty(t, outBuf.String())
@@ -237,9 +234,7 @@ func TestCertify(t *testing.T) {
 		require.NoError(t, err)
 		require.False(t, certificate.Metadata.ToolMetadata.WebCatalogOnly)
 		require.True(t, certificate.Metadata.ToolMetadata.ChartUri == "../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz")
-
 	})
-
 }
 
 func TestBuildChecks(t *testing.T) {
@@ -298,13 +293,10 @@ func TestBuildChecks(t *testing.T) {
 		require.True(t, len(enabledSet) == 3)
 		require.Nil(t, disabledSet)
 	})
-
 }
 
 func TestSignatureCheck(t *testing.T) {
-
 	t.Run("Unsigned chart no key should pass", func(t *testing.T) {
-
 		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
 		utils.CmdStdout = outBuf
@@ -314,7 +306,8 @@ func TestSignatureCheck(t *testing.T) {
 		cmd.SetArgs([]string{
 			"-e", "signature-is-valid", // only consider a single check, perhaps more checks in the future
 			"../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
-			"-E"})
+			"-E",
+		})
 
 		require.NoError(t, cmd.Execute())
 		require.NotEmpty(t, outBuf.String())
@@ -325,7 +318,6 @@ func TestSignatureCheck(t *testing.T) {
 	})
 
 	t.Run("Unsigned chart with key should pass", func(t *testing.T) {
-
 		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
 		utils.CmdStdout = outBuf
@@ -336,7 +328,8 @@ func TestSignatureCheck(t *testing.T) {
 			"-e", "signature-is-valid", // only consider a single check, perhaps more checks in the future
 			"-k", "../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz.key",
 			"../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz",
-			"-E"})
+			"-E",
+		})
 
 		require.NoError(t, cmd.Execute())
 		require.NotEmpty(t, outBuf.String())
@@ -347,7 +340,6 @@ func TestSignatureCheck(t *testing.T) {
 	})
 
 	t.Run("Signed chart with key should pass", func(t *testing.T) {
-
 		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
 		utils.CmdStdout = outBuf
@@ -358,7 +350,8 @@ func TestSignatureCheck(t *testing.T) {
 			"-e", "signature-is-valid", // only consider a single check, perhaps more checks in the future
 			"-k", "../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz.key",
 			"../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz",
-			"-E"})
+			"-E",
+		})
 
 		require.NoError(t, cmd.Execute())
 		require.NotEmpty(t, outBuf.String())
@@ -369,7 +362,6 @@ func TestSignatureCheck(t *testing.T) {
 	})
 
 	t.Run("Signed chart with bad key should fail", func(t *testing.T) {
-
 		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
 		utils.CmdStdout = outBuf
@@ -380,7 +372,8 @@ func TestSignatureCheck(t *testing.T) {
 			"-e", "signature-is-valid", // only consider a single check, perhaps more checks in the future
 			"-k", "../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz.badkey",
 			"../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz",
-			"-E"})
+			"-E",
+		})
 
 		require.NoError(t, cmd.Execute())
 		require.NotEmpty(t, outBuf.String())
@@ -391,7 +384,6 @@ func TestSignatureCheck(t *testing.T) {
 	})
 
 	t.Run("Signed chart with no key should skip", func(t *testing.T) {
-
 		cmd := NewVerifyCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
 		utils.CmdStdout = outBuf
@@ -401,7 +393,8 @@ func TestSignatureCheck(t *testing.T) {
 		cmd.SetArgs([]string{
 			"-e", "signature-is-valid",
 			"https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz?raw=true",
-			"-E"})
+			"-E",
+		})
 
 		require.NoError(t, cmd.Execute())
 		require.NotEmpty(t, outBuf.String())
@@ -410,5 +403,4 @@ func TestSignatureCheck(t *testing.T) {
 		require.Contains(t, outBuf.String(), checks.ChartSigned)
 		require.Contains(t, outBuf.String(), checks.SignatureNoKey)
 	})
-
 }

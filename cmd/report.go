@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/utils"
 	apireport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
@@ -27,7 +28,6 @@ var skipDigestCheck bool
 
 // NewReportCmd creates a command that sanity checks report.
 func NewReportCmd(config *viper.Viper) *cobra.Command {
-
 	// verifyOpts contains this specific command options.
 	reportOpts := &reportOptions{}
 
@@ -37,7 +37,6 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 		Args:  cobra.ExactArgs(2),
 		Short: "Provides information from a report",
 		RunE: func(cmd *cobra.Command, args []string) error {
-
 			reportName := ""
 			reportFormat := apireportsummary.JsonReport
 			if reportToFile {

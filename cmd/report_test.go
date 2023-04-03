@@ -17,7 +17,6 @@ import (
 )
 
 func TestReport(t *testing.T) {
-
 	var expectedAnnotations []apireportsummary.Annotation
 	annotation1 := apireportsummary.Annotation{Name: fmt.Sprintf("%s/%s", apireportsummary.DefaultAnnotationsPrefix, apireportsummary.DigestsAnnotationName), Value: "sha256:0c1c44def5c5de45212d90396062e18e0311b07789f477268fbf233c1783dbd0"}
 	annotation2 := apireportsummary.Annotation{Name: fmt.Sprintf("%s/%s", apireportsummary.DefaultAnnotationsPrefix, apireportsummary.TestedOCPVersionAnnotationName), Value: "4.7.8"}
@@ -94,7 +93,6 @@ func TestReport(t *testing.T) {
 		testReport := apireportsummary.ReportSummary{}
 		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
 		require.True(t, compareAnnotations(expectedAnnotations, testReport.AnnotationsReport))
-
 	})
 
 	t.Run("Should pass for subcommand results", func(t *testing.T) {
@@ -222,7 +220,6 @@ func TestReport(t *testing.T) {
 
 		require.True(t, compareMetadata(expectedMetadata, testReport.MetadataReport))
 		require.True(t, compareResults(expectedCommunityResults, testReport.ResultsReport))
-
 	})
 
 	t.Run("Should pass for invalid profile version", func(t *testing.T) {
@@ -243,7 +240,6 @@ func TestReport(t *testing.T) {
 		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
 
 		require.True(t, compareMetadata(expectedMetadata, testReport.MetadataReport))
-
 	})
 
 	t.Run("Should pass for skip digest check", func(t *testing.T) {
@@ -264,7 +260,6 @@ func TestReport(t *testing.T) {
 		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
 
 		require.True(t, compareMetadata(expectedMetadata, testReport.MetadataReport))
-
 	})
 
 	t.Run("Should error with bad digest check", func(t *testing.T) {
@@ -280,9 +275,7 @@ func TestReport(t *testing.T) {
 		})
 
 		require.Error(t, cmd.Execute())
-
 	})
-
 }
 
 func compareMetadata(expected *apireportsummary.MetadataReport, result *apireportsummary.MetadataReport) bool {
