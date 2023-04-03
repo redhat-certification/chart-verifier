@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"strings"
 
@@ -82,8 +82,14 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 				return errors.New(fmt.Sprintf("report path %s: error opening file  %v", reportArg, openErr))
 			}
 
-			reportBytes, readErr := ioutil.ReadAll(reportFile)
+			reportBytes, readErr := io.ReadAll(reportFile)
 			if readErr != nil {
+				//nolint:errcheck // TODO(komish): The linter indicates that we've not done anything with
+				// this error, which is correct. Perhaps the bigger issue is that this uses an archived API
+				// at https://github.com/pkg/errors. We should consider resolving both, as I'm not sure what we'd expect
+				// for this error (as in, where it should be presented). given that this logic just seems to wrap the input error.
+				//
+				// For now, ignoring the linter. https://github.com/redhat-certification/chart-verifier/issues/321
 				errors.New(fmt.Sprintf("report path %s: error reading file  %v", reportArg, readErr))
 			}
 

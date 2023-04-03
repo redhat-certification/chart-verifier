@@ -150,7 +150,7 @@ func TestCertify(t *testing.T) {
 		// attempts to deserialize the command's output, expecting a json string
 		certificate := apiReport.Report{}
 
-		err := json.Unmarshal([]byte(outBuf.String()), &certificate)
+		err := json.Unmarshal(outBuf.Bytes(), &certificate)
 		require.NoError(t, err)
 		require.True(t, len(certificate.Results) == 1, "Expected only 1 result")
 		require.Equal(t, certificate.Results[0].Check, apiChecks.CheckName("v1.0/is-helm-v3"))
@@ -178,7 +178,7 @@ func TestCertify(t *testing.T) {
 
 		// attempts to deserialize the command's output, expecting a json string
 		certificate := apiReport.Report{}
-		err := yaml.Unmarshal([]byte(outBuf.String()), &certificate)
+		err := yaml.Unmarshal(outBuf.Bytes(), &certificate)
 		require.NoError(t, err)
 		require.True(t, len(certificate.Results) == 1, "Expected only 1 result")
 		require.Equal(t, certificate.Results[0].Check, apiChecks.CheckName("v1.0/is-helm-v3"))
@@ -206,7 +206,7 @@ func TestCertify(t *testing.T) {
 
 		// attempts to deserialize the command's output, expecting a json string
 		certificate := apiReport.Report{}
-		err := yaml.Unmarshal([]byte(outBuf.String()), &certificate)
+		err := yaml.Unmarshal(outBuf.Bytes(), &certificate)
 		require.NoError(t, err)
 		require.True(t, certificate.Metadata.ToolMetadata.WebCatalogOnly)
 		require.True(t, certificate.Metadata.ToolMetadata.ChartUri == "N/A")
@@ -230,7 +230,7 @@ func TestCertify(t *testing.T) {
 
 		// attempts to deserialize the command's output, expecting a json string
 		certificate := apiReport.Report{}
-		err := yaml.Unmarshal([]byte(outBuf.String()), &certificate)
+		err := yaml.Unmarshal(outBuf.Bytes(), &certificate)
 		require.NoError(t, err)
 		require.False(t, certificate.Metadata.ToolMetadata.WebCatalogOnly)
 		require.True(t, certificate.Metadata.ToolMetadata.ChartUri == "../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz")

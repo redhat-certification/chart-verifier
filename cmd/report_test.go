@@ -91,7 +91,7 @@ func TestReport(t *testing.T) {
 		require.NoError(t, cmd.Execute())
 
 		testReport := apireportsummary.ReportSummary{}
-		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
+		require.NoError(t, json.Unmarshal(outBuf.Bytes(), &testReport))
 		require.True(t, compareAnnotations(expectedAnnotations, testReport.AnnotationsReport))
 	})
 
@@ -109,7 +109,7 @@ func TestReport(t *testing.T) {
 		require.NoError(t, cmd.Execute())
 
 		testReport := apireportsummary.ReportSummary{}
-		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
+		require.NoError(t, json.Unmarshal(outBuf.Bytes(), &testReport))
 		require.True(t, compareResults(expectedResults, testReport.ResultsReport))
 	})
 
@@ -127,7 +127,7 @@ func TestReport(t *testing.T) {
 		require.NoError(t, cmd.Execute())
 
 		testReport := apireportsummary.ReportSummary{}
-		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
+		require.NoError(t, json.Unmarshal(outBuf.Bytes(), &testReport))
 		require.True(t, compareMetadata(expectedMetadata, testReport.MetadataReport))
 	})
 
@@ -145,7 +145,7 @@ func TestReport(t *testing.T) {
 		require.NoError(t, cmd.Execute())
 
 		testReport := apireportsummary.ReportSummary{}
-		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
+		require.NoError(t, json.Unmarshal(outBuf.Bytes(), &testReport))
 		require.True(t, compareDigests(expectedDigests, testReport.DigestsReport))
 	})
 
@@ -163,7 +163,7 @@ func TestReport(t *testing.T) {
 		require.NoError(t, cmd.Execute())
 
 		testReport := apireportsummary.ReportSummary{}
-		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
+		require.NoError(t, json.Unmarshal(outBuf.Bytes(), &testReport))
 		require.True(t, compareAnnotations(expectedAnnotations, testReport.AnnotationsReport))
 		require.True(t, compareDigests(expectedDigests, testReport.DigestsReport))
 		require.True(t, compareMetadata(expectedMetadata, testReport.MetadataReport))
@@ -193,7 +193,7 @@ func TestReport(t *testing.T) {
 		expectedPrefixAnnotations = append(expectedPrefixAnnotations, annotationP1, annotationP2, annotationP3, annotationP4)
 
 		testReport := apireportsummary.ReportSummary{}
-		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
+		require.NoError(t, json.Unmarshal(outBuf.Bytes(), &testReport))
 		require.True(t, compareAnnotations(expectedPrefixAnnotations, testReport.AnnotationsReport))
 	})
 
@@ -216,7 +216,7 @@ func TestReport(t *testing.T) {
 		expectedCommunityResults.Failed = "0"
 
 		testReport := apireportsummary.ReportSummary{}
-		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
+		require.NoError(t, json.Unmarshal(outBuf.Bytes(), &testReport))
 
 		require.True(t, compareMetadata(expectedMetadata, testReport.MetadataReport))
 		require.True(t, compareResults(expectedCommunityResults, testReport.ResultsReport))
@@ -237,7 +237,7 @@ func TestReport(t *testing.T) {
 		require.NoError(t, cmd.Execute())
 
 		testReport := apireportsummary.ReportSummary{}
-		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
+		require.NoError(t, json.Unmarshal(outBuf.Bytes(), &testReport))
 
 		require.True(t, compareMetadata(expectedMetadata, testReport.MetadataReport))
 	})
@@ -257,7 +257,7 @@ func TestReport(t *testing.T) {
 		require.NoError(t, cmd.Execute())
 
 		testReport := apireportsummary.ReportSummary{}
-		require.NoError(t, json.Unmarshal([]byte(outBuf.String()), &testReport))
+		require.NoError(t, json.Unmarshal(outBuf.Bytes(), &testReport))
 
 		require.True(t, compareMetadata(expectedMetadata, testReport.MetadataReport))
 	})
@@ -281,27 +281,27 @@ func TestReport(t *testing.T) {
 func compareMetadata(expected *apireportsummary.MetadataReport, result *apireportsummary.MetadataReport) bool {
 	outcome := true
 	if strings.Compare(expected.ProfileVersion, result.ProfileVersion) != 0 {
-		fmt.Println(fmt.Sprintf("profile version mistmatch %s : %s", expected.ProfileVersion, result.ProfileVersion))
+		fmt.Printf("profile version mistmatch %s : %s\n", expected.ProfileVersion, result.ProfileVersion)
 		outcome = false
 	}
 	if expected.ProfileVendorType != result.ProfileVendorType {
-		fmt.Println(fmt.Sprintf("profile vendortype mistmatch %s : %s", expected.ProfileVendorType, result.ProfileVendorType))
+		fmt.Printf("profile vendortype mistmatch %s : %s\n", expected.ProfileVendorType, result.ProfileVendorType)
 		outcome = false
 	}
 	if expected.ChartUri != result.ChartUri {
-		fmt.Println(fmt.Sprintf("chart uri mistmatch %s : %s", expected.ChartUri, result.ChartUri))
+		fmt.Printf("chart uri mistmatch %s : %s\n", expected.ChartUri, result.ChartUri)
 		outcome = false
 	}
 	if expected.Chart.Name != result.Chart.Name {
-		fmt.Println(fmt.Sprintf("chart name mistmatch %s : %s", expected.Chart.Name, result.Chart.Name))
+		fmt.Printf("chart name mistmatch %s : %s\n", expected.Chart.Name, result.Chart.Name)
 		outcome = false
 	}
 	if expected.Chart.Version != result.Chart.Version {
-		fmt.Println(fmt.Sprintf("chart version mistmatch %s : %s", expected.Chart.Version, result.Chart.Version))
+		fmt.Printf("chart version mistmatch %s : %s\n", expected.Chart.Version, result.Chart.Version)
 		outcome = false
 	}
 	if expected.WebCatalogOnly != result.WebCatalogOnly {
-		fmt.Println(fmt.Sprintf("web catalog only mistmatch %t : %t", expected.WebCatalogOnly, result.WebCatalogOnly))
+		fmt.Printf("web catalog only mistmatch %t : %t\n", expected.WebCatalogOnly, result.WebCatalogOnly)
 		outcome = false
 	}
 
@@ -311,11 +311,11 @@ func compareMetadata(expected *apireportsummary.MetadataReport, result *apirepor
 func compareDigests(expected *apireportsummary.DigestReport, result *apireportsummary.DigestReport) bool {
 	outcome := true
 	if strings.Compare(expected.PackageDigest, result.PackageDigest) != 0 {
-		fmt.Println(fmt.Sprintf("package digest mistmatch %s : %s", expected.PackageDigest, result.PackageDigest))
+		fmt.Printf("package digest mistmatch %s : %s\n", expected.PackageDigest, result.PackageDigest)
 		outcome = false
 	}
 	if strings.Compare(expected.ChartDigest, result.ChartDigest) != 0 {
-		fmt.Println(fmt.Sprintf("chart digest mistmatch %s : %s", expected.ChartDigest, result.ChartDigest))
+		fmt.Printf("chart digest mistmatch %s : %s\n", expected.ChartDigest, result.ChartDigest)
 		outcome = false
 	}
 	return outcome
@@ -324,19 +324,19 @@ func compareDigests(expected *apireportsummary.DigestReport, result *apireportsu
 func compareResults(expected *apireportsummary.ResultsReport, result *apireportsummary.ResultsReport) bool {
 	outcome := true
 	if strings.Compare(expected.Passed, result.Passed) != 0 {
-		fmt.Println(fmt.Sprintf("results passed mistmatch %s : %s", expected.Passed, result.Passed))
+		fmt.Printf("results passed mistmatch %s : %s\n", expected.Passed, result.Passed)
 		outcome = false
 	}
 	if strings.Compare(expected.Failed, result.Failed) != 0 {
-		fmt.Println(fmt.Sprintf("results failed mistmatch %s : %s", expected.Failed, result.Failed))
+		fmt.Printf("results failed mistmatch %s : %s\n", expected.Failed, result.Failed)
 		outcome = false
 	}
 	numMessages, err := strconv.Atoi(result.Failed)
 	if err != nil {
-		fmt.Println(fmt.Sprintf("results failed cannot be converted to int  %s : %v", result.Failed, err))
+		fmt.Printf("results failed cannot be converted to int  %s : %v\n", result.Failed, err)
 		outcome = false
 	} else if len(result.Messages) != numMessages {
-		fmt.Println(fmt.Sprintf("results number of fails and number of messages mismatch %d : %d", len(result.Messages), numMessages))
+		fmt.Printf("results number of fails and number of messages mismatch %d : %d\n", len(result.Messages), numMessages)
 		outcome = false
 	}
 	return outcome
@@ -345,7 +345,7 @@ func compareResults(expected *apireportsummary.ResultsReport, result *apireports
 func compareAnnotations(expected []apireportsummary.Annotation, result []apireportsummary.Annotation) bool {
 	outcome := true
 	if len(expected) != len(result) {
-		fmt.Println(fmt.Sprintf("num of annotation mismtatch %d : %d", len(expected), len(result)))
+		fmt.Printf("num of annotation mismtatch %d : %d\n", len(expected), len(result))
 		outcome = false
 	}
 	for _, expectedAnnotation := range expected {
@@ -354,13 +354,13 @@ func compareAnnotations(expected []apireportsummary.Annotation, result []apirepo
 			if strings.Compare(expectedAnnotation.Name, resultAnnotation.Name) == 0 {
 				found = true
 				if strings.Compare(expectedAnnotation.Value, resultAnnotation.Value) != 0 {
-					fmt.Println(fmt.Sprintf("%s annotation mismtatch %s : %s", expectedAnnotation.Name, expectedAnnotation.Value, resultAnnotation.Value))
+					fmt.Printf("%s annotation mismtatch %s : %s\n", expectedAnnotation.Name, expectedAnnotation.Value, resultAnnotation.Value)
 					outcome = false
 				}
 			}
 		}
 		if !found {
-			fmt.Println(fmt.Sprintf("%s annotation not found in results", expectedAnnotation.Name))
+			fmt.Printf("%s annotation not found in results\n", expectedAnnotation.Name)
 			outcome = false
 		}
 	}

@@ -52,6 +52,9 @@ var (
 	disabledChecksFlag []string
 	// outputFormatFlag contains the output format the user has specified: default, yaml or json.
 	outputFormatFlag string
+	//nolint:unused // TODO(komish): The description of this would imply that it's important. We generally
+	// allow users to set overrides using the --set flag. The compiler says it's unused, so something doesn't
+	// quite align. For now, we'll ignore this.
 	// setOverridesFlag contains the overrides the user has specified through the --set flag.
 	setOverridesFlag []string
 	// openshiftVersionFlag set the value of `certifiedOpenShiftVersions` in the report
