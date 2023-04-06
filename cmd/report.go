@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"os"
+	"strings"
+
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"io/ioutil"
-	"os"
-	"strings"
 
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/utils"
 	apireport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
@@ -27,7 +28,6 @@ var skipDigestCheck bool
 
 // NewReportCmd creates a command that sanity checks report.
 func NewReportCmd(config *viper.Viper) *cobra.Command {
-
 	// verifyOpts contains this specific command options.
 	reportOpts := &reportOptions{}
 
@@ -37,7 +37,6 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 		Args:  cobra.ExactArgs(2),
 		Short: "Provides information from a report",
 		RunE: func(cmd *cobra.Command, args []string) error {
-
 			reportName := ""
 			reportFormat := apireportsummary.JsonReport
 			if reportToFile {
@@ -83,8 +82,14 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 				return errors.New(fmt.Sprintf("report path %s: error opening file  %v", reportArg, openErr))
 			}
 
-			reportBytes, readErr := ioutil.ReadAll(reportFile)
+			reportBytes, readErr := io.ReadAll(reportFile)
 			if readErr != nil {
+				//nolint:errcheck // TODO(komish): The linter indicates that we've not done anything with
+				// this error, which is correct. Perhaps the bigger issue is that this uses an archived API
+				// at https://github.com/pkg/errors. We should consider resolving both, as I'm not sure what we'd expect
+				// for this error (as in, where it should be presented). given that this logic just seems to wrap the input error.
+				//
+				// For now, ignoring the linter. https://github.com/redhat-certification/chart-verifier/issues/321
 				errors.New(fmt.Sprintf("report path %s: error reading file  %v", reportArg, readErr))
 			}
 

@@ -52,6 +52,9 @@ var (
 	disabledChecksFlag []string
 	// outputFormatFlag contains the output format the user has specified: default, yaml or json.
 	outputFormatFlag string
+	//nolint:unused // TODO(komish): The description of this would imply that it's important. We generally
+	// allow users to set overrides using the --set flag. The compiler says it's unused, so something doesn't
+	// quite align. For now, we'll ignore this.
 	// setOverridesFlag contains the overrides the user has specified through the --set flag.
 	setOverridesFlag []string
 	// openshiftVersionFlag set the value of `certifiedOpenShiftVersions` in the report
@@ -62,16 +65,15 @@ var (
 	suppressErrorLog bool
 	// distribution method is web-catalog-only.
 	webCatalogOnly bool
-	//client timeout
+	// client timeout
 	clientTimeout time.Duration
 	// pgp public key file
 	pgpPublicKeyFile string
-	//helm install timeout
+	// helm install timeout
 	helmInstallTimeout time.Duration
 )
 
 func buildChecks(enabled []string, unEnabled []string) ([]apiChecks.CheckName, []apiChecks.CheckName, error) {
-
 	var enabledChecks []apiChecks.CheckName
 	var unEnabledChecks []apiChecks.CheckName
 	var convertErr error
@@ -89,7 +91,6 @@ func buildChecks(enabled []string, unEnabled []string) ([]apiChecks.CheckName, [
 		}
 	}
 	return enabledChecks, unEnabledChecks, nil
-
 }
 
 func convertChecks(checks []string) ([]apiChecks.CheckName, error) {
@@ -107,7 +108,6 @@ func convertChecks(checks []string) ([]apiChecks.CheckName, error) {
 		}
 	}
 	return apiCheckSet, nil
-
 }
 
 func convertToMap(values []string) map[string]interface{} {
@@ -129,7 +129,6 @@ type verifyOptions struct {
 
 // NewVerifyCmd creates ...
 func NewVerifyCmd(config *viper.Viper) *cobra.Command {
-
 	// opts contains command line options extracted from the environment.
 	opts := &values.Options{}
 
@@ -141,7 +140,6 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		Short: "Verifies a Helm chart by checking some of its characteristics",
 		RunE: func(cmd *cobra.Command, args []string) error {
-
 			reportFormat := apireport.YamlReport
 			if outputFormatFlag == "json" {
 				reportFormat = apireport.JsonReport
