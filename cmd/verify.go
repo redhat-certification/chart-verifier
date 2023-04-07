@@ -142,7 +142,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			reportFormat := apireport.YamlReport
 			if outputFormatFlag == "json" {
-				reportFormat = apireport.JsonReport
+				reportFormat = apireport.JSONReport
 			}
 
 			reportName := ""
