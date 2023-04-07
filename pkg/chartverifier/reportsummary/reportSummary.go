@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 	"golang.org/x/mod/semver"
 	"gopkg.in/yaml.v3"
-	"strings"
 )
 
 const (
@@ -78,7 +79,6 @@ func (r *ReportSummary) SetBoolean(key BooleanKey, value bool) APIReportSummary 
 }
 
 func (r *ReportSummary) GetContent(summary SummaryType, format SummaryFormat) (string, error) {
-
 	generateSummary := (r.MetadataReport == nil) || (r.ResultsReport == nil) || (r.AnnotationsReport == nil) || (r.DigestsReport == nil)
 
 	if generateSummary {
@@ -136,16 +136,13 @@ func (r *ReportSummary) GetContent(summary SummaryType, format SummaryFormat) (s
 }
 
 func (r *ReportSummary) addAll() {
-
 	r.addAnnotations()
 	r.addDigests()
 	r.addResults()
 	r.addMetadata()
-
 }
 
 func (r *ReportSummary) addAnnotations() {
-
 	anotationsPrefix := DefaultAnnotationsPrefix
 
 	if configAnnotationsPrefix, ok := r.options.values[AnnotationsPrefixConfigName]; ok {
@@ -196,33 +193,27 @@ func (r *ReportSummary) addAnnotations() {
 		annotation.Value = value
 		r.AnnotationsReport = append(r.AnnotationsReport, annotation)
 	}
-
 }
 
 func (r *ReportSummary) addDigests() {
-
 	r.DigestsReport = &DigestReport{}
 	r.DigestsReport.ChartDigest = r.options.report.Metadata.ToolMetadata.Digests.Chart
 	r.DigestsReport.PackageDigest = r.options.report.Metadata.ToolMetadata.Digests.Package
 	if len(r.options.report.Metadata.ToolMetadata.Digests.PublicKey) > 0 {
 		r.DigestsReport.PublicKeyDigest = r.options.report.Metadata.ToolMetadata.Digests.PublicKey
 	}
-
 }
 
 func (r *ReportSummary) addMetadata() {
-
 	r.MetadataReport = &MetadataReport{}
 	r.MetadataReport.ProfileVendorType = profiles.VendorType(r.options.report.Metadata.ToolMetadata.Profile.VendorType)
 	r.MetadataReport.ProfileVersion = r.options.report.Metadata.ToolMetadata.Profile.Version
 	r.MetadataReport.ChartUri = r.options.report.Metadata.ToolMetadata.ChartUri
 	r.MetadataReport.Chart = r.options.report.Metadata.ChartData
 	r.MetadataReport.WebCatalogOnly = r.options.report.Metadata.ToolMetadata.ProviderDelivery || r.options.report.Metadata.ToolMetadata.WebCatalogOnly
-
 }
 
 func (r *ReportSummary) addResults() {
-
 	profileVendorType := r.options.report.Metadata.ToolMetadata.Profile.VendorType
 	profileVersion := r.options.report.Metadata.ToolMetadata.Profile.Version
 
@@ -278,11 +269,9 @@ func (r *ReportSummary) addResults() {
 	r.ResultsReport.Passed = fmt.Sprintf("%d", passed)
 	r.ResultsReport.Failed = fmt.Sprintf("%d", failed)
 	r.ResultsReport.Messages = messages
-
 }
 
 func (r *ReportSummary) checkReportDigest() error {
-
 	toolMetadata := r.options.report.Metadata.ToolMetadata
 	reportVersion := fmt.Sprintf("v%s", toolMetadata.Version)
 
@@ -303,5 +292,4 @@ func (r *ReportSummary) checkReportDigest() error {
 
 	}
 	return nil
-
 }

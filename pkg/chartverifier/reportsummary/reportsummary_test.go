@@ -14,7 +14,6 @@ import (
 )
 
 func TestAddStringReport(t *testing.T) {
-
 	chartUri := "https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.9/psql-service-0.1.9.tgz?raw=true"
 	yamlFileReport := "test-reports/report.yaml"
 	jsonFileReport := "test-reports/report.json"
@@ -33,11 +32,9 @@ func TestAddStringReport(t *testing.T) {
 	require.NoError(t, loadErr)
 	reportSummary = NewReportSummary().SetReport(report)
 	checkReportSummaries(reportSummary, chartUri, t)
-
 }
 
 func TestBadDigestReport(t *testing.T) {
-
 	yamlFileReport := "test-reports/baddigest/report.yaml"
 	jsonFileReport := "test-reports/baddigest/report.json"
 
@@ -57,11 +54,9 @@ func TestBadDigestReport(t *testing.T) {
 	_, summaryErr = NewReportSummary().SetReport(report).GetContent(AllSummary, JsonReport)
 	require.Error(t, summaryErr)
 	require.Contains(t, fmt.Sprintf("%v", summaryErr), "digest in report did not match report content")
-
 }
 
 func TestSkipBadDigestReport(t *testing.T) {
-
 	chartUri := "https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.9/psql-service-0.1.9.tgz?raw=true"
 	yamlFileReport := "test-reports/baddigest/report.yaml"
 	jsonFileReport := "test-reports/baddigest/report.json"
@@ -83,7 +78,6 @@ func TestSkipBadDigestReport(t *testing.T) {
 }
 
 func TestMissingDigestReport(t *testing.T) {
-
 	yamlFileReport := "test-reports/missingdigest/report.yaml"
 	jsonFileReport := "test-reports/missingdigest/report.json"
 
@@ -103,11 +97,9 @@ func TestMissingDigestReport(t *testing.T) {
 	_, summaryErr = NewReportSummary().SetReport(report).GetContent(AllSummary, JsonReport)
 	require.Error(t, summaryErr)
 	require.Contains(t, fmt.Sprintf("%v", summaryErr), "Report does not contain expected report digest.")
-
 }
 
 func TestPreDigestReport(t *testing.T) {
-
 	chartUri := "https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.9/psql-service-0.1.9.tgz?raw=true"
 	yamlFileReport := "test-reports/predigest/report.yaml"
 	jsonFileReport := "test-reports/predigest/report.json"
@@ -126,11 +118,9 @@ func TestPreDigestReport(t *testing.T) {
 	require.NoError(t, loadErr)
 	reportSummary = NewReportSummary().SetReport(report)
 	checkReportSummaries(reportSummary, chartUri, t)
-
 }
 
 func TestProviderDeliveryReport(t *testing.T) {
-
 	chartUri := "N/A"
 	yamlFileReport := "test-reports/providerdelivery/report.yaml"
 	jsonFileReport := "test-reports/providerdelivery/report.json"
@@ -149,11 +139,9 @@ func TestProviderDeliveryReport(t *testing.T) {
 	require.NoError(t, loadErr)
 	reportSummary = NewReportSummary().SetReport(report)
 	checkReportSummaries(reportSummary, chartUri, t)
-
 }
 
 func TestAddUrlReport(t *testing.T) {
-
 	yamlUrlReport := "https://github.com/redhat-certification/chart-verifier/blob/main/cmd/test/report.yaml?raw=true"
 	url, loadUrlErr := url.Parse(yamlUrlReport)
 	require.NoError(t, loadUrlErr)
@@ -164,7 +152,6 @@ func TestAddUrlReport(t *testing.T) {
 	reportSummary := NewReportSummary().SetReport(report)
 
 	checkReportSummaries(reportSummary, chartUri, t)
-
 }
 
 func checkReportSummaries(summary APIReportSummary, chartUri string, t *testing.T) {
@@ -173,7 +160,6 @@ func checkReportSummaries(summary APIReportSummary, chartUri string, t *testing.
 }
 
 func checkReportSummariesFormat(format SummaryFormat, summary APIReportSummary, chartUri string, t *testing.T) {
-
 	reportSummary, reportSummaryErr := summary.GetContent(AllSummary, format)
 	require.NoError(t, reportSummaryErr)
 	checkSummaryAll(format, reportSummary, chartUri, t)
@@ -193,7 +179,6 @@ func checkReportSummariesFormat(format SummaryFormat, summary APIReportSummary, 
 	reportSummary, reportSummaryErr = summary.GetContent(ResultsSummary, format)
 	require.NoError(t, reportSummaryErr)
 	checkSummaryResults(false, format, reportSummary, chartUri, t)
-
 }
 
 func checkSummaryAll(format SummaryFormat, reportSummary string, chartUri string, t *testing.T) {
@@ -201,7 +186,6 @@ func checkSummaryAll(format SummaryFormat, reportSummary string, chartUri string
 	checkSummaryDigests(true, format, reportSummary, chartUri, t)
 	checkSummaryMetadata(true, format, reportSummary, chartUri, t)
 	checkSummaryResults(true, format, reportSummary, chartUri, t)
-
 }
 
 func checkSummaryResults(fullReport bool, format SummaryFormat, reportSummary string, chartUri string, t *testing.T) {

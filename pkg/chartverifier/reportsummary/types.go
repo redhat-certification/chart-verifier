@@ -6,9 +6,11 @@ import (
 	helmchart "helm.sh/helm/v3/pkg/chart"
 )
 
-type SummaryType string
-type SummaryFormat string
-type BooleanKey string
+type (
+	SummaryType   string
+	SummaryFormat string
+	BooleanKey    string
+)
 
 type ReportSummary struct {
 	options           *reportOptions
