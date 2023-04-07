@@ -38,7 +38,7 @@ func runVerifier() error {
 	reportSummary, summmaryErr := reportsummary.NewReportSummary().
 		SetReport(verifier.GetReport()).
 		SetValues(values).
-		GetContent(reportsummary.AllSummary, reportsummary.JsonReport)
+		GetContent(reportsummary.AllSummary, reportsummary.JSONReport)
 
 	if summmaryErr != nil {
 		return summmaryErr

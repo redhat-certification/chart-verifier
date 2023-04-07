@@ -186,8 +186,8 @@ func TestSignedChart(t *testing.T) {
 }
 
 func checkReportSummaries(summary apireportsummary.APIReportSummary, chartURI string, t *testing.T) {
-	checkReportSummariesFormat(apireportsummary.YamlReport, summary, chartURI, t)
-	checkReportSummariesFormat(apireportsummary.JsonReport, summary, chartURI, t)
+	checkReportSummariesFormat(apireportsummary.YAMLReport, summary, chartURI, t)
+	checkReportSummariesFormat(apireportsummary.JSONReport, summary, chartURI, t)
 }
 
 func checkReportSummariesFormat(format apireportsummary.SummaryFormat, summary apireportsummary.APIReportSummary, chartURI string, t *testing.T) {
@@ -220,7 +220,7 @@ func checkSummaryAll(format apireportsummary.SummaryFormat, reportSummary string
 }
 
 func checkSummaryResults(fullReport bool, format apireportsummary.SummaryFormat, reportSummary string, chartURI string, t *testing.T) {
-	if format == apireportsummary.JsonReport {
+	if format == apireportsummary.JSONReport {
 		if !fullReport {
 			require.NotContains(t, reportSummary, "\"annotations\":[{")
 			require.NotContains(t, reportSummary, "\"digests\":{")
@@ -247,7 +247,7 @@ func checkSummaryResults(fullReport bool, format apireportsummary.SummaryFormat,
 }
 
 func checkSummaryAnnotations(fullReport bool, format apireportsummary.SummaryFormat, reportSummary string, chartURI string, t *testing.T) {
-	if format == apireportsummary.JsonReport {
+	if format == apireportsummary.JSONReport {
 		if !fullReport {
 			require.NotContains(t, reportSummary, "\"digests\":{")
 			require.NotContains(t, reportSummary, "\"metadata\":{")
@@ -275,7 +275,7 @@ func checkSummaryAnnotations(fullReport bool, format apireportsummary.SummaryFor
 }
 
 func checkSummaryMetadata(fullReport bool, format apireportsummary.SummaryFormat, reportSummary string, chartURI string, t *testing.T) {
-	if format == apireportsummary.JsonReport {
+	if format == apireportsummary.JSONReport {
 		if !fullReport {
 			require.NotContains(t, reportSummary, "\"annotations\":[{")
 			require.NotContains(t, reportSummary, "\"digests\":{")
@@ -302,7 +302,7 @@ func checkSummaryMetadata(fullReport bool, format apireportsummary.SummaryFormat
 }
 
 func checkSummaryDigests(fullReport bool, format apireportsummary.SummaryFormat, reportSummary string, chartURI string, t *testing.T) {
-	if format == apireportsummary.JsonReport {
+	if format == apireportsummary.JSONReport {
 		if !fullReport {
 			require.NotContains(t, reportSummary, "\"annotations\":[{")
 			require.NotContains(t, reportSummary, "\"metadata\":{")

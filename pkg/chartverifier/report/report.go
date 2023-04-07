@@ -166,7 +166,7 @@ func (r *Report) checkReportDigest() error {
 	if semver.Compare(reportVersion, ReportShaVersion) >= 0 {
 		digestFromReport := r.Metadata.ToolMetadata.ReportDigest
 		if digestFromReport == "" {
-			return errors.New("Report does not contain expected report digest. ")
+			return errors.New("report does not contain expected report digest")
 		}
 
 		calculatedDigest, err := r.GetReportDigest()

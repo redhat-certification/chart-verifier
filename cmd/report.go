@@ -38,13 +38,13 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 		Short: "Provides information from a report",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			reportName := ""
-			reportFormat := apireportsummary.JsonReport
+			reportFormat := apireportsummary.JSONReport
 			if reportToFile {
 				if outputFormatFlag == "json" {
 					reportName = "report-info.json"
 				} else {
 					reportName = "report-info.yaml"
-					reportFormat = apireportsummary.YamlReport
+					reportFormat = apireportsummary.YAMLReport
 				}
 			}
 			utils.InitLog(cmd, reportName, true)

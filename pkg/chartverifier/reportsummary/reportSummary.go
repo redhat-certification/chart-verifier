@@ -6,11 +6,12 @@ import (
 	"fmt"
 	"strings"
 
+	"golang.org/x/mod/semver"
+	"gopkg.in/yaml.v3"
+
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
-	"golang.org/x/mod/semver"
-	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -29,13 +30,14 @@ const (
 	AnnotationsSummary SummaryType = "annotations"
 	AllSummary         SummaryType = "all"
 
-	JsonReport SummaryFormat = "json"
-	YamlReport SummaryFormat = "yaml"
+	JSONReport SummaryFormat = "json"
+	YAMLReport SummaryFormat = "yaml"
 
 	// SkipDigestCheck: Use for testing purpose only
 	SkipDigestCheck BooleanKey = "skipDigestCheck"
 )
 
+//nolint:deadcode // Note(komish) need to ensure this isn't used, and research
 var setBooleanKeys = [...]BooleanKey{SkipDigestCheck}
 
 type APIReportSummary interface {
@@ -116,7 +118,7 @@ func (r *ReportSummary) GetContent(summary SummaryType, format SummaryFormat) (s
 	}
 
 	reportContent := ""
-	if format == JsonReport {
+	if format == JSONReport {
 		b, err := json.Marshal(outputSummary)
 		if err == nil {
 			reportContent = string(b)
@@ -274,22 +276,19 @@ func (r *ReportSummary) addResults() {
 func (r *ReportSummary) checkReportDigest() error {
 	toolMetadata := r.options.report.Metadata.ToolMetadata
 	reportVersion := fmt.Sprintf("v%s", toolMetadata.Version)
-
 	if semver.Compare(reportVersion, report.ReportShaVersion) >= 0 {
-
 		digestFromReport := toolMetadata.ReportDigest
 		if digestFromReport == "" {
-			return errors.New("Report does not contain expected report digest. ")
+			return errors.New("report does not contain expected report digest")
 		}
 
 		calculatedDigest, err := r.options.report.GetReportDigest()
 		if err != nil {
-			return errors.New(fmt.Sprintf("error calculating report digest: %v", err))
+			return fmt.Errorf("error calculating report digest: %v", err)
 		}
 		if calculatedDigest != digestFromReport {
 			return errors.New("digest in report did not match report content")
 		}
-
 	}
 	return nil
 }
