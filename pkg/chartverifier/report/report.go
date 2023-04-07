@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	hashstructure "github.com/mitchellh/hashstructure/v2"
-	"golang.org/x/mod/semver"
-	"gopkg.in/yaml.v3"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+
+	hashstructure "github.com/mitchellh/hashstructure/v2"
+	"golang.org/x/mod/semver"
+	"gopkg.in/yaml.v3"
 )
 
 const (
@@ -45,7 +46,6 @@ func (r *Report) Init() APIReport {
 }
 
 func (r *Report) GetContent(format ReportFormat) (string, error) {
-
 	reportContent := ""
 
 	report, loadErr := r.Load()
@@ -67,7 +67,6 @@ func (r *Report) GetContent(format ReportFormat) (string, error) {
 		reportContent = string(b)
 	}
 	return reportContent, nil
-
 }
 
 func (r *Report) SetContent(report string) APIReport {
@@ -92,7 +91,6 @@ func (r *Report) Load() (*Report, error) {
 }
 
 func (r *Report) loadReport() error {
-
 	reportString := r.options.reportString
 	if len(reportString) == 0 {
 		if r.options.reportUrl != nil {
@@ -126,7 +124,6 @@ func (r *Report) loadReport() error {
 }
 
 func loadReportFromRemote(url *url.URL) (string, error) {
-
 	if url.Scheme != "http" && url.Scheme != "https" {
 		return "", errors.New(fmt.Sprintf("report uri %s: only 'http' and 'https' schemes are supported, but got %s", url, url.Scheme))
 	}
@@ -143,14 +140,12 @@ func loadReportFromRemote(url *url.URL) (string, error) {
 	reportBytes, readErr := io.ReadAll(resp.Body)
 	if readErr != nil {
 		return "", errors.New(fmt.Sprintf("report uri %s: error reading reponse body  %v", url, readErr))
-
 	}
 
 	return string(reportBytes), nil
 }
 
 func (r *Report) GetReportDigest() (string, error) {
-
 	savedDigest := r.Metadata.ToolMetadata.ReportDigest
 	r.Metadata.ToolMetadata.ReportDigest = ""
 
@@ -162,11 +157,9 @@ func (r *Report) GetReportDigest() (string, error) {
 	r.Metadata.ToolMetadata.ReportDigest = savedDigest
 
 	return fmt.Sprintf("uint64:%d", hash), nil
-
 }
 
 func (r *Report) checkReportDigest() error {
-
 	reportVersion := fmt.Sprintf("v%s", r.Metadata.ToolMetadata.Version)
 
 	if semver.Compare(reportVersion, ReportShaVersion) >= 0 {
@@ -186,7 +179,6 @@ func (r *Report) checkReportDigest() error {
 
 	}
 	return nil
-
 }
 
 func (r *Report) dumpReport() {

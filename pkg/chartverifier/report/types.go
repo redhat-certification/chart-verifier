@@ -1,16 +1,18 @@
 package report
 
 import (
+	"net/url"
+
 	apichecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	helmchart "helm.sh/helm/v3/pkg/chart"
-	"net/url"
 )
 
-type ReportFormat string
-type OutcomeType string
+type (
+	ReportFormat string
+	OutcomeType  string
+)
 
-type ShaValue struct {
-}
+type ShaValue struct{}
 
 type Report struct {
 	options    *reportOptions
