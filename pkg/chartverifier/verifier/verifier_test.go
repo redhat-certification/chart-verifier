@@ -15,15 +15,15 @@ import (
 )
 
 func TestVerifyApi(t *testing.T) {
-	chartUri := "../../../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
+	chartURI := "../../../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
 	verifier, reportErr := NewVerifier().
 		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified}).
-		Run(chartUri)
+		Run(chartURI)
 
 	require.NoError(t, reportErr)
 
 	reportSummary := apireportsummary.NewReportSummary().SetReport(verifier.GetReport())
-	checkReportSummaries(reportSummary, chartUri, t)
+	checkReportSummaries(reportSummary, chartURI, t)
 	require.True(t, verifier.GetReport().Metadata.ToolMetadata.Version == apiversion.GetVersion())
 }
 
@@ -100,13 +100,13 @@ func TestBadFlags(t *testing.T) {
 		SetString(StringKey("badStringKey"), []string{"Bad key value"}).
 		Run("../../../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz")
 	require.Error(t, runErr)
-	require.Contains(t, fmt.Sprint(runErr), "Invalid string key name: badStringKey")
+	require.Contains(t, fmt.Sprint(runErr), "invalid string key name: badStringKey")
 
 	_, runErr = NewVerifier().
 		UnEnableChecks([]apichecks.CheckName{apichecks.CheckName("Bad-Check")}).
 		Run("../../../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz")
 	require.Error(t, runErr)
-	require.Contains(t, fmt.Sprint(runErr), "Invalid check name : Bad-Check")
+	require.Contains(t, fmt.Sprint(runErr), "invalid check name : Bad-Check")
 
 	badValueSet := make(map[string]interface{})
 	badValueSet["key"] = "value"
@@ -114,19 +114,19 @@ func TestBadFlags(t *testing.T) {
 		SetValues(ValuesKey("BadValueKey"), badValueSet).
 		Run("../../../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz")
 	require.Error(t, runErr)
-	require.Contains(t, fmt.Sprint(runErr), "Invalid values key name: BadValueKey")
+	require.Contains(t, fmt.Sprint(runErr), "invalid values key name: BadValueKey")
 
 	_, runErr = NewVerifier().
 		SetBoolean(BooleanKey("BadBooleanKey"), false).
 		Run("../../../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz")
 	require.Error(t, runErr)
-	require.Contains(t, fmt.Sprint(runErr), "Invalid boolean key name: BadBooleanKey")
+	require.Contains(t, fmt.Sprint(runErr), "invalid boolean key name: BadBooleanKey")
 
 	_, runErr = NewVerifier().
 		SetDuration(DurationKey("BadDurationKey"), 3000000).
 		Run("../../../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz")
 	require.Error(t, runErr)
-	require.Contains(t, fmt.Sprint(runErr), "Invalid duration key name: BadDurationKey")
+	require.Contains(t, fmt.Sprint(runErr), "invalid duration key name: BadDurationKey")
 
 	_, runErr = NewVerifier().
 		Run("")
@@ -135,7 +135,7 @@ func TestBadFlags(t *testing.T) {
 }
 
 func TestSignedChart(t *testing.T) {
-	chartUri := "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz"
+	chartURI := "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz"
 	key1 := "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz.key"
 	encodedKey1, err1 := tool.GetEncodedKey(key1)
 	require.NoError(t, err1)
@@ -148,7 +148,7 @@ func TestSignedChart(t *testing.T) {
 	verifier, reportErr := NewVerifier().
 		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified}).
 		SetString(PGPPublicKey, []string{encodedKey1, encodedKey2}).
-		Run(chartUri)
+		Run(chartURI)
 
 	require.NoError(t, reportErr)
 	report := verifier.GetReport()
@@ -168,7 +168,7 @@ func TestSignedChart(t *testing.T) {
 	verifier, reportErr = NewVerifier().
 		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified}).
 		SetString(PGPPublicKey, []string{encodedKey2, encodedKey1}).
-		Run(chartUri)
+		Run(chartURI)
 
 	require.NoError(t, reportErr)
 	report = verifier.GetReport()
@@ -185,41 +185,41 @@ func TestSignedChart(t *testing.T) {
 	require.True(t, sigResultFound)
 }
 
-func checkReportSummaries(summary apireportsummary.APIReportSummary, chartUri string, t *testing.T) {
-	checkReportSummariesFormat(apireportsummary.YamlReport, summary, chartUri, t)
-	checkReportSummariesFormat(apireportsummary.JsonReport, summary, chartUri, t)
+func checkReportSummaries(summary apireportsummary.APIReportSummary, chartURI string, t *testing.T) {
+	checkReportSummariesFormat(apireportsummary.YamlReport, summary, chartURI, t)
+	checkReportSummariesFormat(apireportsummary.JsonReport, summary, chartURI, t)
 }
 
-func checkReportSummariesFormat(format apireportsummary.SummaryFormat, summary apireportsummary.APIReportSummary, chartUri string, t *testing.T) {
+func checkReportSummariesFormat(format apireportsummary.SummaryFormat, summary apireportsummary.APIReportSummary, chartURI string, t *testing.T) {
 	reportSummary, reportSummaryErr := summary.GetContent(apireportsummary.AllSummary, format)
 	require.NoError(t, reportSummaryErr)
-	checkSummaryAll(format, reportSummary, chartUri, t)
+	checkSummaryAll(format, reportSummary, chartURI, t)
 
 	reportSummary, reportSummaryErr = summary.GetContent(apireportsummary.DigestsSummary, format)
 	require.NoError(t, reportSummaryErr)
-	checkSummaryDigests(false, format, reportSummary, chartUri, t)
+	checkSummaryDigests(false, format, reportSummary, chartURI, t)
 
 	reportSummary, reportSummaryErr = summary.GetContent(apireportsummary.MetadataSummary, format)
 	require.NoError(t, reportSummaryErr)
-	checkSummaryMetadata(false, format, reportSummary, chartUri, t)
+	checkSummaryMetadata(false, format, reportSummary, chartURI, t)
 
 	reportSummary, reportSummaryErr = summary.GetContent(apireportsummary.AnnotationsSummary, format)
 	require.NoError(t, reportSummaryErr)
-	checkSummaryAnnotations(false, format, reportSummary, chartUri, t)
+	checkSummaryAnnotations(false, format, reportSummary, chartURI, t)
 
 	reportSummary, reportSummaryErr = summary.GetContent(apireportsummary.ResultsSummary, format)
 	require.NoError(t, reportSummaryErr)
-	checkSummaryResults(false, format, reportSummary, chartUri, t)
+	checkSummaryResults(false, format, reportSummary, chartURI, t)
 }
 
-func checkSummaryAll(format apireportsummary.SummaryFormat, reportSummary string, chartUri string, t *testing.T) {
-	checkSummaryAnnotations(true, format, reportSummary, chartUri, t)
-	checkSummaryDigests(true, format, reportSummary, chartUri, t)
-	checkSummaryMetadata(true, format, reportSummary, chartUri, t)
-	checkSummaryResults(true, format, reportSummary, chartUri, t)
+func checkSummaryAll(format apireportsummary.SummaryFormat, reportSummary string, chartURI string, t *testing.T) {
+	checkSummaryAnnotations(true, format, reportSummary, chartURI, t)
+	checkSummaryDigests(true, format, reportSummary, chartURI, t)
+	checkSummaryMetadata(true, format, reportSummary, chartURI, t)
+	checkSummaryResults(true, format, reportSummary, chartURI, t)
 }
 
-func checkSummaryResults(fullReport bool, format apireportsummary.SummaryFormat, reportSummary string, chartUri string, t *testing.T) {
+func checkSummaryResults(fullReport bool, format apireportsummary.SummaryFormat, reportSummary string, chartURI string, t *testing.T) {
 	if format == apireportsummary.JsonReport {
 		if !fullReport {
 			require.NotContains(t, reportSummary, "\"annotations\":[{")
@@ -227,7 +227,7 @@ func checkSummaryResults(fullReport bool, format apireportsummary.SummaryFormat,
 			require.NotContains(t, reportSummary, "\"metadata\":{")
 			require.NotContains(t, reportSummary, "\"name\":\"charts.openshift.io/digest\"")
 			require.NotContains(t, reportSummary, "\"chart\":\"sha256")
-			require.NotContains(t, reportSummary, "\"chart-uri\":\""+chartUri+"\"")
+			require.NotContains(t, reportSummary, "\"chart-uri\":\""+chartURI+"\"")
 		}
 		require.Contains(t, reportSummary, "\"results\":{")
 		require.Contains(t, reportSummary, "\"passed\":")
@@ -238,23 +238,22 @@ func checkSummaryResults(fullReport bool, format apireportsummary.SummaryFormat,
 			require.NotContains(t, reportSummary, "metadata:")
 			require.NotContains(t, reportSummary, "- name: charts.openshift.io/digest")
 			require.NotContains(t, reportSummary, "chart: sha256:")
-			require.NotContains(t, reportSummary, "chart-uri: "+chartUri)
+			require.NotContains(t, reportSummary, "chart-uri: "+chartURI)
 		}
 		require.Contains(t, reportSummary, "results:")
 		require.Contains(t, reportSummary, "passed:")
 		require.Contains(t, reportSummary, "failed:")
-
 	}
 }
 
-func checkSummaryAnnotations(fullReport bool, format apireportsummary.SummaryFormat, reportSummary string, chartUri string, t *testing.T) {
+func checkSummaryAnnotations(fullReport bool, format apireportsummary.SummaryFormat, reportSummary string, chartURI string, t *testing.T) {
 	if format == apireportsummary.JsonReport {
 		if !fullReport {
 			require.NotContains(t, reportSummary, "\"digests\":{")
 			require.NotContains(t, reportSummary, "\"metadata\":{")
 			require.NotContains(t, reportSummary, "\"results\":{")
 			require.NotContains(t, reportSummary, "\"chart\":\"sha256")
-			require.NotContains(t, reportSummary, "\"chart-uri\":\""+chartUri+"\"")
+			require.NotContains(t, reportSummary, "\"chart-uri\":\""+chartURI+"\"")
 			require.NotContains(t, reportSummary, "\"passed\":")
 			require.NotContains(t, reportSummary, "\"failed\":")
 		}
@@ -266,7 +265,7 @@ func checkSummaryAnnotations(fullReport bool, format apireportsummary.SummaryFor
 			require.NotContains(t, reportSummary, "metadata:")
 			require.NotContains(t, reportSummary, "results:")
 			require.NotContains(t, reportSummary, "chart: sha256:")
-			require.NotContains(t, reportSummary, "chart-uri: "+chartUri)
+			require.NotContains(t, reportSummary, "chart-uri: "+chartURI)
 			require.NotContains(t, reportSummary, "passed:")
 			require.NotContains(t, reportSummary, "failed:")
 		}
@@ -275,7 +274,7 @@ func checkSummaryAnnotations(fullReport bool, format apireportsummary.SummaryFor
 	}
 }
 
-func checkSummaryMetadata(fullReport bool, format apireportsummary.SummaryFormat, reportSummary string, chartUri string, t *testing.T) {
+func checkSummaryMetadata(fullReport bool, format apireportsummary.SummaryFormat, reportSummary string, chartURI string, t *testing.T) {
 	if format == apireportsummary.JsonReport {
 		if !fullReport {
 			require.NotContains(t, reportSummary, "\"annotations\":[{")
@@ -287,7 +286,7 @@ func checkSummaryMetadata(fullReport bool, format apireportsummary.SummaryFormat
 			require.NotContains(t, reportSummary, "\"failed\":")
 		}
 		require.Contains(t, reportSummary, "\"metadata\":{")
-		require.Contains(t, reportSummary, "\"chart-uri\":\""+chartUri+"\"")
+		require.Contains(t, reportSummary, "\"chart-uri\":\""+chartURI+"\"")
 	} else {
 		if !fullReport {
 			require.NotContains(t, reportSummary, "digests:")
@@ -298,18 +297,18 @@ func checkSummaryMetadata(fullReport bool, format apireportsummary.SummaryFormat
 			require.NotContains(t, reportSummary, "failed:")
 		}
 		require.Contains(t, reportSummary, "metadata:")
-		require.Contains(t, reportSummary, "chart-uri: "+chartUri)
+		require.Contains(t, reportSummary, "chart-uri: "+chartURI)
 	}
 }
 
-func checkSummaryDigests(fullReport bool, format apireportsummary.SummaryFormat, reportSummary string, chartUri string, t *testing.T) {
+func checkSummaryDigests(fullReport bool, format apireportsummary.SummaryFormat, reportSummary string, chartURI string, t *testing.T) {
 	if format == apireportsummary.JsonReport {
 		if !fullReport {
 			require.NotContains(t, reportSummary, "\"annotations\":[{")
 			require.NotContains(t, reportSummary, "\"metadata\":{")
 			require.NotContains(t, reportSummary, "\"results\":{")
 			require.NotContains(t, reportSummary, "\"name\":\"charts.openshift.io/digest\"")
-			require.NotContains(t, reportSummary, "\"chart-uri\":\""+chartUri+"\"")
+			require.NotContains(t, reportSummary, "\"chart-uri\":\""+chartURI+"\"")
 			require.NotContains(t, reportSummary, "\"passed\":")
 			require.NotContains(t, reportSummary, "\"failed\":")
 		}
@@ -321,7 +320,7 @@ func checkSummaryDigests(fullReport bool, format apireportsummary.SummaryFormat,
 			require.NotContains(t, reportSummary, "metadata:")
 			require.NotContains(t, reportSummary, "results:")
 			require.NotContains(t, reportSummary, "- name: charts.openshift.io/digest")
-			require.NotContains(t, reportSummary, "chart-uri: "+chartUri)
+			require.NotContains(t, reportSummary, "chart-uri: "+chartURI)
 			require.NotContains(t, reportSummary, "passed:")
 			require.NotContains(t, reportSummary, "failed:")
 		}

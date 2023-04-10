@@ -17,14 +17,14 @@ type (
 )
 
 type Verifier struct {
-	Id      string  `json:"UUID" yaml:"UUID"`
+	ID      string  `json:"UUID" yaml:"UUID"`
 	Inputs  Inputs  `json:"inputs" yaml:"inputs"`
 	Outputs Outputs `json:"outputs" yaml:"outputs"`
 }
 
 type Inputs struct {
-	ChartUri  string `json:"chart-uri" yaml:"chart-uri"`
-	ReportUri string `json:"report-uri" yaml:"report_uri"`
+	ChartURI  string `json:"chart-uri" yaml:"chart-uri"`
+	ReportURI string `json:"report-uri" yaml:"report_uri"`
 	Flags     Flags  `json:"flags" yaml:"flags"`
 }
 
