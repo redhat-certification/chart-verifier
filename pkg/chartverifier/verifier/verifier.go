@@ -74,7 +74,8 @@ const (
 	HelmInstallTimeout DurationKey = "helm-install-timeout"
 )
 
-var setStringKeys = [...]StringKey{KubeApiServer,
+var setStringKeys = [...]StringKey{
+	KubeApiServer,
 	KubeAsUser,
 	KubeCaFile,
 	KubeConfig,
@@ -88,12 +89,15 @@ var setStringKeys = [...]StringKey{KubeApiServer,
 	Config,
 	ChartValues,
 	KubeAsGroups,
-	PGPPublicKey}
+	PGPPublicKey,
+}
 
-var setValuesKeys = [...]ValuesKey{CommandSet,
+var setValuesKeys = [...]ValuesKey{
+	CommandSet,
 	ChartSet,
 	ChartSetFile,
-	ChartSetString}
+	ChartSetString,
+}
 
 var setBooleanKeys = [...]BooleanKey{WebCatalogOnly, SuppressErrorLog}
 
@@ -112,7 +116,7 @@ type ApiVerifier interface {
 
 func validateBooleanKeys(v Verifier) error {
 	var err error
-	for key, _ := range v.Inputs.Flags.BooleanFlags {
+	for key := range v.Inputs.Flags.BooleanFlags {
 
 		foundElement := false
 		for _, sliceElement := range setBooleanKeys {
@@ -147,7 +151,7 @@ func (v *Verifier) SetDuration(key DurationKey, duration time.Duration) ApiVerif
 
 func validateDurationKeys(v Verifier) error {
 	var err error
-	for key, _ := range v.Inputs.Flags.DurationFlags {
+	for key := range v.Inputs.Flags.DurationFlags {
 
 		foundElement := false
 		for _, sliceElement := range setDurationKeys {
@@ -173,7 +177,7 @@ func (v *Verifier) SetString(key StringKey, value []string) ApiVerifier {
 
 func validateStringKeys(v Verifier) error {
 	var err error
-	for key, _ := range v.Inputs.Flags.StringFlags {
+	for key := range v.Inputs.Flags.StringFlags {
 		foundElement := false
 		for _, sliceElement := range setStringKeys {
 			if sliceElement == key {
@@ -192,7 +196,6 @@ func validateStringKeys(v Verifier) error {
  * Set a map of values flags. Adds/replaces any previous set values for the specified value setting.
  */
 func (v *Verifier) SetValues(valuesFlagName ValuesKey, values map[string]interface{}) ApiVerifier {
-
 	if _, ok := v.Inputs.Flags.ValuesFlags[valuesFlagName]; ok {
 		for key, element := range values {
 			v.Inputs.Flags.ValuesFlags[valuesFlagName][strings.ToLower(key)] = element
@@ -205,7 +208,7 @@ func (v *Verifier) SetValues(valuesFlagName ValuesKey, values map[string]interfa
 
 func validateValuesKeys(v Verifier) error {
 	var err error
-	for key, _ := range v.Inputs.Flags.ValuesFlags {
+	for key := range v.Inputs.Flags.ValuesFlags {
 		foundElement := false
 		for _, sliceElement := range setValuesKeys {
 			if sliceElement == key {
@@ -257,7 +260,7 @@ func (v *Verifier) UnEnableChecks(checkNames []checks.CheckName) ApiVerifier {
 
 func validateChecks(v Verifier) error {
 	var err error
-	for checkName, _ := range v.Inputs.Flags.Checks {
+	for checkName := range v.Inputs.Flags.Checks {
 		isValidCheckName := false
 		for _, validCheckName := range checks.GetChecks() {
 			if checkName == validCheckName {
@@ -271,7 +274,6 @@ func validateChecks(v Verifier) error {
 		}
 	}
 	return err
-
 }
 
 /*
@@ -389,7 +391,6 @@ func NewVerifier() ApiVerifier {
 }
 
 func (v *Verifier) initialize() {
-
 	v.Id = uuid.New().String()
 
 	v.Inputs.Flags.StringFlags = make(map[StringKey][]string)
@@ -410,7 +411,6 @@ func (v *Verifier) initialize() {
 
 	v.Outputs.Report = nil
 	v.Outputs.ReportSummary = nil
-
 }
 
 func (v Verifier) checkInputs() error {

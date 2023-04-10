@@ -15,7 +15,6 @@ import (
 )
 
 func TestVerifyApi(t *testing.T) {
-
 	chartUri := "../../../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
 	verifier, reportErr := NewVerifier().
 		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified}).
@@ -26,11 +25,9 @@ func TestVerifyApi(t *testing.T) {
 	reportSummary := apireportsummary.NewReportSummary().SetReport(verifier.GetReport())
 	checkReportSummaries(reportSummary, chartUri, t)
 	require.True(t, verifier.GetReport().Metadata.ToolMetadata.Version == apiversion.GetVersion())
-
 }
 
 func TestProfiles(t *testing.T) {
-
 	commandSet := make(map[string]interface{})
 	commandSet["profile.vendortype"] = "redhat"
 
@@ -43,7 +40,6 @@ func TestProfiles(t *testing.T) {
 	report, reportErr := verifier.GetReport().GetContent(apireport.YamlReport)
 	require.NoError(t, reportErr)
 	require.Contains(t, report, "VendorType: redhat")
-
 }
 
 func TestProfilesDeveloperConsole(t *testing.T) {
@@ -63,7 +59,6 @@ func TestProfilesDeveloperConsole(t *testing.T) {
 }
 
 func TestWebCatalogOnly(t *testing.T) {
-
 	commandSet := make(map[string]interface{})
 	commandSet["profile.vendortype"] = "redhat"
 
@@ -98,11 +93,9 @@ func TestWebCatalogOnly(t *testing.T) {
 	report = verifier.GetReport()
 	require.False(t, report.Metadata.ToolMetadata.WebCatalogOnly)
 	require.Contains(t, report.Metadata.ToolMetadata.ChartUri, "chart-0.1.0-v3.valid.tgz")
-
 }
 
 func TestBadFlags(t *testing.T) {
-
 	_, runErr := NewVerifier().
 		SetString(StringKey("badStringKey"), []string{"Bad key value"}).
 		Run("../../../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz")
@@ -139,11 +132,9 @@ func TestBadFlags(t *testing.T) {
 		Run("")
 	require.Error(t, runErr)
 	require.Contains(t, fmt.Sprint(runErr), "run error: chart_uri is required")
-
 }
 
 func TestSignedChart(t *testing.T) {
-
 	chartUri := "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz"
 	key1 := "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz.key"
 	encodedKey1, err1 := tool.GetEncodedKey(key1)
@@ -192,7 +183,6 @@ func TestSignedChart(t *testing.T) {
 		}
 	}
 	require.True(t, sigResultFound)
-
 }
 
 func checkReportSummaries(summary apireportsummary.APIReportSummary, chartUri string, t *testing.T) {
@@ -201,7 +191,6 @@ func checkReportSummaries(summary apireportsummary.APIReportSummary, chartUri st
 }
 
 func checkReportSummariesFormat(format apireportsummary.SummaryFormat, summary apireportsummary.APIReportSummary, chartUri string, t *testing.T) {
-
 	reportSummary, reportSummaryErr := summary.GetContent(apireportsummary.AllSummary, format)
 	require.NoError(t, reportSummaryErr)
 	checkSummaryAll(format, reportSummary, chartUri, t)
@@ -221,7 +210,6 @@ func checkReportSummariesFormat(format apireportsummary.SummaryFormat, summary a
 	reportSummary, reportSummaryErr = summary.GetContent(apireportsummary.ResultsSummary, format)
 	require.NoError(t, reportSummaryErr)
 	checkSummaryResults(false, format, reportSummary, chartUri, t)
-
 }
 
 func checkSummaryAll(format apireportsummary.SummaryFormat, reportSummary string, chartUri string, t *testing.T) {
@@ -229,7 +217,6 @@ func checkSummaryAll(format apireportsummary.SummaryFormat, reportSummary string
 	checkSummaryDigests(true, format, reportSummary, chartUri, t)
 	checkSummaryMetadata(true, format, reportSummary, chartUri, t)
 	checkSummaryResults(true, format, reportSummary, chartUri, t)
-
 }
 
 func checkSummaryResults(fullReport bool, format apireportsummary.SummaryFormat, reportSummary string, chartUri string, t *testing.T) {

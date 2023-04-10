@@ -1,17 +1,20 @@
 package verifier
 
 import (
+	"time"
+
 	apichecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	apireport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 	apireportsummary "github.com/redhat-certification/chart-verifier/pkg/chartverifier/reportsummary"
-	"time"
 )
 
-type ReportFormat string
-type StringKey string
-type ValuesKey string
-type BooleanKey string
-type DurationKey string
+type (
+	ReportFormat string
+	StringKey    string
+	ValuesKey    string
+	BooleanKey   string
+	DurationKey  string
+)
 
 type Verifier struct {
 	Id      string  `json:"UUID" yaml:"UUID"`
