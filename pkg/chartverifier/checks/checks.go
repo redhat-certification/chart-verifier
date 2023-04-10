@@ -19,7 +19,8 @@ const (
 	ExperimentalCheckType      CheckType = "Experimental"
 )
 
-var setCheckNames = []CheckName{ChartTesting,
+var setCheckNames = []CheckName{
+	ChartTesting,
 	ContainsTest,
 	ContainsValuesSchema,
 	ContainsValues,
@@ -31,7 +32,8 @@ var setCheckNames = []CheckName{ChartTesting,
 	NotContainCsiObjects,
 	NotContainsCRDs,
 	RequiredAnnotationsPresent,
-	SignatureIsValid}
+	SignatureIsValid,
+}
 
 func GetChecks() []CheckName {
 	return setCheckNames
