@@ -1,16 +1,19 @@
 package report
 
 import (
-	apichecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
-	helmchart "helm.sh/helm/v3/pkg/chart"
 	"net/url"
+
+	helmchart "helm.sh/helm/v3/pkg/chart"
+
+	apichecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 )
 
-type ReportFormat string
-type OutcomeType string
+type (
+	ReportFormat string
+	OutcomeType  string
+)
 
-type ShaValue struct {
-}
+type ShaValue struct{}
 
 type Report struct {
 	options    *reportOptions
@@ -27,9 +30,10 @@ type ReportMetadata struct {
 }
 
 type ToolMetadata struct {
-	Version                    string  `json:"verifier-version" yaml:"verifier-version"`
-	Profile                    Profile `json:"profile" yaml:"profile"`
-	ReportDigest               string  `json:"reportDigest" yaml:"reportDigest"`
+	Version      string  `json:"verifier-version" yaml:"verifier-version"`
+	Profile      Profile `json:"profile" yaml:"profile"`
+	ReportDigest string  `json:"reportDigest" yaml:"reportDigest"`
+	//nolint:stylecheck // complaining Uri should be URI
 	ChartUri                   string  `json:"chart-uri" yaml:"chart-uri"`
 	Digests                    Digests `json:"digests" yaml:"digests"`
 	LastCertifiedTimestamp     string  `json:"lastCertifiedTimestamp,omitempty" yaml:"lastCertifiedTimestamp,omitempty"`
@@ -60,5 +64,6 @@ type CheckReport struct {
 
 type reportOptions struct {
 	reportString string
-	reportUrl    *url.URL
+	//nolint: stylecheck // complains Url should be URL
+	reportUrl *url.URL
 }
