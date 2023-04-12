@@ -1,9 +1,8 @@
 package reportsummary
 
 import (
-	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/url"
 	"os"
 	"testing"
@@ -14,8 +13,7 @@ import (
 )
 
 func TestAddStringReport(t *testing.T) {
-
-	chartUri := "https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.9/psql-service-0.1.9.tgz?raw=true"
+	chartURI := "https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.9/psql-service-0.1.9.tgz?raw=true"
 	yamlFileReport := "test-reports/report.yaml"
 	jsonFileReport := "test-reports/report.json"
 
@@ -27,17 +25,15 @@ func TestAddStringReport(t *testing.T) {
 	report, loadErr := apireport.NewReport().SetContent(string(yamlFileReportBytes)).Load()
 	require.NoError(t, loadErr)
 	reportSummary := NewReportSummary().SetReport(report)
-	checkReportSummaries(reportSummary, chartUri, t)
+	checkReportSummaries(reportSummary, chartURI, t)
 
 	report, loadErr = apireport.NewReport().SetContent(string(jsonFileReportBytes)).Load()
 	require.NoError(t, loadErr)
 	reportSummary = NewReportSummary().SetReport(report)
-	checkReportSummaries(reportSummary, chartUri, t)
-
+	checkReportSummaries(reportSummary, chartURI, t)
 }
 
 func TestBadDigestReport(t *testing.T) {
-
 	yamlFileReport := "test-reports/baddigest/report.yaml"
 	jsonFileReport := "test-reports/baddigest/report.json"
 
@@ -48,21 +44,19 @@ func TestBadDigestReport(t *testing.T) {
 
 	report, loadErr := apireport.NewReport().SetContent(string(yamlFileReportBytes)).Load()
 	require.NoError(t, loadErr)
-	_, summaryErr := NewReportSummary().SetReport(report).GetContent(AllSummary, YamlReport)
+	_, summaryErr := NewReportSummary().SetReport(report).GetContent(AllSummary, YAMLReport)
 	require.Error(t, summaryErr)
 	require.Contains(t, fmt.Sprintf("%v", summaryErr), "digest in report did not match report content")
 
 	report, loadErr = apireport.NewReport().SetContent(string(jsonFileReportBytes)).Load()
 	require.NoError(t, loadErr)
-	_, summaryErr = NewReportSummary().SetReport(report).GetContent(AllSummary, JsonReport)
+	_, summaryErr = NewReportSummary().SetReport(report).GetContent(AllSummary, JSONReport)
 	require.Error(t, summaryErr)
 	require.Contains(t, fmt.Sprintf("%v", summaryErr), "digest in report did not match report content")
-
 }
 
 func TestSkipBadDigestReport(t *testing.T) {
-
-	chartUri := "https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.9/psql-service-0.1.9.tgz?raw=true"
+	chartURI := "https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.9/psql-service-0.1.9.tgz?raw=true"
 	yamlFileReport := "test-reports/baddigest/report.yaml"
 	jsonFileReport := "test-reports/baddigest/report.json"
 
@@ -74,16 +68,15 @@ func TestSkipBadDigestReport(t *testing.T) {
 	report, loadErr := apireport.NewReport().SetContent(string(yamlFileReportBytes)).Load()
 	require.NoError(t, loadErr)
 	reportSummary := NewReportSummary().SetReport(report).SetBoolean(SkipDigestCheck, true)
-	checkReportSummaries(reportSummary, chartUri, t)
+	checkReportSummaries(reportSummary, chartURI, t)
 
 	report, loadErr = apireport.NewReport().SetContent(string(jsonFileReportBytes)).Load()
 	require.NoError(t, loadErr)
 	reportSummary = NewReportSummary().SetReport(report).SetBoolean(SkipDigestCheck, true)
-	checkReportSummaries(reportSummary, chartUri, t)
+	checkReportSummaries(reportSummary, chartURI, t)
 }
 
 func TestMissingDigestReport(t *testing.T) {
-
 	yamlFileReport := "test-reports/missingdigest/report.yaml"
 	jsonFileReport := "test-reports/missingdigest/report.json"
 
@@ -94,21 +87,19 @@ func TestMissingDigestReport(t *testing.T) {
 
 	report, loadErr := apireport.NewReport().SetContent(string(yamlFileReportBytes)).Load()
 	require.NoError(t, loadErr)
-	_, summaryErr := NewReportSummary().SetReport(report).GetContent(AllSummary, YamlReport)
+	_, summaryErr := NewReportSummary().SetReport(report).GetContent(AllSummary, YAMLReport)
 	require.Error(t, summaryErr)
-	require.Contains(t, fmt.Sprintf("%v", summaryErr), "Report does not contain expected report digest.")
+	require.Contains(t, fmt.Sprintf("%v", summaryErr), "report does not contain expected report digest")
 
 	report, loadErr = apireport.NewReport().SetContent(string(jsonFileReportBytes)).Load()
 	require.NoError(t, loadErr)
-	_, summaryErr = NewReportSummary().SetReport(report).GetContent(AllSummary, JsonReport)
+	_, summaryErr = NewReportSummary().SetReport(report).GetContent(AllSummary, JSONReport)
 	require.Error(t, summaryErr)
-	require.Contains(t, fmt.Sprintf("%v", summaryErr), "Report does not contain expected report digest.")
-
+	require.Contains(t, fmt.Sprintf("%v", summaryErr), "report does not contain expected report digest")
 }
 
 func TestPreDigestReport(t *testing.T) {
-
-	chartUri := "https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.9/psql-service-0.1.9.tgz?raw=true"
+	chartURI := "https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.9/psql-service-0.1.9.tgz?raw=true"
 	yamlFileReport := "test-reports/predigest/report.yaml"
 	jsonFileReport := "test-reports/predigest/report.json"
 
@@ -120,18 +111,16 @@ func TestPreDigestReport(t *testing.T) {
 	report, loadErr := apireport.NewReport().SetContent(string(yamlFileReportBytes)).Load()
 	require.NoError(t, loadErr)
 	reportSummary := NewReportSummary().SetReport(report)
-	checkReportSummaries(reportSummary, chartUri, t)
+	checkReportSummaries(reportSummary, chartURI, t)
 
 	report, loadErr = apireport.NewReport().SetContent(string(jsonFileReportBytes)).Load()
 	require.NoError(t, loadErr)
 	reportSummary = NewReportSummary().SetReport(report)
-	checkReportSummaries(reportSummary, chartUri, t)
-
+	checkReportSummaries(reportSummary, chartURI, t)
 }
 
 func TestProviderDeliveryReport(t *testing.T) {
-
-	chartUri := "N/A"
+	chartURI := "N/A"
 	yamlFileReport := "test-reports/providerdelivery/report.yaml"
 	jsonFileReport := "test-reports/providerdelivery/report.json"
 
@@ -143,76 +132,70 @@ func TestProviderDeliveryReport(t *testing.T) {
 	report, loadErr := apireport.NewReport().SetContent(string(yamlFileReportBytes)).Load()
 	require.NoError(t, loadErr)
 	reportSummary := NewReportSummary().SetReport(report)
-	checkReportSummaries(reportSummary, chartUri, t)
+	checkReportSummaries(reportSummary, chartURI, t)
 
 	report, loadErr = apireport.NewReport().SetContent(string(jsonFileReportBytes)).Load()
 	require.NoError(t, loadErr)
 	reportSummary = NewReportSummary().SetReport(report)
-	checkReportSummaries(reportSummary, chartUri, t)
-
+	checkReportSummaries(reportSummary, chartURI, t)
 }
 
 func TestAddUrlReport(t *testing.T) {
+	yamlURLReport := "https://github.com/redhat-certification/chart-verifier/blob/main/cmd/test/report.yaml?raw=true"
+	url, loadURLErr := url.Parse(yamlURLReport)
+	require.NoError(t, loadURLErr)
 
-	yamlUrlReport := "https://github.com/redhat-certification/chart-verifier/blob/main/cmd/test/report.yaml?raw=true"
-	url, loadUrlErr := url.Parse(yamlUrlReport)
-	require.NoError(t, loadUrlErr)
-
-	chartUri := "internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
+	chartURI := "internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
 	report, loadErr := apireport.NewReport().SetURL(url).Load()
 	require.NoError(t, loadErr)
 	reportSummary := NewReportSummary().SetReport(report)
 
-	checkReportSummaries(reportSummary, chartUri, t)
-
+	checkReportSummaries(reportSummary, chartURI, t)
 }
 
-func checkReportSummaries(summary APIReportSummary, chartUri string, t *testing.T) {
-	checkReportSummariesFormat(YamlReport, summary, chartUri, t)
-	checkReportSummariesFormat(JsonReport, summary, chartUri, t)
+func checkReportSummaries(summary APIReportSummary, chartURI string, t *testing.T) {
+	checkReportSummariesFormat(YAMLReport, summary, chartURI, t)
+	checkReportSummariesFormat(JSONReport, summary, chartURI, t)
 }
 
-func checkReportSummariesFormat(format SummaryFormat, summary APIReportSummary, chartUri string, t *testing.T) {
-
+func checkReportSummariesFormat(format SummaryFormat, summary APIReportSummary, chartURI string, t *testing.T) {
 	reportSummary, reportSummaryErr := summary.GetContent(AllSummary, format)
 	require.NoError(t, reportSummaryErr)
-	checkSummaryAll(format, reportSummary, chartUri, t)
+	checkSummaryAll(format, reportSummary, chartURI, t)
 
 	reportSummary, reportSummaryErr = summary.GetContent(DigestsSummary, format)
 	require.NoError(t, reportSummaryErr)
-	checkSummaryDigests(false, format, reportSummary, chartUri, t)
+	checkSummaryDigests(false, format, reportSummary, chartURI, t)
 
 	reportSummary, reportSummaryErr = summary.GetContent(MetadataSummary, format)
 	require.NoError(t, reportSummaryErr)
-	checkSummaryMetadata(false, format, reportSummary, chartUri, t)
+	checkSummaryMetadata(false, format, reportSummary, chartURI, t)
 
 	reportSummary, reportSummaryErr = summary.GetContent(AnnotationsSummary, format)
 	require.NoError(t, reportSummaryErr)
-	checkSummaryAnnotations(false, format, reportSummary, chartUri, t)
+	checkSummaryAnnotations(false, format, reportSummary, chartURI, t)
 
 	reportSummary, reportSummaryErr = summary.GetContent(ResultsSummary, format)
 	require.NoError(t, reportSummaryErr)
-	checkSummaryResults(false, format, reportSummary, chartUri, t)
-
+	checkSummaryResults(false, format, reportSummary, chartURI, t)
 }
 
-func checkSummaryAll(format SummaryFormat, reportSummary string, chartUri string, t *testing.T) {
-	checkSummaryAnnotations(true, format, reportSummary, chartUri, t)
-	checkSummaryDigests(true, format, reportSummary, chartUri, t)
-	checkSummaryMetadata(true, format, reportSummary, chartUri, t)
-	checkSummaryResults(true, format, reportSummary, chartUri, t)
-
+func checkSummaryAll(format SummaryFormat, reportSummary string, chartURI string, t *testing.T) {
+	checkSummaryAnnotations(true, format, reportSummary, chartURI, t)
+	checkSummaryDigests(true, format, reportSummary, chartURI, t)
+	checkSummaryMetadata(true, format, reportSummary, chartURI, t)
+	checkSummaryResults(true, format, reportSummary, chartURI, t)
 }
 
-func checkSummaryResults(fullReport bool, format SummaryFormat, reportSummary string, chartUri string, t *testing.T) {
-	if format == JsonReport {
+func checkSummaryResults(fullReport bool, format SummaryFormat, reportSummary string, chartURI string, t *testing.T) {
+	if format == JSONReport {
 		if !fullReport {
 			require.NotContains(t, reportSummary, "\"annotations\":[{")
 			require.NotContains(t, reportSummary, "\"digests\":{")
 			require.NotContains(t, reportSummary, "\"metadata\":{")
 			require.NotContains(t, reportSummary, "\"name\":\"charts.openshift.io/digest\"")
 			require.NotContains(t, reportSummary, "\"chart\":\"sha256")
-			require.NotContains(t, reportSummary, "\"chart-uri\":\""+chartUri+"\"")
+			require.NotContains(t, reportSummary, "\"chart-uri\":\""+chartURI+"\"")
 		}
 		require.Contains(t, reportSummary, "\"results\":{")
 		require.Contains(t, reportSummary, "\"passed\":")
@@ -223,23 +206,22 @@ func checkSummaryResults(fullReport bool, format SummaryFormat, reportSummary st
 			require.NotContains(t, reportSummary, "metadata:")
 			require.NotContains(t, reportSummary, "- name: charts.openshift.io/digest")
 			require.NotContains(t, reportSummary, "chart: sha256:")
-			require.NotContains(t, reportSummary, "chart-uri: "+chartUri)
+			require.NotContains(t, reportSummary, "chart-uri: "+chartURI)
 		}
 		require.Contains(t, reportSummary, "results:")
 		require.Contains(t, reportSummary, "passed:")
 		require.Contains(t, reportSummary, "failed:")
-
 	}
 }
 
-func checkSummaryAnnotations(fullReport bool, format SummaryFormat, reportSummary string, chartUri string, t *testing.T) {
-	if format == JsonReport {
+func checkSummaryAnnotations(fullReport bool, format SummaryFormat, reportSummary string, chartURI string, t *testing.T) {
+	if format == JSONReport {
 		if !fullReport {
 			require.NotContains(t, reportSummary, "\"digests\":{")
 			require.NotContains(t, reportSummary, "\"metadata\":{")
 			require.NotContains(t, reportSummary, "\"results\":{")
 			require.NotContains(t, reportSummary, "\"chart\":\"sha256")
-			require.NotContains(t, reportSummary, "\"chart-uri\":\""+chartUri+"\"")
+			require.NotContains(t, reportSummary, "\"chart-uri\":\""+chartURI+"\"")
 			require.NotContains(t, reportSummary, "\"passed\":")
 			require.NotContains(t, reportSummary, "\"failed\":")
 		}
@@ -251,7 +233,7 @@ func checkSummaryAnnotations(fullReport bool, format SummaryFormat, reportSummar
 			require.NotContains(t, reportSummary, "metadata:")
 			require.NotContains(t, reportSummary, "results:")
 			require.NotContains(t, reportSummary, "chart: sha256:")
-			require.NotContains(t, reportSummary, "chart-uri: "+chartUri)
+			require.NotContains(t, reportSummary, "chart-uri: "+chartURI)
 			require.NotContains(t, reportSummary, "passed:")
 			require.NotContains(t, reportSummary, "failed:")
 		}
@@ -260,8 +242,8 @@ func checkSummaryAnnotations(fullReport bool, format SummaryFormat, reportSummar
 	}
 }
 
-func checkSummaryMetadata(fullReport bool, format SummaryFormat, reportSummary string, chartUri string, t *testing.T) {
-	if format == JsonReport {
+func checkSummaryMetadata(fullReport bool, format SummaryFormat, reportSummary string, chartURI string, t *testing.T) {
+	if format == JSONReport {
 		if !fullReport {
 			require.NotContains(t, reportSummary, "\"annotations\":[{")
 			require.NotContains(t, reportSummary, "\"digests\":{")
@@ -272,7 +254,7 @@ func checkSummaryMetadata(fullReport bool, format SummaryFormat, reportSummary s
 			require.NotContains(t, reportSummary, "\"failed\":")
 		}
 		require.Contains(t, reportSummary, "\"metadata\":{")
-		require.Contains(t, reportSummary, "\"chart-uri\":\""+chartUri+"\"")
+		require.Contains(t, reportSummary, "\"chart-uri\":\""+chartURI+"\"")
 		require.Contains(t, reportSummary, "\"webCatalogOnly\":")
 	} else {
 		if !fullReport {
@@ -284,18 +266,18 @@ func checkSummaryMetadata(fullReport bool, format SummaryFormat, reportSummary s
 			require.NotContains(t, reportSummary, "failed:")
 		}
 		require.Contains(t, reportSummary, "metadata:")
-		require.Contains(t, reportSummary, "chart-uri: "+chartUri)
+		require.Contains(t, reportSummary, "chart-uri: "+chartURI)
 	}
 }
 
-func checkSummaryDigests(fullReport bool, format SummaryFormat, reportSummary string, chartUri string, t *testing.T) {
-	if format == JsonReport {
+func checkSummaryDigests(fullReport bool, format SummaryFormat, reportSummary string, chartURI string, t *testing.T) {
+	if format == JSONReport {
 		if !fullReport {
 			require.NotContains(t, reportSummary, "\"annotations\":[{")
 			require.NotContains(t, reportSummary, "\"metadata\":{")
 			require.NotContains(t, reportSummary, "\"results\":{")
 			require.NotContains(t, reportSummary, "\"name\":\"charts.openshift.io/digest\"")
-			require.NotContains(t, reportSummary, "\"chart-uri\":\""+chartUri+"\"")
+			require.NotContains(t, reportSummary, "\"chart-uri\":\""+chartURI+"\"")
 			require.NotContains(t, reportSummary, "\"passed\":")
 			require.NotContains(t, reportSummary, "\"failed\":")
 		}
@@ -307,7 +289,7 @@ func checkSummaryDigests(fullReport bool, format SummaryFormat, reportSummary st
 			require.NotContains(t, reportSummary, "metadata:")
 			require.NotContains(t, reportSummary, "results:")
 			require.NotContains(t, reportSummary, "- name: charts.openshift.io/digest")
-			require.NotContains(t, reportSummary, "chart-uri: "+chartUri)
+			require.NotContains(t, reportSummary, "chart-uri: "+chartURI)
 			require.NotContains(t, reportSummary, "passed:")
 			require.NotContains(t, reportSummary, "failed:")
 		}
@@ -320,12 +302,12 @@ func loadChartFromAbsPath(path string) ([]byte, error) {
 	// Open the yaml file which defines the tests to run
 	reportFile, openErr := os.Open(path)
 	if openErr != nil {
-		return nil, errors.New(fmt.Sprintf("report path %s: error opening file  %v", path, openErr))
+		return nil, fmt.Errorf("report path %s: error opening file  %v", path, openErr)
 	}
 
-	reportBytes, readErr := ioutil.ReadAll(reportFile)
+	reportBytes, readErr := io.ReadAll(reportFile)
 	if readErr != nil {
-		return nil, errors.New(fmt.Sprintf("report path %s: error reading file  %v", path, readErr))
+		return nil, fmt.Errorf("report path %s: error reading file  %v", path, readErr)
 	}
 
 	return reportBytes, nil
