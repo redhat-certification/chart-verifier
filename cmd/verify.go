@@ -191,13 +191,13 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 				SetDuration(apiverifier.HelmInstallTimeout, helmInstallTimeout).
 				SetString(apiverifier.OpenshiftVersion, []string{openshiftVersionFlag}).
 				SetString(apiverifier.ChartValues, opts.ValueFiles).
-				SetString(apiverifier.KubeApiServer, []string{settings.KubeAPIServer}).
+				SetString(apiverifier.KubeAPIServer, []string{settings.KubeAPIServer}).
 				SetString(apiverifier.KubeAsUser, []string{settings.KubeAsUser}).
 				SetString(apiverifier.KubeCaFile, []string{settings.KubeCaFile}).
 				SetString(apiverifier.KubeConfig, []string{settings.KubeConfig}).
 				SetString(apiverifier.KubeContext, []string{settings.KubeContext}).
 				SetString(apiverifier.Namespace, []string{settings.Namespace()}).
-				SetString(apiverifier.KubeApiServer, []string{settings.KubeAPIServer}).
+				SetString(apiverifier.KubeAPIServer, []string{settings.KubeAPIServer}).
 				SetString(apiverifier.RegistryConfig, []string{settings.RegistryConfig}).
 				SetString(apiverifier.RepositoryConfig, []string{settings.RepositoryConfig}).
 				SetString(apiverifier.RepositoryCache, []string{settings.RepositoryCache}).
