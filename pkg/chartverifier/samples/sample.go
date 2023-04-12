@@ -2,6 +2,7 @@ package samples
 
 import (
 	"fmt"
+
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 	"github.com/redhat-certification/chart-verifier/pkg/chartverifier/reportsummary"
@@ -9,7 +10,6 @@ import (
 )
 
 func runVerifier() error {
-
 	// Run verify command for a chart, but omit the chart testing check and run checks based on the redhat profile
 	commandSet := make(map[string]interface{})
 	commandSet["profile.vendortype"] = "redhat"
@@ -46,5 +46,4 @@ func runVerifier() error {
 	fmt.Println("report summary content:\n", reportSummary)
 
 	return nil
-
 }
