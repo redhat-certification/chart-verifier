@@ -18,6 +18,7 @@ package checks
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -32,7 +33,6 @@ import (
 
 	"helm.sh/helm/v3/pkg/chartutil"
 
-	"github.com/pkg/errors"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 
@@ -49,7 +49,7 @@ import (
 // doesn't contain the 'http' or 'https' schema, or any other error related to retrieving the contents of the chart.
 func loadChartFromRemote(url *url.URL) (*chart.Chart, error) {
 	if url.Scheme != "http" && url.Scheme != "https" {
-		return nil, errors.Errorf("only 'http' and 'https' schemes are supported, but got %q", url.Scheme)
+		return nil, fmt.Errorf("only 'http' and 'https' schemes are supported, but got %q", url.Scheme)
 	}
 
 	resp, err := http.Get(url.String())
@@ -169,7 +169,7 @@ func LoadChartFromURI(opts *CheckOptions) (*chart.Chart, string, error) {
 	case "file", "":
 		chrt, err = loadChartFromAbsPath(u.Path)
 	default:
-		return nil, "", errors.Errorf("scheme %q not supported", u.Scheme)
+		return nil, "", fmt.Errorf("scheme %q not supported", u.Scheme)
 	}
 
 	if err != nil {

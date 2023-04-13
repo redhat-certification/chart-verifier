@@ -17,6 +17,7 @@
 package checks
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -26,7 +27,6 @@ import (
 	"strings"
 
 	"github.com/Masterminds/sprig"
-	"github.com/pkg/errors"
 	"golang.org/x/mod/semver"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/lint"

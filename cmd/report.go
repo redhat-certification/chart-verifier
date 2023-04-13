@@ -1,12 +1,12 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -65,7 +65,7 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 			case string(apireportsummary.AllSummary):
 				reportType = apireportsummary.AllSummary
 			default:
-				return errors.New(fmt.Sprintf("Error: command %s not recognized", commandArg))
+				return fmt.Errorf("Error: command %s not recognized", commandArg)
 			}
 
 			valueMap := make(map[string]interface{})
@@ -85,12 +85,8 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 			reportBytes, readErr := io.ReadAll(reportFile)
 			if readErr != nil {
 				//nolint:errcheck // TODO(komish): The linter indicates that we've not done anything with
-				// this error, which is correct. Perhaps the bigger issue is that this uses an archived API
-				// at https://github.com/pkg/errors. We should consider resolving both, as I'm not sure what we'd expect
-				// for this error (as in, where it should be presented). given that this logic just seems to wrap the input error.
-				//
-				// For now, ignoring the linter. https://github.com/redhat-certification/chart-verifier/issues/321
-				errors.New(fmt.Sprintf("report path %s: error reading file  %v", reportArg, readErr))
+				// this error, which is correct. Need to confirm what the intention was before changing this.
+				fmt.Errorf("report path %s: error reading file  %v", reportArg, readErr)
 			}
 
 			report, loadErr := apireport.NewReport().
