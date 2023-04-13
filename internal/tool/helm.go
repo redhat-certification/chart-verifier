@@ -111,7 +111,7 @@ func (h Helm) Test(ctx context.Context, namespace, release string) error {
 	deadline, _ := ctx.Deadline()
 	client := action.NewReleaseTesting(h.config)
 	client.Namespace = namespace
-	client.Timeout = deadline.Sub(time.Now())
+	client.Timeout = time.Until(deadline)
 
 	if client.Timeout <= 0 {
 		return errors.New("Helm test error : timeout has expired, please consider increasing the timeout using the chart-verifier timeout flag")

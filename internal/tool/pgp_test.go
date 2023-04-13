@@ -2,7 +2,7 @@ package tool
 
 import (
 	"bytes"
-	"io/ioutil"
+	"os"
 	"os/exec"
 	"strings"
 	"testing"
@@ -28,7 +28,7 @@ func TestPGPKeyEncoding(t *testing.T) {
 	require.NoError(t, decodeErr)
 	require.True(t, len(decodedKey) > 0)
 
-	keyBytes, readErr := ioutil.ReadFile(keyfileName)
+	keyBytes, readErr := os.ReadFile(keyfileName)
 	require.NoError(t, readErr)
 	require.Equal(t, keyBytes, decodedKey)
 }

@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
@@ -18,6 +17,9 @@ func GetKeyRing(targetDir string, publicKeys []string) (string, error) {
 			return "", err
 		}
 	} else {
+		//nolint //TODO(komish): The intention may have been to return if
+		// this RemoveAll fails, but we need to be certain. In some cases, RemoveAll
+		// returns an error that might be ignored. Need to validate. Ignoring for now.
 		err = os.RemoveAll(targetDir)
 	}
 
@@ -72,7 +74,7 @@ func GetEncodedKey(publicKeyFileName string) (string, error) {
 		return "", nil
 	}
 	// #nosec G304
-	keyBytes, err := ioutil.ReadFile(publicKeyFileName)
+	keyBytes, err := os.ReadFile(publicKeyFileName)
 	if err != nil {
 		return "", err
 	}
@@ -94,7 +96,6 @@ func GetPublicKeyDigest(publicKey string) (string, error) {
 func createKeyFiles(targetDir string, publicKeys []string) ([]string, error) {
 	var keyFiles []string
 	for keyNum, publicKey := range publicKeys {
-
 		keyFile := fmt.Sprintf("Pubkey_%d.asc", keyNum)
 		keyFileName := path.Join(targetDir, keyFile)
 
@@ -103,7 +104,7 @@ func createKeyFiles(targetDir string, publicKeys []string) ([]string, error) {
 			return nil, err
 		}
 		// #nosec G306
-		err = ioutil.WriteFile(keyFileName, decodedKey, 0o644)
+		err = os.WriteFile(keyFileName, decodedKey, 0o644)
 		if err != nil {
 			return nil, err
 		}

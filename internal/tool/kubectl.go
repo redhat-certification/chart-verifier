@@ -99,7 +99,7 @@ func (k Kubectl) WaitForDeployments(context context.Context, namespace string, s
 	unavailableDeployments := []deploymentNotReady{{Name: "none", Unavailable: 1}}
 	getDeploymentsError := ""
 
-	utils.LogInfo(fmt.Sprintf("Start wait for deployments. --timeout time left: %s ", deadline.Sub(time.Now()).String()))
+	utils.LogInfo(fmt.Sprintf("Start wait for deployments. --timeout time left: %s ", time.Until(deadline).String()))
 
 	for deadline.After(time.Now()) && len(unavailableDeployments) > 0 {
 		unavailableDeployments = []deploymentNotReady{}
@@ -125,7 +125,7 @@ func (k Kubectl) WaitForDeployments(context context.Context, namespace string, s
 				}
 				time.Sleep(time.Second)
 			} else {
-				utils.LogInfo(fmt.Sprintf("Finish wait for deployments, --timeout time left %s", deadline.Sub(time.Now()).String()))
+				utils.LogInfo(fmt.Sprintf("Finish wait for deployments, --timeout time left %s", time.Until(deadline).String()))
 			}
 		}
 	}
@@ -136,7 +136,7 @@ func (k Kubectl) WaitForDeployments(context context.Context, namespace string, s
 		return errors.New(errorMsg)
 	}
 	if len(unavailableDeployments) > 0 {
-		errorMsg := fmt.Sprintf("Error unavailable deployments, timeout has expired, please consider increasing the timeout using the chart-verifier --timeout flag")
+		errorMsg := "error unavailable deployments, timeout has expired, please consider increasing the timeout using the chart-verifier --timeout flag"
 		utils.LogError(errorMsg)
 		return errors.New(errorMsg)
 	}
