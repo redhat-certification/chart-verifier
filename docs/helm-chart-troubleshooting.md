@@ -1,25 +1,27 @@
 # Troubleshooting
 
-- [Check failures](#troubleshooting-check-failures)
-  - [is-helm-v3 v1.0](#is-helm-v3-v10)
-  - [has-readme v1.0](#has-readme-v10)
-  - [contains-test v1.0](#contains-test-v10)
-  - [has-kubeversion v1.1](#has-kubeversion-v10)
-  - [has-kubeversion v1.0](#has-kubeversion-v11)
-  - [contains-values v1.0](#contains-values-v10)
-  - [contains-values-schema v1.0](#contains-values-schema-v10)  
-  - [not-contains-crds v1.0](#not-contains-crds-v1.0)  
-  - [not-contain-csi-objects v1.0](#not-contain-csi-objects-v10)  
-  - [helm-lint v1.0](#helm-lint-v10)  
-  - [images-are-certified v1.0](#images-are-certified-v10)
-  - [chart-testing v1.0](#chart-testing-v10)
-  - [required-annotations-present v1.0](#required-annotations-present-v10) 
-  - [signature-is-valid v1.0](#signature-is-valid-v10)  
-- [Report related submission failures](#report-related-submission-failures)   
-  - [One or more mandatory checks have failed or are missing from the report.](#one-or-more-mandatory-checks-have-failed-or-are-missing-from-the-report.)
-  - [The digest in the report does not match the digest calculated for the submitted chart.](#the-digest-in-the-report-does-not-match-the-digest-calculated-for-the-submitted-chart)
-  - [The certifiedOpenShiftVersions annotation does not contain a valid value.](#the-certifiedOpenShiftVersions-annotation-does-not-contain-a-valid-value)
-  - [The chart uri is not a valid url](#the-chart-uri-is-not-a-valid-url)
+- [Troubleshooting](#troubleshooting)
+  - [Troubleshooting check failures](#troubleshooting-check-failures)
+    - [`is-helm-v3` v1.0](#is-helm-v3-v10)
+    - [`has-readme` v1.0](#has-readme-v10)
+    - [`contains-test` v1.0](#contains-test-v10)
+    - [`has-kubeversion` v1.0](#has-kubeversion-v10)
+    - [`has-kubeversion` v1.1](#has-kubeversion-v11)
+    - [`contains-values` v1.0](#contains-values-v10)
+    - [`contains-values-schema` v1.0](#contains-values-schema-v10)
+    - [`not-contains-crds` v1.0](#not-contains-crds-v10)
+    - [`not-contain-csi-objects` v1.0](#not-contain-csi-objects-v10)
+    - [`helm-lint` v1.0](#helm-lint-v10)
+    - [`images-are-certified` v1.0](#images-are-certified-v10)
+    - [`images-are-certified` v1.1](#images-are-certified-v11)
+    - [`chart-testing` v1.0](#chart-testing-v10)
+    - [`required-annotations-present` v1.0](#required-annotations-present-v10)
+    - [`signature-is-valid` v1.0](#signature-is-valid-v10)
+  - [Report related submission failures](#report-related-submission-failures)
+    - [One or more mandatory checks have failed or are missing from the report.](#one-or-more-mandatory-checks-have-failed-or-are-missing-from-the-report)
+    - [The digest in the report does not match the digest calculated for the submitted chart.](#the-digest-in-the-report-does-not-match-the-digest-calculated-for-the-submitted-chart)
+    - [The certifiedOpenShiftVersions annotation does not contain a valid value.](#the-certifiedopenshiftversions-annotation-does-not-contain-a-valid-value)
+  - [The chart uri is not a valid url.](#the-chart-uri-is-not-a-valid-url)
     
 ## Troubleshooting check failures
 
@@ -148,7 +150,7 @@ Run the chart verifier and set log_ouput to true to get additional information:
 ```
 $ podman run --rm -i \
           -e KUBECONFIG=/.kube/config \
-          -v "${HOME}/.kube":/.kube \ 
+          -v "${HOME}/.kube":/.kube:z \ 
           "quay.io/redhat-certification/chart-verifier" \
           verify -l \
           <chart-uri>

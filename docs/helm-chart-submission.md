@@ -1,8 +1,9 @@
 
 # Submission of Helm charts for Red Hat OpenShift certification
- - [Submission options](#submission-options)
- - [Helm Chart Distribution methods](#helm-chart-distribution-methods)
- - [Web Catalog Only](#web_catalog_only)
+- [Submission of Helm charts for Red Hat OpenShift certification](#submission-of-helm-charts-for-red-hat-openshift-certification)
+  - [Submission options](#submission-options)
+  - [Helm Chart Distribution methods:](#helm-chart-distribution-methods)
+  - [Web catalog only](#web-catalog-only)
 
 ## Submission options
 
@@ -58,9 +59,9 @@ Web catalog only distribution method is then based on the following conditions:
 1. When generating the Verification report the ```--web-catalog-only``` flag is used.
    Example:
     ```
-    $ podman run --rm -i                                  \
+    $ podman run --rm -i                                \
           -e KUBECONFIG=/.kube/config                   \
-          -v "${HOME}/.kube":/.kube                     \
+          -v "${HOME}/.kube":/.kube:z                   \
           "quay.io/redhat-certification/chart-verifier" \
           verify --web-catalog-only                     \
           <chart-uri>
