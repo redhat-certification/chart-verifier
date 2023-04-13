@@ -132,7 +132,6 @@ func (h Helm) Uninstall(namespace, release string) error {
 	client := action.NewUninstall(h.config)
 	// TODO: support other options if required
 	_, err := client.Run(release)
-
 	if err != nil {
 		utils.LogError(fmt.Sprintf("Error from helm uninstall : %v", err))
 		return err

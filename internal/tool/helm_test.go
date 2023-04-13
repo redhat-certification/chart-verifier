@@ -2,10 +2,11 @@ package tool
 
 import (
 	"context"
-	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"testing"
 	"time"
+
+	"gopkg.in/yaml.v3"
 
 	"github.com/stretchr/testify/require"
 	"helm.sh/helm/v3/pkg/action"
