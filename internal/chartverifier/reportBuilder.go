@@ -21,11 +21,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/pkg/errors"
-	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
-	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
-	"github.com/redhat-certification/chart-verifier/internal/chartverifier/utils"
-	apiReport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 	"io"
 	"net/http"
 	"net/url"
@@ -33,6 +28,11 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/utils"
+	apiReport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 
 	helmchart "helm.sh/helm/v3/pkg/chart"
 )
@@ -228,7 +228,7 @@ func GetPackageDigest(uri string) string {
 			chartReader, _ = os.Open(url.Path)
 		}
 	default:
-		err = errors.Errorf("scheme %q not supported", url.Scheme)
+		err = fmt.Errorf("scheme %q not supported", url.Scheme)
 	}
 	if err != nil || chartReader == nil {
 		return ""

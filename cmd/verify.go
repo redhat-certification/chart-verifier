@@ -17,6 +17,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -32,8 +33,6 @@ import (
 	"helm.sh/helm/v3/pkg/cli/values"
 
 	//"helm.sh/helm/v3/pkg/getter"
-
-	"github.com/pkg/errors"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -104,7 +103,7 @@ func convertChecks(checks []string) ([]apiChecks.CheckName, error) {
 			}
 		}
 		if !checkFound {
-			return apiCheckSet, errors.New(fmt.Sprintf("enabled check is invalid :%s", check))
+			return apiCheckSet, fmt.Errorf("enabled check is invalid :%s", check)
 		}
 	}
 	return apiCheckSet, nil
