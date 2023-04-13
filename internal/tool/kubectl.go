@@ -50,7 +50,6 @@ func init() {
 	kubeOpenShiftVersionMap = make(map[string]string)
 
 	yamlFile, err := content.ReadFile("kubeOpenShiftVersionMap.yaml")
-
 	if err != nil {
 		utils.LogError(fmt.Sprintf("Error reading content of kubeOpenShiftVersionMap.yaml: %v", err))
 		return
@@ -71,7 +70,6 @@ func init() {
 		}
 		kubeOpenShiftVersionMap[versionMap.KubeVersion] = versionMap.OcpVersion
 	}
-
 }
 
 type Kubectl struct {
