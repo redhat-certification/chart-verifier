@@ -75,19 +75,19 @@ func TestOCVersions(t *testing.T) {
 			t.Error(err)
 		}
 		if serverVersion.Major != testdata.getVersionOut.Major || serverVersion.Minor != testdata.getVersionOut.Minor {
-			t.Error(fmt.Sprintf("server version mismatch, expected: %+v, got: %+v", testdata.getVersionOut, serverVersion))
+			t.Errorf("server version mismatch, expected: %+v, got: %+v", testdata.getVersionOut, serverVersion)
 		}
 		kubeVersion := fmt.Sprintf("%s.%s", serverVersion.Major, serverVersion.Minor)
 		ocVersion := GetKubeOpenShiftVersionMap()[kubeVersion]
 		if ocVersion != testdata.OCVersion {
-			t.Error(fmt.Sprintf("version mismatch, expected: %s, got: %s", testdata.OCVersion, ocVersion))
+			t.Errorf("version mismatch, expected: %s, got: %s", testdata.OCVersion, ocVersion)
 		}
 	}
 
 	latestKV := GetLatestKubeVersion()
 	expectedLatestKV := fmt.Sprintf("%s.%s.0", latestVersion.Major, latestVersion.Minor)
 	if latestKV != expectedLatestKV {
-		t.Error(fmt.Sprintf("latest kubversion mismatch, expected: %s, got: %s", expectedLatestKV, latestKV))
+		t.Errorf("latest kubversion mismatch, expected: %s, got: %s", expectedLatestKV, latestKV)
 	}
 }
 
@@ -157,7 +157,7 @@ func TestTimeExpirationWaitingForDeployments(t *testing.T) {
 	k := new(Kubectl)
 	err := k.WaitForDeployments(ctx, "testNameSpace", "selector")
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "Error unavailable deployments, timeout has expired,")
+	require.Contains(t, err.Error(), "error unavailable deployments, timeout has expired,")
 }
 
 func TestTimeExpirationGetDeploymentsFailure(t *testing.T) {
@@ -181,7 +181,7 @@ func deploymentTestListGood(k Kubectl, context context.Context, namespace string
 	for index := 0; index < len(DeploymentList1); index++ {
 		if DeploymentList1[index].Status.UnavailableReplicas > 0 {
 			DeploymentList1[index].Status.UnavailableReplicas--
-			fmt.Println(fmt.Sprintf("UnavailableReplicas set to %d for deployment %s", DeploymentList1[index].Status.UnavailableReplicas, DeploymentList1[index].Name))
+			fmt.Printf("UnavailableReplicas set to %d for deployment %s\n", DeploymentList1[index].Status.UnavailableReplicas, DeploymentList1[index].Name)
 		}
 	}
 	return DeploymentList1, nil

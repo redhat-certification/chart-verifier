@@ -2,7 +2,8 @@ package tool
 
 import (
 	"context"
-	"io/ioutil"
+	"io"
+	"os"
 	"testing"
 	"time"
 
@@ -43,7 +44,7 @@ func TestInstall(t *testing.T) {
 		t.Run(tt.releaseName, func(t *testing.T) {
 			actionConfig := &action.Configuration{
 				Releases:     storage.Init(driver.NewMemory()),
-				KubeClient:   &kubefake.PrintingKubeClient{Out: ioutil.Discard},
+				KubeClient:   &kubefake.PrintingKubeClient{Out: io.Discard},
 				Capabilities: chartutil.DefaultCapabilities,
 				Log:          func(format string, v ...interface{}) {},
 			}
@@ -56,9 +57,9 @@ func TestInstall(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), tt.timeout)
 			defer cancel()
 
-			before_install_time := time.Now()
+			beforeInstallTime := time.Now()
 			err := helm.Install(ctx, "default", tt.chartPath, tt.releaseName, "")
-			require.WithinDuration(t, before_install_time, time.Now(), tt.timeout)
+			require.WithinDuration(t, beforeInstallTime, time.Now(), tt.timeout)
 			if err == nil {
 				require.Equal(t, tt.expected, "")
 			} else {
@@ -103,7 +104,7 @@ func TestUninstall(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			actionConfig := &action.Configuration{
 				Releases:     store,
-				KubeClient:   &kubefake.PrintingKubeClient{Out: ioutil.Discard},
+				KubeClient:   &kubefake.PrintingKubeClient{Out: io.Discard},
 				Capabilities: chartutil.DefaultCapabilities,
 				Log:          func(format string, v ...interface{}) {},
 			}
@@ -136,7 +137,7 @@ func TestUpgrade(t *testing.T) {
 	testValues.AsMap()["k8Project"] = "default"
 
 	var chartMetadata chart.Metadata
-	yamlFile, err := ioutil.ReadFile("../chartverifier/checks/psql-service-0.1.7/Chart.yaml")
+	yamlFile, err := os.ReadFile("../chartverifier/checks/psql-service-0.1.7/Chart.yaml")
 	require.NoError(t, err)
 	err = yaml.Unmarshal(yamlFile, &chartMetadata)
 	require.NoError(t, err)
@@ -183,7 +184,7 @@ func TestUpgrade(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			actionConfig := &action.Configuration{
 				Releases:     store,
-				KubeClient:   &kubefake.PrintingKubeClient{Out: ioutil.Discard},
+				KubeClient:   &kubefake.PrintingKubeClient{Out: io.Discard},
 				Capabilities: chartutil.DefaultCapabilities,
 				Log:          func(format string, v ...interface{}) {},
 			}
@@ -200,9 +201,9 @@ func TestUpgrade(t *testing.T) {
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), tt.timeout)
 			defer cancel()
-			before_upgrade_time := time.Now()
+			beforeUpgradeTime := time.Now()
 			err := helm.Upgrade(ctx, "default", tt.chartPath, tt.release.Name)
-			require.WithinDuration(t, before_upgrade_time, time.Now(), tt.timeout)
+			require.WithinDuration(t, beforeUpgradeTime, time.Now(), tt.timeout)
 			if err == nil {
 				require.Equal(t, tt.expected, "")
 			} else {
@@ -214,7 +215,7 @@ func TestUpgrade(t *testing.T) {
 
 func TestReleaseTesting(t *testing.T) {
 	releaseTestPath := "../chartverifier/checks/psql-service-0.1.7/templates/tests/test-psql-connection.yaml"
-	releaseTest, err := ioutil.ReadFile(releaseTestPath)
+	releaseTest, err := os.ReadFile(releaseTestPath)
 	if err != nil {
 		t.Error(err)
 	}
@@ -284,7 +285,7 @@ func TestReleaseTesting(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			actionConfig := &action.Configuration{
 				Releases:     store,
-				KubeClient:   &kubefake.PrintingKubeClient{Out: ioutil.Discard},
+				KubeClient:   &kubefake.PrintingKubeClient{Out: io.Discard},
 				Capabilities: chartutil.DefaultCapabilities,
 				Log:          func(format string, v ...interface{}) {},
 			}
@@ -301,12 +302,12 @@ func TestReleaseTesting(t *testing.T) {
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), tt.timeout)
 			defer cancel()
-			before_test_time := time.Now()
+			beforeTestime := time.Now()
 			err := helm.Test(ctx, "default", tt.release.Name)
 			if tt.timeout <= 0 {
-				require.WithinDuration(t, before_test_time, time.Now(), 1*time.Second)
+				require.WithinDuration(t, beforeTestime, time.Now(), 1*time.Second)
 			} else {
-				require.WithinDuration(t, before_test_time, time.Now(), tt.timeout)
+				require.WithinDuration(t, beforeTestime, time.Now(), tt.timeout)
 			}
 			if err == nil {
 				require.Equal(t, tt.expected, "")
