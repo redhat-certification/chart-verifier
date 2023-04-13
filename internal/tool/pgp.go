@@ -26,7 +26,7 @@ func GetKeyRing(targetDir string, publicKeys []string) (string, error) {
 	ringFile := path.Join(targetDir, "keyring.pgp")
 
 	keyFileDir := path.Join(targetDir, "key")
-	if err := os.MkdirAll(keyFileDir, 0o777); err != nil {
+	if err := os.MkdirAll(keyFileDir, 0o750); err != nil {
 		return "", err
 	}
 
