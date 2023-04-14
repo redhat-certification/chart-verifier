@@ -21,11 +21,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/pkg/errors"
-	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
-	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
-	"github.com/redhat-certification/chart-verifier/internal/chartverifier/utils"
-	apiReport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 	"io"
 	"net/http"
 	"net/url"
@@ -33,6 +28,12 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/pkg/errors"
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/utils"
+	apiReport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 
 	helmchart "helm.sh/helm/v3/pkg/chart"
 )
@@ -122,7 +123,6 @@ func (r *reportBuilder) AddCheck(check checks.Check, result checks.Result) Repor
 }
 
 func (r *reportBuilder) Build() (*apiReport.Report, error) {
-
 	apiReport := r.Report.GetApiReport()
 
 	for _, annotation := range profiles.Get().Annotations {
@@ -194,7 +194,6 @@ func (fs *fileSorter) Less(i, j int) bool {
 }
 
 func GenerateSha(rawFiles []*helmchart.File) string {
-
 	name := func(f1, f2 *helmchart.File) bool {
 		return f1.Name < f2.Name
 	}
@@ -210,7 +209,6 @@ func GenerateSha(rawFiles []*helmchart.File) string {
 }
 
 func GetPackageDigest(uri string) string {
-
 	url, err := url.Parse(uri)
 	if err != nil {
 		return ""

@@ -19,8 +19,9 @@ package chartverifier
 import (
 	"context"
 	"errors"
-	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
 	"testing"
+
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
@@ -43,7 +44,6 @@ func isOk(c *apiReport.Report) bool {
 }
 
 func TestVerifier_Verify(t *testing.T) {
-
 	addr := "127.0.0.1:9876"
 	ctx, cancel := context.WithCancel(context.Background())
 

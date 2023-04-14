@@ -1,10 +1,10 @@
 package api
 
 import (
+	"time"
+
 	"github.com/spf13/viper"
 	"helm.sh/helm/v3/pkg/cli"
-
-	"time"
 
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier"
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
@@ -36,7 +36,6 @@ type RunOptions struct {
 }
 
 func Run(options RunOptions) (*apireport.Report, error) {
-
 	var verifyReport *apireport.Report
 
 	verifierBuilder := chartverifier.NewVerifierBuilder()
@@ -68,7 +67,6 @@ func Run(options RunOptions) (*apireport.Report, error) {
 		SetSettings(options.Settings).
 		SetPublicKeys(options.PublicKeys).
 		Build()
-
 	if err != nil {
 		return verifyReport, err
 	}
@@ -80,5 +78,4 @@ func Run(options RunOptions) (*apireport.Report, error) {
 	}
 
 	return verifyReport, nil
-
 }

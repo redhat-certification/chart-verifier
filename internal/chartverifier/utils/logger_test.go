@@ -3,15 +3,16 @@ package utils
 import (
 	"bytes"
 	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"os"
 	"path"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/stretchr/testify/require"
 )
 
 func NewTestCmd(config *viper.Viper) *cobra.Command {
@@ -51,7 +52,6 @@ func NewTestCmd(config *viper.Viper) *cobra.Command {
 }
 
 func TestLogging(t *testing.T) {
-
 	t.Run("LogInfo, no logfile, should be no output", func(t *testing.T) {
 		tCmd := NewTestCmd(viper.New())
 		outBuf := bytes.NewBufferString("")
@@ -63,7 +63,6 @@ func TestLogging(t *testing.T) {
 
 		require.Empty(t, outBuf.String())
 		require.Empty(t, errBuf.String())
-
 	})
 
 	t.Run("LogInfo, set logfile, should be a logfile created", func(t *testing.T) {
@@ -85,7 +84,6 @@ func TestLogging(t *testing.T) {
 		t.Cleanup(func() {
 			checkAndOrDeleteFiles("delete", "don't care just be sure log is deleted")
 		})
-
 	})
 
 	t.Run("Write to stdOut to a file", func(t *testing.T) {
@@ -105,7 +103,6 @@ func TestLogging(t *testing.T) {
 		t.Cleanup(func() {
 			checkAndOrDeleteFiles("delete", "don't care just be sure report is deleted")
 		})
-
 	})
 
 	t.Run("Write Error to stdError and file", func(t *testing.T) {
@@ -125,7 +122,6 @@ func TestLogging(t *testing.T) {
 		t.Cleanup(func() {
 			checkAndOrDeleteFiles("delete", "don't care just be sure log is deleted")
 		})
-
 	})
 
 	t.Run("Write Warning to stdError and file", func(t *testing.T) {
@@ -145,7 +141,6 @@ func TestLogging(t *testing.T) {
 		t.Cleanup(func() {
 			checkAndOrDeleteFiles("delete", "don't care just be sure log is deleted")
 		})
-
 	})
 
 	t.Run("Test log file pruning", func(t *testing.T) {
@@ -170,7 +165,6 @@ func TestLogging(t *testing.T) {
 		t.Cleanup(func() {
 			checkAndOrDeleteFiles("delete", "don't care just be sure log file are deleted")
 		})
-
 	})
 }
 

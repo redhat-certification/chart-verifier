@@ -17,16 +17,16 @@
 package chartverifier
 
 import (
+	"testing"
+
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
 	"github.com/stretchr/testify/assert"
-	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
 func TestCertificationBuilder(t *testing.T) {
-
 	t.Run("Should fail building verifier when requiredChecks are not set", func(t *testing.T) {
 		b := NewVerifierBuilder()
 

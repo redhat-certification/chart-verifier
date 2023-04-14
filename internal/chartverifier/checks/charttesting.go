@@ -65,7 +65,6 @@ func (e OpenShiftSemVerErr) Error() string {
 // buildChartTestingConfiguration computes the chart testing related
 // configuration from the given check options.
 func buildChartTestingConfiguration(opts *CheckOptions) config.Configuration {
-
 	// cfg will be populated with options gathered from the input
 	// check options.
 	cfg := config.Configuration{
@@ -103,7 +102,6 @@ func buildChartTestingConfiguration(opts *CheckOptions) config.Configuration {
 // functions used in this context were also ported from
 // chart-verifier.
 func ChartTesting(opts *CheckOptions) (Result, error) {
-
 	utils.LogInfo("Start chart install and test check")
 
 	ctx, cancel := context.WithTimeout(context.Background(), opts.Timeout)
@@ -254,7 +252,6 @@ func upgradeAndTestChart(
 	kubectl *tool.Kubectl,
 	configRelease string,
 ) chart.TestResult {
-
 	// result contains the test result; please notice that each values
 	// file in the chart's 'ci' folder will be installed and tested
 	// and the first failure makes the test fail.
@@ -338,7 +335,7 @@ func writeObjectToTempYamlFile(obj map[string]interface{}) (filename string, cle
 
 	filename = path.Join(tempDir, "values.yaml")
 
-	err = ioutil.WriteFile(filename, objBytes, 0644)
+	err = ioutil.WriteFile(filename, objBytes, 0o644)
 	if err != nil {
 		return "", nil, fmt.Errorf("writing values file new contents: %w", err)
 	}
@@ -356,7 +353,6 @@ func writeObjectToTempYamlFile(obj map[string]interface{}) (filename string, cle
 // In the case the given filename is an empty string, it indicates that only the valueOverrides contents will be
 // materialized into the temporary file to be merged by `helm` when processing the chart.
 func newTempValuesFileWithOverrides(filename string, valuesOverrides map[string]interface{}) (string, func(), error) {
-
 	var obj map[string]interface{}
 
 	if filename != "" {
@@ -393,7 +389,6 @@ func installAndTestChartRelease(
 	valuesOverrides map[string]interface{},
 	configRelease string,
 ) chart.TestResult {
-
 	// valuesFiles contains all the configurations that should be
 	// executed; in other words, it performs a test matrix between
 	// values files and tests.
@@ -411,7 +406,6 @@ func installAndTestChartRelease(
 		// Use anonymous function. Otherwise deferred calls would pile up
 		// and be executed in reverse order after the loop.
 		fun := func() error {
-
 			tmpValuesFile, tmpValuesFileCleanup, err := newTempValuesFileWithOverrides(valuesFile, valuesOverrides)
 			if err != nil {
 				// it is required this operation to succeed, otherwise there are no guarantees the values informed using

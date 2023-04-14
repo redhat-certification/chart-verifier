@@ -138,7 +138,6 @@ func (r *DefaultRegistry) Get(id CheckId) (Check, bool) {
 }
 
 func (r *DefaultRegistry) Add(name apiChecks.CheckName, version string, checkFunc CheckFunc) Registry {
-
 	check := Check{CheckId: CheckId{Name: name, Version: version}, Func: checkFunc}
 	(*r)[check.CheckId] = check
 	return r

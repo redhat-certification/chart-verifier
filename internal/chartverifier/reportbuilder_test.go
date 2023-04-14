@@ -16,12 +16,13 @@ import (
 )
 
 func TestSha(t *testing.T) {
-
-	charts := []string{"checks/chart-0.1.0-v3.with-csi.tgz",
+	charts := []string{
+		"checks/chart-0.1.0-v3.with-csi.tgz",
 		"checks/chart-0.1.0-v3.valid.tgz",
 		"checks/chart-0.1.0-v2.invalid.tgz",
 		"checks/chart-0.1.0-v3.without-readme.tgz",
-		"checks/chart-0.1.0-v3.with-crd.tgz"}
+		"checks/chart-0.1.0-v3.with-crd.tgz",
+	}
 
 	shas := make(map[string]string)
 
@@ -44,7 +45,6 @@ func TestSha(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		// get sha's again and make sure they match
 		for _, chart := range charts {
-
 			t.Run("Sha must not change : "+chart, func(t *testing.T) {
 				opts := checks.CheckOptions{
 					URI:             chart,
@@ -59,16 +59,16 @@ func TestSha(t *testing.T) {
 			})
 		}
 	}
-
 }
 
 func TestFilePackageDigest(t *testing.T) {
-
-	charts := []string{"checks/chart-0.1.0-v3.with-csi.tgz",
+	charts := []string{
+		"checks/chart-0.1.0-v3.with-csi.tgz",
 		"checks/chart-0.1.0-v3.valid.tgz",
 		"checks/chart-0.1.0-v2.invalid.tgz",
 		"checks/chart-0.1.0-v3.without-readme.tgz",
-		"checks/chart-0.1.0-v3.with-crd.tgz"}
+		"checks/chart-0.1.0-v3.with-crd.tgz",
+	}
 
 	for _, chart := range charts {
 		cmd := exec.Command("sha256sum", chart)
@@ -79,11 +79,9 @@ func TestFilePackageDigest(t *testing.T) {
 		commandResponse := strings.Split(out.String(), " ")
 		assert.Equal(t, commandResponse[0], GetPackageDigest(chart), fmt.Sprintf("%s digests did not match as expected", chart))
 	}
-
 }
 
 func TestUrlPackageDigest(t *testing.T) {
-
 	charts := make(map[string]string)
 
 	charts["https://github.com/openshift-helm-charts/charts/releases/download/hashicorp-vault-0.13.0/hashicorp-vault-0.13.0.tgz"] = "97e274069d9d3d028903610a3f9fca892b2620f0a334de6215ec5f962328586f"
@@ -92,9 +90,6 @@ func TestUrlPackageDigest(t *testing.T) {
 	charts["checks/chart-0.1.0-v3.valid.tgz?raw=true"] = "577c5bbc52f405da1b494bbf1b8251f8e6fdc316583bb0ee71eb74baed843615"
 
 	for chart, sha := range charts {
-
 		assert.Equal(t, sha, GetPackageDigest(chart), fmt.Sprintf("%s digests did not match as expected", chart))
-
 	}
-
 }

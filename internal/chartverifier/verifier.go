@@ -86,7 +86,6 @@ func (c *verifier) subConfig(name string) *viper.Viper {
 }
 
 func (c *verifier) Verify(uri string) (*apiReport.Report, error) {
-
 	if c.webCatalogOnly {
 		if len(GetPackageDigest(uri)) == 0 {
 			return nil, CheckErr("Provider delivery control requires chart input which is a tarball.")
@@ -110,8 +109,10 @@ func (c *verifier) Verify(uri string) (*apiReport.Report, error) {
 		if check.Func == nil {
 			return nil, CheckNotFoundErr(check.CheckId.Name)
 		}
-		holder := AnnotationHolder{Holder: result,
-			CertifiedOpenShiftVersionFlag: c.openshiftVersion}
+		holder := AnnotationHolder{
+			Holder:                        result,
+			CertifiedOpenShiftVersionFlag: c.openshiftVersion,
+		}
 
 		r, checkErr := check.Func(&checks.CheckOptions{
 			HelmEnvSettings:    c.settings,

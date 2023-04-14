@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 	"io"
 	"io/fs"
 	"io/ioutil"
@@ -15,6 +13,9 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 type VerifierLog struct {
@@ -27,13 +28,17 @@ type LogEntry struct {
 	Entry string `json:"Entry" yaml:"Entry"`
 }
 
-var CmdStdout io.Writer = os.Stdout
-var CmdStderr io.Writer = os.Stderr
+var (
+	CmdStdout io.Writer = os.Stdout
+	CmdStderr io.Writer = os.Stderr
+)
 
-var verifierlog VerifierLog
-var cmd *cobra.Command
-var stdoutFileName string
-var stderrFileName string
+var (
+	verifierlog    VerifierLog
+	cmd            *cobra.Command
+	stdoutFileName string
+	stderrFileName string
+)
 
 const outputDirectory string = "chartverifier"
 
@@ -72,7 +77,6 @@ func LogError(message string) {
 }
 
 func WriteLogs(log_format string) {
-
 	pruneLogFiles()
 
 	if len(verifierlog.Entries) > 0 && len(stderrFileName) > 0 {
@@ -95,7 +99,6 @@ func WriteLogs(log_format string) {
 		writeToFile(logOut, stderrFileName)
 	}
 	return
-
 }
 
 func WriteStdOut(output string) {
@@ -116,7 +119,6 @@ func writeToStdOut(output string) {
 }
 
 func writeToFile(output string, fileName string) bool {
-
 	currentDir, err := os.Getwd()
 	if err != nil {
 		LogError(fmt.Sprintf("error getting current working directory : %s", err))
@@ -126,7 +128,7 @@ func writeToFile(output string, fileName string) bool {
 	outputFile := path.Join(outputDir, fileName)
 	if _, err := os.Stat(outputDir); err != nil {
 		// #nosec G301
-		if err = os.MkdirAll(outputDir, 0777); err != nil {
+		if err = os.MkdirAll(outputDir, 0o777); err != nil {
 			LogError(fmt.Sprintf("error creating directory : %s : %s", outputDir, err))
 			return false
 		}
@@ -140,7 +142,7 @@ func writeToFile(output string, fileName string) bool {
 		LogError(fmt.Sprintf("Error removing existing file %s: %s", fileName, err))
 	}
 	// #nosec G304
-	if outfile, open_err := os.OpenFile(outputFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600); open_err == nil {
+	if outfile, open_err := os.OpenFile(outputFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0o600); open_err == nil {
 		outfile.WriteString(output)
 		outfile.Close()
 		return true
@@ -181,7 +183,6 @@ func (fs *fileSorter) Less(i, j int) bool {
 }
 
 func pruneLogFiles() {
-
 	currentDir, err := os.Getwd()
 	if err != nil {
 		LogError(fmt.Sprintf("error getting current working directory : %s", err))
@@ -221,7 +222,6 @@ func pruneLogFiles() {
 		}
 
 	}
-
 }
 
 func getTimeStamp() string {
