@@ -59,11 +59,14 @@ func DefaultRegistry() checks.Registry {
 type FilteredRegistry map[apiChecks.CheckName]checks.Check
 
 type verifierBuilder struct {
-	checks                      FilteredRegistry
-	config                      *viper.Viper
-	registry                    checks.Registry
-	toolVersion                 string
-	openshiftVersion            string
+	checks           FilteredRegistry
+	config           *viper.Viper
+	registry         checks.Registry
+	toolVersion      string
+	openshiftVersion string
+	//nolint:unused // TODO(komish): Need to identify if this is actually
+	// unused, or is intended to be used but its spelling is causing it
+	// to be unused coincidentally (like with a local var).
 	suppportedOpenshiftVersions string
 	webCatalogOnly              bool
 	timeout                     time.Duration
