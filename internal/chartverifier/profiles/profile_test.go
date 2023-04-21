@@ -29,7 +29,6 @@ const (
 )
 
 func TestProfile(t *testing.T) {
-
 	testProfile := getDefaultProfile("test")
 	testProfile.Name = "profile-partner-1.2"
 	config := make(map[string]interface{})
@@ -68,11 +67,9 @@ func TestProfile(t *testing.T) {
 			assert.True(t, cmp.Equal(diskProfile, testProfile), "profiles do not match")
 		}
 	})
-
 }
 
 func TestGetProfiles(t *testing.T) {
-
 	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion11, configVersion11)
 	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion11, configVersion11)
 	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion11, configVersion11)
@@ -88,7 +85,6 @@ func TestGetProfiles(t *testing.T) {
 }
 
 func getAndCheckProfile(t *testing.T, configVendorType, expectVendorType VendorType, configVersion, expectVersion string) {
-
 	config := make(map[string]interface{})
 
 	if len(configVendorType) > 0 {
@@ -105,11 +101,10 @@ func getAndCheckProfile(t *testing.T, configVendorType, expectVendorType VendorT
 		profile = Get()
 		assert.Equal(t, expectVendorType, profile.Vendor, "VendorType did not match")
 		assert.Equal(t, expectVersion, profile.Version, "Version did not match")
-
 	})
 }
-func TestProfileFilter(t *testing.T) {
 
+func TestProfileFilter(t *testing.T) {
 	defaultRegistry := checks.NewRegistry()
 
 	defaultRegistry.Add(apiChecks.HasReadme, checkVersion10, checks.HasReadme)
@@ -167,11 +162,9 @@ func TestProfileFilter(t *testing.T) {
 		filteredChecks := New(config).FilterChecks(defaultRegistry.AllChecks())
 		CompareCheckMaps(t, expectedChecks, filteredChecks)
 	})
-
 }
 
 func CompareCheckMaps(t *testing.T, expectedChecks, filteredChecks FilteredRegistry) {
-
 	assert.Equal(t, len(expectedChecks), len(filteredChecks), fmt.Sprintf("Expected map length : %d does not match returned mao length : %d", len(expectedChecks), len(filteredChecks)))
 	for k, v := range filteredChecks {
 		_, ok := expectedChecks[k]

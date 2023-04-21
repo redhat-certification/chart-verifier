@@ -13,9 +13,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Annotation string
-type VendorType string
-type VendorVersion string
+type (
+	Annotation    string
+	VendorType    string
+	VendorVersion string
+)
 
 const (
 	DigestAnnotation                 Annotation = "Digest"
@@ -70,7 +72,6 @@ func Get() *Profile {
 }
 
 func New(values map[string]interface{}) *Profile {
-
 	profileVendorType := VendorTypeDefault
 	var profileVersion string
 
@@ -114,7 +115,6 @@ func New(values map[string]interface{}) *Profile {
 
 // Get all profiles in the profiles directory, and any subdirectories, and add each to the profile map
 func getProfiles() {
-
 	profileFiles, err := profileconfig.GetProfiles()
 	if err != nil {
 		return
@@ -138,7 +138,6 @@ func getProfiles() {
 }
 
 func (profile *Profile) FilterChecks(registry checks.DefaultRegistry) FilteredRegistry {
-
 	filteredChecks := make(map[apiChecks.CheckName]checks.Check)
 
 	for _, check := range profile.Checks {
@@ -152,11 +151,9 @@ func (profile *Profile) FilterChecks(registry checks.DefaultRegistry) FilteredRe
 	}
 
 	return filteredChecks
-
 }
 
 func readProfile(profileBytes []byte) (*Profile, error) {
-
 	profile := &Profile{}
 	err := yaml.Unmarshal(profileBytes, profile)
 	if err != nil {
@@ -164,5 +161,4 @@ func readProfile(profileBytes []byte) (*Profile, error) {
 	}
 
 	return profile, nil
-
 }
