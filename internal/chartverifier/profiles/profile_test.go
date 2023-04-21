@@ -9,14 +9,17 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
 	apiChecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
-	"github.com/stretchr/testify/assert"
 )
 
 const (
-	NoVersion           string     = ""
-	configVersion00     string     = "v0.0"
+	NoVersion       string = ""
+	configVersion00 string = "v0.0"
+	//nolint:deadcode // TODO(komish) identify where this was intended to be used, or remove.
+	// This should be unused but its triggering as deadcode which is replaced by the unused linter.
 	configVersion10     string     = "v1.0"
 	configVersion11     string     = "v1.1"
 	configVersion12     string     = "v1.2"

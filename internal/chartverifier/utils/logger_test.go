@@ -59,7 +59,7 @@ func TestLogging(t *testing.T) {
 		errBuf := bytes.NewBufferString("")
 		CmdStderr = errBuf
 		tCmd.SetArgs([]string{"LogInfoOnly", "This should not be output"})
-		tCmd.Execute()
+		require.NoError(t, tCmd.Execute())
 
 		require.Empty(t, outBuf.String())
 		require.Empty(t, errBuf.String())
@@ -74,7 +74,7 @@ func TestLogging(t *testing.T) {
 
 		output := "This should be output in a log file"
 		tCmd.SetArgs([]string{"LogInfoFile", output})
-		tCmd.Execute()
+		require.NoError(t, tCmd.Execute())
 
 		require.Empty(t, outBuf.String())
 		require.Empty(t, errBuf.String())
@@ -94,7 +94,7 @@ func TestLogging(t *testing.T) {
 		CmdStderr = errBuf
 		output := "This should be output to file only"
 		tCmd.SetArgs([]string{"StdOutFile", output})
-		tCmd.Execute()
+		require.NoError(t, tCmd.Execute())
 
 		require.Empty(t, outBuf.String())
 		require.Empty(t, errBuf.String())
@@ -113,7 +113,7 @@ func TestLogging(t *testing.T) {
 		CmdStderr = errBuf
 		output := "This error should be output to stderr and log file"
 		tCmd.SetArgs([]string{"ErrorAndLog", output})
-		tCmd.Execute()
+		require.NoError(t, tCmd.Execute())
 
 		require.Empty(t, outBuf.String())
 		require.True(t, strings.Contains(errBuf.String(), output))
@@ -132,7 +132,7 @@ func TestLogging(t *testing.T) {
 		CmdStderr = errBuf
 		output := "This warning should be output to stderr and log file."
 		tCmd.SetArgs([]string{"WarningAndLog", output})
-		tCmd.Execute()
+		require.NoError(t, tCmd.Execute())
 
 		require.Empty(t, outBuf.String())
 		require.True(t, strings.Contains(errBuf.String(), output))
@@ -152,7 +152,7 @@ func TestLogging(t *testing.T) {
 
 		tCmd.SetArgs([]string{"testPrune"})
 		for i := 1; i <= 15; i++ {
-			tCmd.Execute()
+			require.NoError(t, tCmd.Execute())
 			numlogFiles := howManyLogFiles()
 			if i < 10 {
 				require.True(t, numlogFiles == i, fmt.Sprintf("expected %d logfile but found %d", i, numlogFiles))
@@ -182,7 +182,7 @@ func checkAndOrDeleteFiles(fileType string, expectedContent string) bool {
 		files, err := ioutil.ReadDir(logFilesPath)
 		if err != nil {
 			if fileType != "delete" {
-				fmt.Println(fmt.Sprintf("error reading log directory : %s : %s", logFilesPath, err))
+				fmt.Printf("error reading log directory : %s : %s\n", logFilesPath, err)
 				return false
 			}
 			return true
@@ -202,7 +202,7 @@ func checkAndOrDeleteFiles(fileType string, expectedContent string) bool {
 				if fileType != "delete" {
 					logfileContent, err := ioutil.ReadFile(filePath)
 					if err != nil {
-						fmt.Println(fmt.Sprintf("error reading file %s", err))
+						fmt.Printf("error reading file %s", err)
 						return false
 					}
 					if strings.Contains(string(logfileContent), expectedContent) {
@@ -220,14 +220,14 @@ func checkAndOrDeleteFiles(fileType string, expectedContent string) bool {
 func howManyLogFiles() int {
 	currentDir, err := os.Getwd()
 	if err != nil {
-		fmt.Println(fmt.Sprintf("error getting current working directory : %s", err))
+		fmt.Printf("error getting current working directory : %s\n", err)
 		return 0
 	}
 	logFilesPath := path.Join(currentDir, outputDirectory)
 
 	files, err := ioutil.ReadDir(logFilesPath)
 	if err != nil {
-		fmt.Println(fmt.Sprintf("error reading log directory : %s : %s", logFilesPath, err))
+		fmt.Printf("error reading log directory : %s : %s\n", logFilesPath, err)
 		return 0
 	}
 	numLogFiles := 0

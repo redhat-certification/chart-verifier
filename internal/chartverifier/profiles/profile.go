@@ -5,12 +5,13 @@ import (
 	"regexp"
 	"strings"
 
+	"golang.org/x/mod/semver"
+	"gopkg.in/yaml.v3"
+
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/utils"
 	"github.com/redhat-certification/chart-verifier/internal/profileconfig"
 	apiChecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
-	"golang.org/x/mod/semver"
-	"gopkg.in/yaml.v3"
 )
 
 type (
@@ -74,9 +75,7 @@ func Get() *Profile {
 func New(values map[string]interface{}) *Profile {
 	profileVendorType := VendorTypeDefault
 	var profileVersion string
-
 	if values != nil {
-
 		if vendorType, ok := values[VendorTypeConfigName]; ok {
 			profileVendorType = VendorType(strings.ToLower(fmt.Sprintf("%v", vendorType)))
 		}

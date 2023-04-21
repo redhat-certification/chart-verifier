@@ -20,7 +20,7 @@ import (
 
 type VerifierLog struct {
 	Name    string      `json:"name" yaml:"name"`
-	Time    string      `json:"time" yaml: time"`
+	Time    string      `json:"time" yaml:"time"`
 	Entries []*LogEntry `json:"log" yaml:"log"`
 }
 
@@ -59,29 +59,29 @@ func LogWarning(message string) {
 	if cmd != nil {
 		cmd.PrintErrln(message)
 	}
-	warning_log_entry := LogEntry{Entry: fmt.Sprintf("[WARNING] %s : %s", getTimeStamp(), message)}
-	verifierlog.Entries = append(verifierlog.Entries, &warning_log_entry)
+	warningLogEntry := LogEntry{Entry: fmt.Sprintf("[WARNING] %s : %s", getTimeStamp(), message)}
+	verifierlog.Entries = append(verifierlog.Entries, &warningLogEntry)
 }
 
 func LogInfo(message string) {
-	info_log_entry := LogEntry{Entry: fmt.Sprintf("[INFO] %s : %s", getTimeStamp(), message)}
-	verifierlog.Entries = append(verifierlog.Entries, &info_log_entry)
+	infoLogEntry := LogEntry{Entry: fmt.Sprintf("[INFO] %s : %s", getTimeStamp(), message)}
+	verifierlog.Entries = append(verifierlog.Entries, &infoLogEntry)
 }
 
 func LogError(message string) {
 	if cmd != nil {
 		cmd.PrintErrln(message)
 	}
-	error_log_entry := LogEntry{Entry: fmt.Sprintf("[ERROR] %s : %s", getTimeStamp(), message)}
-	verifierlog.Entries = append(verifierlog.Entries, &error_log_entry)
+	errorLogEntry := LogEntry{Entry: fmt.Sprintf("[ERROR] %s : %s", getTimeStamp(), message)}
+	verifierlog.Entries = append(verifierlog.Entries, &errorLogEntry)
 }
 
-func WriteLogs(log_format string) {
+func WriteLogs(logFormat string) {
 	pruneLogFiles()
 
 	if len(verifierlog.Entries) > 0 && len(stderrFileName) > 0 {
 		logOut := ""
-		if log_format == "json" {
+		if logFormat == "json" {
 			b, err := json.Marshal(&verifierlog)
 			if err != nil {
 				LogError(err.Error())
@@ -98,7 +98,6 @@ func WriteLogs(log_format string) {
 		}
 		writeToFile(logOut, stderrFileName)
 	}
-	return
 }
 
 func WriteStdOut(output string) {
@@ -118,6 +117,7 @@ func writeToStdOut(output string) {
 	cmd.SetOut(savedOut)
 }
 
+// writeToFile writes output to fileName and returns true if successful.
 func writeToFile(output string, fileName string) bool {
 	currentDir, err := os.Getwd()
 	if err != nil {
@@ -135,19 +135,32 @@ func writeToFile(output string, fileName string) bool {
 	}
 
 	if _, err := os.Stat(outputFile); err == nil {
+		// TODO(komish) this block needs refactoring.
+		//
+		// The general idea here is "try to delete an existing file and if you can't
+		// fail", but the handling of the value err here doesn't quite do what is
+		// expected. Adding this comment at linting/styling application instead of refactoring,
+		// but this should be done soon after.
+		//
+		//nolint:ineffassign,staticcheck
 		err = os.Remove(outputFile)
 	} else if errors.Is(err, os.ErrNotExist) {
+		//nolint:ineffassign
 		err = nil
 	} else {
 		LogError(fmt.Sprintf("Error removing existing file %s: %s", fileName, err))
 	}
-	// #nosec G304
-	if outfile, open_err := os.OpenFile(outputFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0o600); open_err == nil {
-		outfile.WriteString(output)
-		outfile.Close()
+	outfile, openErr := os.OpenFile(outputFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0o600)
+	if openErr == nil {
+		// #nosec G304
+		defer outfile.Close()
+		if _, writeErr := outfile.WriteString(output); writeErr != nil {
+			LogError(fmt.Sprintf("Error writing file %s: %s", fileName, writeErr))
+			return false
+		}
 		return true
 	} else {
-		LogError(fmt.Sprintf("Error creating/opening file %s: %s", fileName, open_err))
+		LogError(fmt.Sprintf("Error creating/opening file %s: %s", fileName, openErr))
 	}
 	return false
 }
@@ -220,7 +233,6 @@ func pruneLogFiles() {
 				LogError(fmt.Sprintf("error deleting logfile : %s : %s", logFiles[i].Name(), err))
 			}
 		}
-
 	}
 }
 
