@@ -30,7 +30,7 @@ type RunOptions struct {
 	SuppressErrorLog   bool
 	ClientTimeout      time.Duration
 	HelmInstallTimeout time.Duration
-	ChartUri           string
+	ChartURI           string
 	Settings           *cli.EnvSettings
 	PublicKeys         []string
 }
@@ -50,9 +50,9 @@ func Run(options RunOptions) (*apireport.Report, error) {
 	checkRegistry := make(chartverifier.FilteredRegistry)
 
 	for _, checkName := range options.ChecksToRun {
-		for checkId, check := range profileChecks {
-			if checkId == checkName {
-				checkRegistry[checkId] = check
+		for checkID, check := range profileChecks {
+			if checkID == checkName {
+				checkRegistry[checkID] = check
 			}
 		}
 	}
@@ -71,7 +71,7 @@ func Run(options RunOptions) (*apireport.Report, error) {
 		return verifyReport, err
 	}
 
-	verifyReport, err = verifier.Verify(options.ChartUri)
+	verifyReport, err = verifier.Verify(options.ChartURI)
 
 	if err != nil {
 		return verifyReport, err

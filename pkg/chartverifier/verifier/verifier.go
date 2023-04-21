@@ -295,7 +295,7 @@ func (v *Verifier) Run(chartURI string) (APIVerifier, error) {
 
 	runOptions := api.RunOptions{}
 
-	runOptions.ChartUri = chartURI
+	runOptions.ChartURI = chartURI
 
 	runOptions.ViperConfig = viper.New()
 
