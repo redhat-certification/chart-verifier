@@ -17,12 +17,12 @@
 package pyxis
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func Test_getImageRegistries(t *testing.T) {
-
 	type testCase struct {
 		description string
 		repository  string
@@ -36,7 +36,8 @@ func Test_getImageRegistries(t *testing.T) {
 		{description: "Test rhel8/nginx-116 respository", repository: "rhel8/nginx-116", registry: "registry.access.redhat.com", message: ""},
 		{description: "Test ibm/nginx respository", repository: "ibm/nginx", registry: "non_registry", message: ""},
 		{description: "Test turbonomic/zookeeper respository", repository: "turbonomic/zookeeper", registry: "registry.connect.redhat.com", message: ""},
-		{description: "Test cpopen/ibmcloud-object-storage-driver respository", repository: "cpopen/ibmcloud-object-storage-driver", registry: "icr.io", message: ""}}
+		{description: "Test cpopen/ibmcloud-object-storage-driver respository", repository: "cpopen/ibmcloud-object-storage-driver", registry: "icr.io", message: ""},
+	}
 
 	for _, tc := range PassTestCases {
 		t.Run(tc.description, func(t *testing.T) {
@@ -58,11 +59,9 @@ func Test_getImageRegistries(t *testing.T) {
 			require.Contains(t, err.Error(), tc.message)
 		})
 	}
-
 }
 
 func Test_checkImageInRegistry(t *testing.T) {
-
 	type testCase struct {
 		description string
 		message     string

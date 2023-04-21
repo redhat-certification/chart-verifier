@@ -134,7 +134,6 @@ func GetImageRegistries(repository string) ([]string, error) {
 }
 
 func IsImageInRegistry(imageRef ImageReference) (bool, error) {
-
 	var err error
 	found := false
 
