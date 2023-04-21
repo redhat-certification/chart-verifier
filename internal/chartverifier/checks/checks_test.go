@@ -250,7 +250,6 @@ func TestHasMinKubeVersion(t *testing.T) {
 			require.Equal(t, KuberVersionNotSpecified, r.Reason)
 		})
 	}
-
 }
 
 func TestNotContainCRDs(t *testing.T) {
@@ -364,19 +363,15 @@ func TestHelmLint(t *testing.T) {
 			require.Contains(t, r.Reason, HelmLintHasFailedPrefix)
 		})
 	}
-
 }
 
 func TestImageCertify(t *testing.T) {
-
 	checkImages(t, ImagesAreCertified, false)
 
 	checkImages(t, ImagesAreCertified_V1_1, true)
-
 }
 
 func checkImages(t *testing.T, fn func(*CheckOptions) (Result, error), version1_1 bool) {
-
 	type testCase struct {
 		description string
 		uri         string
@@ -439,7 +434,6 @@ func checkImages(t *testing.T, fn func(*CheckOptions) (Result, error), version1_
 }
 
 func TestImageParsing(t *testing.T) {
-
 	type testCase struct {
 		description      string
 		image            string
@@ -506,7 +500,6 @@ func TestRequiredAnnotationsPresent(t *testing.T) {
 }
 
 func TestSemVers(t *testing.T) {
-
 	// Vault: kubeVersion: '>= 1.14.0-0'
 	// IBM: kubeversion: '>=1.10.1-0'
 	// Fortanix : kubeversion: '>= 1.16.0 < 1.22.0'
@@ -547,7 +540,6 @@ func TestSemVers(t *testing.T) {
 			}
 		})
 	}
-
 }
 
 func TestSignatureIsValid(t *testing.T) {
@@ -561,36 +553,41 @@ func TestSignatureIsValid(t *testing.T) {
 	}
 
 	testCases := []testCase{
-		{description: "unsigned chart",
-			uri:     "chart-0.1.0-v3.no-missing-annotations.tgz",
-			keyFile: "",
-			reason:  fmt.Sprintf("%s : %s", ChartNotSigned, SignatureIsNotPresentSuccess),
-			ok:      true, skipped: true,
+		{
+			description: "unsigned chart",
+			uri:         "chart-0.1.0-v3.no-missing-annotations.tgz",
+			keyFile:     "",
+			reason:      fmt.Sprintf("%s : %s", ChartNotSigned, SignatureIsNotPresentSuccess),
+			ok:          true, skipped: true,
 		},
-		{description: "unsigned chart with key provided",
-			uri:     "chart-0.1.0-v3.no-missing-annotations.tgz",
-			keyFile: "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz.key",
-			reason:  fmt.Sprintf("%s : %s", ChartNotSigned, SignatureIsNotPresentSuccess),
-			ok:      true, skipped: true,
+		{
+			description: "unsigned chart with key provided",
+			uri:         "chart-0.1.0-v3.no-missing-annotations.tgz",
+			keyFile:     "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz.key",
+			reason:      fmt.Sprintf("%s : %s", ChartNotSigned, SignatureIsNotPresentSuccess),
+			ok:          true, skipped: true,
 		},
 
-		{description: "signed chart with valid key",
-			uri:     "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz",
-			keyFile: "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz.key",
-			reason:  fmt.Sprintf("%s : %s", ChartSigned, SignatureIsValidSuccess),
-			ok:      true, skipped: false,
+		{
+			description: "signed chart with valid key",
+			uri:         "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz",
+			keyFile:     "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz.key",
+			reason:      fmt.Sprintf("%s : %s", ChartSigned, SignatureIsValidSuccess),
+			ok:          true, skipped: false,
 		},
-		{description: "signed chart with no key",
-			uri:     "https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz?raw=true",
-			keyFile: "",
-			reason:  fmt.Sprintf("%s : %s", ChartSigned, SignatureNoKey),
-			ok:      true, skipped: true,
+		{
+			description: "signed chart with no key",
+			uri:         "https://github.com/redhat-certification/chart-verifier/blob/main/tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz?raw=true",
+			keyFile:     "",
+			reason:      fmt.Sprintf("%s : %s", ChartSigned, SignatureNoKey),
+			ok:          true, skipped: true,
 		},
-		{description: "signed chart with bad key",
-			uri:     "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz",
-			keyFile: "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz.badkey",
-			reason:  fmt.Sprintf("%s : %s", ChartSigned, SignatureFailure),
-			ok:      false, skipped: false,
+		{
+			description: "signed chart with bad key",
+			uri:         "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz",
+			keyFile:     "../../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz.badkey",
+			reason:      fmt.Sprintf("%s : %s", ChartSigned, SignatureFailure),
+			ok:          false, skipped: false,
 		},
 	}
 
@@ -611,5 +608,4 @@ func TestSignatureIsValid(t *testing.T) {
 			require.Contains(t, r.Reason, tc.reason, fmt.Sprintf("%s : reason mismatch", tc.description))
 		})
 	}
-
 }
