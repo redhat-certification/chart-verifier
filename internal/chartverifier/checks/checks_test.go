@@ -21,11 +21,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/redhat-certification/chart-verifier/internal/chartverifier/pyxis"
-	"github.com/redhat-certification/chart-verifier/internal/tool"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 	"helm.sh/helm/v3/pkg/cli"
+
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/pyxis"
+	"github.com/redhat-certification/chart-verifier/internal/tool"
 )
 
 func TestIsHelmV3(t *testing.T) {
@@ -441,16 +442,16 @@ func TestImageParsing(t *testing.T) {
 	}
 
 	testCases := []testCase{
-		{"Single repo Default version 1", "repo", &pyxis.ImageReference{[]string(nil), "repo", "latest", ""}},
-		{"Single repo Default version 2", "repo:", &pyxis.ImageReference{[]string(nil), "repo", "latest", ""}},
-		{"Single repo with version", "repo:1.1.8", &pyxis.ImageReference{[]string(nil), "repo", "1.1.8", ""}},
-		{"Double repo with version", "repo/product:1.1.8", &pyxis.ImageReference{[]string(nil), "repo/product", "1.1.8", ""}},
-		{"Triple repo with version", "repo/subrepo/product:1.1.8", &pyxis.ImageReference{[]string(nil), "repo/subrepo/product", "1.1.8", ""}},
-		{"Registry, single repo with version", "registry.com/product:1.1.8", &pyxis.ImageReference{[]string{"registry.com"}, "product", "1.1.8", ""}},
-		{"Registry, double repo with version", "registry.com/repo/product:1.1.8", &pyxis.ImageReference{[]string{"registry.com"}, "repo/product", "1.1.8", ""}},
-		{"Registry with port, double repo with version", "registry.com:8080/repo/product:1.1.8", &pyxis.ImageReference{[]string{"registry.com:8080"}, "repo/product", "1.1.8", ""}},
-		{"Single repo Sha256", "repo@sha256:12345", &pyxis.ImageReference{[]string(nil), "repo", "", "sha256:12345"}},
-		{"Single repo Sha128", "repo@sha128:12345", &pyxis.ImageReference{[]string(nil), "repo", "", "sha128:12345"}},
+		{"Single repo Default version 1", "repo", &pyxis.ImageReference{Registries: []string(nil), Repository: "repo", Tag: "latest", Sha: ""}},
+		{"Single repo Default version 2", "repo:", &pyxis.ImageReference{Registries: []string(nil), Repository: "repo", Tag: "latest", Sha: ""}},
+		{"Single repo with version", "repo:1.1.8", &pyxis.ImageReference{Registries: []string(nil), Repository: "repo", Tag: "1.1.8", Sha: ""}},
+		{"Double repo with version", "repo/product:1.1.8", &pyxis.ImageReference{Registries: []string(nil), Repository: "repo/product", Tag: "1.1.8", Sha: ""}},
+		{"Triple repo with version", "repo/subrepo/product:1.1.8", &pyxis.ImageReference{Registries: []string(nil), Repository: "repo/subrepo/product", Tag: "1.1.8", Sha: ""}},
+		{"Registry, single repo with version", "registry.com/product:1.1.8", &pyxis.ImageReference{Registries: []string{"registry.com"}, Repository: "product", Tag: "1.1.8", Sha: ""}},
+		{"Registry, double repo with version", "registry.com/repo/product:1.1.8", &pyxis.ImageReference{Registries: []string{"registry.com"}, Repository: "repo/product", Tag: "1.1.8", Sha: ""}},
+		{"Registry with port, double repo with version", "registry.com:8080/repo/product:1.1.8", &pyxis.ImageReference{Registries: []string{"registry.com:8080"}, Repository: "repo/product", Tag: "1.1.8", Sha: ""}},
+		{"Single repo Sha256", "repo@sha256:12345", &pyxis.ImageReference{Registries: []string(nil), Repository: "repo", Tag: "", Sha: "sha256:12345"}},
+		{"Single repo Sha128", "repo@sha128:12345", &pyxis.ImageReference{Registries: []string(nil), Repository: "repo", Tag: "", Sha: "sha128:12345"}},
 	}
 
 	for _, testCase := range testCases {
@@ -511,6 +512,8 @@ func TestSemVers(t *testing.T) {
 		OCPRange    string
 	}
 
+	// nolint:unused // TODO(komish): Identify historical purpose of this type
+	// before considering for removal.
 	type TestError struct {
 		expectedOCPRange string
 		gotOCORange      string

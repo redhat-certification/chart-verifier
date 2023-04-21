@@ -17,10 +17,11 @@
 package chartverifier
 
 import (
+	"testing"
+
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
 	"github.com/stretchr/testify/assert"
-	"testing"
 
 	"github.com/stretchr/testify/require"
 )
@@ -39,8 +40,8 @@ func TestCertificationBuilder(t *testing.T) {
 		b := NewVerifierBuilder()
 
 		checkMap := make(FilteredRegistry)
-		checkMap["a"] = checks.Check{CheckId: checks.CheckId{Name: "a"}}
-		checkMap["b"] = checks.Check{CheckId: checks.CheckId{Name: "b"}}
+		checkMap["a"] = checks.Check{CheckID: checks.CheckID{Name: "a"}}
+		checkMap["b"] = checks.Check{CheckID: checks.CheckID{Name: "b"}}
 
 		c, err := b.
 			SetChecks(checkMap).

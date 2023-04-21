@@ -39,7 +39,7 @@ func TestChartTesting(t *testing.T) {
 		opts        CheckOptions
 	}
 
-	chartUri, err := absPathFromSourceFileLocation("psql-service-0.1.7")
+	chartURI, err := absPathFromSourceFileLocation("psql-service-0.1.7")
 	if err != nil {
 		t.Error(err)
 	}
@@ -48,7 +48,7 @@ func TestChartTesting(t *testing.T) {
 		{
 			description: "providing a valid k8Project value should succeed",
 			opts: CheckOptions{
-				URI: chartUri,
+				URI: chartURI,
 				Values: map[string]interface{}{
 					"k8Project": "default",
 				},
@@ -72,7 +72,7 @@ func TestChartTesting(t *testing.T) {
 		{
 			description: "providing a bogus k8Project should fail",
 			opts: CheckOptions{
-				URI: chartUri,
+				URI: chartURI,
 				Values: map[string]interface{}{
 					"k8Project": "bogus",
 				},
@@ -82,10 +82,10 @@ func TestChartTesting(t *testing.T) {
 		},
 		{
 			// the chart being used in this test forces the rendered resources to have an empty namespace field, which
-			// is invalid and can't be overriden using helm's namespace option.
+			// is invalid and can't be overridden using helm's namespace option.
 			description: "empty values should fail",
 			opts: CheckOptions{
-				URI:             chartUri,
+				URI:             chartURI,
 				Values:          map[string]interface{}{},
 				ViperConfig:     viper.New(),
 				HelmEnvSettings: cli.New(),

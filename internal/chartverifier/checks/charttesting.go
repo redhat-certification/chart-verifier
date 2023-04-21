@@ -2,7 +2,6 @@ package checks
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -13,11 +12,11 @@ import (
 	"github.com/helm/chart-testing/v3/pkg/config"
 	"github.com/helm/chart-testing/v3/pkg/util"
 	"github.com/imdario/mergo"
-	"github.com/redhat-certification/chart-verifier/internal/chartverifier/utils"
-	"github.com/redhat-certification/chart-verifier/internal/tool"
 	"gopkg.in/yaml.v3"
 	"helm.sh/helm/v3/pkg/cli"
-	helmcli "helm.sh/helm/v3/pkg/cli"
+
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/utils"
+	"github.com/redhat-certification/chart-verifier/internal/tool"
 )
 
 const (
@@ -85,7 +84,7 @@ func buildChartTestingConfiguration(opts *CheckOptions) config.Configuration {
 	}
 
 	if len(cfg.Namespace) == 0 {
-		// Namespace() returns "default" unless has been overriden
+		// Namespace() returns "default" unless has been overridden
 		// through environment variables.
 		cfg.Namespace = opts.HelmEnvSettings.Namespace()
 	}
@@ -135,7 +134,7 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 
 	configRelease := opts.ViperConfig.GetString(ReleaseConfigString)
 	if len(configRelease) > 0 {
-		utils.LogInfo(fmt.Sprintf("User specifed release: %s", configRelease))
+		utils.LogInfo(fmt.Sprintf("User specified release: %s", configRelease))
 	}
 
 	if cfg.Upgrade {
@@ -201,6 +200,8 @@ func generateInstallConfig(
 		}
 		releaseSelector = fmt.Sprintf("%s=%s", cfg.ReleaseLabel, release)
 		cleanup = func() {
+			//nolint:errcheck // TODO(komish) identify if this error needs to be
+			// handled nicely
 			helm.Uninstall(namespace, release)
 		}
 	} else {
@@ -210,7 +211,11 @@ func generateInstallConfig(
 			_, namespace = chrt.CreateInstallParams(cfg.BuildId)
 		}
 		cleanup = func() {
+			//nolint:errcheck // TODO(komish) identify if this error needs to be
+			// handled nicely
 			helm.Uninstall(namespace, release)
+			//nolint:errcheck // TODO(komish) identify if this error needs to be
+			// handled nicely
 			kubectl.DeleteNamespace(context.TODO(), namespace)
 		}
 	}
@@ -218,6 +223,7 @@ func generateInstallConfig(
 }
 
 // testRelease tests a release.
+// nolint:unparam //TODO(komish) identify the value of cleanupHelmTests historically.
 func testRelease(
 	ctx context.Context,
 	helm *tool.Helm,
@@ -234,7 +240,7 @@ func testRelease(
 	return nil
 }
 
-// getChartPreviousVersion attemtps to retrieve the previous version
+// getChartPreviousVersion attempts to retrieve the previous version
 // of the given chart.
 func getChartPreviousVersion(chrt *chart.Chart) (*chart.Chart, error) {
 	// TODO: decide which sources do we consider when searching for a
@@ -279,10 +285,10 @@ func upgradeAndTestChart(
 
 			// Install previous version of chart. If installation fails, ignore this release.
 			if err := helm.Install(ctx, namespace, oldChrt.Path(), release, valuesFile); err != nil {
-				return fmt.Errorf("Upgrade testing for release '%s' skipped because of previous revision installation error: %w", release, err)
+				return fmt.Errorf("upgrade testing for release '%s' skipped because of previous revision installation error: %w", release, err)
 			}
 			if err := testRelease(ctx, helm, kubectl, release, namespace, releaseSelector, true); err != nil {
-				return fmt.Errorf("Upgrade testing for release '%s' skipped because of previous revision testing error", release)
+				return fmt.Errorf("upgrade testing for release '%s' skipped because of previous revision testing error", release)
 			}
 
 			if err := helm.Upgrade(ctx, namespace, oldChrt.Path(), release); err != nil {
@@ -296,7 +302,6 @@ func upgradeAndTestChart(
 			result.Error = err
 			break
 		}
-
 	}
 
 	return result
@@ -366,7 +371,6 @@ func newTempValuesFileWithOverrides(filename string, valuesOverrides map[string]
 		if err != nil {
 			return "", nil, fmt.Errorf("merging extra values: %w", err)
 		}
-
 	} else {
 		obj = valuesOverrides
 	}
@@ -402,7 +406,6 @@ func installAndTestChartRelease(
 	result := chart.TestResult{Chart: chrt}
 
 	for _, valuesFile := range valuesFiles {
-
 		// Use anonymous function. Otherwise deferred calls would pile up
 		// and be executed in reverse order after the loop.
 		fun := func() error {
@@ -418,10 +421,10 @@ func installAndTestChartRelease(
 			defer releaseCleanup()
 
 			if err := helm.Install(ctx, namespace, chrt.Path(), release, tmpValuesFile); err != nil {
-				return errors.New(fmt.Sprintf("Chart Install failure: %v", err))
+				return fmt.Errorf("chart Install failure: %v", err)
 			}
 			if err = testRelease(ctx, helm, kubectl, release, namespace, releaseSelector, false); err != nil {
-				return errors.New(fmt.Sprintf("Chart test failure: %v", err))
+				return fmt.Errorf("chart test failure: %v", err)
 			}
 			return nil
 		}
@@ -436,7 +439,7 @@ func installAndTestChartRelease(
 	return result
 }
 
-func setOCVersion(holder AnnotationHolder, envSettings *helmcli.EnvSettings, versioner Versioner) error {
+func setOCVersion(holder AnnotationHolder, envSettings *cli.EnvSettings, versioner Versioner) error {
 	// kubectl.GetVersion() returns an error both in case the kubectl command can't be executed and
 	// the value for the OpenShift version key not present.
 	osVersion, getVersionErr := versioner(envSettings)

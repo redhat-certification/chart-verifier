@@ -19,9 +19,10 @@ package checks
 import (
 	"time"
 
-	apiChecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"github.com/spf13/viper"
 	helmcli "helm.sh/helm/v3/pkg/cli"
+
+	apiChecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 )
 
 type Result struct {
@@ -83,12 +84,12 @@ type AnnotationHolder interface {
 	SetSupportedOpenShiftVersions(versions string)
 }
 
-type CheckId struct {
+type CheckID struct {
 	Name    apiChecks.CheckName
 	Version string
 }
 type Check struct {
-	CheckId CheckId
+	CheckID CheckID
 	Type    apiChecks.CheckType
 	Func    CheckFunc
 }
@@ -117,12 +118,12 @@ type CheckOptions struct {
 type CheckFunc func(options *CheckOptions) (Result, error)
 
 type Registry interface {
-	Get(id CheckId) (Check, bool)
+	Get(id CheckID) (Check, bool)
 	Add(name apiChecks.CheckName, version string, checkFunc CheckFunc) Registry
 	AllChecks() DefaultRegistry
 }
 
-type DefaultRegistry map[CheckId]Check
+type DefaultRegistry map[CheckID]Check
 
 func (r *DefaultRegistry) AllChecks() DefaultRegistry {
 	return *r
@@ -132,13 +133,13 @@ func NewRegistry() Registry {
 	return &DefaultRegistry{}
 }
 
-func (r *DefaultRegistry) Get(id CheckId) (Check, bool) {
+func (r *DefaultRegistry) Get(id CheckID) (Check, bool) {
 	v, ok := (*r)[id]
 	return v, ok
 }
 
 func (r *DefaultRegistry) Add(name apiChecks.CheckName, version string, checkFunc CheckFunc) Registry {
-	check := Check{CheckId: CheckId{Name: name, Version: version}, Func: checkFunc}
-	(*r)[check.CheckId] = check
+	check := Check{CheckID: CheckID{Name: name, Version: version}, Func: checkFunc}
+	(*r)[check.CheckID] = check
 	return r
 }

@@ -194,7 +194,7 @@ func IsChartNotFound(err error) bool {
 	return ok
 }
 
-func getImageReferences(chartUri string, vals map[string]interface{}, kubeVersionString string) ([]string, error) {
+func getImageReferences(chartURI string, vals map[string]interface{}, kubeVersionString string) ([]string, error) {
 	capabilities := chartutil.DefaultCapabilities
 
 	if kubeVersionString == "" {
@@ -217,7 +217,7 @@ func getImageReferences(chartUri string, vals map[string]interface{}, kubeVersio
 	mem.SetNamespace("TestNamespace")
 	actionConfig.Releases = storage.Init(mem)
 
-	txt, err := actions.RenderManifests("test-release", chartUri, vals, actionConfig)
+	txt, err := actions.RenderManifests("test-release", chartURI, vals, actionConfig)
 	if err != nil {
 		return nil, err
 	}
