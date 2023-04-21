@@ -108,7 +108,7 @@ func (c *verifier) Verify(uri string) (*apiReport.Report, error) {
 	for _, check := range c.requiredChecks {
 
 		if check.Func == nil {
-			return nil, CheckNotFoundErr(check.CheckId.Name)
+			return nil, CheckNotFoundErr(check.CheckID.Name)
 		}
 		holder := AnnotationHolder{Holder: result,
 			CertifiedOpenShiftVersionFlag: c.openshiftVersion}
@@ -117,7 +117,7 @@ func (c *verifier) Verify(uri string) (*apiReport.Report, error) {
 			HelmEnvSettings:    c.settings,
 			URI:                uri,
 			Values:             c.values,
-			ViperConfig:        c.subConfig(string(check.CheckId.Name)),
+			ViperConfig:        c.subConfig(string(check.CheckID.Name)),
 			AnnotationHolder:   &holder,
 			Timeout:            c.timeout,
 			HelmInstallTimeout: c.helmInstallTimeout,
@@ -129,7 +129,7 @@ func (c *verifier) Verify(uri string) (*apiReport.Report, error) {
 		}
 		_ = result.AddCheck(check, r)
 
-		if check.CheckId.Name == apiChecks.SignatureIsValid {
+		if check.CheckID.Name == apiChecks.SignatureIsValid {
 			if len(c.publicKeys) == 1 && strings.Contains(r.Reason, checks.ChartSigned) {
 				publicKeyDigest, digestErr := tool.GetPublicKeyDigest(c.publicKeys[0])
 				if digestErr != nil {

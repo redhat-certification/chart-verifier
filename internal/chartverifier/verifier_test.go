@@ -19,8 +19,9 @@ package chartverifier
 import (
 	"context"
 	"errors"
-	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
 	"testing"
+
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
@@ -49,7 +50,7 @@ func TestVerifier_Verify(t *testing.T) {
 
 	require.NoError(t, testutil.ServeCharts(ctx, addr, "./checks/"))
 
-	dummyCheck := checks.Check{CheckId: checks.CheckId{Name: "dummy-check"}}
+	dummyCheck := checks.Check{CheckID: checks.CheckID{Name: "dummy-check"}}
 
 	erroredCheck := func(_ *checks.CheckOptions) (checks.Result, error) {
 		return checks.Result{}, errors.New("artificial error")
@@ -85,7 +86,7 @@ func TestVerifier_Verify(t *testing.T) {
 			settings:       cli.New(),
 			config:         viper.New(),
 			profile:        profiles.Get(),
-			registry:       checks.NewRegistry().Add(dummyCheck.CheckId.Name, "v1.0", erroredCheck),
+			registry:       checks.NewRegistry().Add(dummyCheck.CheckID.Name, "v1.0", erroredCheck),
 			requiredChecks: []checks.Check{dummyCheck},
 		}
 
@@ -100,7 +101,7 @@ func TestVerifier_Verify(t *testing.T) {
 			settings:         cli.New(),
 			config:           viper.New(),
 			profile:          profiles.Get(),
-			registry:         checks.NewRegistry().Add(dummyCheck.CheckId.Name, "v1.0", negativeCheck),
+			registry:         checks.NewRegistry().Add(dummyCheck.CheckID.Name, "v1.0", negativeCheck),
 			requiredChecks:   []checks.Check{dummyCheck},
 			openshiftVersion: "4.9",
 		}
@@ -117,7 +118,7 @@ func TestVerifier_Verify(t *testing.T) {
 			settings:       cli.New(),
 			config:         viper.New(),
 			profile:        profiles.Get(),
-			registry:       checks.NewRegistry().Add(dummyCheck.CheckId.Name, "v1.0", positiveCheck),
+			registry:       checks.NewRegistry().Add(dummyCheck.CheckID.Name, "v1.0", positiveCheck),
 			requiredChecks: []checks.Check{dummyCheck},
 			webCatalogOnly: true,
 		}
@@ -134,7 +135,7 @@ func TestVerifier_Verify(t *testing.T) {
 			settings:       cli.New(),
 			config:         viper.New(),
 			profile:        profiles.Get(),
-			registry:       checks.NewRegistry().Add(dummyCheck.CheckId.Name, "v1.0", positiveCheck),
+			registry:       checks.NewRegistry().Add(dummyCheck.CheckID.Name, "v1.0", positiveCheck),
 			requiredChecks: []checks.Check{dummyCheck},
 			webCatalogOnly: true,
 		}

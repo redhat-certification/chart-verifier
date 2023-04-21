@@ -134,12 +134,12 @@ func TestProfileFilter(t *testing.T) {
 	defaultRegistry.Add("BadContainsTestName", "v1.o", checks.ContainsTest)
 
 	expectedChecks := FilteredRegistry{}
-	expectedChecks[apiChecks.HasReadme] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.HasReadme, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.HasReadme}
-	expectedChecks[apiChecks.IsHelmV3] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.IsHelmV3, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.IsHelmV3}
-	expectedChecks[apiChecks.ContainsTest] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.ContainsTest, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.ContainsTest}
-	expectedChecks[apiChecks.ContainsValues] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.ContainsValues, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.ContainsValues}
-	expectedChecks[apiChecks.HasKubeVersion] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.HasKubeVersion, Version: checkVersion11}, Type: apiChecks.MandatoryCheckType, Func: checks.HasKubeVersion_V1_1}
-	expectedChecks[apiChecks.ImagesAreCertified] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.ImagesAreCertified, Version: checkVersion11}, Type: apiChecks.MandatoryCheckType, Func: checks.ImagesAreCertified_V1_1}
+	expectedChecks[apiChecks.HasReadme] = checks.Check{CheckID: checks.CheckID{Name: apiChecks.HasReadme, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.HasReadme}
+	expectedChecks[apiChecks.IsHelmV3] = checks.Check{CheckID: checks.CheckID{Name: apiChecks.IsHelmV3, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.IsHelmV3}
+	expectedChecks[apiChecks.ContainsTest] = checks.Check{CheckID: checks.CheckID{Name: apiChecks.ContainsTest, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.ContainsTest}
+	expectedChecks[apiChecks.ContainsValues] = checks.Check{CheckID: checks.CheckID{Name: apiChecks.ContainsValues, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.ContainsValues}
+	expectedChecks[apiChecks.HasKubeVersion] = checks.Check{CheckID: checks.CheckID{Name: apiChecks.HasKubeVersion, Version: checkVersion11}, Type: apiChecks.MandatoryCheckType, Func: checks.HasKubeVersion_V1_1}
+	expectedChecks[apiChecks.ImagesAreCertified] = checks.Check{CheckID: checks.CheckID{Name: apiChecks.ImagesAreCertified, Version: checkVersion11}, Type: apiChecks.MandatoryCheckType, Func: checks.ImagesAreCertified_V1_1}
 
 	config := make(map[string]interface{})
 	t.Run("Checks filtered using profile subset", func(t *testing.T) {
@@ -156,12 +156,12 @@ func TestProfileFilter(t *testing.T) {
 	defaultRegistry.Add(apiChecks.ChartTesting, checkVersion10, checks.ChartTesting)
 	defaultRegistry.Add(apiChecks.RequiredAnnotationsPresent, checkVersion10, checks.RequiredAnnotationsPresent)
 
-	expectedChecks[apiChecks.ContainsValuesSchema] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.ContainsValuesSchema, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.ContainsValuesSchema}
-	expectedChecks[apiChecks.NotContainsCRDs] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.NotContainsCRDs, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.NotContainCRDs}
-	expectedChecks[apiChecks.HelmLint] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.HelmLint, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.HelmLint}
-	expectedChecks[apiChecks.NotContainCsiObjects] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.NotContainCsiObjects, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.NotContainCSIObjects}
-	expectedChecks[apiChecks.ChartTesting] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.ChartTesting, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.ChartTesting}
-	expectedChecks[apiChecks.RequiredAnnotationsPresent] = checks.Check{CheckId: checks.CheckId{Name: apiChecks.RequiredAnnotationsPresent, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.RequiredAnnotationsPresent}
+	expectedChecks[apiChecks.ContainsValuesSchema] = checks.Check{CheckID: checks.CheckID{Name: apiChecks.ContainsValuesSchema, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.ContainsValuesSchema}
+	expectedChecks[apiChecks.NotContainsCRDs] = checks.Check{CheckID: checks.CheckID{Name: apiChecks.NotContainsCRDs, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.NotContainCRDs}
+	expectedChecks[apiChecks.HelmLint] = checks.Check{CheckID: checks.CheckID{Name: apiChecks.HelmLint, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.HelmLint}
+	expectedChecks[apiChecks.NotContainCsiObjects] = checks.Check{CheckID: checks.CheckID{Name: apiChecks.NotContainCsiObjects, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.NotContainCSIObjects}
+	expectedChecks[apiChecks.ChartTesting] = checks.Check{CheckID: checks.CheckID{Name: apiChecks.ChartTesting, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.ChartTesting}
+	expectedChecks[apiChecks.RequiredAnnotationsPresent] = checks.Check{CheckID: checks.CheckID{Name: apiChecks.RequiredAnnotationsPresent, Version: checkVersion10}, Type: apiChecks.MandatoryCheckType, Func: checks.RequiredAnnotationsPresent}
 
 	t.Run("Checks filtered using profile - full set", func(t *testing.T) {
 		filteredChecks := New(config).FilterChecks(defaultRegistry.AllChecks())
@@ -178,8 +178,8 @@ func CompareCheckMaps(t *testing.T, expectedChecks, filteredChecks FilteredRegis
 		if !ok {
 			assert.True(t, ok, "Entry not found in expected: %s", k)
 		} else {
-			assert.Equal(t, v.CheckId.Name, expectedChecks[k].CheckId.Name, fmt.Sprintf("%s: Map names do not match! got:%s, expect:%s ", k, v.CheckId.Name, expectedChecks[k].CheckId.Name))
-			assert.Equal(t, v.CheckId.Version, expectedChecks[k].CheckId.Version, fmt.Sprintf("%s: Map versions do not match! got:%s, expect:%s", k, v.CheckId.Version, expectedChecks[k].CheckId.Version))
+			assert.Equal(t, v.CheckID.Name, expectedChecks[k].CheckID.Name, fmt.Sprintf("%s: Map names do not match! got:%s, expect:%s ", k, v.CheckID.Name, expectedChecks[k].CheckID.Name))
+			assert.Equal(t, v.CheckID.Version, expectedChecks[k].CheckID.Version, fmt.Sprintf("%s: Map versions do not match! got:%s, expect:%s", k, v.CheckID.Version, expectedChecks[k].CheckID.Version))
 			assert.Equal(t, v.Type, expectedChecks[k].Type, fmt.Sprintf("%s: Map types do not match! got:%s, expect:%s", k, v.Type, expectedChecks[k].Type))
 			runFunc := filepath.Base(runtime.FuncForPC(reflect.ValueOf(v.Func).Pointer()).Name())
 			expectFunc := filepath.Base(runtime.FuncForPC(reflect.ValueOf(expectedChecks[k].Func).Pointer()).Name())

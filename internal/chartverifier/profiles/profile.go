@@ -2,14 +2,15 @@ package profiles
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
+
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/utils"
 	"github.com/redhat-certification/chart-verifier/internal/profileconfig"
 	apiChecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	"golang.org/x/mod/semver"
 	"gopkg.in/yaml.v3"
-	"regexp"
-	"strings"
 )
 
 type Annotation string
@@ -143,7 +144,7 @@ func (profile *Profile) FilterChecks(registry checks.DefaultRegistry) FilteredRe
 	for _, check := range profile.Checks {
 		splitter := regexp.MustCompile(`/`)
 		splitCheck := splitter.Split(check.Name, -1)
-		checkIndex := checks.CheckId{Name: apiChecks.CheckName(splitCheck[1]), Version: splitCheck[0]}
+		checkIndex := checks.CheckID{Name: apiChecks.CheckName(splitCheck[1]), Version: splitCheck[0]}
 		if newCheck, ok := registry[checkIndex]; ok {
 			newCheck.Type = check.Type
 			filteredChecks[checkIndex.Name] = newCheck

@@ -18,6 +18,7 @@ package chartverifier
 
 import (
 	"fmt"
+
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
 	apiChecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	apiReport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
@@ -46,7 +47,7 @@ func newReport() InternalReport {
 func (ir *InternalReport) AddCheck(check checks.Check) *InternalCheckReport {
 	newCheck := InternalCheckReport{}
 	newCheck.APICheckReport = apiReport.CheckReport{}
-	newCheck.APICheckReport.Check = apiChecks.CheckName(fmt.Sprintf("%s/%s", check.CheckId.Version, check.CheckId.Name))
+	newCheck.APICheckReport.Check = apiChecks.CheckName(fmt.Sprintf("%s/%s", check.CheckID.Version, check.CheckID.Name))
 	newCheck.APICheckReport.Type = apiChecks.CheckType(check.Type)
 	newCheck.APICheckReport.Outcome = apiReport.UnknownOutcomeType
 	ir.APIReport.Results = append(ir.APIReport.Results, &newCheck.APICheckReport)

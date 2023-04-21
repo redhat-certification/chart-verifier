@@ -186,6 +186,7 @@ func HasKubeVersion(opts *CheckOptions) (Result, error) {
 	return r, nil
 }
 
+//nolint:stylecheck // Note(komish) separating numeric values is a valid use case for underscores.
 func HasKubeVersion_V1_1(opts *CheckOptions) (Result, error) {
 	c, _, err := LoadChartFromURI(opts)
 	if err != nil {
@@ -281,6 +282,7 @@ func ImagesAreCertified(opts *CheckOptions) (Result, error) {
 	return r, nil
 }
 
+//nolint:stylecheck // Note(komish) separating numeric values is a valid use case for underscores.
 func ImagesAreCertified_V1_1(opts *CheckOptions) (Result, error) {
 	r := NewResult(true, "")
 
@@ -317,12 +319,12 @@ func RequiredAnnotationsPresent(opts *CheckOptions) (Result, error) {
 func SignatureIsValid(opts *CheckOptions) (Result, error) {
 	chartPath := opts.URI
 
-	chartUrl, err := url.Parse(chartPath)
+	chartURL, err := url.Parse(chartPath)
 	if err != nil {
 		return NewResult(false, fmt.Sprintf("Failed to parse chart location: %s", chartPath)), nil
 	}
 	var provFile string
-	switch chartUrl.Scheme {
+	switch chartURL.Scheme {
 	case "http", "https":
 		if strings.HasSuffix(chartPath, ".tgz") {
 			provFile = chartPath + ".prov"
@@ -331,7 +333,7 @@ func SignatureIsValid(opts *CheckOptions) (Result, error) {
 		} else {
 			return NewSkippedResult(fmt.Sprintf("%s : %s", ChartNotSigned, SignatureIsNotPresentSuccess)), nil
 		}
-		provFileUrl, err := url.Parse(provFile)
+		provFileURL, err := url.Parse(provFile)
 		if err != nil {
 			return NewResult(false, fmt.Sprintf("%s : Failed to parse prov file location: %s", SignatureFailure, provFile)), nil
 		}
@@ -350,13 +352,13 @@ func SignatureIsValid(opts *CheckOptions) (Result, error) {
 			return NewResult(false, fmt.Sprintf("%s : %s : error getting cache dir:  %v", ChartSigned, SignatureFailure, err)), nil
 		}
 
-		chartPath, err = downloadFile(chartUrl, downloadDir)
+		chartPath, err = downloadFile(chartURL, downloadDir)
 		if err != nil {
-			return NewResult(false, fmt.Sprintf("%s : %s. error downloading %s:  %v", ChartSigned, SignatureIsNotPresentSuccess, chartUrl.String(), err)), nil
+			return NewResult(false, fmt.Sprintf("%s : %s. error downloading %s:  %v", ChartSigned, SignatureIsNotPresentSuccess, chartURL.String(), err)), nil
 		}
-		_, err = downloadFile(provFileUrl, downloadDir)
+		_, err = downloadFile(provFileURL, downloadDir)
 		if err != nil {
-			return NewResult(false, fmt.Sprintf("%s : %s. error downloading %s:  %v", ChartSigned, SignatureIsNotPresentSuccess, provFileUrl.String(), err)), nil
+			return NewResult(false, fmt.Sprintf("%s : %s. error downloading %s:  %v", ChartSigned, SignatureIsNotPresentSuccess, provFileURL.String(), err)), nil
 		}
 	case "file", "":
 		if strings.HasSuffix(chartPath, ".tgz") {
@@ -368,7 +370,7 @@ func SignatureIsValid(opts *CheckOptions) (Result, error) {
 			return NewSkippedResult(fmt.Sprintf("%s : %s", ChartNotSigned, SignatureIsNotPresentSuccess)), nil
 		}
 	default:
-		return NewResult(false, fmt.Sprintf("%s: scheme %q not supported", SignatureFailure, chartUrl.Scheme)), nil
+		return NewResult(false, fmt.Sprintf("%s: scheme %q not supported", SignatureFailure, chartURL.Scheme)), nil
 	}
 
 	verify := action.NewVerify()
@@ -519,7 +521,6 @@ func certifyImages(r Result, opts *CheckOptions, registry string) Result {
 		r.SetResult(true, NoImagesToCertify)
 	} else {
 		for _, image := range images {
-
 			err = nil
 			imageRef := parseImageReference(image)
 

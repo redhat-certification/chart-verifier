@@ -114,9 +114,9 @@ func (r *reportBuilder) SetPublicKeyDigest(digest string) ReportBuilder {
 func (r *reportBuilder) AddCheck(check checks.Check, result checks.Result) ReportBuilder {
 	checkReport := r.Report.AddCheck(check)
 	checkReport.SetResult(result.Ok, result.Skipped, result.Reason)
-	utils.LogInfo(fmt.Sprintf("Check: %s:%s result : %t", check.CheckId.Name, check.CheckId.Version, result.Ok))
+	utils.LogInfo(fmt.Sprintf("Check: %s:%s result : %t", check.CheckID.Name, check.CheckID.Version, result.Ok))
 	if !result.Ok {
-		utils.LogInfo(fmt.Sprintf("Check: %s:%s reason : %s", check.CheckId.Name, check.CheckId.Version, result.Reason))
+		utils.LogInfo(fmt.Sprintf("Check: %s:%s reason : %s", check.CheckID.Name, check.CheckID.Version, result.Reason))
 	}
 	return r
 }
