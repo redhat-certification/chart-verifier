@@ -76,9 +76,7 @@ const (
 	RedHatRegistry               = "registry.redhat.io/"
 )
 
-var (
-	requiredAnnotations = [...]string{"charts.openshift.io/name"}
-)
+var requiredAnnotations = [...]string{"charts.openshift.io/name"}
 
 func notImplemented() (Result, error) {
 	return Result{Ok: false}, errors.New("not implemented")
@@ -130,7 +128,6 @@ func ContainsTest(opts *CheckOptions) (Result, error) {
 	}
 
 	return r, nil
-
 }
 
 func ContainsValues(opts *CheckOptions) (Result, error) {
@@ -190,7 +187,6 @@ func HasKubeVersion(opts *CheckOptions) (Result, error) {
 }
 
 func HasKubeVersion_V1_1(opts *CheckOptions) (Result, error) {
-
 	c, _, err := LoadChartFromURI(opts)
 	if err != nil {
 		return NewResult(false, err.Error()), err
@@ -278,7 +274,6 @@ func CanBeInstalledWithoutClusterAdminPrivileges(opts *CheckOptions) (Result, er
 }
 
 func ImagesAreCertified(opts *CheckOptions) (Result, error) {
-
 	r := NewResult(true, "")
 
 	r = certifyImages(r, opts, "")
@@ -287,7 +282,6 @@ func ImagesAreCertified(opts *CheckOptions) (Result, error) {
 }
 
 func ImagesAreCertified_V1_1(opts *CheckOptions) (Result, error) {
-
 	r := NewResult(true, "")
 
 	r = certifyImages(r, opts, RedHatRegistry)
@@ -321,7 +315,6 @@ func RequiredAnnotationsPresent(opts *CheckOptions) (Result, error) {
 }
 
 func SignatureIsValid(opts *CheckOptions) (Result, error) {
-
 	chartPath := opts.URI
 
 	chartUrl, err := url.Parse(chartPath)
@@ -402,11 +395,9 @@ func SignatureIsValid(opts *CheckOptions) (Result, error) {
 	}
 
 	return NewResult(true, fmt.Sprintf("%s : %s", ChartSigned, SignatureIsValidSuccess)), nil
-
 }
 
 func parseImageReference(image string) pyxis.ImageReference {
-
 	imageRef := pyxis.ImageReference{}
 	imageParts := strings.Split(image, "/")
 
@@ -434,11 +425,9 @@ func parseImageReference(image string) pyxis.ImageReference {
 	}
 
 	return imageRef
-
 }
 
 func getOCPRange(kubeVersionRange string) (string, error) {
-
 	semverCompare := sprig.GenericFuncMap()["semverCompare"].(func(string, string) (bool, error))
 	minOCPVersion := ""
 	maxOCPVersion := ""
@@ -473,11 +462,9 @@ func getOCPRange(kubeVersionRange string) (string, error) {
 	}
 
 	return "", fmt.Errorf("%s : Failed to determine a minimum OCP version", KuberVersionProcessingError)
-
 }
 
 func downloadFile(fileURL *url.URL, directory string) (string, error) {
-
 	urlPath := fileURL.Path
 	segments := strings.Split(urlPath, "/")
 	fileName := segments[len(segments)-1]
@@ -514,7 +501,6 @@ func downloadFile(fileURL *url.URL, directory string) (string, error) {
 }
 
 func certifyImages(r Result, opts *CheckOptions, registry string) Result {
-
 	kubeVersion := ""
 	kubeConfig := tool.GetClientConfig(opts.HelmEnvSettings)
 	kubectl, kubeErr := tool.NewKubectl(kubeConfig)
@@ -548,7 +534,6 @@ func certifyImages(r Result, opts *CheckOptions, registry string) Result {
 			} else {
 				certified, checkImageErr := pyxis.IsImageInRegistry(imageRef)
 				if !certified {
-
 					if strings.Contains(checkImageErr.Error(), "No images found for Registry/Repository") && registry != "" {
 						if strings.HasPrefix(image, registry) {
 							r.SetSkipped(fmt.Sprintf("%s : %s", ImageCertifySkipped, image))

@@ -164,9 +164,7 @@ func TestVersionSetting(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-
 		t.Run(tc.description, func(t *testing.T) {
-
 			err := setOCVersion(tc.opts.AnnotationHolder, tc.opts.HelmEnvSettings, tc.versioner)
 
 			if len(tc.error) > 0 {
@@ -176,9 +174,6 @@ func TestVersionSetting(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, tc.version, tc.opts.AnnotationHolder.(*testAnnotationHolder).OpenShiftVersion)
 			}
-
 		})
-
 	}
-
 }

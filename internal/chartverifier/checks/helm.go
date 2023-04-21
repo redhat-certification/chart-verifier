@@ -195,7 +195,6 @@ func IsChartNotFound(err error) bool {
 }
 
 func getImageReferences(chartUri string, vals map[string]interface{}, kubeVersionString string) ([]string, error) {
-
 	capabilities := chartutil.DefaultCapabilities
 
 	if kubeVersionString == "" {
@@ -224,11 +223,9 @@ func getImageReferences(chartUri string, vals map[string]interface{}, kubeVersio
 	}
 
 	return getImagesFromContent(txt)
-
 }
 
 func getImagesFromContent(content string) ([]string, error) {
-
 	imagesMap := make(map[string]bool)
 
 	type ImageRef struct {
@@ -259,7 +256,6 @@ func getImagesFromContent(content string) ([]string, error) {
 	}
 
 	return images, err
-
 }
 
 func getNextLine(reader *bufio.Reader) (string, error) {
@@ -284,5 +280,4 @@ func getCacheDir(opts *CheckOptions) string {
 		}
 	}
 	return path.Join(cacheDir, "chart-verifier")
-
 }
