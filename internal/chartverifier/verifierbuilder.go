@@ -99,7 +99,6 @@ func (b *verifierBuilder) SetConfig(config *viper.Viper) VerifierBuilder {
 }
 
 func (b *verifierBuilder) SetOverrides(overrides map[string]interface{}) VerifierBuilder {
-
 	// naively override values from the configuration
 	for key, val := range overrides {
 		b.config.Set(key, val)

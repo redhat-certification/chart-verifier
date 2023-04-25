@@ -24,8 +24,10 @@ import (
 	apiReport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 )
 
-var ReportApiVersion = "v1"
-var ReportKind = "verify-report"
+var (
+	ReportApiVersion = "v1"
+	ReportKind       = "verify-report"
+)
 
 type InternalReport struct {
 	APIReport apiReport.Report
@@ -74,11 +76,9 @@ func (cr *InternalCheckReport) GetApiCheckReport() *apiReport.CheckReport {
 }
 
 func (ir *InternalReport) SetReportDigest() {
-
 	var err error
 	ir.APIReport.Metadata.ToolMetadata.ReportDigest, err = ir.APIReport.GetReportDigest()
 	if err != nil {
 		ir.APIReport.Metadata.ToolMetadata.ReportDigest = err.Error()
 	}
-
 }
