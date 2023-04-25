@@ -19,9 +19,10 @@ package chartverifier
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
-	"github.com/stretchr/testify/assert"
 
 	"github.com/stretchr/testify/require"
 )

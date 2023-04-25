@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -65,7 +64,7 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 			case string(apireportsummary.AllSummary):
 				reportType = apireportsummary.AllSummary
 			default:
-				return fmt.Errorf("Error: command %s not recognized", commandArg)
+				return fmt.Errorf("error: command %s not recognized", commandArg)
 			}
 
 			valueMap := make(map[string]interface{})
@@ -79,13 +78,15 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 			// #nosec G304
 			reportFile, openErr := os.Open(reportArg)
 			if openErr != nil {
-				return errors.New(fmt.Sprintf("report path %s: error opening file  %v", reportArg, openErr))
+				return fmt.Errorf("report path %s: error opening file  %v", reportArg, openErr)
 			}
 
 			reportBytes, readErr := io.ReadAll(reportFile)
 			if readErr != nil {
-				//nolint:errcheck // TODO(komish): The linter indicates that we've not done anything with
+				// TODO(komish): The linter indicates that we've not done anything with
 				// this error, which is correct. Need to confirm what the intention was before changing this.
+				//
+				//nolint:errcheck,govet,staticcheck
 				fmt.Errorf("report path %s: error reading file  %v", reportArg, readErr)
 			}
 
@@ -103,7 +104,7 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 				GetContent(reportType, reportFormat)
 
 			if summaryErr != nil {
-				return errors.New(fmt.Sprintf("Error executing command: %v", summaryErr))
+				return fmt.Errorf("error executing command: %v", summaryErr)
 			}
 
 			utils.WriteStdOut(reportSummary)

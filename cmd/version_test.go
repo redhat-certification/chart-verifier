@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	apiversion "github.com/redhat-certification/chart-verifier/pkg/chartverifier/version"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/mod/semver"
+
+	apiversion "github.com/redhat-certification/chart-verifier/pkg/chartverifier/version"
 )
 
 func TestVersion(t *testing.T) {

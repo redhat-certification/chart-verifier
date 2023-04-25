@@ -40,7 +40,7 @@ import (
 type ReportBuilder interface {
 	SetToolVersion(name string) ReportBuilder
 	SetProfile(vendorType profiles.VendorType, version string) ReportBuilder
-	SetChartUri(name string) ReportBuilder
+	SetChartURI(name string) ReportBuilder
 	AddCheck(check checks.Check, result checks.Result) ReportBuilder
 	SetChart(chart *helmchart.Chart) ReportBuilder
 	SetTestedOpenShiftVersion(version string) ReportBuilder
@@ -80,34 +80,34 @@ func (r *reportBuilder) SetSupportedOpenShiftVersions(versions string) ReportBui
 }
 
 func (r *reportBuilder) SetToolVersion(version string) ReportBuilder {
-	r.Report.GetApiReport().Metadata.ToolMetadata.Version = version
+	r.Report.GetAPIReport().Metadata.ToolMetadata.Version = version
 	return r
 }
 
 func (r *reportBuilder) SetProfile(vendorType profiles.VendorType, version string) ReportBuilder {
-	r.Report.GetApiReport().Metadata.ToolMetadata.Profile.VendorType = string(vendorType)
-	r.Report.GetApiReport().Metadata.ToolMetadata.Profile.Version = version
+	r.Report.GetAPIReport().Metadata.ToolMetadata.Profile.VendorType = string(vendorType)
+	r.Report.GetAPIReport().Metadata.ToolMetadata.Profile.Version = version
 	return r
 }
 
-func (r *reportBuilder) SetChartUri(uri string) ReportBuilder {
-	r.Report.GetApiReport().Metadata.ToolMetadata.ChartUri = uri
+func (r *reportBuilder) SetChartURI(uri string) ReportBuilder {
+	r.Report.GetAPIReport().Metadata.ToolMetadata.ChartUri = uri
 	return r
 }
 
 func (r *reportBuilder) SetChart(chart *helmchart.Chart) ReportBuilder {
 	r.Chart = chart
-	r.Report.GetApiReport().Metadata.ChartData = chart.Metadata
+	r.Report.GetAPIReport().Metadata.ChartData = chart.Metadata
 	return r
 }
 
 func (r *reportBuilder) SetWebCatalogOnly(webCatalogOnly bool) ReportBuilder {
-	r.Report.GetApiReport().Metadata.ToolMetadata.WebCatalogOnly = webCatalogOnly
+	r.Report.GetAPIReport().Metadata.ToolMetadata.WebCatalogOnly = webCatalogOnly
 	return r
 }
 
 func (r *reportBuilder) SetPublicKeyDigest(digest string) ReportBuilder {
-	r.Report.GetApiReport().Metadata.ToolMetadata.Digests.PublicKey = digest
+	r.Report.GetAPIReport().Metadata.ToolMetadata.Digests.PublicKey = digest
 	return r
 }
 
@@ -122,7 +122,7 @@ func (r *reportBuilder) AddCheck(check checks.Check, result checks.Result) Repor
 }
 
 func (r *reportBuilder) Build() (*apiReport.Report, error) {
-	apiReport := r.Report.GetApiReport()
+	apiReport := r.Report.GetAPIReport()
 
 	for _, annotation := range profiles.Get().Annotations {
 		switch annotation {
@@ -154,7 +154,7 @@ func (r *reportBuilder) Build() (*apiReport.Report, error) {
 	apiReport.Metadata.ToolMetadata.Digests.Package = GetPackageDigest(apiReport.Metadata.ToolMetadata.ChartUri)
 
 	if apiReport.Metadata.ToolMetadata.WebCatalogOnly {
-		r.SetChartUri(("N/A"))
+		r.SetChartURI(("N/A"))
 	}
 
 	r.Report.SetReportDigest()

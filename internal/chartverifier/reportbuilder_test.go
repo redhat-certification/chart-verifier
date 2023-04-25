@@ -11,8 +11,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"helm.sh/helm/v3/pkg/cli"
 
-	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
 	"github.com/stretchr/testify/require"
+
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
 )
 
 func TestSha(t *testing.T) {

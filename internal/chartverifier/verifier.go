@@ -20,13 +20,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/spf13/viper"
+	helmcli "helm.sh/helm/v3/pkg/cli"
+
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
 	"github.com/redhat-certification/chart-verifier/internal/tool"
 	apiChecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 	apiReport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
-	"github.com/spf13/viper"
-	helmcli "helm.sh/helm/v3/pkg/cli"
 )
 
 type CheckNotFoundErr string
@@ -99,13 +100,12 @@ func (c *verifier) Verify(uri string) (*apiReport.Report, error) {
 
 	result := NewReportBuilder().
 		SetToolVersion(c.toolVersion).
-		SetChartUri(uri).
+		SetChartURI(uri).
 		SetChart(chrt).
 		SetProfile(c.profile.Vendor, c.profile.Version).
 		SetWebCatalogOnly(c.webCatalogOnly)
 
 	for _, check := range c.requiredChecks {
-
 		if check.Func == nil {
 			return nil, CheckNotFoundErr(check.CheckID.Name)
 		}
