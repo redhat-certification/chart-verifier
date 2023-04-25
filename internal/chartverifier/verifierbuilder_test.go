@@ -27,7 +27,6 @@ import (
 )
 
 func TestCertificationBuilder(t *testing.T) {
-
 	t.Run("Should fail building verifier when requiredChecks are not set", func(t *testing.T) {
 		b := NewVerifierBuilder()
 

@@ -122,7 +122,6 @@ func (r *reportBuilder) AddCheck(check checks.Check, result checks.Result) Repor
 }
 
 func (r *reportBuilder) Build() (*apiReport.Report, error) {
-
 	apiReport := r.Report.GetApiReport()
 
 	for _, annotation := range profiles.Get().Annotations {
@@ -194,7 +193,6 @@ func (fs *fileSorter) Less(i, j int) bool {
 }
 
 func GenerateSha(rawFiles []*helmchart.File) string {
-
 	name := func(f1, f2 *helmchart.File) bool {
 		return f1.Name < f2.Name
 	}
@@ -210,7 +208,6 @@ func GenerateSha(rawFiles []*helmchart.File) string {
 }
 
 func GetPackageDigest(uri string) string {
-
 	url, err := url.Parse(uri)
 	if err != nil {
 		return ""
