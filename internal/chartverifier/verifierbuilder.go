@@ -59,18 +59,23 @@ func DefaultRegistry() checks.Registry {
 type FilteredRegistry map[apiChecks.CheckName]checks.Check
 
 type verifierBuilder struct {
-	checks                      FilteredRegistry
-	config                      *viper.Viper
-	registry                    checks.Registry
-	toolVersion                 string
-	openshiftVersion            string
-	suppportedOpenshiftVersions string
-	webCatalogOnly              bool
-	timeout                     time.Duration
-	publicKeys                  []string
-	helmInstallTimeout          time.Duration
-	values                      map[string]interface{}
-	settings                    *cli.EnvSettings
+	checks           FilteredRegistry
+	config           *viper.Viper
+	registry         checks.Registry
+	toolVersion      string
+	openshiftVersion string
+	// NOTE(komish): We should do some due diligence as to if this was
+	// used at some point and that was later removed before we consider
+	// removing it fro mhere.
+	//
+	//nolint:unused
+	supportedOpenshiftVersions string
+	webCatalogOnly             bool
+	timeout                    time.Duration
+	publicKeys                 []string
+	helmInstallTimeout         time.Duration
+	values                     map[string]interface{}
+	settings                   *cli.EnvSettings
 }
 
 func (b *verifierBuilder) SetSettings(settings *cli.EnvSettings) VerifierBuilder {

@@ -6,8 +6,9 @@ import (
 	"io"
 	"os"
 
-	apiversion "github.com/redhat-certification/chart-verifier/pkg/chartverifier/version"
 	"github.com/spf13/cobra"
+
+	apiversion "github.com/redhat-certification/chart-verifier/pkg/chartverifier/version"
 )
 
 func init() {

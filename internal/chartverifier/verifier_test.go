@@ -63,7 +63,7 @@ func TestVerifier_Verify(t *testing.T) {
 		return checks.Result{Ok: true}, nil
 	}
 
-	validChartUri := "http://" + addr + "/charts/chart-0.1.0-v3.valid.tgz"
+	validChartURI := "http://" + addr + "/charts/chart-0.1.0-v3.valid.tgz"
 
 	t.Run("Should return error if check does not exist", func(t *testing.T) {
 		c := &verifier{
@@ -74,7 +74,7 @@ func TestVerifier_Verify(t *testing.T) {
 			requiredChecks: []checks.Check{dummyCheck},
 		}
 
-		r, err := c.Verify(validChartUri)
+		r, err := c.Verify(validChartURI)
 		require.Error(t, err)
 		require.Nil(t, r)
 	})
@@ -89,7 +89,7 @@ func TestVerifier_Verify(t *testing.T) {
 			requiredChecks: []checks.Check{dummyCheck},
 		}
 
-		r, err := c.Verify(validChartUri)
+		r, err := c.Verify(validChartURI)
 		require.Error(t, err)
 		require.Nil(t, r)
 	})
@@ -105,7 +105,7 @@ func TestVerifier_Verify(t *testing.T) {
 			openshiftVersion: "4.9",
 		}
 
-		r, err := c.Verify(validChartUri)
+		r, err := c.Verify(validChartURI)
 		require.NoError(t, err)
 		require.NotNil(t, r)
 		require.False(t, isOk(r))
@@ -122,7 +122,7 @@ func TestVerifier_Verify(t *testing.T) {
 			webCatalogOnly: true,
 		}
 
-		r, err := c.Verify(validChartUri)
+		r, err := c.Verify(validChartURI)
 		require.NoError(t, err)
 		require.NotNil(t, r)
 		require.True(t, isOk(r))

@@ -25,7 +25,7 @@ import (
 )
 
 var (
-	ReportApiVersion = "v1"
+	ReportAPIVersion = "v1"
 	ReportKind       = "verify-report"
 )
 
@@ -39,7 +39,7 @@ type InternalCheckReport struct {
 
 func newReport() InternalReport {
 	report := InternalReport{}
-	report.APIReport = apiReport.Report{Apiversion: ReportApiVersion, Kind: ReportKind}
+	report.APIReport = apiReport.Report{Apiversion: ReportAPIVersion, Kind: ReportKind}
 	report.APIReport.Metadata = apiReport.ReportMetadata{}
 	report.APIReport.Metadata.ToolMetadata = apiReport.ToolMetadata{}
 
@@ -50,7 +50,7 @@ func (ir *InternalReport) AddCheck(check checks.Check) *InternalCheckReport {
 	newCheck := InternalCheckReport{}
 	newCheck.APICheckReport = apiReport.CheckReport{}
 	newCheck.APICheckReport.Check = apiChecks.CheckName(fmt.Sprintf("%s/%s", check.CheckID.Version, check.CheckID.Name))
-	newCheck.APICheckReport.Type = apiChecks.CheckType(check.Type)
+	newCheck.APICheckReport.Type = check.Type
 	newCheck.APICheckReport.Outcome = apiReport.UnknownOutcomeType
 	ir.APIReport.Results = append(ir.APIReport.Results, &newCheck.APICheckReport)
 	return &newCheck
@@ -67,11 +67,11 @@ func (cr *InternalCheckReport) SetResult(outcome bool, skipped bool, reason stri
 	cr.APICheckReport.Reason = reason
 }
 
-func (ir *InternalReport) GetApiReport() *apiReport.Report {
+func (ir *InternalReport) GetAPIReport() *apiReport.Report {
 	return &ir.APIReport
 }
 
-func (cr *InternalCheckReport) GetApiCheckReport() *apiReport.CheckReport {
+func (cr *InternalCheckReport) GetAPICheckReport() *apiReport.CheckReport {
 	return &cr.APICheckReport
 }
 

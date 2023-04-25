@@ -19,10 +19,11 @@ package chartverifier
 import (
 	"time"
 
-	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
-	apiReport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 	"github.com/spf13/viper"
 	"helm.sh/helm/v3/pkg/cli"
+
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
+	apiReport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 )
 
 type VerifierBuilder interface {
