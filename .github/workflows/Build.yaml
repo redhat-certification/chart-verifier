@@ -26,33 +26,21 @@ jobs:
               with:
                 go-version: '>=1.17.0'
                 
-            - name: Check go mod status
+            - name: Ensure Modules
               working-directory: ./chart-verifier
-              run: |
-                # run `make gomod_tidy`
-                make gomod_tidy
-                if [[ ! -z $(git status -s) ]]
-                then
-                    echo "Go mod - state is not clean:"
-                    git status -s
-                    git diff "$GITHUB_SHA"
-                    exit 1
-                fi
+              run: make tidy
+
+            - name: Ensure Formatting
+              working-directory: ./chart-verifier
+              run: make fmt
+
+            - name: Run Linters
+              working-directory: ./chart-verifier
+              run: make lint
 
             - name: Build Binary
               working-directory: ./chart-verifier
               run: make bin
-
-            - name: Check format
-              working-directory: ./chart-verifier
-              run: |
-                # run `make gofmt`
-                make gofmt
-                if [[ ! -z $(git status -s) ]]
-                then
-                    echo "go fmt - found badly formatted source : $(git status -s)"
-                    exit 1
-                fi
 
             - name: Download dependencies
               working-directory: ./chart-verifier
