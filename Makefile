@@ -2,15 +2,22 @@
 default: bin
 
 .PHONY: all
-all:  gomod_tidy gofmt bin test
+all:  tidy fmt bin test
 
-.PHONY: gomod_tidy
-gomod_tidy:
+# This is a backwards-compatible target to help get
+# the PR merged without breaking gha. It can be removed
+# once this PR merges.
+.PHONY gomod_tidy:
+gomod_tidy: tidy
+
+.PHONY gofmt:
+gofmt: fmt
+
+.PHONY: tidy
+tidy:
 	go mod tidy
+	git diff --exit-code
 
-.PHONY: gofmt
-gofmt:
-	go fmt -x ./...
 
 .PHONY: fmt
 fmt: install.gofumpt
@@ -21,7 +28,7 @@ fmt: install.gofumpt
 
 .PHONY: bin
 bin:
-	 go build -o ./out/chart-verifier main.go
+	go build -o ./out/chart-verifier main.go
 
 .PHONY: lint
 lint: install.golangci-lint
@@ -43,16 +50,20 @@ build-image:
 gosec: install.gosec
 	$(GOSEC) -no-fail -fmt=sarif -out=gosec.sarif -exclude-dir tests ./...
 
-# Developer Tooling Installation
+### Developer Tooling Installation
+
+# gosec
 GOSEC = $(shell pwd)/out/gosec
 GOSEC_VERSION ?= latest
 install.gosec: 
 	$(call go-install-tool,$(GOSEC),github.com/securego/gosec/v2/cmd/gosec@$(GOSEC_VERSION))
 
+# gofumpt
 GOFUMPT = $(shell pwd)/out/gofumpt
 install.gofumpt:
 	$(call go-install-tool,$(GOFUMPT),mvdan.cc/gofumpt@latest)
 
+# golangci-lint
 GOLANGCI_LINT = $(shell pwd)/out/golangci-lint
 GOLANGCI_LINT_VERSION ?= v1.52.2
 install.golangci-lint: $(GOLANGCI_LINT)
