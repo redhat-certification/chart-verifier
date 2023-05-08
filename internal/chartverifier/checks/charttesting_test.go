@@ -39,7 +39,12 @@ func TestChartTesting(t *testing.T) {
 		opts        CheckOptions
 	}
 
-	chartURI, err := absPathFromSourceFileLocation("psql-service-0.1.7")
+	psqlChartURI, err := absPathFromSourceFileLocation("psql-service-0.1.7")
+	if err != nil {
+		t.Error(err)
+	}
+
+	ciChartURI, err := absPathFromSourceFileLocation("chart-0.1.0-v3.with-ci")
 	if err != nil {
 		t.Error(err)
 	}
@@ -48,10 +53,18 @@ func TestChartTesting(t *testing.T) {
 		{
 			description: "providing a valid k8Project value should succeed",
 			opts: CheckOptions{
-				URI: chartURI,
+				URI: psqlChartURI,
 				Values: map[string]interface{}{
 					"k8Project": "default",
 				},
+				ViperConfig:     viper.New(),
+				HelmEnvSettings: cli.New(),
+			},
+		},
+		{
+			description: "a valid chart with ci override values should succeed",
+			opts: CheckOptions{
+				URI:             ciChartURI,
 				ViperConfig:     viper.New(),
 				HelmEnvSettings: cli.New(),
 			},
@@ -72,7 +85,7 @@ func TestChartTesting(t *testing.T) {
 		{
 			description: "providing a bogus k8Project should fail",
 			opts: CheckOptions{
-				URI: chartURI,
+				URI: psqlChartURI,
 				Values: map[string]interface{}{
 					"k8Project": "bogus",
 				},
@@ -85,7 +98,7 @@ func TestChartTesting(t *testing.T) {
 			// is invalid and can't be overridden using helm's namespace option.
 			description: "empty values should fail",
 			opts: CheckOptions{
-				URI:             chartURI,
+				URI:             psqlChartURI,
 				Values:          map[string]interface{}{},
 				ViperConfig:     viper.New(),
 				HelmEnvSettings: cli.New(),
