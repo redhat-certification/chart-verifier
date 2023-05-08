@@ -373,7 +373,7 @@ func newTempValuesFileWithOverrides(filename string, valuesOverrides map[string]
 			return "", nil, fmt.Errorf("reading values file: %w", err)
 		}
 
-		err = mergo.MergeWithOverwrite(obj, valuesOverrides)
+		err = mergo.MergeWithOverwrite(&obj, valuesOverrides)
 		if err != nil {
 			return "", nil, fmt.Errorf("merging extra values: %w", err)
 		}
