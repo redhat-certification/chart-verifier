@@ -136,7 +136,9 @@ jobs:
                   gpg --version
                   curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
                   if [ $GITHUB_REPOSITORY == "redhat-certification/chart-verifier" ]; then
-                    ./oc login --token=${{ secrets.CLUSTER_TOKEN }} --server=${API_SERVER}
+                    # TODO: temporarily allow for skipping TLS verification as the new cluster uses local-only certificates
+                    # This if logic isn't removed to remind us to come back and swap this out when a valid cert is put in place.
+                    ./oc login --insecure-skip-tls-verify --token=${{ secrets.CLUSTER_TOKEN }} --server=${API_SERVER}
                   else
                     ./oc login --insecure-skip-tls-verify --token=${{ secrets.CLUSTER_TOKEN }} --server=${API_SERVER}
                   fi
