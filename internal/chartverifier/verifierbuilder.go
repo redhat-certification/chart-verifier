@@ -71,6 +71,7 @@ type verifierBuilder struct {
 	//nolint:unused
 	supportedOpenshiftVersions string
 	webCatalogOnly             bool
+	skipCleanup                bool
 	timeout                    time.Duration
 	publicKeys                 []string
 	helmInstallTimeout         time.Duration
@@ -123,6 +124,11 @@ func (b *verifierBuilder) SetOpenShiftVersion(version string) VerifierBuilder {
 
 func (b *verifierBuilder) SetWebCatalogOnly(webCatalogOnly bool) VerifierBuilder {
 	b.webCatalogOnly = webCatalogOnly
+	return b
+}
+
+func (b *verifierBuilder) SetSkipCleanup(skipCleanup bool) VerifierBuilder {
+	b.skipCleanup = skipCleanup
 	return b
 }
 
@@ -179,6 +185,7 @@ func (b *verifierBuilder) Build() (Verifier, error) {
 		profile:            profile,
 		openshiftVersion:   b.openshiftVersion,
 		webCatalogOnly:     b.webCatalogOnly,
+		skipCleanup:        b.skipCleanup,
 		timeout:            b.timeout,
 		helmInstallTimeout: b.helmInstallTimeout,
 		publicKeys:         b.publicKeys,

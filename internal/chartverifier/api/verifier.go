@@ -28,6 +28,7 @@ type RunOptions struct {
 	OpenShiftVersion   string
 	WebCatalogOnly     bool
 	SuppressErrorLog   bool
+	SkipCleanup        bool
 	ClientTimeout      time.Duration
 	HelmInstallTimeout time.Duration
 	ChartURI           string
@@ -62,6 +63,7 @@ func Run(options RunOptions) (*apireport.Report, error) {
 		SetToolVersion(options.APIVersion).
 		SetOpenShiftVersion(options.OpenShiftVersion).
 		SetWebCatalogOnly(options.WebCatalogOnly).
+		SetSkipCleanup(options.SkipCleanup).
 		SetTimeout(options.ClientTimeout).
 		SetHelmInstallTimeout(options.HelmInstallTimeout).
 		SetSettings(options.Settings).

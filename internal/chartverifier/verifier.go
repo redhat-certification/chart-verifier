@@ -72,6 +72,7 @@ type verifier struct {
 	profile            *profiles.Profile
 	openshiftVersion   string
 	webCatalogOnly     bool
+	skipCleanup        bool
 	timeout            time.Duration
 	helmInstallTimeout time.Duration
 	publicKeys         []string
@@ -122,6 +123,7 @@ func (c *verifier) Verify(uri string) (*apiReport.Report, error) {
 			AnnotationHolder:   &holder,
 			Timeout:            c.timeout,
 			HelmInstallTimeout: c.helmInstallTimeout,
+			SkipCleanup:        c.skipCleanup,
 			PublicKeys:         c.publicKeys,
 		})
 

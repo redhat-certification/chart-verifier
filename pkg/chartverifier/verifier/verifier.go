@@ -70,6 +70,7 @@ const (
 	WebCatalogOnly   BooleanKey = "web-catalog-only"
 	ProviderDelivery BooleanKey = "provider-delivery" // Deprecated in 1.10
 	SuppressErrorLog BooleanKey = "suppress-error-log"
+	SkipCleanup      BooleanKey = "skip-cleanup"
 
 	Timeout            DurationKey = "timeout"
 	HelmInstallTimeout DurationKey = "helm-install-timeout"
@@ -100,7 +101,7 @@ var setValuesKeys = [...]ValuesKey{
 	ChartSetString,
 }
 
-var setBooleanKeys = [...]BooleanKey{WebCatalogOnly, SuppressErrorLog}
+var setBooleanKeys = [...]BooleanKey{WebCatalogOnly, SuppressErrorLog, SkipCleanup}
 
 var setDurationKeys = [...]DurationKey{Timeout, HelmInstallTimeout}
 
@@ -350,6 +351,10 @@ func (v *Verifier) Run(chartURI string) (APIVerifier, error) {
 		runOptions.SuppressErrorLog = booleanValue
 	}
 
+	if booleanValue, ok := v.Inputs.Flags.BooleanFlags[SkipCleanup]; ok {
+		runOptions.SkipCleanup = booleanValue
+	}
+
 	if durationValue, ok := v.Inputs.Flags.DurationFlags[Timeout]; ok {
 		runOptions.ClientTimeout = durationValue
 	}
@@ -397,6 +402,7 @@ func (v *Verifier) initialize() {
 	v.Inputs.Flags.BooleanFlags = make(map[BooleanKey]bool)
 	v.Inputs.Flags.BooleanFlags[WebCatalogOnly] = false
 	v.Inputs.Flags.BooleanFlags[SuppressErrorLog] = false
+	v.Inputs.Flags.BooleanFlags[SkipCleanup] = false
 	v.Inputs.Flags.DurationFlags = make(map[DurationKey]time.Duration)
 	v.Inputs.Flags.Checks = make(map[checks.CheckName]CheckStatus)
 
