@@ -36,6 +36,7 @@ type VerifierBuilder interface {
 	SetToolVersion(string) VerifierBuilder
 	SetOpenShiftVersion(string) VerifierBuilder
 	SetWebCatalogOnly(bool) VerifierBuilder
+	SetSkipCleanup(bool) VerifierBuilder
 	SetTimeout(time.Duration) VerifierBuilder
 	SetPublicKeys([]string) VerifierBuilder
 	SetHelmInstallTimeout(time.Duration) VerifierBuilder

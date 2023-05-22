@@ -113,6 +113,8 @@ type CheckOptions struct {
 	PublicKeys []string
 	// helm install timeout
 	HelmInstallTimeout time.Duration
+	// skip helm cleanup
+	SkipCleanup bool
 }
 
 type CheckFunc func(options *CheckOptions) (Result, error)

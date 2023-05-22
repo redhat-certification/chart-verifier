@@ -45,6 +45,7 @@ type ApiVerifier interface {
   - ```WebCatalogOnly```
   - ```Provider Delivery``` (deprecated - replaced by ```WebCatalogOnly```)  
   - ```SuppressErrorLog```
+  - ```SkipCleanup```
     
 - SetDuration: Sets a duration flag. ```DurationKey``` values are defined in the verifier package and include:
   - ```Timeout```

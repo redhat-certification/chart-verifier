@@ -157,14 +157,14 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 			utils.LogError(fmt.Sprintf("End chart install and test check with BreakingChangeAllowed error: %v", err))
 			return NewResult(false, err.Error()), nil
 		}
-		result := upgradeAndTestChart(ctx, cfg, oldChrt, chrt, helm, kubectl, configRelease)
+		result := upgradeAndTestChart(ctx, cfg, oldChrt, chrt, helm, kubectl, configRelease, opts.SkipCleanup)
 
 		if result.Error != nil {
 			utils.LogError(fmt.Sprintf("End chart install and test check with upgradeAndTestChart error: %v", result.Error))
 			return NewResult(false, result.Error.Error()), nil
 		}
 	} else {
-		result := installAndTestChartRelease(ctx, cfg, chrt, helm, kubectl, opts.Values, configRelease)
+		result := installAndTestChartRelease(ctx, cfg, chrt, helm, kubectl, opts.Values, configRelease, opts.SkipCleanup)
 		if result.Error != nil {
 			utils.LogError(fmt.Sprintf("End chart install and test check with installAndTestChartRelease error: %v", result.Error))
 			return NewResult(false, result.Error.Error()), nil
@@ -191,6 +191,7 @@ func generateInstallConfig(
 	helm *tool.Helm,
 	kubectl *tool.Kubectl,
 	configRelease string,
+	skipCleanup bool,
 ) (namespace, release, releaseSelector string, cleanup func()) {
 	release = configRelease
 	if cfg.Namespace != "" {
@@ -202,7 +203,11 @@ func generateInstallConfig(
 		cleanup = func() {
 			//nolint:errcheck // TODO(komish) identify if this error needs to be
 			// handled nicely
-			helm.Uninstall(namespace, release)
+			if skipCleanup {
+				utils.LogInfo("Skipping resource cleanup")
+			} else {
+				helm.Uninstall(namespace, release)
+			}
 		}
 	} else {
 		if len(release) == 0 {
@@ -257,6 +262,7 @@ func upgradeAndTestChart(
 	helm *tool.Helm,
 	kubectl *tool.Kubectl,
 	configRelease string,
+	skipCleanup bool,
 ) chart.TestResult {
 	// result contains the test result; please notice that each values
 	// file in the chart's 'ci' folder will be installed and tested
@@ -280,7 +286,7 @@ func upgradeAndTestChart(
 		// Use anonymous function. Otherwise deferred calls would pile up
 		// and be executed in reverse order after the loop.
 		fun := func() error {
-			namespace, release, releaseSelector, cleanup := generateInstallConfig(cfg, oldChrt, helm, kubectl, configRelease)
+			namespace, release, releaseSelector, cleanup := generateInstallConfig(cfg, oldChrt, helm, kubectl, configRelease, skipCleanup)
 			defer cleanup()
 
 			// Install previous version of chart. If installation fails, ignore this release.
@@ -392,6 +398,7 @@ func installAndTestChartRelease(
 	kubectl *tool.Kubectl,
 	valuesOverrides map[string]interface{},
 	configRelease string,
+	skipCleanup bool,
 ) chart.TestResult {
 	// valuesFiles contains all the configurations that should be
 	// executed; in other words, it performs a test matrix between
@@ -417,7 +424,7 @@ func installAndTestChartRelease(
 			}
 			defer tmpValuesFileCleanup()
 
-			namespace, release, releaseSelector, releaseCleanup := generateInstallConfig(cfg, chrt, helm, kubectl, configRelease)
+			namespace, release, releaseSelector, releaseCleanup := generateInstallConfig(cfg, chrt, helm, kubectl, configRelease, skipCleanup)
 			defer releaseCleanup()
 
 			if err := helm.Install(ctx, namespace, chrt.Path(), release, tmpValuesFile); err != nil {

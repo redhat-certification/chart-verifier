@@ -64,6 +64,8 @@ var (
 	reportToFile bool
 	// write an error log file
 	suppressErrorLog bool
+	// skip helm cleanup
+	skipCleanup bool
 	// distribution method is web-catalog-only.
 	webCatalogOnly bool
 	// client timeout
@@ -188,6 +190,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 			var runErr error
 			verifier, runErr = verifier.SetBoolean(apiverifier.WebCatalogOnly, webCatalogOnly).
 				SetBoolean(apiverifier.SuppressErrorLog, suppressErrorLog).
+				SetBoolean(apiverifier.SkipCleanup, skipCleanup).
 				SetDuration(apiverifier.Timeout, clientTimeout).
 				SetDuration(apiverifier.HelmInstallTimeout, helmInstallTimeout).
 				SetString(apiverifier.OpenshiftVersion, []string{openshiftVersionFlag}).
@@ -250,6 +253,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 	cmd.Flags().DurationVar(&clientTimeout, "timeout", 30*time.Minute, "time to wait for completion of chart install and test")
 	cmd.Flags().BoolVarP(&reportToFile, "write-to-file", "w", false, "write report to ./chartverifier/report.yaml (default: stdout)")
 	cmd.Flags().BoolVarP(&suppressErrorLog, "suppress-error-log", "E", false, "suppress the error log (default: written to ./chartverifier/verifier-<timestamp>.log)")
+	cmd.Flags().BoolVarP(&skipCleanup, "skip-cleanup", "c", false, "set this to skip resource cleanup after verifier run")
 	cmd.Flags().BoolVarP(&webCatalogOnly, "web-catalog-only", "W", false, "set this to indicate that the distribution method is web catalog only (default: false)")
 	cmd.Flags().StringVarP(&pgpPublicKeyFile, "pgp-public-key", "k", "", "file containing gpg public key of the key used to sign the chart")
 	cmd.Flags().DurationVar(&helmInstallTimeout, "helm-install-timeout", 5*time.Minute, "helm install timeout")
