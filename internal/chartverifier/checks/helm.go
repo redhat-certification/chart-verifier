@@ -20,7 +20,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -209,7 +208,7 @@ func getImageReferences(chartURI string, vals map[string]interface{}, kubeVersio
 
 	actionConfig := &action.Configuration{
 		Releases:     nil,
-		KubeClient:   &kubefake.PrintingKubeClient{Out: ioutil.Discard},
+		KubeClient:   &kubefake.PrintingKubeClient{Out: io.Discard},
 		Capabilities: capabilities,
 		Log:          func(format string, v ...interface{}) {},
 	}

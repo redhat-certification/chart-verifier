@@ -1,3 +1,8 @@
+.DEFAULT_GOAL:=help
+
+IMAGE_BUILDER?=podman
+IMAGE_REPO?=quay.io/redhat-certification
+COMMIT_ID=$(shell git rev-parse --short HEAD)
 
 default: bin
 
@@ -44,7 +49,7 @@ test:
 
 .PHONY: build-image
 build-image:
-	hack/build-image.sh
+	$(IMAGE_BUILDER) build -t $(IMAGE_REPO)/chart-verifier:$(COMMIT_ID) .
 
 .PHONY: gosec
 gosec: install.gosec

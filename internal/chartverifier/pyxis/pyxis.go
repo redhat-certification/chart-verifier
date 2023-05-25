@@ -18,7 +18,7 @@ package pyxis
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -98,7 +98,7 @@ func GetImageRegistries(repository string) ([]string, error) {
 			if resp.StatusCode == 200 {
 				// #nosec G307
 				defer resp.Body.Close()
-				body, _ := ioutil.ReadAll(resp.Body)
+				body, _ := io.ReadAll(resp.Body)
 				var repositoriesBody RepositoriesBody
 				//nolint:errcheck // TODO(komish): this should be checked, but we really need
 				// to look at refactoring this block in its entirety. Delay fixing this until then.
@@ -169,7 +169,7 @@ Loops:
 					// to look at refactoring this block in its entirety. Delay fixing this until then
 					//
 					//nolint:errcheck
-					body, _ := ioutil.ReadAll(resp.Body)
+					body, _ := io.ReadAll(resp.Body)
 					var registriesBody RegistriesBody
 					//nolint:errcheck
 					json.Unmarshal(body, &registriesBody)

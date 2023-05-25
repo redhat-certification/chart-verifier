@@ -36,7 +36,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -70,7 +70,7 @@ jobs:
     - name: Send message to helm_dev slack channel
       id: notify_dev
       if: ${{ always() &&  github.event_name == 'schedule' && steps.codeql_analysis.conclusion != 'success' }}
-      uses: archive/github-actions-slack@v2.0.0
+      uses: archive/github-actions-slack@v2.7.0
       with:
         slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
         slack-channel: C02979BDUPL
@@ -83,7 +83,7 @@ jobs:
     - name: Send message to helm_notify slack channel
       id: notify
       if: ${{ always() &&  github.event_name == 'schedule' && steps.codeql_analysis.conclusion == 'success' }}
-      uses: archive/github-actions-slack@v2.0.0
+      uses: archive/github-actions-slack@v2.7.0
       with:
         slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
         slack-channel: C04K1ARMH8A
