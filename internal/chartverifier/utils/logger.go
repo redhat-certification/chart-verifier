@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -207,7 +206,7 @@ func pruneLogFiles() {
 		return
 	}
 
-	files, err := ioutil.ReadDir(logFilesPath)
+	files, err := os.ReadDir(logFilesPath)
 	if err != nil {
 		LogError(fmt.Sprintf("error reading log directory : %s : %s", logFilesPath, err))
 		return
@@ -216,7 +215,13 @@ func pruneLogFiles() {
 	logFiles := make([]fs.FileInfo, 0)
 	for _, file := range files {
 		if strings.HasPrefix(file.Name(), "verifier") && strings.HasSuffix(file.Name(), ".log") {
-			logFiles = append(logFiles, file)
+			fileInfo, err := file.Info()
+			if err != nil {
+				LogError(fmt.Sprintf("error getting file info : %s : %s", logFiles, err))
+				return
+			}
+
+			logFiles = append(logFiles, fileInfo)
 		}
 	}
 

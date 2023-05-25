@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -179,7 +178,7 @@ func checkAndOrDeleteFiles(fileType string, expectedContent string) bool {
 		}
 		logFilesPath := path.Join(currentDir, outputDirectory)
 
-		files, err := ioutil.ReadDir(logFilesPath)
+		files, err := os.ReadDir(logFilesPath)
 		if err != nil {
 			if fileType != "delete" {
 				fmt.Printf("error reading log directory : %s : %s\n", logFilesPath, err)
@@ -200,7 +199,7 @@ func checkAndOrDeleteFiles(fileType string, expectedContent string) bool {
 			if foundFile {
 				filePath := path.Join(logFilesPath, file.Name())
 				if fileType != "delete" {
-					logfileContent, err := ioutil.ReadFile(filePath)
+					logfileContent, err := os.ReadFile(filePath)
 					if err != nil {
 						fmt.Printf("error reading file %s", err)
 						return false
@@ -225,7 +224,7 @@ func howManyLogFiles() int {
 	}
 	logFilesPath := path.Join(currentDir, outputDirectory)
 
-	files, err := ioutil.ReadDir(logFilesPath)
+	files, err := os.ReadDir(logFilesPath)
 	if err != nil {
 		fmt.Printf("error reading log directory : %s : %s\n", logFilesPath, err)
 		return 0

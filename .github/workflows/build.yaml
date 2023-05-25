@@ -8,23 +8,20 @@ on:
 jobs:
     build:
         name: Build artifacts
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
 
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v2
-
             - name: Checkout
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
               with:
                 ref: ${{ github.event.pull_request.head.ref }}
                 repository: ${{ github.event.pull_request.head.repo.full_name }}
                 path: "chart-verifier"
 
             - name: Setup Go
-              uses: actions/setup-go@v2
+              uses: actions/setup-go@v4
               with:
-                go-version: '>=1.17.0'
+                go-version-file: go.mod
                 
             - name: Ensure Modules
               working-directory: ./chart-verifier
@@ -41,10 +38,6 @@ jobs:
             - name: Build Binary
               working-directory: ./chart-verifier
               run: make bin
-
-            - name: Download dependencies
-              working-directory: ./chart-verifier
-              run: go mod download
 
             - name: Run tests
               working-directory: ./chart-verifier

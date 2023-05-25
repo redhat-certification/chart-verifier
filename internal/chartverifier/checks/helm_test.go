@@ -18,7 +18,7 @@ package checks
 
 import (
 	"context"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -177,7 +177,7 @@ func TestTemplate(t *testing.T) {
 }
 
 func TestLongLineTemplate(t *testing.T) {
-	content, err := ioutil.ReadFile("templates/test-template.yaml")
+	content, err := os.ReadFile("templates/test-template.yaml")
 	require.NoError(t, err)
 
 	images, err := getImagesFromContent(string(content))

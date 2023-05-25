@@ -35,33 +35,7 @@ Alternatively, download `chart-verifier` binary from the [release page](https://
 
 To build `chart-verifier` locally, execute `make bin` for macOS and Linux, or `make bin_win` for Windows.
 
-To build `chart-verifier` container image, execute `hack/build-image.sh` or its PowerShell alternative:
-
-```text
-PS C:\Users\igors\GolandProjects\chart-verifier> .\hack\build-image.ps1
-[+] Building 15.1s (15/15) FINISHED
- => [internal] load build definition from Dockerfile                                                                                                                                                                                                                 0.0s
- => => transferring dockerfile: 32B                                                                                                                                                                                                                                  0.0s
- => [internal] load .dockerignore                                                                                                                                                                                                                                    0.0s
- => => transferring context: 2B                                                                                                                                                                                                                                      0.0s
- => [internal] load metadata for docker.io/library/fedora:31                                                                                                                                                                                                         1.4s
- => [internal] load metadata for docker.io/library/golang:1.15                                                                                                                                                                                                       1.3s
- => [build 1/7] FROM docker.io/library/golang:1.15@sha256:d141a8bca046ade2c96f89e864cd31f5d0ba88d5a71d62d59e0e1f2ecc2451f1                                                                                                                                           0.0s
- => CACHED [stage-1 1/2] FROM docker.io/library/fedora:31@sha256:ba4fe6a3da48addb248a16e8a63599cc5ff5250827e7232d2e3038279a0e467e                                                                                                                                    0.0s
- => [internal] load build context                                                                                                                                                                                                                                    0.5s
- => => transferring context: 43.06MB                                                                                                                                                                                                                                 0.5s
- => CACHED [build 2/7] WORKDIR /tmp/src                                                                                                                                                                                                                              0.0s
- => CACHED [build 3/7] COPY go.mod .                                                                                                                                                                                                                                 0.0s
- => CACHED [build 4/7] COPY go.sum .                                                                                                                                                                                                                                 0.0s
- => CACHED [build 5/7] RUN go mod download                                                                                                                                                                                                                           0.0s
- => [build 6/7] COPY . .                                                                                                                                                                                                                                             0.2s
- => [build 7/7] RUN ./hack/build.sh                                                                                                                                                                                                                                 12.5s
- => [stage-1 2/2] COPY --from=build /tmp/src/out/chart-verifier /app/chart-verifier                                                                                                                                                                                  0.1s
- => exporting to image                                                                                                                                                                                                                                               0.2s
- => => exporting layers                                                                                                                                                                                                                                              0.2s
- => => writing image sha256:7302e88a2805cb4be1b9e130d057bd167381e27f314cbe3c28fbc6cb7ee6f2a1                                                                                                                                                                         0.0s
- => => naming to quay.io/redhat-certification/chart-verifier:07e369d
-```
+To build `chart-verifier` container image, execute `make build-image`:
 
 The container image created by the build program is tagged with the commit ID of the working directory at the time of
 the build: `quay.io/redhat-certification/chart-verifier:0d3706f`.

@@ -3,7 +3,6 @@ package checks
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 
@@ -67,7 +66,7 @@ func buildChartTestingConfiguration(opts *CheckOptions) config.Configuration {
 	// cfg will be populated with options gathered from the input
 	// check options.
 	cfg := config.Configuration{
-		BuildId:           opts.ViperConfig.GetString("buildId"),
+		BuildID:           opts.ViperConfig.GetString("buildId"),
 		Upgrade:           opts.ViperConfig.GetBool("upgrade"),
 		SkipMissingValues: opts.ViperConfig.GetBool("skipMissingValues"),
 		ReleaseLabel:      opts.ViperConfig.GetString("releaseLabel"),
@@ -75,8 +74,8 @@ func buildChartTestingConfiguration(opts *CheckOptions) config.Configuration {
 		HelmExtraArgs:     opts.ViperConfig.GetString("helmExtraArgs"),
 	}
 
-	if len(cfg.BuildId) == 0 {
-		cfg.BuildId = "build-" + util.RandomString(6)
+	if len(cfg.BuildID) == 0 {
+		cfg.BuildID = "build-" + util.RandomString(6)
 	}
 
 	if len(cfg.ReleaseLabel) == 0 {
@@ -196,7 +195,7 @@ func generateInstallConfig(
 	if cfg.Namespace != "" {
 		namespace = cfg.Namespace
 		if len(release) == 0 {
-			release, _ = chrt.CreateInstallParams(cfg.BuildId)
+			release, _ = chrt.CreateInstallParams(cfg.BuildID)
 		}
 		releaseSelector = fmt.Sprintf("%s=%s", cfg.ReleaseLabel, release)
 		cleanup = func() {
@@ -206,9 +205,9 @@ func generateInstallConfig(
 		}
 	} else {
 		if len(release) == 0 {
-			release, namespace = chrt.CreateInstallParams(cfg.BuildId)
+			release, namespace = chrt.CreateInstallParams(cfg.BuildID)
 		} else {
-			_, namespace = chrt.CreateInstallParams(cfg.BuildId)
+			_, namespace = chrt.CreateInstallParams(cfg.BuildID)
 		}
 		cleanup = func() {
 			//nolint:errcheck // TODO(komish) identify if this error needs to be
@@ -310,7 +309,7 @@ func upgradeAndTestChart(
 // readObjectFromYamlFile unmarshals the given filename and returns an object with its contents.
 func readObjectFromYamlFile(filename string) (map[string]interface{}, error) {
 	// #nosec G304
-	objBytes, err := ioutil.ReadFile(filename)
+	objBytes, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("reading values file: %w", err)
 	}
@@ -333,14 +332,14 @@ func writeObjectToTempYamlFile(obj map[string]interface{}) (filename string, cle
 		return "", nil, fmt.Errorf("marshalling values file new contents: %w", err)
 	}
 
-	tempDir, err := ioutil.TempDir(os.TempDir(), "chart-testing-*")
+	tempDir, err := os.MkdirTemp(os.TempDir(), "chart-testing-*")
 	if err != nil {
 		return "", nil, fmt.Errorf("creating temporary directory: %w", err)
 	}
 
 	filename = path.Join(tempDir, "values.yaml")
 
-	err = ioutil.WriteFile(filename, objBytes, 0o644)
+	err = os.WriteFile(filename, objBytes, 0o644)
 	if err != nil {
 		return "", nil, fmt.Errorf("writing values file new contents: %w", err)
 	}
