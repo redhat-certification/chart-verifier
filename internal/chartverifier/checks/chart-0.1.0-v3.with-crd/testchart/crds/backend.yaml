@@ -1,0 +1,16 @@
+kind: CustomResourceDefinition
+metadata:
+    name: backservs.service.example.com
+spec:
+    group: service.example.com
+    versions:
+        - name: v1
+          served: true
+          storage: true
+    scope: Namespaced
+    names:
+        plural: backservs
+        singular: backserv
+        kind: Backserv
+        shortNames:
+        - bs
