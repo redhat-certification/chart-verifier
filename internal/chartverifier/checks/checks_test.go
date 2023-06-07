@@ -179,6 +179,43 @@ func TestHasValuesSchema(t *testing.T) {
 	}
 }
 
+func TestNotContainValuesSchemaRemoteRef(t *testing.T) {
+	type testCase struct {
+		description string
+		uri         string
+	}
+
+	positiveTestCases := []testCase{
+		{description: "chart with schema without remote ref", uri: "chart-0.1.0-v3.valid.tgz"},
+	}
+
+	for _, tc := range positiveTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			config := viper.New()
+			r, err := NotContainValuesSchemaRemoteRef(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.True(t, r.Ok)
+			require.Equal(t, ValuesSchemaHasNoRemoteRef, r.Reason)
+		})
+	}
+
+	negativeTestCases := []testCase{
+		{description: "chart with schema with remote ref", uri: "chart-0.1.0-v3.schema-with-remote-ref.tgz"},
+	}
+
+	for _, tc := range negativeTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			config := viper.New()
+			r, err := NotContainValuesSchemaRemoteRef(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.False(t, r.Ok)
+			require.Equal(t, ValuesSchemaHasRemoteRef, r.Reason)
+		})
+	}
+}
+
 func TestHasValues(t *testing.T) {
 	type testCase struct {
 		description string

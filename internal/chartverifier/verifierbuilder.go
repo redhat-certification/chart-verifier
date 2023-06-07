@@ -40,6 +40,7 @@ func init() {
 	defaultRegistry.Add(apiChecks.ContainsTest, "v1.0", checks.ContainsTest)
 	defaultRegistry.Add(apiChecks.ContainsValues, "v1.0", checks.ContainsValues)
 	defaultRegistry.Add(apiChecks.ContainsValuesSchema, "v1.0", checks.ContainsValuesSchema)
+	defaultRegistry.Add(apiChecks.NotContainValuesSchemaRemoteRef, "v1.0", checks.NotContainValuesSchemaRemoteRef)
 	defaultRegistry.Add(apiChecks.HasKubeVersion, "v1.0", checks.HasKubeVersion)
 	defaultRegistry.Add(apiChecks.HasKubeVersion, "v1.1", checks.HasKubeVersion_V1_1)
 	defaultRegistry.Add(apiChecks.NotContainsCRDs, "v1.0", checks.NotContainCRDs)

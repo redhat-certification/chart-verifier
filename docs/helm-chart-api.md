@@ -165,6 +165,7 @@ func GetChecks() []CheckName
     - ```IsHelmV3```
     - ```NotContainCsiObjects```
     - ```NotContainsCRDs```
+    - ```NotContainValuesSchemaRemoteRef```
     - ```RequiredAnnotationsPresent``` 
 
 

@@ -24,6 +24,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 
 	"github.com/Masterminds/sprig"
@@ -50,6 +51,9 @@ const (
 	KuberVersionProcessingError  = "Error converting kubeVersion to an OCP range"
 	ValuesSchemaFileExist        = "Values schema file exist"
 	ValuesSchemaFileDoesNotExist = "Values schema file does not exist"
+	ValuesSchemaHasRemoteRef     = "Values schema contains remote reference"
+	ValuesSchemaHasNoRemoteRef   = "Values schema doesn't contain remote reference"
+	ValuesSchemaRemoteRefSkipped = "Values schema remote reference check skipped, no schema present"
 	ValuesFileExist              = "Values file exist"
 	ValuesFileDoesNotExist       = "Values file does not exist"
 	ChartContainCRDs             = "Chart contains CRDs"
@@ -157,6 +161,25 @@ func ContainsValuesSchema(opts *CheckOptions) (Result, error) {
 		r.SetResult(true, ValuesSchemaFileExist)
 	}
 
+	return r, nil
+}
+
+func NotContainValuesSchemaRemoteRef(opts *CheckOptions) (Result, error) {
+	c, _, err := LoadChartFromURI(opts)
+	if err != nil {
+		return Result{}, err
+	}
+
+	if len(c.Schema) == 0 {
+		return NewSkippedResult(fmt.Sprintf("%s : %s", ValuesSchemaHasNoRemoteRef, ValuesSchemaRemoteRefSkipped)), nil
+	}
+
+	r := NewResult(false, ValuesSchemaHasRemoteRef)
+
+	match, _ := regexp.Match(`\$ref"\s*:\s*"[^#]`, c.Schema)
+	if !match {
+		r.SetResult(true, ValuesSchemaHasNoRemoteRef)
+	}
 	return r, nil
 }
 

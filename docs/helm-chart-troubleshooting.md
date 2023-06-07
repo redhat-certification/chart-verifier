@@ -9,6 +9,7 @@
     - [`has-kubeversion` v1.1](#has-kubeversion-v11)
     - [`contains-values` v1.0](#contains-values-v10)
     - [`contains-values-schema` v1.0](#contains-values-schema-v10)
+    - [`not-contain-values-schema-remote-ref` v1.0](#not-contain-values-schema-remote-ref-v10)
     - [`not-contains-crds` v1.0](#not-contains-crds-v10)
     - [`not-contain-csi-objects` v1.0](#not-contain-csi-objects-v10)
     - [`helm-lint` v1.0](#helm-lint-v10)
@@ -64,6 +65,10 @@ See also helm documentation: [values](https://helm.sh/docs/chart_template_guide/
 Requires a ```values.schema.json``` file to be present in the chart. If the file is not present the check will fail.
 
 See also helm documentation: [Schema Files](https://helm.sh/docs/topics/charts/#schema-files)
+
+### `not-contain-values-schema-remote-ref` v1.0
+
+Requires a ```values.schema.json``` file to not contain remote [remote schema references](https://json-schema.org/understanding-json-schema/structuring.html#ref). Remote references are not supported by OpenShift's Helm catalog and are not suitable for air-gapped environments.
 
 ### `not-contains-crds` v1.0
 

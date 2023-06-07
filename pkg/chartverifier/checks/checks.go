@@ -1,22 +1,23 @@
 package checks
 
 const (
-	HasReadme                  CheckName = "has-readme"
-	IsHelmV3                   CheckName = "is-helm-v3"
-	ContainsTest               CheckName = "contains-test"
-	ContainsValues             CheckName = "contains-values"
-	ContainsValuesSchema       CheckName = "contains-values-schema"
-	HasKubeVersion             CheckName = "has-kubeversion"
-	NotContainsCRDs            CheckName = "not-contains-crds"
-	HelmLint                   CheckName = "helm-lint"
-	NotContainCsiObjects       CheckName = "not-contain-csi-objects"
-	ImagesAreCertified         CheckName = "images-are-certified"
-	ChartTesting               CheckName = "chart-testing"
-	RequiredAnnotationsPresent CheckName = "required-annotations-present"
-	SignatureIsValid           CheckName = "signature-is-valid"
-	MandatoryCheckType         CheckType = "Mandatory"
-	OptionalCheckType          CheckType = "Optional"
-	ExperimentalCheckType      CheckType = "Experimental"
+	HasReadme                       CheckName = "has-readme"
+	IsHelmV3                        CheckName = "is-helm-v3"
+	ContainsTest                    CheckName = "contains-test"
+	ContainsValues                  CheckName = "contains-values"
+	ContainsValuesSchema            CheckName = "contains-values-schema"
+	NotContainValuesSchemaRemoteRef CheckName = "not-contain-values-schema-remote-ref"
+	HasKubeVersion                  CheckName = "has-kubeversion"
+	NotContainsCRDs                 CheckName = "not-contains-crds"
+	HelmLint                        CheckName = "helm-lint"
+	NotContainCsiObjects            CheckName = "not-contain-csi-objects"
+	ImagesAreCertified              CheckName = "images-are-certified"
+	ChartTesting                    CheckName = "chart-testing"
+	RequiredAnnotationsPresent      CheckName = "required-annotations-present"
+	SignatureIsValid                CheckName = "signature-is-valid"
+	MandatoryCheckType              CheckType = "Mandatory"
+	OptionalCheckType               CheckType = "Optional"
+	ExperimentalCheckType           CheckType = "Experimental"
 )
 
 var setCheckNames = []CheckName{
@@ -31,6 +32,7 @@ var setCheckNames = []CheckName{
 	IsHelmV3,
 	NotContainCsiObjects,
 	NotContainsCRDs,
+	NotContainValuesSchemaRemoteRef,
 	RequiredAnnotationsPresent,
 	SignatureIsValid,
 }
