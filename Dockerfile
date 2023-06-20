@@ -6,7 +6,7 @@ COPY . .
 
 RUN go build -o ./out/chart-verifier main.go
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal
+FROM registry.access.redhat.com/ubi9/ubi-minimal
 
 COPY --from=build /tmp/src/out/chart-verifier /app/chart-verifier
 
