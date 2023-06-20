@@ -11,7 +11,10 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Checkout
+            - name: Checkout main branch
+              uses: actions/checkout@v3
+            
+            - name: Checkout PR branch
               uses: actions/checkout@v3
               with:
                 ref: ${{ github.event.pull_request.head.ref }}
@@ -21,7 +24,7 @@ jobs:
             - name: Setup Go
               uses: actions/setup-go@v4
               with:
-                go-version-file: ./chart-verifier/go.mod
+                go-version-file: go.mod
                 
             - name: Ensure Modules
               working-directory: ./chart-verifier
