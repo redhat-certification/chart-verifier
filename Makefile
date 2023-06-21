@@ -33,7 +33,7 @@ fmt: install.gofumpt
 
 .PHONY: bin
 bin:
-	go build -o ./out/chart-verifier main.go
+	CGO_ENABLED=0 go build -o ./out/chart-verifier main.go
 
 .PHONY: lint
 lint: install.golangci-lint
@@ -41,7 +41,7 @@ lint: install.golangci-lint
 
 .PHONY: bin_win
 bin_win:
-	env GOOS=windows GOARCH=amd64 go build -o .\out\chart-verifier.exe main.go
+	env GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -o .\out\chart-verifier.exe main.go
 
 .PHONY: test
 test:
