@@ -4,7 +4,7 @@ WORKDIR /tmp/src
 
 COPY . .
 
-RUN go build -o ./out/chart-verifier main.go
+RUN CGO_ENABLED=0 go build -o ./out/chart-verifier main.go
 
 FROM registry.access.redhat.com/ubi9/ubi-minimal
 
