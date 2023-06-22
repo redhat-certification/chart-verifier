@@ -1,11 +1,13 @@
 {
-    "version": "1.11.1",
+    "version": "1.12.0",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
         "<ul>",
-        "</li>Add option to skip cleanup after verification run (#350)</li>",
-        "</li>Tool fails when chart contains ci directory (#346)</li>",
-        "</li>equal sign lost in chart set values (#297)</li>",
+        "<li>updating dependencies and build processes to latest versions (#352)</li>",
+        "<li>ensure setup-go workflow uses go.mod in the right location (#357)</li>",
+        "<li>Re-add removed clone of main during CI tests (#358)</li>",
+        "<li>Move runtime image to UBI9 from UBI8 to address GLIBC discrepancies  (#356)</li>",
+        "<li>Disable CGO on build (#359)</li>",
         "</ul>"
     ]
 }
