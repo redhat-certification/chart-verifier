@@ -19,7 +19,7 @@ image:
   name: postgresql-10-rhel7
   repository: "registry.access.redhat.com/rhscl/"
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: "1-161"
 
 
 podSecurityContext: 
