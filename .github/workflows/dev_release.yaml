@@ -61,8 +61,7 @@ jobs:
                 tag_name: ${{ env.DEV_RELEASE }}
                 body: "Development release created with each merge into the main branch."
                 files: ${{ steps.create-tarfile.outputs.tarball_full_name }}
+                prerelease: true
+                draft: false
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
-
