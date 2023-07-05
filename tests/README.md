@@ -37,9 +37,13 @@ As a result there are 6 tests.
 
 ### Signing the chart
 
-The chart is signed using helm cli and a secret key. In this initial version the secret key used was one from Martin Mulholland. As a result the public key checked in for the test is also from Martin.
+The signed chart tests have been signed with a key generated specifically for
+these tests. When these are changed, a new keypair must be generated to use for
+signing. The secret key can be thrown away. The private key can be thrown away.
+The public key is all that's required for these tests to complete, and this key
+is not to be used for anything else.
 
-In the event the chart has to be updated, or a new chart added, the creator or updater of the chart can sign it use their own secret key, and create a copy of their public key to include with the test. 
+TODO: Generate a workflow that does this automagically in a container, etc.
 
 This is not ideal, we will investigate generating secret and public keys as art of the test using a bot id. 
 

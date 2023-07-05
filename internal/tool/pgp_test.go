@@ -12,7 +12,7 @@ import (
 
 var (
 	keyfileName    = "../../tests/charts/psql-service/0.1.11/psql-service-0.1.11.tgz.key"
-	expectedDigest = "1cc31121e86388fad29e4cc6fc6660f102f43d8c52ce5f7d54e134c3cb94adc2"
+	expectedDigest = "e5ff2a2124a152af497deea4d4be2ba279a7daa43b39e182af3aa686daf12e1e"
 )
 
 func TestPGPKeyEncoding(t *testing.T) {
