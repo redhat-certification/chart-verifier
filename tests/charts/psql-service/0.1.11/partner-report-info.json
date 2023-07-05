@@ -1,1 +1,51 @@
-{"annotations":[{"name":"charts.openshift.io/digest","value":"sha256:df41f5fb2134bceb4b3340c1bf795cc6191835250738cae089aa2c278db04491"},{"name":"charts.openshift.io/lastCertifiedTimestamp","value":"2023-01-13T15:54:52.070001-05:00"},{"name":"charts.openshift.io/testedOpenShiftVersion","value":"4.11"},{"name":"charts.openshift.io/supportedOpenShiftVersions","value":"\u003e=4.7"}],"digests":{"chart":"sha256:df41f5fb2134bceb4b3340c1bf795cc6191835250738cae089aa2c278db04491","package":"1205312f570d9608d17626f559c9280c2dde9b37ae0e6214c00c0e16c477fe10","publicKey":"1cc31121e86388fad29e4cc6fc6660f102f43d8c52ce5f7d54e134c3cb94adc2"},"metadata":{"vendorType":"partner","profileVersion":"v1.2","webCatalogOnly":false,"chart-uri":"psql-service-0.1.11.tgz","chart":{"name":"psql-service","version":"0.1.11","description":"A Helm chart for a RedHat Certified PSQL","apiVersion":"v2","appVersion":"10.0.0","annotations":{"charts.openshift.io/archs":"x86_64","charts.openshift.io/name":"PSQL RedHat Demo Chart","charts.openshift.io/provider":"RedHat","charts.openshift.io/supportURL":"https://github.com/dperaza4dustbit/helm-chart"},"kubeVersion":"\u003e=1.20.0","type":"application"}},"results":{"passed":"13","failed":"0","message":null}}
+{
+    "annotations": [
+        {
+            "name": "charts.openshift.io/digest",
+            "value": "sha256:5a5584c48c449861d1ef23325d91a4fa1fd838e7754558e32119986f5b8dfeed"
+        },
+        {
+            "name": "charts.openshift.io/lastCertifiedTimestamp",
+            "value": "2023-01-13T15:54:52.070001-05:00"
+        },
+        {
+            "name": "charts.openshift.io/testedOpenShiftVersion",
+            "value": "4.11"
+        },
+        {
+            "name": "charts.openshift.io/supportedOpenShiftVersions",
+            "value": "\u003e=4.7"
+        }
+    ],
+    "digests": {
+        "chart": "sha256:5a5584c48c449861d1ef23325d91a4fa1fd838e7754558e32119986f5b8dfeed",
+        "package": "defaa409927744f7a2caa0b18467c28fc2343b3a2bd8d2fe8a104cd72d66c0c2",
+        "publicKey": "e5ff2a2124a152af497deea4d4be2ba279a7daa43b39e182af3aa686daf12e1e"
+    },
+    "metadata": {
+        "vendorType": "partner",
+        "profileVersion": "v1.2",
+        "webCatalogOnly": false,
+        "chart-uri": "psql-service-0.1.11.tgz",
+        "chart": {
+            "name": "psql-service",
+            "version": "0.1.11",
+            "description": "A Helm chart for a RedHat Certified PSQL",
+            "apiVersion": "v2",
+            "appVersion": "10.0.0",
+            "annotations": {
+                "charts.openshift.io/archs": "x86_64",
+                "charts.openshift.io/name": "PSQL RedHat Demo Chart",
+                "charts.openshift.io/provider": "RedHat",
+                "charts.openshift.io/supportURL": "https://github.com/dperaza4dustbit/helm-chart"
+            },
+            "kubeVersion": "\u003e=1.20.0",
+            "type": "application"
+        }
+    },
+    "results": {
+        "passed": "13",
+        "failed": "0",
+        "message": null
+    }
+}
