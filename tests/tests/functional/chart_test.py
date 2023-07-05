@@ -299,20 +299,20 @@ def run_verify_podman_image(verifier_image_name,verifier_image_tag,profile_type,
 
     if chart_location.startswith('http:/') or chart_location.startswith('https:/'):
         if pgp_location:
-            out = subprocess.run(["podman", "run", "-v", f"{kubeconfig}:/kubeconfig", "-e", "KUBECONFIG=/kubeconfig", "--rm",
+            out = subprocess.run(["podman", "run", "-v", f"{kubeconfig}:/kubeconfig:z", "-e", "KUBECONFIG=/kubeconfig", "--rm",
                                   f"{verifier_image_name}:{verifier_image_tag}", "verify", "--set", f"profile.vendortype={profile_type}","--pgp-public-key",public_key_location,chart_location], capture_output=True)
         else:
-            out = subprocess.run(["podman", "run", "-v", f"{kubeconfig}:/kubeconfig", "-e", "KUBECONFIG=/kubeconfig", "--rm",
+            out = subprocess.run(["podman", "run", "-v", f"{kubeconfig}:/kubeconfig:z", "-e", "KUBECONFIG=/kubeconfig", "--rm",
                           f"{verifier_image_name}:{verifier_image_tag}", "verify", "--set", f"profile.vendortype={profile_type}", chart_location], capture_output=True)
     else:
         chart_directory = os.path.dirname(os.path.abspath(chart_location))
         chart_name = os.path.basename(os.path.abspath(chart_location))
         if pgp_key_location:
             pgp_key_name = os.path.basename(os.path.abspath(pgp_key_location))
-            out = subprocess.run(["podman", "run", "-v", f"{chart_directory}:/charts:z", "-v", f"{kubeconfig}:/kubeconfig", "-e", "KUBECONFIG=/kubeconfig", "--rm",
+            out = subprocess.run(["podman", "run", "-v", f"{chart_directory}:/charts:z", "-v", f"{kubeconfig}:/kubeconfig:z", "-e", "KUBECONFIG=/kubeconfig", "--rm",
                                   f"{verifier_image_name}:{verifier_image_tag}", "verify", "--set", f"profile.vendortype={profile_type}","--pgp-public-key",f"/charts/{pgp_key_name}",f"/charts/{chart_name}"], capture_output=True)
         else:
-            out = subprocess.run(["podman", "run", "-v", f"{chart_directory}:/charts:z", "-v", f"{kubeconfig}:/kubeconfig", "-e", "KUBECONFIG=/kubeconfig", "--rm",
+            out = subprocess.run(["podman", "run", "-v", f"{chart_directory}:/charts:z", "-v", f"{kubeconfig}:/kubeconfig:z", "-e", "KUBECONFIG=/kubeconfig", "--rm",
                               f"{verifier_image_name}:{verifier_image_tag}", "verify", "--set", f"profile.vendortype={profile_type}", f"/charts/{chart_name}"], capture_output=True)
 
     return out.stdout.decode("utf-8")
