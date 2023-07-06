@@ -45,7 +45,7 @@ jobs:
                 ve1/bin/tar-file --release=${DEV_RELEASE}
 
             - name: Delete previous release and tag
-              name: delete-previous
+              id: delete-previous
               if: ${{ steps.create-tarfile.outcome == 'success' }}
               uses: dev-drprasad/delete-tag-and-release@v0.2.1
               with:
