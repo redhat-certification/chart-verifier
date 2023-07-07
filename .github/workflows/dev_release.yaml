@@ -1,4 +1,10 @@
-name: Create dev release
+name: Create Dev Release
+# Delete the previous development release and recreate it
+# with code based off of the main branch.
+#
+# This is done so that the openshift-tools-installer has a valid
+# semantic version release to install.
+# https://github.com/redhat-actions/openshift-tools-installer
 
 on:
     push:
@@ -6,7 +12,7 @@ on:
             - main
 
 jobs:
-    build:
+    release:
         name: Create Dev Release
         runs-on: ubuntu-latest
         env:
@@ -53,10 +59,17 @@ jobs:
                 tag_name: ${{ env.DEV_RELEASE }} # tag name to delete
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            
+              # The next step seems to periodically create a draft release.
+              # We think this is because of a race condition.
+              # Force a wait after the previous release was deleted.
+            - name: Sleep and to buffer release recreation
+              id: sleep-after-delete-previous
+              run: sleep 8
 
             - name: Create the release
               id: create_release
-              if: ${{ steps.delete-previous.outcome == 'success' }}
+              if: ${{ steps.delete-previous.outcome == 'success' && steps.sleep-after-delete-previous == 'success' }}
               uses: softprops/action-gh-release@v1
               with:
                 tag_name: ${{ env.DEV_RELEASE }}
