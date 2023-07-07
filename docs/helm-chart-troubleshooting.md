@@ -52,7 +52,8 @@ Requires the ```kubeVersion``` attribute of chart.yaml to be set to a valid sema
 
 See also helm documentation: [Helm documentetaion of the kubeVersion attribute](https://helm.sh/docs/topics/charts/#the-kubeversion-field)
 
-Note: The kubeVersion filed will be used to detremine the Open Shift versions the charts supports and will be set as annotation ``````  
+Note: The kubeVersion field will be used to detremine the OpenShift versions the charts supports and will be set as annotation.
+
 ### `contains-values` v1.0
 
 Requires a ```values.schema``` file to be present in the chart. If the file is not present the check will fail.
@@ -161,7 +162,7 @@ $ podman run --rm -i \
 Requires the following annotation to be present in chart.yaml:
 - ```charts.openshift.io/name```
 
-The value of the annotation will be used in the Open Shift catalogue as the name of the chart.
+The value of the annotation will be used in the OpenShift catalogue as the name of the chart.
 
 
 ### `signature-is-valid` v1.0

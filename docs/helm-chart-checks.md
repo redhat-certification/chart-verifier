@@ -321,9 +321,9 @@ Annotations added to a v1.1 profile report are common to all profile types: part
 |-------------------|------------------|
 | [digests.chart](helm-chart-annotations.md#digests) | The sha value of the chart as calculated from the copy loaded into memory. |
 | [digests.package](helm-chart-annotations.md#digests) | The sha value of the chart tarball if used to create the report. |
-| [testedOpenShiftVersion](helm-chart-annotations.md#testedOpenShiftVersion) | The Open Shift version that was used by the chart-testing check. |
+| [testedOpenShiftVersion](helm-chart-annotations.md#testedOpenShiftVersion) | The OpenShift version that was used by the chart-testing check. |
 | [lastCertifiedTimestamp](helm-chart-annotations.md#lastCertifiedTimestamp) | The time that the report was created by the chart verifier |
-| [supportedOpenShiftVersions](helm-chart-annotations.md#supportedOpenShiftVersions) | The Open Shift versions supported by the chart based on the kuberVersion attrinute in chart.yaml |
+| [supportedOpenShiftVersions](helm-chart-annotations.md#supportedOpenShiftVersions) | The OpenShift versions supported by the chart based on the kuberVersion attrinute in chart.yaml |
 
 #### Checks
 
@@ -355,7 +355,7 @@ Annotations added to a v1.0 profile report are common to all profile types: part
 |-------------------|------------------|
 | [digests.chart](helm-chart-annotations.md#digests) | The sha value of the chart as calculated from the copy loaded into memory. |
 | [digests.package](helm-chart-annotations.md#digests) | The sha value of the chart tarball if used to create the report. |
-| [certifiedOpenShiftVersion](helm-chart-annotations.md#certifiedOpenShiftVersion) | The Open Shift version that was used by the chart-testing check. |
+| [certifiedOpenShiftVersion](helm-chart-annotations.md#certifiedOpenShiftVersion) | The OpenShift version that was used by the chart-testing check. |
 | [lastCertifiedTimestamp](helm-chart-annotations.md#lastCertifiedTimestamp) | The time that the report was created by the chart verifier |
 
 #### Checks
@@ -383,11 +383,11 @@ To specify which profile to use the --set flag:
     --set profile.vendorType=partner
         valid values based on current profiles: partner, community, redhat, default
         default is same as partner.
-        If value specified is not specified or not recognized, default will be assumed.
+        If value is not specified or not recognized, default will be assumed.
         The flag name is case insensitive.
     --set profile.version=v1.1
         Valid values based on current profiles: v1.0, v1.0
-        If value specified is not specified or not recognized, v1.1 will be assumed.
+        If value is not specified or not recognized, v1.1 will be assumed.
         The flag name is case insensitive.
 ```
 For example:
@@ -451,7 +451,7 @@ If the chart requires overrides values, these can be set using through the `--ch
 ### Check processing
 
 The `chart-testing` check performs the following actions, keeping the semantics provided by [github.com/helm/chart-testing](https://github.com/helm/chart-testing):
-1. Install: the chart being verified will be installed in the available OpenShift cluster utilizing the same semantics client-go uses to find the current context:
+1. Install: the chart being verified will be installed in the available OpenShift cluster using the same semantics client-go uses to find the current context:
     1. `--kubeconfig flag`
     1. `KUBECONFIG` environment variable
     1. `$HOME/.kube/config`.
