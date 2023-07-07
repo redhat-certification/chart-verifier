@@ -1,6 +1,6 @@
 ## Creating a new chart-verifier release
 
-Chart verifier - release creation is automated through a git hub workflow. To create a new release follow these steps:
+Chart verifier - release creation is automated through a GitHub workflow. To create a new release follow these steps:
 
 1. Modify the [pkg/chartverifier/version/version_info.json](https://github.com/redhat-certification/chart-verifier/blob/main/pkg/chartverifier/version/version_info.json) file with information about the new release, for example:
    ```
