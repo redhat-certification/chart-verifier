@@ -226,20 +226,21 @@ def run_report_docker_image(verifier_image_name,verifier_image_tag,profile_type,
 def run_version_tarball_image(tarball_name):
     tar = tarfile.open(tarball_name, "r:gz")
     tar.extractall(path="./test_verifier")
-    out = subprocess.run(["./test_verifier/chart-verifier","version"],capture_output=True)
+    out = subprocess.run(["./test_verifier/chart-verifier","version", "--as-data"],capture_output=True)
     return normalize_version(out.stdout.decode("utf-8"))
 
 def normalize_version(version):
-    """Trim trailing newlines and leading v from semantic versions.
+    """Extract normalized version from JSON data
 
     Parameters:
-    version (string): a semver string like v0.0.0\n
+    version (string): the version and commit ID in JSON
 
     Returns:
     string: a normalized semver like 0.0.0.
     """
     print(f'version input to normalize_version function is: {version}')
-    return version.rstrip().lstrip('v')
+    version_dict = json.loads(version)
+    return version_dict["version"]
 
 def run_version_docker_image(verifier_image_name,verifier_image_tag):
     """Run chart verifier's version command using the Docker image."""
@@ -247,7 +248,7 @@ def run_version_docker_image(verifier_image_name,verifier_image_tag):
     os.environ["VERIFIER_IMAGE"] = verifier_image
     try:
         client = docker.from_env()
-        output = client.containers.run(verifier_image,"version",stdin_open=True,tty=True,stdout=True,remove=True)
+        output = client.containers.run(verifier_image,"version --as-data",stdin_open=True,tty=True,stdout=True,remove=True)
     except docker.errors.ContainerError as exc:
         return f"FAIL: docker.errors.ContainerError: {exc.args}"
     except docker.errors.ImageNotFound as exc:
@@ -262,7 +263,7 @@ def run_version_docker_image(verifier_image_name,verifier_image_tag):
 
 def run_version_podman_image(verifier_image_name,verifier_image_tag):
     """Run chart verifier's version command in Podman."""
-    out = subprocess.run(["podman", "run", "--rm", f"{verifier_image_name}:{verifier_image_tag}", "version"], capture_output=True)
+    out = subprocess.run(["podman", "run", "--rm", f"{verifier_image_name}:{verifier_image_tag}", "version", "--as-data"], capture_output=True)
     return normalize_version(out.stdout.decode("utf-8"))
 
 def run_verify_tarball_image(tarball_name,profile_type, chart_location,pgp_key_location=None):

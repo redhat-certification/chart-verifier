@@ -3,6 +3,7 @@
 IMAGE_BUILDER?=podman
 IMAGE_REPO?=quay.io/redhat-certification
 COMMIT_ID=$(shell git rev-parse --short HEAD)
+COMMIT_ID_LONG=$(shell git rev-parse HEAD)
 
 default: bin
 
@@ -33,7 +34,9 @@ fmt: install.gofumpt
 
 .PHONY: bin
 bin:
-	CGO_ENABLED=0 go build -o ./out/chart-verifier main.go
+	CGO_ENABLED=0 go build \
+		-ldflags "-X 'github.com/redhat-certification/chart-verifier/cmd.CommitIDLong=$(COMMIT_ID_LONG)'" \
+		-o ./out/chart-verifier main.go
 
 .PHONY: lint
 lint: install.golangci-lint
@@ -41,7 +44,9 @@ lint: install.golangci-lint
 
 .PHONY: bin_win
 bin_win:
-	env GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -o .\out\chart-verifier.exe main.go
+	env GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build \
+		-ldflags "-X 'github.com/redhat-certification/chart-verifier/cmd.CommitIDLong=$(COMMIT_ID_LONG)'" \
+		-o .\out\chart-verifier.exe main.go
 
 .PHONY: test
 test:
