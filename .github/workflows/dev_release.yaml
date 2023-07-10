@@ -1,6 +1,7 @@
 name: Create Dev Release
 # Delete the previous development release and recreate it
-# with code based off of the main branch.
+# with code based off of the main branch. Also updates the
+# DEV_RELEASE tag for the image to match.
 #
 # This is done so that the openshift-tools-installer has a valid
 # semantic version release to install.
@@ -10,14 +11,12 @@ on:
     push:
         branches:
             - main
-
+env:
+    DEV_RELEASE: 0.1.0
 jobs:
     release:
         name: Create Dev Release
         runs-on: ubuntu-latest
-        env:
-            DEV_RELEASE: 0.1.0
-
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
@@ -69,7 +68,7 @@ jobs:
 
             - name: Create the release
               id: create_release
-              if: ${{ steps.delete-previous.outcome == 'success' && steps.sleep-after-delete-previous == 'success' }}
+              if: ${{ steps.delete-previous.outcome == 'success' && steps.sleep-after-delete-previous.outcome == 'success' }}
               uses: softprops/action-gh-release@v1
               with:
                 tag_name: ${{ env.DEV_RELEASE }}
@@ -79,3 +78,45 @@ jobs:
                 draft: false
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    image:
+      name: Create Dev Image
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v4
+        with:
+            python-version: '3.9'
+
+      - name: Set up Python scripts
+        run: |
+          # set up python requirements and scripts on PR branch
+          python3 -m venv ve1
+          cd scripts && ../ve1/bin/pip3 install -r requirements.txt && cd ..
+          cd scripts && ../ve1/bin/python3 setup.py install && cd ..
+
+      - name: Create image
+        id: build-image
+        run: ve1/bin/build-and-test --image-name="quay.io/redhat-certification/chart-verifier" --sha-value=$DEV_RELEASE --build-only="True"}
+
+      - name: Login to Quay as Bot
+        id: login-as-bot
+        if: ${{ steps.build-image.outcome == 'success'}}
+        uses: redhat-actions/podman-login@v1
+        with:
+          username: ${{ secrets.QUAY_BOT_USERNAME }}
+          password: ${{ secrets.QUAY_BOT_TOKEN }}
+          registry: quay.io/redhat-certification
+
+      - name: Push Image
+        if: ${{ steps.login-as-bot.outcome == 'success' }}
+        run: |
+          podman push quay.io/redhat-certification/chart-verifier:$DEV_RELEASE
