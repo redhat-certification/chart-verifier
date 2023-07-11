@@ -171,7 +171,7 @@ func GetClientConfig(envSettings *cli.EnvSettings) clientcmd.ClientConfig {
 
 	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 		loadingRules,
-		&clientcmd.ConfigOverrides{})
+		&clientcmd.ConfigOverrides{CurrentContext: envSettings.KubeContext})
 }
 
 func getDeploymentsList(k Kubectl, context context.Context, namespace string, selector string) ([]v1.Deployment, error) {
