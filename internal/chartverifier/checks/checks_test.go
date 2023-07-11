@@ -530,7 +530,7 @@ func TestSemVers(t *testing.T) {
 		{kubeVersion: ">= 1.14.0-0", OCPRange: ">=4.2"},
 		{kubeVersion: "1.16 - 1.21", OCPRange: "4.3 - 4.8"},
 		{kubeVersion: "*", OCPRange: ">=4.1"},
-		{kubeVersion: ">=1.16.0 <1.22.0", OCPRange: "Error converting kubeVersion to an OCP range : improper constraint: >=1.16.0 <1.22.0"},
+		{kubeVersion: ">= 1.23.0 < 1.26.3", OCPRange: "4.10 - 4.13"},
 	}
 
 	for _, test := range testCases {
