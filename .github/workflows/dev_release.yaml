@@ -113,8 +113,8 @@ jobs:
         if: ${{ steps.build-image.outcome == 'success'}}
         with:
           registry: quay.io
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.QUAY_BOT_USERNAME }}
+          password: ${{ secrets.QUAY_BOT_TOKEN }}
 
       - name: Push Image
         if: ${{ steps.login-as-bot.outcome == 'success' }}
