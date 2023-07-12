@@ -221,7 +221,7 @@ jobs:
               # for it to complete before proceeding successfully.
               id: wait_for_image_build
               if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
-              run: 
+              run: |
                 expectedImage=quay.io/redhat-certification/chart-verifier:${{ steps.check_version_in_PR.outputs.PR_version }}
                 for i in {1..30}; do
                   s=60
