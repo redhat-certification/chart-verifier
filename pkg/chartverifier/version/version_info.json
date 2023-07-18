@@ -1,19 +1,11 @@
 {
-    "version": "1.12.1",
+    "version": "1.12.2",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
         "<ul>",
-        "<li>Move latest tag on Quay using Robot account (#361)</li>",
-        "<li>change expected tag after latest tag was unpublished (#364)</li>",
-        "<li>Make dev releases prereleases and not drafts (#363)</li>",
-        "<li>Ensure release creation only happens after release deletion is completed successfully (#365)</li>",
-        "<li>use id instead of name (#366)</li>",
-        "<li>Fix various typos in documentation (#367)</li>",
-        "<li>Update action identifiers (#368)</li>",
-        "<li>Update the 0.1.0 image in addition to the release for each merged commit in main (#371)</li>",
-        "<li>Use docker login and push instead of podman (#372)</li>",
-        "<li>Use the right environment variables (#373)</li>",
-        "<li>Update sprig to v3 to resolve semver constraint validity issues (#374)</li>",
+        "<li>Use multiline parsing for run task (#376) by @komish</li>",
+        "<li>Add commit ID to version output (#370) by @mgoerens</li>",
+        "<li>apply kubecontext setting to kubectl client (#377) by @dcurran90</li>",
         "</ul>"
     ]
 }
