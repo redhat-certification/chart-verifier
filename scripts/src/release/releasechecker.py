@@ -31,7 +31,7 @@ import requests
 import semver
 import sys
 sys.path.append('./scripts/src/')
-from release import tarfile_asset
+from release import tarfile_asset, releasebody
 from utils import utils
 
 VERSION_FILE = 'pkg/chartverifier/version/version_info.json'
@@ -63,18 +63,6 @@ def check_if_only_version_file_is_modified(api_url):
                 return False
 
     return version_file_found
-
-def make_release_body(version, image_name, release_info):
-    body = f"Chart verifier version {version} <br><br>Docker Image:<br>- {image_name}:{version}<br><br>"
-    body += "This version includes:<br>"
-    for info in release_info:
-        if info.startswith("<"):
-            body += info
-        else:
-            body += f"- {info}<br>"
-
-    print(f"[INFO] Release body: {body}")
-    utils.add_output("PR_release_body",body)
 
 def get_version_info():
     data = {}
@@ -111,7 +99,8 @@ def main():
             utils.add_output("PR_release_image",version_info["quay-image"])
             utils.add_output("PR_release_info",version_info["release-info"])
             utils.add_output("PR_includes_release","true")
-            make_release_body(version_info["version"],version_info["quay-image"],version_info["release-info"])
+            release_body = releasebody.get_release_body(version_info["version"],version_info["quay-image"],version_info["release-info"])
+            utils.add_output("PR_release_body",release_body)
     else:
         version_info = get_version_info()
         if args.version:

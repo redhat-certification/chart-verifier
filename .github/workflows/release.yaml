@@ -1,0 +1,90 @@
+name: create release on new tags
+
+# This workflow is triggered by new version tags (e.g. "1.12.2" without leading "v") on the main
+# branch.
+#
+# Tagging should be automatic after each merged PR release (see the build.yaml workflow).
+# Alternatively, this workflow can be triggered by manually creating a tag on the main branch with
+# the aforementioned format. Note that the tests are *not* run by this workflow, and that you
+# should therefore apply caution before manually tagging the main branch in order to trigger it.
+#
+# This workflow contains a check that the tag matches the version set in
+# ./pkg/chartverifier/version/version_info.json.
+#
+# In order to recreate a GitHub release and rebuild its associated assets, first the tag needs to
+# be manually deleted (e.g `git tag --delete 1.12.2 && git push --delete origin 1.12.2`). The
+# GitHub release that was created for this tag automatically turns into a "Draft" release and will
+# need to be manually cleaned up, though it doesn't constitute a blocker for this workflow to run.
+# Finally, as mentioned above, create a new tag (e.g. `git tag 1.12.2 && git push --tags`) to
+# recreate the release.
+#
+# This workflow builds the tarball, creates the Github release and attaches the tarball to it.
+
+on:
+  push:
+    # Publish semver tags as releases.
+    tags: '[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  build-and-release:
+    name: Create GitHub release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+
+      - name: Print tag to GITHUB_OUTPUT
+        id: get_tag
+        run: |
+          echo "release_version=${GITHUB_REF#refs/*/}" | tee -a $GITHUB_OUTPUT
+
+      - name: Build binary and make tarball
+        id: build_bin
+        run: |
+          make bin
+          TARBALL_NAME="chart-verifier.tgz-${{ steps.get_tag.outputs.release_version }}.tgz"
+          tar -zcvf $TARBALL_NAME -C out/ chart-verifier
+          export TARBALL_PATH=$(realpath $TARBALL_NAME)
+          echo "tarball_path=$TARBALL_PATH" | tee -a $GITHUB_OUTPUT
+
+      - name: Check that the tag matches the current version
+        id: check_tag_and_version
+        run: |
+          release_version=${{ steps.get_tag.outputs.release_version }}
+          bin_version=$(out/chart-verifier version --as-data | jq -r .version)
+          if [[ "$release_version" != "$bin_version" ]]; then
+            echo "Binary version ($bin_version) doesn't match tag ($release_version)" && exit 1
+          fi
+
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Set up Python scripts
+        run: |
+          # set up python requirements and scripts on PR branch
+          python3 -m venv ve1
+          cd scripts && ../ve1/bin/pip3 install -r requirements.txt && cd ..
+          cd scripts && ../ve1/bin/python3 setup.py install && cd ..
+
+      - name: Generate release body
+        id: release_body
+        run: echo "release_body=$(ve1/bin/print-release-body)" | tee -a $GITHUB_OUTPUT
+
+      - name: Create the release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.get_tag.outputs.release_version }}
+          body: ${{ steps.release_body.outputs.release_body }}
+          files: ${{ steps.build_bin.outputs.tarball_path }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

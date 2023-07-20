@@ -1,4 +1,9 @@
-name: Build, Test and Release
+name: Build, Test, Automerge and Tag
+
+# This workflow runs on all PRs that are targetting the main branch.
+#
+# It runs the test suite. If the PR is a release PR, it automerges and tags the main branch with
+# the corresonding new version. Finally, it retags the container image with latest.
 
 on:
     pull_request_target:
@@ -118,7 +123,7 @@ jobs:
               id: create-tarfile
               working-directory: ./chart-verifier
               run: |
-                # check if release file only is included in PR
+                # create test tarball for the tests
                 ve1/bin/tar-file --release="test"
 
 
@@ -187,7 +192,7 @@ jobs:
             - name: Approve PR
               id: approve_pr
               if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
-              uses: hmarr/auto-approve-action@v2
+              uses: hmarr/auto-approve-action@v3
               with:
                   github-token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -200,21 +205,28 @@ jobs:
                 MERGE_METHOD: squash
                 MERGE_LABELS: ""
 
-            - name: Check for PR merge
+            - name: Get master branch sha
+              id: master_sha
               if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
               run: |
-                ve1/bin/check-auto-merge --api-url=${{ github.event.pull_request._links.self.href }}
+                git fetch
+                export ORIGIN_MASTER_SHA=$(git rev-parse origin/master)
+                echo "origin_master_sha=$ORIGIN_MASTER_SHA" >> $GITHUB_OUTPUT
 
-            - name: Create the the release
-              id: create_release
+            - name: Create release tag
+              id: create_release_tag
               if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
-              uses: softprops/action-gh-release@v1
+              uses: mathieudutour/github-tag-action@v6.1
               with:
-                tag_name: ${{ steps.check_version_in_PR.outputs.PR_version }}
-                body: ${{ steps.check_version_in_PR.outputs.PR_release_body }}
-                files: ${{ steps.check_version_in_PR.outputs.PR_tarball_name }}
-              env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                # It is necessary to use a Personal Access Token here rather than the usual GITHUB_TOKEN, as this
+                # step should trigger the release.yaml workflow, and events (such as tags) triggered by the
+                # GITHUB_TOKEN cannot create a new workflow run. See:
+                # https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow
+                # This Personal Access Token belongs to the openshift-helm-charts-bot account.
+                github_token: ${{ secrets.GH_HELM_BOT_TOKEN }}
+                custom_tag: ${{ steps.check_version_in_PR.outputs.PR_version }}
+                tag_prefix: ""
+                commit_sha: ${{ steps.master_sha.outputs.origin_master_sha }}
 
             - name: Wait for image build to complete
               # Quay is configured to automatically build our image. This waits
