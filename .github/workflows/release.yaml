@@ -18,7 +18,8 @@ name: create release on new tags
 # Finally, as mentioned above, create a new tag (e.g. `git tag 1.12.2 && git push --tags`) to
 # recreate the release.
 #
-# This workflow builds the tarball, creates the Github release and attaches the tarball to it.
+# This workflow builds all release assets (the tarball and the container images), creates the
+# Github release and attaches the tarball to it.
 
 on:
   push:
@@ -88,3 +89,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build container images
+        id: build_container_images
+        run: |
+            # Build podman images locally
+            image_tag=${{ steps.get_tag.outputs.release_version }}
+            podman build \
+              -t quay.io/redhat-certification/chart-verifier:$image_tag \
+              -t quay.io/redhat-certification/chart-verifier:latest \
+              -t quay.io/redhat-certification/chart-verifier:main .
+
+      - name: Push to quay.io
+        id: push_to_quay
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: chart-verifier
+          tags: |
+            ${{ steps.get_tag.outputs.release_version }}
+            latest
+            main
+          registry: quay.io/redhat-certification
+          username: ${{ secrets.QUAY_BOT_USERNAME }}
+          password: ${{ secrets.QUAY_BOT_TOKEN }}
