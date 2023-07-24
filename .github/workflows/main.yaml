@@ -1,0 +1,42 @@
+name: Create container image on main
+
+# This workflow builds a container image for each commit on the main branch.
+# The image is tagged with the (short) commit ID and "main", and pushed to Quay.
+
+on:
+    push:
+        branches:
+            - main
+jobs:
+    image:
+      name: Build and push container images
+      runs-on: ubuntu-latest
+      steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get commit ID
+        id: get_commit_id
+        run: |
+          # Make the short commit ID available to the following steps.
+          COMMIT_ID=$(git rev-parse --short HEAD)
+          echo "commit_id=$COMMIT_ID" | tee -a $GITHUB_OUTPUT
+
+      - name: Build container images
+        id: build_container_images
+        run: |
+            # Build podman images locally
+            make build-image IMAGE_TAG=${{ steps.get_commit_id.outputs.commit_id }}
+            make build-image IMAGE_TAG=main
+
+      - name: Push to quay.io
+        id: push_to_quay
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: chart-verifier
+          tags: |
+            ${{ steps.get_commit_id.outputs.commit_id }}
+            main
+          registry: quay.io/redhat-certification
+          username: ${{ secrets.QUAY_BOT_USERNAME }}
+          password: ${{ secrets.QUAY_BOT_TOKEN }}

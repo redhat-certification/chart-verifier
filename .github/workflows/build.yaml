@@ -3,7 +3,7 @@ name: Build, Test, Automerge and Tag
 # This workflow runs on all PRs that are targetting the main branch.
 #
 # It runs the test suite. If the PR is a release PR, it automerges and tags the main branch with
-# the corresonding new version. Finally, it retags the container image with latest.
+# the corresonding new version.
 
 on:
     pull_request_target:
@@ -225,39 +225,3 @@ jobs:
                 custom_tag: ${{ steps.check_version_in_PR.outputs.PR_version }}
                 tag_prefix: ""
                 commit_sha: ${{ steps.main_sha.outputs.origin_main_sha }}
-
-            - name: Wait for image build to complete
-              # Quay is configured to automatically build our image. This waits
-              # for it to complete before proceeding successfully.
-              id: wait_for_image_build
-              if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
-              run: |
-                expectedImage=quay.io/redhat-certification/chart-verifier:${{ steps.check_version_in_PR.outputs.PR_version }}
-                for i in {1..30}; do
-                  s=60
-                  echo "Querying Quay for "${expectedImage}" in ${s} seconds..." 
-                  sleep $s
-                  skopeo inspect docker://"${expectedImage}" && echo "Image Found!" && exit 0
-                done
-                echo "ERR Image not found in allotted time."
-                exit 1           
-          
-            - name: Login to Quay as Bot
-              id: login_as_bot
-              if: ${{ steps.wait_for_image_build.outcome == 'success'}}
-              uses: redhat-actions/podman-login@v1
-              with:
-                username: ${{ secrets.QUAY_BOT_USERNAME }}
-                password: ${{ secrets.QUAY_BOT_TOKEN }}
-                registry: quay.io/redhat-certification
-
-            - name: Update latest tag
-              if: ${{ steps.login_as_bot.outcome == 'success'}}
-              id: update_latest_tag
-              # TODO: When we shift to a push-from-this-repo model (instead of Quay build model)
-              # we should transition this tag workflow to use the digest of the image built here in CI.
-              run: |
-                imageReference=quay.io/redhat-certification/chart-verifier
-                podman pull ${imageReference}:${{ steps.check_version_in_PR.outputs.PR_version }}
-                podman tag ${imageReference}:${{ steps.check_version_in_PR.outputs.PR_version }} ${imageReference}:latest
-                podman push ${imageReference}:latest
