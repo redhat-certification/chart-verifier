@@ -521,6 +521,12 @@ func certifyImages(r Result, opts *CheckOptions, registry string) Result {
 		r.SetResult(true, NoImagesToCertify)
 	} else {
 		for _, image := range images {
+			// skip to evaluate next image, if current image is an empty string
+			if strings.Trim(image, " ") == "" {
+				r.AddResult(false, "ImageCertify() = empty image found")
+				continue
+			}
+
 			err = nil
 			imageRef := parseImageReference(image)
 
