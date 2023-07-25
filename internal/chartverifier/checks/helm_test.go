@@ -180,7 +180,7 @@ func TestLongLineTemplate(t *testing.T) {
 	content, err := os.ReadFile("templates/test-template.yaml")
 	require.NoError(t, err)
 
-	images, err := getImagesFromContent(string(content))
+	images, err := getImagesFromContent(string(content)), nil
 	require.NoError(t, err)
 
 	require.Equal(t, len(images), 2)
