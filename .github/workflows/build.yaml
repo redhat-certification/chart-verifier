@@ -81,7 +81,7 @@ jobs:
             - name: Get Date
               id: get-date
               run: |
-                echo "date=$(/bin/date -u "+%Y%m%d")" >> $GITHUB_OUTPUT
+                echo "date=$(/bin/date -u "+%Y%m%d")" | tee -a $GITHUB_OUTPUT
               shell: bash
 
             - uses: actions/cache@v2
@@ -106,7 +106,6 @@ jobs:
                   commit_sha=$(git rev-parse --short HEAD)
                   ve1/bin/build-and-test --image-name="quay.io/redhat-certification/chart-verifier" --sha-value=$commit_sha --build-only="True"}
 
-
             - name: Build podman Image
               working-directory: ./chart-verifier
               id: build_podman_image
@@ -117,7 +116,7 @@ jobs:
                   image_tag="podman-"$commit_sha
                   echo "use image tag $image_tag"
                   podman build -t quay.io/redhat-certification/chart-verifier:$image_tag .
-                  echo "podman_image_tag=$image_tag" >> $GITHUB_OUTPUT
+                  echo "podman_image_tag=$image_tag" | tee -a $GITHUB_OUTPUT
 
             - name: Create tarfile
               id: create-tarfile
@@ -125,7 +124,6 @@ jobs:
               run: |
                 # create test tarball for the tests
                 ve1/bin/tar-file --release="test"
-
 
             - name: Login to oc
               working-directory: ./chart-verifier
@@ -211,7 +209,7 @@ jobs:
               run: |
                 git fetch
                 export ORIGIN_MASTER_SHA=$(git rev-parse origin/master)
-                echo "origin_master_sha=$ORIGIN_MASTER_SHA" >> $GITHUB_OUTPUT
+                echo "origin_master_sha=$ORIGIN_MASTER_SHA" | tee -a $GITHUB_OUTPUT
 
             - name: Create release tag
               id: create_release_tag
