@@ -203,13 +203,13 @@ jobs:
                 MERGE_METHOD: squash
                 MERGE_LABELS: ""
 
-            - name: Get master branch sha
-              id: master_sha
+            - name: Get main branch sha
+              id: main_sha
               if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
               run: |
                 git fetch
-                export ORIGIN_MASTER_SHA=$(git rev-parse origin/master)
-                echo "origin_master_sha=$ORIGIN_MASTER_SHA" | tee -a $GITHUB_OUTPUT
+                export ORIGIN_MAIN_SHA=$(git rev-parse origin/main)
+                echo "origin_main_sha=$ORIGIN_MAIN_SHA" | tee -a $GITHUB_OUTPUT
 
             - name: Create release tag
               id: create_release_tag
@@ -224,7 +224,7 @@ jobs:
                 github_token: ${{ secrets.GH_HELM_BOT_TOKEN }}
                 custom_tag: ${{ steps.check_version_in_PR.outputs.PR_version }}
                 tag_prefix: ""
-                commit_sha: ${{ steps.master_sha.outputs.origin_master_sha }}
+                commit_sha: ${{ steps.main_sha.outputs.origin_main_sha }}
 
             - name: Wait for image build to complete
               # Quay is configured to automatically build our image. This waits
