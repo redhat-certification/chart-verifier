@@ -25,6 +25,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"helm.sh/helm/v3/pkg/chartutil"
 
@@ -223,12 +224,21 @@ func getImageReferences(chartURI string, vals map[string]interface{}, kubeVersio
 // getImagesFromContent evaluates generated templates from
 // helm and extracts images which are returned in a slice
 func getImagesFromContent(content string) []string {
-	var images []string
-	re := regexp.MustCompile(`\s+image\:\s+(?P<image>.*)`)
+	re := regexp.MustCompile(`\s+image\:\s+(?P<image>.*)\n`)
 	matches := re.FindAllStringSubmatch(content, -1)
+	imageMap := make(map[string]struct{})
 	for _, match := range matches {
-		images = append(images, match[re.SubexpIndex("image")])
+		image := strings.TrimSpace(match[re.SubexpIndex("image")])
+		image = strings.Trim(image, "\"")
+		image = strings.Trim(image, "'")
+		imageMap[image] = struct{}{}
 	}
+
+	var images []string
+	for k := range imageMap {
+		images = append(images, k)
+	}
+
 	return images
 }
 

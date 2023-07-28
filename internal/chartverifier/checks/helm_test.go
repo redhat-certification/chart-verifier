@@ -19,6 +19,7 @@ package checks
 import (
 	"context"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -187,4 +188,41 @@ func TestLongLineTemplate(t *testing.T) {
 
 	require.Contains(t, images, "1.1.1/cv-test/image1:tag-123")
 	require.Contains(t, images, "1.1.2/cv-test/image2:tag-223")
+}
+
+func TestGetImagesFromContent(t *testing.T) {
+	test := struct {
+		name    string
+		content string
+		want    []string
+	}{
+		name: "find images in yaml",
+		content: `
+	image: "registry.access.redhat.com/rhscl/postgresql-10-rhel7:1-161"
+	image: 'busybox'
+	image:  "  "
+	image: registry.redhat.io/cpopen/ibmcloud-object-storage-driver@sha256:fc17bb3e89d00b3eb0f50b3ea83aa75c52e43d8e56cf2e0f17475e934eeeeb5f
+`,
+		want: []string{
+			"registry.access.redhat.com/rhscl/postgresql-10-rhel7:1-161",
+			"busybox",
+			"",
+			"registry.redhat.io/cpopen/ibmcloud-object-storage-driver@sha256:fc17bb3e89d00b3eb0f50b3ea83aa75c52e43d8e56cf2e0f17475e934eeeeb5f",
+		},
+	}
+
+	t.Run(test.name, func(t *testing.T) {
+		got := getImagesFromContent(test.content)
+		if testing.Verbose() {
+			t.Logf("got %d images", len(got))
+		}
+		if len(got) != len(test.want) {
+			t.Errorf("got %d images but, want %d", len(got), len(test.want))
+		}
+		for _, image := range got {
+			if strings.TrimSpace(image) == "" {
+				t.Logf("Found empty image")
+			}
+		}
+	})
 }

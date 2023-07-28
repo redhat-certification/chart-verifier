@@ -514,10 +514,11 @@ func certifyImages(r Result, opts *CheckOptions, registry string) Result {
 	}
 
 	images, err := getImageReferences(opts.URI, opts.Values, kubeVersion)
-
 	if err != nil {
 		r.SetResult(false, fmt.Sprintf("%s : Failed to get images, error running helm template : %v", ImageCertifyFailed, err))
-	} else if len(images) == 0 {
+	}
+
+	if len(images) == 0 {
 		r.SetResult(true, NoImagesToCertify)
 	} else {
 		for _, image := range images {
@@ -527,16 +528,15 @@ func certifyImages(r Result, opts *CheckOptions, registry string) Result {
 				continue
 			}
 
-			err = nil
 			imageRef := parseImageReference(image)
-
 			if len(imageRef.Registries) == 0 {
 				imageRef.Registries, err = pyxis.GetImageRegistries(imageRef.Repository)
+				if err != nil {
+					r.AddResult(false, fmt.Sprintf("%s : %s : %v", ImageNotCertified, image, err))
+				}
 			}
 
-			if err != nil {
-				r.AddResult(false, fmt.Sprintf("%s : %s : %v", ImageNotCertified, image, err))
-			} else if len(imageRef.Registries) == 0 {
+			if len(imageRef.Registries) == 0 {
 				r.AddResult(false, fmt.Sprintf("%s : %s", ImageNotCertified, image))
 			} else {
 				certified, checkImageErr := pyxis.IsImageInRegistry(imageRef)
