@@ -4,7 +4,6 @@ Feature: Chart verification
 
     Examples:
         | image_type |
-        | docker |
         | tarball |
         | podman |
 

@@ -8,12 +8,11 @@ Tests are basic and test good charts only:
 
 Each chart is verified as partner, redhat and community. A report summary, of the verifier report created, is obtained for each chart and the content is compared to expected content. 
 
-This amounts to 6 tests. These 6 tests are then run on 3 image types:
-- chart-verifier docker image
+This amounts to 6 tests. These 6 tests are then run on 2 image types:
 - chart-verifier podman image
 - chart-verifier binary image
 
-As a result there are 18 tests.
+As a result there are 12 tests.
 
 ## Signed chart tests
 
@@ -28,12 +27,11 @@ And to enable verification of the chart a public key file is included which cont
 
 The chart is verified as partner and redhat. A report summary, of the verifier report created, is obtained for the chart and the content is compared to expected content.
 
-This amounts to 2 tests. These 2 tests are then run on 3 image types:
-- chart-verifier docker image
+This amounts to 2 tests. These 2 tests are then run on 2 image types:
 - chart-verifier podman image
 - chart-verifier binary image
 
-As a result there are 6 tests.
+As a result there are 4 tests.
 
 ### Signing the chart
 

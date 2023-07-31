@@ -103,20 +103,19 @@ jobs:
           cd scripts && ../ve1/bin/pip3 install -r requirements.txt && cd ..
           cd scripts && ../ve1/bin/python3 setup.py install && cd ..
 
-      - name: Create image
-        id: build-image
-        run: ve1/bin/build-and-test --image-name="quay.io/redhat-certification/chart-verifier" --sha-value=$DEV_RELEASE --build-only="True"}
+      - name: Build container images
+        id: build_container_images
+        run: |
+            # Build podman images locally
+            make build-image IMAGE_TAG=$DEV_RELEASE
 
-      - name: Login to Registry
-        id: login-as-bot
-        uses: docker/login-action@v2
-        if: ${{ steps.build-image.outcome == 'success'}}
+      - name: Push to quay.io
+        id: push_to_quay
+        uses: redhat-actions/push-to-registry@v2
         with:
-          registry: quay.io
+          image: chart-verifier
+          tags: |
+            $DEV_RELEASE
+          registry: quay.io/redhat-certification
           username: ${{ secrets.QUAY_BOT_USERNAME }}
           password: ${{ secrets.QUAY_BOT_TOKEN }}
-
-      - name: Push Image
-        if: ${{ steps.login-as-bot.outcome == 'success' }}
-        run: |
-          docker push quay.io/redhat-certification/chart-verifier:$DEV_RELEASE

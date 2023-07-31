@@ -98,23 +98,14 @@ jobs:
                   curl -sLO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz
                   tar zxvf openshift-client-linux.tar.gz oc
 
-            - name: Build the Image
-              working-directory: ./chart-verifier
-              id: build_image
-              run: |
-                  # build a docker image
-                  commit_sha=$(git rev-parse --short HEAD)
-                  ve1/bin/build-and-test --image-name="quay.io/redhat-certification/chart-verifier" --sha-value=$commit_sha --build-only="True"}
-
             - name: Build podman Image
               working-directory: ./chart-verifier
               id: build_podman_image
               run: |
                   # build a podman image
-                  # sudo apt install qemu-system-x86
-                  commit_sha=$(git rev-parse --short HEAD)
-                  image_tag="podman-"$commit_sha
-                  echo "use image tag $image_tag"
+                  image_tag="test"
+                  echo "Building container image using podman for the tests, tagging as $image_tag"
+                  make build-image IMAGE_TAG=$image_tag
                   podman build -t quay.io/redhat-certification/chart-verifier:$image_tag .
                   echo "podman_image_tag=$image_tag" | tee -a $GITHUB_OUTPUT
 
@@ -147,7 +138,6 @@ jobs:
               working-directory: ./chart-verifier
               env:
                   KUBECONFIG: /tmp/ci-kubeconfig
-                  VERIFIER_IMAGE_TAG:  ${{ steps.build_image.outputs.verifier-image-tag }}
                   VERIFIER_TARBALL_NAME : ${{ steps.create-tarfile.outputs.tarball_full_name }}
                   PODMAN_IMAGE_TAG : ${{ steps.build_podman_image.outputs.podman_image_tag }}
               id: run_test

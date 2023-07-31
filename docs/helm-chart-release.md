@@ -26,20 +26,13 @@ Chart verifier - release creation is automated through a GitHub workflow. To cre
    - The submitter has approval authority for the repository.
    - All tests pass. 
 
-1. After merging the PR and creating the release the workflow continues in an attempt to add the ```latest``` tag to the new chart verifier image in quay. This may take a while.      
+1. After the PR is merged, the "release.yaml" workflow runs and create the GitHub release along with all its assets:
 
-   - When the release is created, quay will detect the release and build a docker image for the release. 
-        - see [chart verifier image tags in quay](https://quay.io/repository/redhat-certification/chart-verifier?tab=tags)
-   - The workflow retries for up to 15 minutes for the docker image to appear in quay so that it can be linked. If this fails it can be done manually:
-        1. Navigate to the [chart verifier image tags in quay](https://quay.io/repository/redhat-certification/chart-verifier?tab=tags)
-            1. For the new image hit the options icon on the far right
-            1. A drop down list appears, select "add a new tag" 
-            1. A dialogue appears, enter the new tag name as "latest" 
-            1. Quay detects latest is laready in use, select "Move" so it points to the new release.
-   
+    - A container image is built and pushed to Quay under two tags: ```latest``` and one corresponding to the version number (```x.y.z``` without leading ```v``).
+    - A tarball is created and attached to the GitHub release.
+
 Notes:
-- To link the image to the ```latest``` tag in quay an auth token is required. This must be set as a repository secret "QUAY_AUTH_TOKEN"
+- To push the images to Quay, an auth token is required. This must be set as a repository secret "QUAY_AUTH_TOKEN"
     - For information on creating an auth token see: [Red Hat Quay API guide](https://access.redhat.com/documentation/en-us/red_hat_quay/3/html/red_hat_quay_api_guide/using_the_red_hat_quay_api) 
     - The workflow uses the [ChartVerfifierReleaser OAuth Applictaion](https://quay.io/organization/redhat-certification?tab=applications). 
       - If the application auth token is changed for any reason the repository secret must also be updated.
-    
