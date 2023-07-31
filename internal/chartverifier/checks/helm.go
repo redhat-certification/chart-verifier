@@ -218,13 +218,16 @@ func getImageReferences(chartURI string, vals map[string]interface{}, kubeVersio
 		return nil, err
 	}
 
-	return getImagesFromContent(txt), nil
+	return getImagesFromContent(txt)
 }
 
 // getImagesFromContent evaluates generated templates from
 // helm and extracts images which are returned in a slice
-func getImagesFromContent(content string) []string {
-	re := regexp.MustCompile(`\s+image\:\s+(?P<image>.*)\n`)
+func getImagesFromContent(content string) ([]string, error) {
+	re, err := regexp.Compile(`\s+image\:\s+(?P<image>.*)\n`)
+	if err != nil {
+		return nil, fmt.Errorf("error getting images; %v", err)
+	}
 	matches := re.FindAllStringSubmatch(content, -1)
 	imageMap := make(map[string]struct{})
 	for _, match := range matches {
@@ -239,7 +242,7 @@ func getImagesFromContent(content string) []string {
 		images = append(images, k)
 	}
 
-	return images
+	return images, nil
 }
 
 func getCacheDir(opts *CheckOptions) string {

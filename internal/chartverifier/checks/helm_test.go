@@ -181,7 +181,7 @@ func TestLongLineTemplate(t *testing.T) {
 	content, err := os.ReadFile("templates/test-template.yaml")
 	require.NoError(t, err)
 
-	images, err := getImagesFromContent(string(content)), nil
+	images, err := getImagesFromContent(string(content))
 	require.NoError(t, err)
 
 	require.Equal(t, len(images), 2)
@@ -212,7 +212,8 @@ func TestGetImagesFromContent(t *testing.T) {
 	}
 
 	t.Run(test.name, func(t *testing.T) {
-		got := getImagesFromContent(test.content)
+		got, err := getImagesFromContent(test.content)
+		require.Nil(t, err)
 		if testing.Verbose() {
 			t.Logf("got %d images", len(got))
 		}
