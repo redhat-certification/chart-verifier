@@ -341,7 +341,9 @@ func SignatureIsValid(opts *CheckOptions) (Result, error) {
 		resp, err := http.Get(provFile)
 		if err != nil {
 			return NewResult(false, fmt.Sprintf("%s : get error was %v", SignatureFailure, err)), nil
-		} else if resp.StatusCode == 404 {
+		}
+
+		if resp.StatusCode == 404 {
 			return NewSkippedResult(fmt.Sprintf("%s : %s", ChartNotSigned, SignatureIsNotPresentSuccess)), nil
 		} else if resp.StatusCode != 200 {
 			return NewResult(false, fmt.Sprintf("%s. get prov file response code was %d", SignatureFailure, resp.StatusCode)), nil
@@ -467,12 +469,8 @@ func getOCPRange(kubeVersionRange string) (string, error) {
 }
 
 func downloadFile(fileURL *url.URL, directory string) (string, error) {
-	urlPath := fileURL.Path
-	segments := strings.Split(urlPath, "/")
-	fileName := segments[len(segments)-1]
-
 	// Create blank file
-	filePath := path.Join(directory, fileName)
+	filePath := path.Join(directory, path.Base(fileURL.Path))
 	// #nosec G304
 	file, err := os.Create(filePath)
 	if err != nil {
