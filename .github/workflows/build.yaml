@@ -84,7 +84,7 @@ jobs:
                 echo "date=$(/bin/date -u "+%Y%m%d")" | tee -a $GITHUB_OUTPUT
               shell: bash
 
-            - uses: actions/cache@v4
+            - uses: actions/cache@v3
               id: cache
               with:
                   path: ./chart-verifier/oc
