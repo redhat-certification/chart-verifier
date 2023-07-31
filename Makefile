@@ -51,7 +51,7 @@ bin_win:
 
 .PHONY: test
 test:
-	go test -v ./...
+	go test -v -coverprofile=coverage.out ./...
 
 # Build the container image. Usage: make build-image IMAGE_TAG=my_tag
 # If IMAGE_TAG is not provided, use the COMMIT_ID

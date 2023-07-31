@@ -643,11 +643,13 @@ func TestSignatureIsValid(t *testing.T) {
 		},
 	}
 
+	config := viper.New()
+	var base64Key string
+	var encodeErr error
+
 	for _, tc := range testCases {
 		t.Run(tc.description, func(t *testing.T) {
-			config := viper.New()
-			base64Key := ""
-			var encodeErr error
+			base64Key = ""
 			if len(tc.keyFile) > 0 {
 				base64Key, encodeErr = tool.GetEncodedKey(tc.keyFile)
 				require.NoError(t, encodeErr)
