@@ -83,11 +83,7 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 
 			reportBytes, readErr := io.ReadAll(reportFile)
 			if readErr != nil {
-				// TODO(komish): The linter indicates that we've not done anything with
-				// this error, which is correct. Need to confirm what the intention was before changing this.
-				//
-				//nolint:errcheck,govet,staticcheck
-				fmt.Errorf("report path %s: error reading file  %v", reportArg, readErr)
+				return fmt.Errorf("report path %s: error reading file  %v", reportArg, readErr)
 			}
 
 			report, loadErr := apireport.NewReport().
