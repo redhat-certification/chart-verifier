@@ -115,6 +115,7 @@ subjects:
     namespace: ${name}
 """
 
+
 def apply_config(tmpl, **values):
     with tempfile.TemporaryDirectory(prefix="sa-for-chart-testing-") as tmpdir:
         content = Template(tmpl).substitute(values)
@@ -129,6 +130,7 @@ def apply_config(tmpl, **values):
             stderr = ""
 
     return stdout, stderr
+
 
 def delete_config(tmpl, **values):
     with tempfile.TemporaryDirectory(prefix="sa-for-chart-testing-") as tmpdir:
@@ -145,12 +147,14 @@ def delete_config(tmpl, **values):
 
     return stdout, stderr
 
+
 def create_namespace(namespace):
     print("creating Namespace:", namespace)
     stdout, stderr = apply_config(namespace_template, name=namespace)
     print("stdout:\n", stdout, sep="")
     if stderr.strip():
         print("[ERROR] creating Namespace:", stderr)
+
 
 def create_serviceaccount(namespace):
     print("creating ServiceAccount:", namespace)
@@ -159,12 +163,14 @@ def create_serviceaccount(namespace):
     if stderr.strip():
         print("[ERROR] creating ServiceAccount:", stderr)
 
+
 def create_role(namespace):
     print("creating Role:", namespace)
     stdout, stderr = apply_config(role_template, name=namespace)
     print("stdout:\n", stdout, sep="")
     if stderr.strip():
         print("[ERROR] creating Role:", stderr)
+
 
 def create_rolebinding(namespace):
     print("creating RoleBinding:", namespace)
@@ -173,6 +179,7 @@ def create_rolebinding(namespace):
     if stderr.strip():
         print("[ERROR] creating RoleBinding:", stderr)
 
+
 def create_clusterrole(namespace):
     print("creating ClusterRole:", namespace)
     stdout, stderr = apply_config(clusterrole_template, name=namespace)
@@ -180,12 +187,14 @@ def create_clusterrole(namespace):
     if stderr.strip():
         print("[ERROR] creating ClusterRole:", stderr)
 
+
 def create_clusterrolebinding(namespace):
     print("creating ClusterRoleBinding:", namespace)
     stdout, stderr = apply_config(clusterrolebinding_template, name=namespace)
     print("stdout:\n", stdout, sep="")
     if stderr.strip():
         print("[ERROR] creating ClusterRoleBinding:", stderr)
+
 
 def delete_namespace(namespace):
     print("deleting Namespace:", namespace)
@@ -195,6 +204,7 @@ def delete_namespace(namespace):
         print("[ERROR] deleting Namespace:", namespace, stderr)
         sys.exit(1)
 
+
 def delete_clusterrole(name):
     print("deleting ClusterRole:", name)
     stdout, stderr = delete_config(clusterrole_template, name=name)
@@ -202,6 +212,7 @@ def delete_clusterrole(name):
     if stderr.strip():
         print("[ERROR] deleting ClusterRole:", name, stderr)
         sys.exit(1)
+
 
 def delete_clusterrolebinding(name):
     print("deleting ClusterRoleBinding:", name)
@@ -211,11 +222,15 @@ def delete_clusterrolebinding(name):
         print("[ERROR] deleting ClusterRoleBinding:", name, stderr)
         sys.exit(1)
 
+
 def write_sa_token(namespace, token):
     secret_found = False
     secrets = []
     for i in range(7):
-        out = subprocess.run(["./oc", "get", "serviceaccount", namespace, "-n", namespace, "-o", "json"], capture_output=True)
+        out = subprocess.run(
+            ["./oc", "get", "serviceaccount", namespace, "-n", namespace, "-o", "json"],
+            capture_output=True,
+        )
         stdout = out.stdout.decode("utf-8")
         if out.returncode != 0:
             stderr = out.stderr.decode("utf-8")
@@ -229,15 +244,18 @@ def write_sa_token(namespace, token):
                 secret_found = True
                 break
             else:
-                pattern = r'Tokens:\s+([A-Za-z0-9-]+)'
-                dout = subprocess.run(["./oc", "describe", "serviceaccount", namespace, "-n", namespace], capture_output=True)
+                pattern = r"Tokens:\s+([A-Za-z0-9-]+)"
+                dout = subprocess.run(
+                    ["./oc", "describe", "serviceaccount", namespace, "-n", namespace],
+                    capture_output=True,
+                )
                 dstdout = dout.stdout.decode("utf-8")
                 match = re.search(pattern, dstdout)
                 if match:
-                  token_name = match.group(1)
+                    token_name = match.group(1)
                 else:
-                  print("[ERROR] Token not found, Exiting")
-                  sys.exit(1)
+                    print("[ERROR] Token not found, Exiting")
+                    sys.exit(1)
                 secrets.append({"name": token_name})
                 secret_found = True
                 break
@@ -248,7 +266,10 @@ def write_sa_token(namespace, token):
         sys.exit(1)
 
     for secret in secrets:
-        out = subprocess.run(["./oc", "get", "secret", secret["name"], "-n", namespace, "-o", "json"], capture_output=True)
+        out = subprocess.run(
+            ["./oc", "get", "secret", secret["name"], "-n", namespace, "-o", "json"],
+            capture_output=True,
+        )
         stdout = out.stdout.decode("utf-8")
         if out.returncode != 0:
             stderr = out.stderr.decode("utf-8")
@@ -262,10 +283,14 @@ def write_sa_token(namespace, token):
                 with open(token, "w") as fd:
                     fd.write(base64.b64decode(content).decode("utf-8"))
 
+
 def switch_project_context(namespace, token, api_server):
     tkn = open(token).read()
     for i in range(7):
-        out = subprocess.run(["./oc", "login", "--token", tkn, "--server", api_server], capture_output=True)
+        out = subprocess.run(
+            ["./oc", "login", "--token", tkn, "--server", api_server],
+            capture_output=True,
+        )
         stdout = out.stdout.decode("utf-8")
         print(stdout)
         out = subprocess.run(["./oc", "project", namespace], capture_output=True)
@@ -280,19 +305,45 @@ def switch_project_context(namespace, token, api_server):
         time.sleep(10)
 
     # This exit will happen if there is an infra failure
-    print("""[ERROR] There is an error creating the namespace and service account. It happens due to some infrastructure failure.  It is not directly related to the changes in the pull request. You can wait for some time and try to re-run the job.  To re-run the job change the PR into a draft and remove the draft state.""")
+    print(
+        """[ERROR] There is an error creating the namespace and service account. It
+        happens due to some infrastructure failure.  It is not directly related to the
+        changes in the pull request. You can wait for some time and try to re-run the
+        job.  To re-run the job change the PR into a draft and remove the draft
+        state."""
+    )
     sys.exit(1)
+
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", "--create", dest="create", type=str, required=False,
-                                        help="create service account and namespace for chart testing")
-    parser.add_argument("-t", "--token", dest="token", type=str, required=False,
-                                        help="service account token for chart testing")
-    parser.add_argument("-d", "--delete", dest="delete", type=str, required=False,
-                                        help="delete service account and namespace used for chart testing")
-    parser.add_argument("-s", "--server", dest="server", type=str, required=False,
-                                        help="API server URL")
+    parser.add_argument(
+        "-c",
+        "--create",
+        dest="create",
+        type=str,
+        required=False,
+        help="create service account and namespace for chart testing",
+    )
+    parser.add_argument(
+        "-t",
+        "--token",
+        dest="token",
+        type=str,
+        required=False,
+        help="service account token for chart testing",
+    )
+    parser.add_argument(
+        "-d",
+        "--delete",
+        dest="delete",
+        type=str,
+        required=False,
+        help="delete service account and namespace used for chart testing",
+    )
+    parser.add_argument(
+        "-s", "--server", dest="server", type=str, required=False, help="API server URL"
+    )
     args = parser.parse_args()
 
     if args.create:
