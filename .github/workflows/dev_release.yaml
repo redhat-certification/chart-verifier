@@ -115,7 +115,7 @@ jobs:
         with:
           image: chart-verifier
           tags: |
-            $DEV_RELEASE
+            ${{ env.DEV_RELEASE }}
           registry: quay.io/redhat-certification
           username: ${{ secrets.QUAY_BOT_USERNAME }}
           password: ${{ secrets.QUAY_BOT_TOKEN }}
