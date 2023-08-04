@@ -33,3 +33,6 @@ Dockerfile.cross
 
 # omit coverage files
 coverage.out
+
+# omit generated reports
+report-info.*
