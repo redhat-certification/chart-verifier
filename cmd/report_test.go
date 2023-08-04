@@ -178,6 +178,28 @@ func TestReport(t *testing.T) {
 			wantMetadata: expectedMetadata,
 		},
 		{
+			name: "Should pass writing output to yaml file",
+			args: []string{
+				"-w",
+				"-o",
+				"yaml",
+				string(apireportsummary.AnnotationsSummary),
+				"test/report.yaml",
+			},
+			wantErr: false,
+		},
+		{
+			name: "Should pass writing output to json file",
+			args: []string{
+				"-w",
+				"-o",
+				"json",
+				string(apireportsummary.AnnotationsSummary),
+				"test/report.yaml",
+			},
+			wantErr: false,
+		},
+		{
 			name: "Should pass for skip digest check",
 			args: []string{
 				"-d",
@@ -228,7 +250,6 @@ func TestReport(t *testing.T) {
 
 			if hasOutput {
 				require.NoError(t, json.Unmarshal(outBuff.Bytes(), &testReport))
-
 			}
 
 			if len(tc.wantAnnotations) > 0 {
