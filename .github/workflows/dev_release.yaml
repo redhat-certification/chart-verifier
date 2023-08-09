@@ -1,7 +1,7 @@
 name: Create Dev Release
 # Delete the previous development release and recreate it
-# with code based off of the main branch. Also updates the
-# DEV_RELEASE tag for the image to match.
+# with code based off of the main branch. The DEV_RELEASE
+# tag is updated as part of the "main.yaml" workfmow.
 #
 # This is done so that the openshift-tools-installer has a valid
 # semantic version release to install.
@@ -78,32 +78,3 @@ jobs:
                 draft: false
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    image:
-      name: Create Dev Image
-      runs-on: ubuntu-latest
-      steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Go
-        uses: actions/setup-go@v4
-        with:
-          go-version-file: go.mod
-
-      - name: Build container images
-        id: build_container_images
-        run: |
-            # Build podman images locally
-            make build-image IMAGE_TAG=$DEV_RELEASE
-
-      - name: Push to quay.io
-        id: push_to_quay
-        uses: redhat-actions/push-to-registry@v2
-        with:
-          image: chart-verifier
-          tags: |
-            ${{ env.DEV_RELEASE }}
-          registry: quay.io/redhat-certification
-          username: ${{ secrets.QUAY_BOT_USERNAME }}
-          password: ${{ secrets.QUAY_BOT_TOKEN }}
