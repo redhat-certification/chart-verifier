@@ -1,12 +1,16 @@
 name: Create container image on main
 
 # This workflow builds a container image for each commit on the main branch.
-# The image is tagged with the (short) commit ID and "main", and pushed to Quay.
+# The image is tagged with the (short) commit ID, "main" and "0.1.0" (i.e. the
+# development release), and pushed to Quay.
 
 on:
     push:
         branches:
             - main
+env:
+    DEV_RELEASE: 0.1.0
+    CONTAINER_REGISTRY: quay.io/redhat-certification
 jobs:
     image:
       name: Build and push container images
@@ -29,6 +33,7 @@ jobs:
             # Build podman images locally
             make build-image IMAGE_TAG=${{ steps.get_commit_id.outputs.commit_id }} QUAY_EXPIRE_AFTER=1w
             make build-image IMAGE_TAG=main
+            podman tag ${{ env.CONTAINER_REGISTRY }}/chart-verifier:main ${{ env.CONTAINER_REGISTRY }}/chart-verifier:${{ env.DEV_RELEASE }}
 
       - name: Push to quay.io
         id: push_to_quay
@@ -38,6 +43,7 @@ jobs:
           tags: |
             ${{ steps.get_commit_id.outputs.commit_id }}
             main
+            ${{ env.DEV_RELEASE }}
           registry: quay.io/redhat-certification
           username: ${{ secrets.QUAY_BOT_USERNAME }}
           password: ${{ secrets.QUAY_BOT_TOKEN }}
