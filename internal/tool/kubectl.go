@@ -29,6 +29,8 @@ var content embed.FS
 var (
 	kubeOpenShiftVersionMap map[string]string
 	listDeployments         = getDeploymentsList
+	listDaemonSets          = getDaemonSetsList
+	listStatefulSets        = getStatefulSetsList
 	latestKubeVersion       *semver.Version
 )
 
@@ -44,6 +46,11 @@ type versionMapping struct {
 type deploymentNotReady struct {
 	Name        string
 	Unavailable int32
+}
+type workloadNotReady struct {
+	ResourceType string
+	Name         string
+	Unavailable  int32
 }
 
 func init() {
@@ -93,50 +100,76 @@ func NewKubectl(kubeConfig clientcmd.ClientConfig) (*Kubectl, error) {
 
 	return kubectl, nil
 }
-
-func (k Kubectl) WaitForDeployments(context context.Context, namespace string, selector string) error {
+func (k Kubectl) WaitForWorkloadResources(context context.Context, namespace string, selector string) error {
 	deadline, _ := context.Deadline()
-	unavailableDeployments := []deploymentNotReady{{Name: "none", Unavailable: 1}}
-	getDeploymentsError := ""
+	unavailableWorkloadResources := []workloadNotReady{{Name: "none", Unavailable: 1}}
 
-	utils.LogInfo(fmt.Sprintf("Start wait for deployments. --timeout time left: %s ", time.Until(deadline).String()))
+	getWorkloadResourceError := ""
 
-	for deadline.After(time.Now()) && len(unavailableDeployments) > 0 {
-		unavailableDeployments = []deploymentNotReady{}
-		deployments, err := listDeployments(k, context, namespace, selector)
-		if err != nil {
-			unavailableDeployments = []deploymentNotReady{{Name: "none", Unavailable: 1}}
-			getDeploymentsError = fmt.Sprintf("error getting deployments from namespace %s : %v", namespace, err)
-			utils.LogWarning(getDeploymentsError)
+	utils.LogInfo(fmt.Sprintf("Start wait for workloads resources. --timeout time left: %s ", time.Until(deadline).String()))
+	for deadline.After(time.Now()) && len(unavailableWorkloadResources) > 0 {
+		unavailableWorkloadResources = []workloadNotReady{}
+
+		deployments, errDeployment := listDeployments(k, context, namespace, selector)
+		daemonSets, errDaemonSets := listDaemonSets(k, context, namespace, selector)
+		statefulSets, errStatefulSets := listStatefulSets(k, context, namespace, selector)
+
+		if errDeployment != nil {
+			unavailableWorkloadResources = []workloadNotReady{{Name: "none", ResourceType: "Deployment", Unavailable: 1}}
+			getWorkloadResourceError = fmt.Sprintf("error getting deployments from namespace %s : %v", namespace, errDeployment)
+			utils.LogWarning(getWorkloadResourceError)
+			time.Sleep(time.Second)
+		} else if errDaemonSets != nil {
+			unavailableWorkloadResources = []workloadNotReady{{Name: "none", ResourceType: "DaemonSet", Unavailable: 1}}
+			getWorkloadResourceError = fmt.Sprintf("error getting daemon sets from namespace %s : %v", namespace, errDaemonSets)
+			utils.LogWarning(getWorkloadResourceError)
+			time.Sleep(time.Second)
+		} else if errStatefulSets != nil {
+			unavailableWorkloadResources = []workloadNotReady{{Name: "none", ResourceType: "StatefulSet", Unavailable: 1}}
+			getWorkloadResourceError = fmt.Sprintf("error getting stateful sets from namespace %s : %v", namespace, errStatefulSets)
+			utils.LogWarning(getWorkloadResourceError)
 			time.Sleep(time.Second)
 		} else {
-			getDeploymentsError = ""
+			getWorkloadResourceError = ""
 			for _, deployment := range deployments {
 				// Just after rollout, pods from the previous deployment revision may still be in a
 				// terminating state.
 				if deployment.Status.UnavailableReplicas > 0 {
-					unavailableDeployments = append(unavailableDeployments, deploymentNotReady{Name: deployment.Name, Unavailable: deployment.Status.UnavailableReplicas})
+					unavailableWorkloadResources = append(unavailableWorkloadResources, workloadNotReady{Name: deployment.Name, ResourceType: "Deployment", Unavailable: deployment.Status.UnavailableReplicas})
 				}
 			}
-			if len(unavailableDeployments) > 0 {
-				utils.LogInfo(fmt.Sprintf("Wait for %d deployments:", len(unavailableDeployments)))
-				for _, unavailableDeployment := range unavailableDeployments {
-					utils.LogInfo(fmt.Sprintf("    - %s with %d unavailable replicas", unavailableDeployment.Name, unavailableDeployment.Unavailable))
+			for _, daemonSet := range daemonSets {
+				if daemonSet.Status.NumberUnavailable > 0 {
+					unavailableWorkloadResources = append(unavailableWorkloadResources, workloadNotReady{Name: daemonSet.Name, ResourceType: "DaemonSet", Unavailable: daemonSet.Status.NumberUnavailable})
+				}
+			}
+			for _, statefulSet := range statefulSets {
+				// TODO: Double check that Replicas is requested and Available is currently running
+				unavailableReplicas := statefulSet.Status.Replicas - statefulSet.Status.AvailableReplicas
+				if unavailableReplicas > 0 {
+					unavailableWorkloadResources = append(unavailableWorkloadResources, workloadNotReady{Name: statefulSet.Name, ResourceType: "StatefulSet", Unavailable: unavailableReplicas})
+				}
+			}
+
+			if len(unavailableWorkloadResources) > 0 {
+				utils.LogInfo(fmt.Sprintf("Wait for %d workload resources:", len(unavailableWorkloadResources)))
+				for _, unavailableWorkloadResource := range unavailableWorkloadResources {
+					utils.LogInfo(fmt.Sprintf("    - %s %s with %d unavailable pods", unavailableWorkloadResource.ResourceType, unavailableWorkloadResource.Name, unavailableWorkloadResource.Unavailable))
 				}
 				time.Sleep(time.Second)
 			} else {
-				utils.LogInfo(fmt.Sprintf("Finish wait for deployments, --timeout time left %s", time.Until(deadline).String()))
+				utils.LogInfo(fmt.Sprintf("Finish wait for workload resources, --timeout time left %s", time.Until(deadline).String()))
 			}
 		}
 	}
 
-	if len(getDeploymentsError) > 0 {
-		errorMsg := fmt.Sprintf("Time out retrying after %s", getDeploymentsError)
+	if len(getWorkloadResourceError) > 0 {
+		errorMsg := fmt.Sprintf("Time out retrying after %s", getWorkloadResourceError)
 		utils.LogError(errorMsg)
 		return errors.New(errorMsg)
 	}
-	if len(unavailableDeployments) > 0 {
-		errorMsg := "error unavailable deployments, timeout has expired, please consider increasing the timeout using the chart-verifier --timeout flag"
+	if len(unavailableWorkloadResources) > 0 {
+		errorMsg := "error unavailable workload resources, timeout has expired, please consider increasing the timeout using the chart-verifier --timeout flag"
 		utils.LogError(errorMsg)
 		return errors.New(errorMsg)
 	}
@@ -176,6 +209,20 @@ func GetClientConfig(envSettings *cli.EnvSettings) clientcmd.ClientConfig {
 
 func getDeploymentsList(k Kubectl, context context.Context, namespace string, selector string) ([]v1.Deployment, error) {
 	list, err := k.clientset.AppsV1().Deployments(namespace).List(context, metav1.ListOptions{LabelSelector: selector})
+	if err != nil {
+		return nil, err
+	}
+	return list.Items, err
+}
+func getStatefulSetsList(k Kubectl, context context.Context, namespace string, selector string) ([]v1.StatefulSet, error) {
+	list, err := k.clientset.AppsV1().StatefulSets(namespace).List(context, metav1.ListOptions{LabelSelector: selector})
+	if err != nil {
+		return nil, err
+	}
+	return list.Items, err
+}
+func getDaemonSetsList(k Kubectl, context context.Context, namespace string, selector string) ([]v1.DaemonSet, error) {
+	list, err := k.clientset.AppsV1().DaemonSets(namespace).List(context, metav1.ListOptions{LabelSelector: selector})
 	if err != nil {
 		return nil, err
 	}
