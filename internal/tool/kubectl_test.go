@@ -154,9 +154,11 @@ var testStatefulSets = []v1.StatefulSet{
 	},
 }
 
-var DeploymentList1 []v1.Deployment
-var DaemonSetList1 []v1.DaemonSet
-var StatefulSetList1 []v1.StatefulSet
+var (
+	DeploymentList1  []v1.Deployment
+	DaemonSetList1   []v1.DaemonSet
+	StatefulSetList1 []v1.StatefulSet
+)
 
 func TestGetDeploymentList(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -164,6 +166,7 @@ func TestGetDeploymentList(t *testing.T) {
 
 	clientset := fake.NewSimpleClientset()
 	_, err := clientset.AppsV1().Deployments("").Create(ctx, &testDeployments[0], metav1.CreateOptions{})
+	require.NoError(t, err)
 
 	kubectl := Kubectl{clientset: clientset}
 	deps, err := getDeploymentsList(kubectl, ctx, "", "")
@@ -171,7 +174,6 @@ func TestGetDeploymentList(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 1, len(deps))
 	require.Equal(t, testDeployments[0], deps[0])
-
 }
 
 func TestGetDaemonSetList(t *testing.T) {
@@ -180,6 +182,7 @@ func TestGetDaemonSetList(t *testing.T) {
 
 	clientset := fake.NewSimpleClientset()
 	_, err := clientset.AppsV1().DaemonSets("").Create(ctx, &testDaemonSets[0], metav1.CreateOptions{})
+	require.NoError(t, err)
 
 	kubectl := Kubectl{clientset: clientset}
 	daemons, err := getDaemonSetsList(kubectl, ctx, "", "")
@@ -187,7 +190,6 @@ func TestGetDaemonSetList(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 1, len(daemons))
 	require.Equal(t, testDaemonSets[0], daemons[0])
-
 }
 
 func TestGetStatefulSetList(t *testing.T) {
@@ -196,6 +198,7 @@ func TestGetStatefulSetList(t *testing.T) {
 
 	clientset := fake.NewSimpleClientset()
 	_, err := clientset.AppsV1().StatefulSets("").Create(ctx, &testStatefulSets[0], metav1.CreateOptions{})
+	require.NoError(t, err)
 
 	kubectl := Kubectl{clientset: clientset}
 	sts, err := getStatefulSetsList(kubectl, ctx, "", "")
@@ -203,7 +206,6 @@ func TestGetStatefulSetList(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 1, len(sts))
 	require.Equal(t, testStatefulSets[0], sts[0])
-
 }
 
 func TestWaitForWorkloadResources(t *testing.T) {
@@ -288,7 +290,6 @@ func TestBadToGoodWaitForStatefulSets(t *testing.T) {
 	k := new(Kubectl)
 	err := k.WaitForWorkloadResources(ctx, "testNameSpace", "selector")
 	require.NoError(t, err)
-
 }
 
 func TestTimeExpirationWaitingForWorkloadResources(t *testing.T) {
@@ -345,6 +346,7 @@ func daemonSetTestListGood(k Kubectl, context context.Context, namespace string,
 	}
 	return DaemonSetList1, nil
 }
+
 func statefulSetTestListGood(k Kubectl, context context.Context, namespace string, selector string) ([]v1.StatefulSet, error) {
 	fmt.Println("statefulSetSetTestListGood called")
 	for index := 0; index < len(testDaemonSets); index++ {
@@ -364,9 +366,11 @@ func deploymentTestListBad(k Kubectl, context context.Context, namespace string,
 	return nil, errors.New("pretend error getting deployment list")
 }
 
-var deploymentErrorSent = false
-var daemonSetErrorSent = false
-var statefulSetErrorSent = false
+var (
+	deploymentErrorSent  = false
+	daemonSetErrorSent   = false
+	statefulSetErrorSent = false
+)
 
 func deploymentTestListBadToGood(k Kubectl, context context.Context, namespace string, selector string) ([]v1.Deployment, error) {
 	if !deploymentErrorSent {

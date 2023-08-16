@@ -43,10 +43,6 @@ type versionMapping struct {
 	OcpVersion  string `yaml:"ocp-version"`
 }
 
-type deploymentNotReady struct {
-	Name        string
-	Unavailable int32
-}
 type workloadNotReady struct {
 	ResourceType string
 	Name         string
@@ -100,6 +96,7 @@ func NewKubectl(kubeConfig clientcmd.ClientConfig) (*Kubectl, error) {
 
 	return kubectl, nil
 }
+
 func (k Kubectl) WaitForWorkloadResources(context context.Context, namespace string, selector string) error {
 	deadline, _ := context.Deadline()
 	unavailableWorkloadResources := []workloadNotReady{{Name: "none", Unavailable: 1}}
@@ -214,6 +211,7 @@ func getDeploymentsList(k Kubectl, context context.Context, namespace string, se
 	}
 	return list.Items, err
 }
+
 func getStatefulSetsList(k Kubectl, context context.Context, namespace string, selector string) ([]v1.StatefulSet, error) {
 	list, err := k.clientset.AppsV1().StatefulSets(namespace).List(context, metav1.ListOptions{LabelSelector: selector})
 	if err != nil {
@@ -221,6 +219,7 @@ func getStatefulSetsList(k Kubectl, context context.Context, namespace string, s
 	}
 	return list.Items, err
 }
+
 func getDaemonSetsList(k Kubectl, context context.Context, namespace string, selector string) ([]v1.DaemonSet, error) {
 	list, err := k.clientset.AppsV1().DaemonSets(namespace).List(context, metav1.ListOptions{LabelSelector: selector})
 	if err != nil {
