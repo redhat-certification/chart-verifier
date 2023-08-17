@@ -300,8 +300,8 @@ func TestTimeExpirationWaitingForWorkloadResources(t *testing.T) {
 	DeploymentList1 = make([]v1.Deployment, len(testDeployments))
 	copy(DeploymentList1, testDeployments)
 
-	listDaemonSets = daemonSetTestListEmpty
-	listStatefulSets = statefulSetTestListEmpty
+	listDaemonSets = daemonSetTestListGood
+	listStatefulSets = statefulSetTestListGood
 
 	k := new(Kubectl)
 	err := k.WaitForWorkloadResources(ctx, "testNameSpace", "selector")
@@ -326,6 +326,9 @@ func TestTimeExpirationGetDeploymentsFailure(t *testing.T) {
 }
 
 func deploymentTestListGood(k Kubectl, context context.Context, namespace string, selector string) ([]v1.Deployment, error) {
+	// Mock listing Deployments
+	// Return contents of testDeployments and decrease
+	// the nuber of unavailable pods on each call
 	fmt.Println("deploymentTestListGood called")
 	for index := 0; index < len(DeploymentList1); index++ {
 		if DeploymentList1[index].Status.UnavailableReplicas > 0 {
@@ -337,7 +340,9 @@ func deploymentTestListGood(k Kubectl, context context.Context, namespace string
 }
 
 func daemonSetTestListGood(k Kubectl, context context.Context, namespace string, selector string) ([]v1.DaemonSet, error) {
-	fmt.Println("daemonSetTestListGood called")
+	// Mock listing DaemonSets
+	// Return contents of testDaemonSets and decrease
+	// the nuber of unavailable pods on each call
 	for index := 0; index < len(testDaemonSets); index++ {
 		if DaemonSetList1[index].Status.NumberUnavailable > 0 {
 			DaemonSetList1[index].Status.NumberUnavailable--
@@ -348,6 +353,9 @@ func daemonSetTestListGood(k Kubectl, context context.Context, namespace string,
 }
 
 func statefulSetTestListGood(k Kubectl, context context.Context, namespace string, selector string) ([]v1.StatefulSet, error) {
+	// Mock listing StatefulSets
+	// Return contents of testStatefulSets and increase
+	// the nuber of available pods on each call
 	fmt.Println("statefulSetSetTestListGood called")
 	for index := 0; index < len(testDaemonSets); index++ {
 		unavailableReplicas := StatefulSetList1[index].Status.Replicas - StatefulSetList1[index].Status.AvailableReplicas
@@ -362,6 +370,7 @@ func statefulSetTestListGood(k Kubectl, context context.Context, namespace strin
 }
 
 func deploymentTestListBad(k Kubectl, context context.Context, namespace string, selector string) ([]v1.Deployment, error) {
+	// Mock listing Deployments with error
 	fmt.Println("deploymentTestListBad called")
 	return nil, errors.New("pretend error getting deployment list")
 }
@@ -373,6 +382,9 @@ var (
 )
 
 func deploymentTestListBadToGood(k Kubectl, context context.Context, namespace string, selector string) ([]v1.Deployment, error) {
+	// Mock listing Deployments
+	// Return error on first call and pass to deploymentTestListGood
+	// on subsequent calls
 	if !deploymentErrorSent {
 		fmt.Println("deploymentTestListBadToGood bad path")
 		deploymentErrorSent = true
@@ -383,6 +395,9 @@ func deploymentTestListBadToGood(k Kubectl, context context.Context, namespace s
 }
 
 func daemonSetTestListBadToGood(k Kubectl, context context.Context, namespace string, selector string) ([]v1.DaemonSet, error) {
+	// Mock listing DaemonSets
+	// Return error on first call and pass to daemonSetTestListGood
+	// on subsequent calls
 	if !daemonSetErrorSent {
 		fmt.Println("daemonSetTestListBadToGood bad path")
 		daemonSetErrorSent = true
@@ -393,6 +408,9 @@ func daemonSetTestListBadToGood(k Kubectl, context context.Context, namespace st
 }
 
 func statefulSetTestListBadToGood(k Kubectl, context context.Context, namespace string, selector string) ([]v1.StatefulSet, error) {
+	// Mock listing StatefulSets
+	// Return error on first call and pass to statefulSetTestListGood
+	// on subsequent calls
 	if !statefulSetErrorSent {
 		fmt.Println("statefulSetTestListBadToGood bad path")
 		statefulSetErrorSent = true
@@ -400,12 +418,4 @@ func statefulSetTestListBadToGood(k Kubectl, context context.Context, namespace 
 	}
 	fmt.Println("statefulSetTestListBadToGood good path")
 	return statefulSetTestListGood(k, context, namespace, selector)
-}
-
-func daemonSetTestListEmpty(k Kubectl, context context.Context, namespace string, selector string) ([]v1.DaemonSet, error) {
-	return []v1.DaemonSet{}, nil
-}
-
-func statefulSetTestListEmpty(k Kubectl, context context.Context, namespace string, selector string) ([]v1.StatefulSet, error) {
-	return []v1.StatefulSet{}, nil
 }

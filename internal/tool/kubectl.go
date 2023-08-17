@@ -100,20 +100,22 @@ func NewKubectl(kubeConfig clientcmd.ClientConfig) (*Kubectl, error) {
 func (k Kubectl) WaitForWorkloadResources(context context.Context, namespace string, selector string) error {
 	deadline, _ := context.Deadline()
 	unavailableWorkloadResources := []workloadNotReady{{Name: "none", Unavailable: 1}}
-
 	getWorkloadResourceError := ""
 
+	// Loop until timeout reached or all requested pods are available
 	utils.LogInfo(fmt.Sprintf("Start wait for workloads resources. --timeout time left: %s ", time.Until(deadline).String()))
 	for deadline.After(time.Now()) && len(unavailableWorkloadResources) > 0 {
 		unavailableWorkloadResources = []workloadNotReady{}
 
-		deployments, errDeployment := listDeployments(k, context, namespace, selector)
+		deployments, errDeployments := listDeployments(k, context, namespace, selector)
 		daemonSets, errDaemonSets := listDaemonSets(k, context, namespace, selector)
 		statefulSets, errStatefulSets := listStatefulSets(k, context, namespace, selector)
 
-		if errDeployment != nil {
+		// Else/If block will handle errors from API requests for each
+		// resource type or inspect the resources that are successfully returned
+		if errDeployments != nil {
 			unavailableWorkloadResources = []workloadNotReady{{Name: "none", ResourceType: "Deployment", Unavailable: 1}}
-			getWorkloadResourceError = fmt.Sprintf("error getting deployments from namespace %s : %v", namespace, errDeployment)
+			getWorkloadResourceError = fmt.Sprintf("error getting deployments from namespace %s : %v", namespace, errDeployments)
 			utils.LogWarning(getWorkloadResourceError)
 			time.Sleep(time.Second)
 		} else if errDaemonSets != nil {
@@ -128,9 +130,8 @@ func (k Kubectl) WaitForWorkloadResources(context context.Context, namespace str
 			time.Sleep(time.Second)
 		} else {
 			getWorkloadResourceError = ""
+			// Check the number of unavailable replicas for each workload type
 			for _, deployment := range deployments {
-				// Just after rollout, pods from the previous deployment revision may still be in a
-				// terminating state.
 				if deployment.Status.UnavailableReplicas > 0 {
 					unavailableWorkloadResources = append(unavailableWorkloadResources, workloadNotReady{Name: deployment.Name, ResourceType: "Deployment", Unavailable: deployment.Status.UnavailableReplicas})
 				}
@@ -141,13 +142,15 @@ func (k Kubectl) WaitForWorkloadResources(context context.Context, namespace str
 				}
 			}
 			for _, statefulSet := range statefulSets {
-				// TODO: Double check that Replicas is requested and Available is currently running
+				// StatefulSet doesn't report unavailable replicas so it is calculated here
 				unavailableReplicas := statefulSet.Status.Replicas - statefulSet.Status.AvailableReplicas
 				if unavailableReplicas > 0 {
 					unavailableWorkloadResources = append(unavailableWorkloadResources, workloadNotReady{Name: statefulSet.Name, ResourceType: "StatefulSet", Unavailable: unavailableReplicas})
 				}
 			}
 
+			// If any pods are unavailable report it and sleep until the next loop
+			// If everythign is available exit the loop
 			if len(unavailableWorkloadResources) > 0 {
 				utils.LogInfo(fmt.Sprintf("Wait for %d workload resources:", len(unavailableWorkloadResources)))
 				for _, unavailableWorkloadResource := range unavailableWorkloadResources {
@@ -160,7 +163,8 @@ func (k Kubectl) WaitForWorkloadResources(context context.Context, namespace str
 		}
 	}
 
-	if len(getWorkloadResourceError) > 0 {
+	// Any errors or resources that are still unavailable returns an error at this point
+	if getWorkloadResourceError != "" {
 		errorMsg := fmt.Sprintf("Time out retrying after %s", getWorkloadResourceError)
 		utils.LogError(errorMsg)
 		return errors.New(errorMsg)
