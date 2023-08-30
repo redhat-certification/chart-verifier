@@ -321,7 +321,7 @@ func TestTimeExpirationGetDeploymentsFailure(t *testing.T) {
 	err := k.WaitForWorkloadResources(ctx, "testNameSpace", "selector")
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "Time out retrying after")
-	require.Contains(t, err.Error(), "error getting deployments from namespace")
+	require.Contains(t, err.Error(), "error getting Deployment from namespace")
 	require.Contains(t, err.Error(), "pretend error getting deployment list")
 }
 
