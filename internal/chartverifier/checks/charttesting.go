@@ -235,7 +235,7 @@ func testRelease(
 	release, namespace, releaseSelector string,
 	cleanupHelmTests bool,
 ) error {
-	if err := kubectl.WaitForDeployments(ctx, namespace, releaseSelector); err != nil {
+	if err := kubectl.WaitForWorkloadResources(ctx, namespace, releaseSelector); err != nil {
 		return err
 	}
 	if err := helm.Test(ctx, namespace, release); err != nil {
