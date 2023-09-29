@@ -549,51 +549,6 @@ func TestRequiredAnnotationsPresent(t *testing.T) {
 	}
 }
 
-func TestSemVers(t *testing.T) {
-	// Vault: kubeVersion: '>= 1.14.0-0'
-	// IBM: kubeversion: '>=1.10.1-0'
-	// Fortanix : kubeversion: '>= 1.16.0 < 1.22.0'
-	// Wildfly: kubeversion: ""
-	// Infispan: kubeversion: ""
-
-	type testCase struct {
-		kubeVersion string
-		OCPRange    string
-	}
-
-	// nolint:unused // TODO(komish): Identify historical purpose of this type
-	// before considering for removal.
-	type TestError struct {
-		expectedOCPRange string
-		gotOCORange      string
-	}
-
-	testCases := []testCase{
-		{kubeVersion: "~1.22-0", OCPRange: "4.9"},
-		{kubeVersion: "1.22.*", OCPRange: "4.9"},
-		{kubeVersion: "^1.22", OCPRange: ">=4.9"},
-		{kubeVersion: ">=1.20-0", OCPRange: ">=4.7"},
-		{kubeVersion: "1.21 - 1.22", OCPRange: "4.8 - 4.9"},
-		{kubeVersion: ">1.20", OCPRange: ">=4.8"},
-		{kubeVersion: "~1.21", OCPRange: "4.8"},
-		{kubeVersion: ">= 1.14.0-0", OCPRange: ">=4.2"},
-		{kubeVersion: "1.16 - 1.21", OCPRange: "4.3 - 4.8"},
-		{kubeVersion: "*", OCPRange: ">=4.1"},
-		{kubeVersion: ">= 1.23.0 < 1.26.3", OCPRange: "4.10 - 4.13"},
-	}
-
-	for _, test := range testCases {
-		t.Run(fmt.Sprintf("Check kube version %s", test.kubeVersion), func(t *testing.T) {
-			OCPRange, err := getOCPRange(test.kubeVersion)
-			if err != nil {
-				require.Equal(t, test.OCPRange, fmt.Sprintf("%v", err))
-			} else {
-				require.Equal(t, test.OCPRange, OCPRange)
-			}
-		})
-	}
-}
-
 func TestSignatureIsValid(t *testing.T) {
 	type testCase struct {
 		description string

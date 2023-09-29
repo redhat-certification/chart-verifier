@@ -26,8 +26,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/Masterminds/sprig/v3"
-	"golang.org/x/mod/semver"
+	"github.com/opdev/getocprange"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/lint"
 	"helm.sh/helm/v3/pkg/lint/support"
@@ -196,7 +195,7 @@ func HasKubeVersion_V1_1(opts *CheckOptions) (Result, error) {
 	r := NewResult(false, KuberVersionNotSpecified)
 
 	if c.Metadata.KubeVersion != "" {
-		OCPRange, err := getOCPRange(c.Metadata.KubeVersion)
+		OCPRange, err := getocprange.GetOCPRange(c.Metadata.KubeVersion)
 		if err != nil {
 			r = NewResult(false, err.Error())
 		} else {
@@ -429,43 +428,6 @@ func parseImageReference(image string) pyxis.ImageReference {
 	}
 
 	return imageRef
-}
-
-func getOCPRange(kubeVersionRange string) (string, error) {
-	semverCompare := sprig.GenericFuncMap()["semverCompare"].(func(string, string) (bool, error))
-	minOCPVersion := ""
-	maxOCPVersion := ""
-	for kubeVersion, OCPVersion := range tool.GetKubeOpenShiftVersionMap() {
-		match, err := semverCompare(kubeVersionRange, kubeVersion)
-		if err != nil {
-			return "", fmt.Errorf("%s : %s", KuberVersionProcessingError, err)
-		}
-		if match {
-			testOCPVersion := fmt.Sprintf("v%s", OCPVersion)
-			if minOCPVersion == "" || semver.Compare(testOCPVersion, fmt.Sprintf("v%s", minOCPVersion)) < 0 {
-				minOCPVersion = OCPVersion
-			}
-			if maxOCPVersion == "" || semver.Compare(testOCPVersion, fmt.Sprintf("v%s", maxOCPVersion)) > 0 {
-				maxOCPVersion = OCPVersion
-			}
-		}
-	}
-	// Check if min ocp range is open ended, for example 1.* or >-=1.20
-	// To do this see if 1.999 is valid for the min OCP version range, not perfect but works until kubernetes hits 2.0.
-	if minOCPVersion != "" {
-		match, _ := semverCompare(kubeVersionRange, "1.999")
-		if match {
-			return fmt.Sprintf(">=%s", minOCPVersion), nil
-		} else {
-			if minOCPVersion == maxOCPVersion {
-				return minOCPVersion, nil
-			} else {
-				return fmt.Sprintf("%s - %s", minOCPVersion, maxOCPVersion), nil
-			}
-		}
-	}
-
-	return "", fmt.Errorf("%s : Failed to determine a minimum OCP version", KuberVersionProcessingError)
 }
 
 func downloadFile(fileURL *url.URL, directory string) (string, error) {
