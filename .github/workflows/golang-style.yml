@@ -1,0 +1,30 @@
+name: Golang Style
+
+on:
+  pull_request:
+    paths:
+    - '**.go'
+
+jobs:
+  enforce:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Go
+      uses: actions/setup-go@v4
+      with:
+        go-version-file: go.mod
+
+    - name: Ensure Modules
+      run: make tidy
+
+    - name: Ensure Formatting
+      run: make fmt
+
+    - name: Run Linters
+      run: make lint
+
+    - name: Build Binary
+      run: make bin

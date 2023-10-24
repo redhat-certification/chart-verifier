@@ -1,0 +1,31 @@
+name: Python Style
+
+on:
+  pull_request:
+    paths:
+    # Only trigger on changes to Python source.
+    - 'scripts/**.py'
+    - 'tests/**.py'
+
+jobs:
+  enforce:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.x Part 1
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.9"
+
+    - name: Install style tooling
+      run: make venv.codestyle
+
+    - name: Run formatter
+      run: make py.ci.format
+
+      # Temporarily auto-pass linting until we are able to manually review and
+      # address.
+    - name: Run linter
+      run: make py.lint
