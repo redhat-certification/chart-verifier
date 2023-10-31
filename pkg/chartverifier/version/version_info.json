@@ -1,11 +1,9 @@
 {
-    "version": "1.13.1",
+    "version": "1.13.2",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
         "<ul>",
-        "<li>Add Support for RHOCP 4.14 (#413) by @vikasmulaje</li>",
-        "<li>Use the go.mod from the PR to setup Golang (#415) by @komish</li>",
-        "<li>Bump Golang to v1.21 (#414) by @komish</li>",
+        "<li>bump getocprange to include 4.14 support (#417) by @komish</li>",
         "</ul>"
     ]
 }
