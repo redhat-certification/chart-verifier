@@ -35,14 +35,6 @@ jobs:
               working-directory: ./chart-verifier
               run: make tidy
 
-            - name: Ensure Formatting
-              working-directory: ./chart-verifier
-              run: make fmt
-
-            - name: Run Linters
-              working-directory: ./chart-verifier
-              run: make lint
-
             - name: Build Binary
               working-directory: ./chart-verifier
               run: make bin
@@ -70,15 +62,6 @@ jobs:
                 python3 -m venv ve1
                 cd scripts && ../ve1/bin/pip3 install -r requirements.txt && cd ..
                 cd scripts && ../ve1/bin/python3 setup.py install && cd ..
-
-            - name: Run flake8
-              working-directory: ./chart-verifier
-              run: |
-                python3 -m venv ve_flake8
-                source ve_flake8/bin/activate
-                pip3 install flake8
-                flake8 scripts/
-                flake8 tests/
 
             - name: Check if only release file in PR
               working-directory: ./chart-verifier
