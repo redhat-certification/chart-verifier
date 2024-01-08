@@ -6,11 +6,11 @@ import (
 	"os"
 	"path"
 
+	"dario.cat/mergo"
 	"github.com/Masterminds/semver"
 	"github.com/helm/chart-testing/v3/pkg/chart"
 	"github.com/helm/chart-testing/v3/pkg/config"
 	"github.com/helm/chart-testing/v3/pkg/util"
-	"github.com/imdario/mergo"
 	"gopkg.in/yaml.v3"
 	"helm.sh/helm/v3/pkg/cli"
 
