@@ -463,17 +463,7 @@ func downloadFile(fileURL *url.URL, directory string) (string, error) {
 }
 
 func certifyImages(r Result, opts *CheckOptions, registry string) Result {
-	kubeVersion := ""
-	kubeConfig := tool.GetClientConfig(opts.HelmEnvSettings)
-	kubectl, kubeErr := tool.NewKubectl(kubeConfig)
-	if kubeErr == nil {
-		serverVersion, versionErr := kubectl.GetServerVersion()
-		if versionErr == nil {
-			kubeVersion = fmt.Sprintf("%s.%s", serverVersion.Major, serverVersion.Minor)
-		}
-	}
-
-	images, err := getImageReferences(opts.URI, opts.Values, kubeVersion)
+	images, err := getImageReferences(opts.URI, opts.Values)
 	if err != nil {
 		r.SetResult(false, fmt.Sprintf("%s : Failed to get images, error running helm template : %v", ImageCertifyFailed, err))
 	}

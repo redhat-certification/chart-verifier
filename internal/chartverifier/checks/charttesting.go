@@ -11,6 +11,7 @@ import (
 	"github.com/helm/chart-testing/v3/pkg/chart"
 	"github.com/helm/chart-testing/v3/pkg/config"
 	"github.com/helm/chart-testing/v3/pkg/util"
+	"github.com/opdev/getocprange"
 	"gopkg.in/yaml.v3"
 	"helm.sh/helm/v3/pkg/cli"
 
@@ -40,12 +41,15 @@ func getVersion(envSettings *cli.EnvSettings) (string, error) {
 	// Relying on Kubernetes version can be replaced after fixing this issue:
 	// https://bugzilla.redhat.com/show_bug.cgi?id=1850656
 	kubeVersion := fmt.Sprintf("%s.%s", serverVersion.Major, serverVersion.Minor)
-	osVersion, ok := tool.GetKubeOpenShiftVersionMap()[kubeVersion]
-	if !ok {
-		return "", fmt.Errorf("internal error: %q not found in Kubernetes-OpenShift version map", kubeVersion)
+
+	// We can safely assume that GetOCPRange is going to return a single version rather than a range,
+	// given that "kubeVersion" is itself a single version and not a range.
+	OCPVersion, err := getocprange.GetOCPRange(kubeVersion)
+	if err != nil {
+		return "", fmt.Errorf("Error translating kubeVersion %q to an OCP version: %v", kubeVersion, err)
 	}
 
-	return osVersion, nil
+	return OCPVersion, nil
 }
 
 type OpenShiftVersionErr string
