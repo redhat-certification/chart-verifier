@@ -2,6 +2,7 @@ package report
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
@@ -20,8 +21,9 @@ const (
 	SkippedOutcomeType OutcomeType = "SKIPPED"
 	UnknownOutcomeType OutcomeType = "UNKNOWN"
 
-	JSONReport ReportFormat = "json"
-	YamlReport ReportFormat = "yaml"
+	JSONReport  ReportFormat = "json"
+	JUnitReport ReportFormat = "junit"
+	YamlReport  ReportFormat = "yaml"
 
 	ReportShaVersion string = "v1.9.0"
 )
@@ -56,9 +58,16 @@ func (r *Report) GetContent(format ReportFormat) (string, error) {
 	if format == JSONReport {
 		b, marshalErr := json.Marshal(report)
 		if marshalErr != nil {
-			return "", fmt.Errorf("report json marshal failed : %v", marshalErr)
+			return "", fmt.Errorf("report xml marshal failed : %v", marshalErr)
 		}
 		reportContent = string(b)
+	} else if format == JUnitReport {
+		// convert report to JUnit
+		out, marshalErr := xml.MarshalIndent(r, " ", "  ")
+		if marshalErr != nil {
+			return "", fmt.Errorf("report JUnit marshal failed: %v", marshalErr)
+		}
+		reportContent = xml.Header + string(out)
 	} else {
 		b, marshalErr := yaml.Marshal(report)
 		if marshalErr != nil {
@@ -112,6 +121,11 @@ func (r *Report) loadReport() error {
 		unMarshalErr := json.Unmarshal([]byte(reportString), r)
 		if unMarshalErr != nil {
 			return fmt.Errorf("report json ummarshal failed : %v", unMarshalErr)
+		}
+	} else if strings.HasPrefix(strings.TrimSpace(reportString), "<?xml version=\"1.0\" encoding=\"UTF-8\"?>") {
+		unMarshalErr := xml.Unmarshal([]byte(reportString), r)
+		if unMarshalErr != nil {
+			return fmt.Errorf("report junit ummarshal failed : %v", unMarshalErr)
 		}
 	} else {
 		unMarshalErr := yaml.Unmarshal([]byte(reportString), r)

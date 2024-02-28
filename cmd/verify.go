@@ -139,14 +139,17 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 			reportFormat := apireport.YamlReport
 			if outputFormatFlag == "json" {
 				reportFormat = apireport.JSONReport
+			} else if outputFormatFlag == "junit" {
+				reportFormat = apireport.JUnitReport
 			}
 
 			reportName := ""
 			if reportToFile {
+				reportName = "report.yaml"
 				if outputFormatFlag == "json" {
 					reportName = "report.json"
-				} else {
-					reportName = "report.yaml"
+				} else if outputFormatFlag == "junit" {
+					reportName = "report.xml"
 				}
 			}
 
@@ -237,7 +240,7 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 
 	cmd.Flags().StringSliceVarP(&disabledChecksFlag, "disable", "x", nil, "all checks will be enabled except the informed ones")
 
-	cmd.Flags().StringVarP(&outputFormatFlag, "output", "o", "", "the output format: default, json or yaml")
+	cmd.Flags().StringVarP(&outputFormatFlag, "output", "o", "", "the output format: default, json, junit or yaml")
 
 	cmd.Flags().StringSliceVarP(&verifyOpts.Values, "set", "s", []string{}, "overrides a configuration, e.g: dummy.ok=false")
 
