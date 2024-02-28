@@ -1,9 +1,13 @@
 {
-    "version": "1.13.2",
+    "version": "1.13.3",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
         "<ul>",
-        "<li>bump getocprange to include 4.14 support (#417) by @komish</li>",
+        "<li>Partition out Golang and Python linting and style tasks (#412) by @komish</li>",
+        "<li>updating various dependencies (#420) by @acornett21</li>",
+        "<li>Update to latest GitHub actions using Node20 (#422) by @mgoerens</li>",
+        "<li>Use get-ocp-range to translate Kube to OCP ranges (#423) by @mgoerens</li>",
+        "<li>Bump getocprange to support OCP 4.15 (#425) by @komish</li>",
         "</ul>"
     ]
 }
