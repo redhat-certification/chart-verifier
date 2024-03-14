@@ -56,7 +56,7 @@ Note: The kubeVersion field will be used to detremine the OpenShift versions the
 
 ### `contains-values` v1.0
 
-Requires a ```values.schema``` file to be present in the chart. If the file is not present the check will fail.
+Requires a ```values.yaml``` file to be present in the chart. If the file is not present the check will fail.
 
 See also helm documentation: [values](https://helm.sh/docs/chart_template_guide/values_files/) and [Best Practices for using values](https://helm.sh/docs/chart_best_practices/values/).
 
