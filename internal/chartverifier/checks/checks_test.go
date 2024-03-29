@@ -105,6 +105,43 @@ func TestHasReadme(t *testing.T) {
 	}
 }
 
+func TestHasNotes(t *testing.T) {
+	type testCase struct {
+		description string
+		uri         string
+	}
+
+	positiveTestCases := []testCase{
+		{description: "chart with NOTES.txt", uri: "chart-0.1.0-v3.valid.tgz"},
+	}
+
+	for _, tc := range positiveTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			config := viper.New()
+			r, err := HasNotes(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.True(t, r.Ok)
+			require.Equal(t, NotesExist, r.Reason)
+		})
+	}
+
+	negativeTestCases := []testCase{
+		{description: "chart without NOTES.txt", uri: "chart-0.1.0-v3.without-notes.tgz"},
+	}
+
+	for _, tc := range negativeTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			config := viper.New()
+			r, err := HasNotes(&CheckOptions{URI: tc.uri, ViperConfig: config, HelmEnvSettings: cli.New()})
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.False(t, r.Ok)
+			require.Equal(t, NotesDoesNotExist, r.Reason)
+		})
+	}
+}
+
 func TestContainsTest(t *testing.T) {
 	type testCase struct {
 		description string
