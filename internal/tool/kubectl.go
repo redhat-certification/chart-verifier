@@ -127,11 +127,14 @@ func (k Kubectl) WaitForWorkloadResources(context context.Context, namespace str
 		return errors.New(errorMsg)
 	}
 	if len(unavailableWorkloadResources) > 0 {
-		errorMsg := "error unavailable workload resources, timeout has expired, please consider increasing the timeout using the chart-verifier --timeout flag"
+		// Initialize errorMsg
+		errorMsg := "error unavailable workload resources, timeout has expired, please consider increasing the timeout using the chart-verifier --timeout flag. Unavailable resources: "
+		for _, unavailableWorkloadResource := range unavailableWorkloadResources {
+			errorMsg += fmt.Sprintf("%s/%s, ", unavailableWorkloadResource.ResourceType, unavailableWorkloadResource.Name)
+		}
 		utils.LogError(errorMsg)
 		return errors.New(errorMsg)
 	}
-
 	return nil
 }
 
