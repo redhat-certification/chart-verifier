@@ -39,8 +39,8 @@ const (
 	APIVersion2                  = "v2"
 	ReadmeExist                  = "Chart has a README"
 	ReadmeDoesNotExist           = "Chart does not have a README"
-	NotesExist                   = "Chart does contain NOTES"
-	NotesDoesNotExist            = "Chart does not contain NOTES"
+	NotesExist                   = "Chart does contain NOTES.txt"
+	NotesDoesNotExist            = "Chart does not contain NOTES.txt"
 	NotHelm3Reason               = "API version is not V2, used in Helm 3"
 	Helm3Reason                  = "API version is V2, used in Helm 3"
 	TestTemplatePrefix           = "templates/tests/"
@@ -121,7 +121,6 @@ func HasNotes(opts *CheckOptions) (Result, error) {
 
 	r := NewResult(false, NotesDoesNotExist)
 	for _, f := range c.Templates {
-		fmt.Println(f.Name)
 		if f.Name == "templates/NOTES.txt" {
 			r.SetResult(true, NotesExist)
 		}

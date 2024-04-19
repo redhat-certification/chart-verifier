@@ -35,5 +35,4 @@ checks:
     - name: v1.0/signature-is-valid
       type: Mandatory
     - name: v1.0/has-notes
-      type: Mandatory
-
+      type: Optional

@@ -43,7 +43,7 @@ func getDefaultProfile(msg string) *Profile {
 		{Name: fmt.Sprintf("%s/%s", CheckVersion10, apiChecks.ChartTesting), Type: apiChecks.MandatoryCheckType},
 		{Name: fmt.Sprintf("%s/%s", CheckVersion10, apiChecks.RequiredAnnotationsPresent), Type: apiChecks.MandatoryCheckType},
 		{Name: fmt.Sprintf("%s/%s", CheckVersion10, apiChecks.SignatureIsValid), Type: apiChecks.MandatoryCheckType},
-		{Name: fmt.Sprintf("%s/%s", CheckVersion10, apiChecks.HasNotes), Type: apiChecks.MandatoryCheckType},
+		{Name: fmt.Sprintf("%s/%s", CheckVersion10, apiChecks.HasNotes), Type: apiChecks.OptionalCheckType},
 	}
 
 	return &profile
