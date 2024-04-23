@@ -107,6 +107,7 @@ func HasReadme(opts *CheckOptions) (Result, error) {
 	for _, f := range c.Files {
 		if f.Name == "README.md" {
 			r.SetResult(true, ReadmeExist)
+			break
 		}
 	}
 
@@ -123,6 +124,7 @@ func HasNotes(opts *CheckOptions) (Result, error) {
 	for _, f := range c.Templates {
 		if f.Name == "templates/NOTES.txt" {
 			r.SetResult(true, NotesExist)
+			break
 		}
 	}
 
