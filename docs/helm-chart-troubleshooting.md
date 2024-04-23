@@ -175,6 +175,10 @@ This check requires that the public key provided to the chart verifier is from a
 - pgp public key file does not have access to the signed chart.
     - ensure the public key matches the secret key used to sign the chart. 
     
+### `has-notes` v1.0
+
+Requires a "NOTES.txt" file to exist in the templates directory of the chart. Any other spelling or
+capitialisation of letters will result in the check failing.
 
 ## Report related submission failures
 

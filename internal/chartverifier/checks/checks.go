@@ -39,6 +39,8 @@ const (
 	APIVersion2                  = "v2"
 	ReadmeExist                  = "Chart has a README"
 	ReadmeDoesNotExist           = "Chart does not have a README"
+	NotesExist                   = "Chart does contain NOTES.txt"
+	NotesDoesNotExist            = "Chart does not contain NOTES.txt"
 	NotHelm3Reason               = "API version is not V2, used in Helm 3"
 	Helm3Reason                  = "API version is V2, used in Helm 3"
 	TestTemplatePrefix           = "templates/tests/"
@@ -105,6 +107,24 @@ func HasReadme(opts *CheckOptions) (Result, error) {
 	for _, f := range c.Files {
 		if f.Name == "README.md" {
 			r.SetResult(true, ReadmeExist)
+			break
+		}
+	}
+
+	return r, nil
+}
+
+func HasNotes(opts *CheckOptions) (Result, error) {
+	c, _, err := LoadChartFromURI(opts)
+	if err != nil {
+		return Result{}, err
+	}
+
+	r := NewResult(false, NotesDoesNotExist)
+	for _, f := range c.Templates {
+		if f.Name == "templates/NOTES.txt" {
+			r.SetResult(true, NotesExist)
+			break
 		}
 	}
 
