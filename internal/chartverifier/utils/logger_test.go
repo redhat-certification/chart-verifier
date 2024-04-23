@@ -176,7 +176,7 @@ func checkAndOrDeleteFiles(fileType string, expectedContent string) bool {
 				"ror getting current working directory : %s", err))
 			return false
 		}
-		logFilesPath := path.Join(currentDir, outputDirectory)
+		logFilesPath := path.Join(currentDir, OutputDirectory)
 
 		files, err := os.ReadDir(logFilesPath)
 		if err != nil {
@@ -222,7 +222,7 @@ func howManyLogFiles() int {
 		fmt.Printf("error getting current working directory : %s\n", err)
 		return 0
 	}
-	logFilesPath := path.Join(currentDir, outputDirectory)
+	logFilesPath := path.Join(currentDir, OutputDirectory)
 
 	files, err := os.ReadDir(logFilesPath)
 	if err != nil {
