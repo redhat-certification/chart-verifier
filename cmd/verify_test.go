@@ -115,6 +115,28 @@ func TestCertify(t *testing.T) {
 			},
 		},
 		{
+			name: "Should succeed when the chart exists and a chart value is overridden",
+			args: []string{
+				"-e", "helm-lint",
+				"-S", "replicaCount=2",
+				"-E",
+				"../internal/chartverifier/checks/chart-0.1.0-v3.with-additionalproperties-false.tgz",
+			},
+			validateErrorFunc: func(err error) {
+				require.NoError(t, err)
+			},
+			validateOutputFunc: func(output *bytes.Buffer) {
+				require.NotEmpty(t, output.String())
+
+				expected := "results:\n" +
+					"    - check: v1.0/helm-lint\n" +
+					"      type: Mandatory\n" +
+					"      outcome: PASS\n" +
+					"      reason: Helm lint successful\n"
+				require.Contains(t, output.String(), expected)
+			},
+		},
+		{
 			name: "Should display JSON certificate when option --output and argument values are given",
 			args: []string{
 				"-e", "is-helm-v3", // only consider a single check, perhaps more checks in the future
