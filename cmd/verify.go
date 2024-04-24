@@ -110,7 +110,7 @@ func convertToMap(values []string) map[string]interface{} {
 	valueMap := make(map[string]interface{})
 	for _, val := range values {
 		parts := strings.SplitN(val, "=", 2)
-		valueMap[strings.ToLower(parts[0])] = parts[1]
+		valueMap[parts[0]] = parts[1]
 	}
 	return valueMap
 }
