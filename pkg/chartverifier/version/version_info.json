@@ -1,13 +1,14 @@
 {
-    "version": "1.13.3",
+    "version": "1.13.4",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
         "<ul>",
-        "<li>Partition out Golang and Python linting and style tasks (#412) by @komish</li>",
-        "<li>updating various dependencies (#420) by @acornett21</li>",
-        "<li>Update to latest GitHub actions using Node20 (#422) by @mgoerens</li>",
-        "<li>Use get-ocp-range to translate Kube to OCP ranges (#423) by @mgoerens</li>",
-        "<li>Bump getocprange to support OCP 4.15 (#425) by @komish</li>",
+        "<li>Wrong file name documented in contains-values check. (#427) by @zvigrinberg</li>",
+        "<li>Removing unused variable setOverridesFlag (#421) by @dcurran90</li>",
+        "<li>Add NOTES.txt check (#430) by @trgeiger</li>",
+        "<li>remove output directory from file list for digest (#410) by @dcurran90</li>",
+        "<li>Output unavailable resources (#436) by @rocrisp</li>",
+        "<li>Case sensitive management for input options keys (#435) by @mrizzi</li>",
         "</ul>"
     ]
 }
