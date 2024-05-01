@@ -1,6 +1,7 @@
 package report
 
 import (
+	"encoding/xml"
 	"net/url"
 
 	helmchart "helm.sh/helm/v3/pkg/chart"
@@ -66,4 +67,45 @@ type reportOptions struct {
 	reportString string
 	//nolint: stylecheck // complains Url should be URL
 	reportUrl *url.URL
+}
+
+type JUnitTestSuites struct {
+	XMLName xml.Name         `xml:"testsuites"`
+	Suites  []JUnitTestSuite `xml:"testsuite"`
+}
+
+type JUnitTestSuite struct {
+	XMLName    xml.Name        `xml:"testsuite"`
+	Tests      int             `xml:"tests,attr"`
+	Failures   int             `xml:"failures,attr"`
+	Skipped    int             `xml:"skipped,attr"`
+	Name       string          `xml:"name,attr"`
+	Properties []JUnitProperty `xml:"properties>property,omitempty"`
+	TestCases  []JUnitTestCase `xml:"testcase"`
+}
+
+type JUnitTestCase struct {
+	XMLName     xml.Name          `xml:"testcase"`
+	Classname   string            `xml:"classname,attr"`
+	Name        string            `xml:"name,attr"`
+	SkipMessage *JUnitSkipMessage `xml:"skipped,omitempty"`
+	Failure     *JUnitMessage     `xml:"failure,omitempty"`
+	Warning     *JUnitMessage     `xml:"warning,omitempty"`
+	SystemOut   string            `xml:"system-out,omitempty"`
+	Message     string            `xml:",chardata"`
+}
+
+type JUnitSkipMessage struct {
+	Message string `xml:"message,attr"`
+}
+
+type JUnitProperty struct {
+	Name  string `xml:"name,attr"`
+	Value string `xml:"value,attr"`
+}
+
+type JUnitMessage struct {
+	Message  string `xml:"message,attr"`
+	Type     string `xml:"type,attr"`
+	Contents string `xml:",chardata"`
 }
