@@ -22,12 +22,12 @@ jobs:
               uses: actions/checkout@v4
 
             - name: Setup Go
-              uses: actions/setup-go@v4
+              uses: actions/setup-go@v5
               with:
                 go-version-file: go.mod
 
             - name: Set up Python 3.x
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                   python-version: '3.9'
 
@@ -52,12 +52,11 @@ jobs:
             - name: Delete previous release and tag
               id: delete-previous
               if: ${{ steps.create-tarfile.outcome == 'success' }}
-              uses: dev-drprasad/delete-tag-and-release@v0.2.1
+              uses: dev-drprasad/delete-tag-and-release@v1.1
               with:
                 delete_release: true # default: false
                 tag_name: ${{ env.DEV_RELEASE }} # tag name to delete
-              env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                github_token: ${{ secrets.GITHUB_TOKEN }}
             
               # The next step seems to periodically create a draft release.
               # We think this is because of a race condition.
@@ -69,12 +68,11 @@ jobs:
             - name: Create the release
               id: create_release
               if: ${{ steps.delete-previous.outcome == 'success' && steps.sleep-after-delete-previous.outcome == 'success' }}
-              uses: softprops/action-gh-release@v1
+              uses: softprops/action-gh-release@v2
               with:
                 tag_name: ${{ env.DEV_RELEASE }}
                 body: "Development release created with each merge into the main branch."
                 files: ${{ steps.create-tarfile.outputs.tarball_full_name }}
                 prerelease: true
                 draft: false
-              env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                token: ${{ secrets.GITHUB_TOKEN }}
