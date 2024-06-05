@@ -34,7 +34,7 @@ func Test_getImageRegistries(t *testing.T) {
 		{description: "Test rhscl repository", repository: "rhscl/postgresql-10-rhel7", registry: "registry.access.redhat.com", message: ""},
 		{description: "Test rhel6.7 repository", repository: "rhel6.7", registry: "registry.access.redhat.com", message: ""},
 		{description: "Test rhel8/nginx-116 repository", repository: "rhel8/nginx-116", registry: "registry.access.redhat.com", message: ""},
-		{description: "Test ibm/nginx repository", repository: "ibm/nginx", registry: "non_registry", message: ""},
+		{description: "Test ibm/pfs-nginx-prod repository", repository: "ibm/pfs-nginx-prod", registry: "non_registry", message: ""},
 		{description: "Test turbonomic/zookeeper repository", repository: "turbonomic/zookeeper", registry: "registry.connect.redhat.com", message: ""},
 		{description: "Test cpopen/ibmcloud-object-storage-driver repository", repository: "cpopen/ibmcloud-object-storage-driver", registry: "icr.io", message: ""},
 	}
