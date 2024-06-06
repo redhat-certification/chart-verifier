@@ -1,0 +1,23 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      k8s:
+        applies-to: "version-updates"
+        patterns:
+          - "k8s.io/*"
+          - "sigs.k8s.io/*"
+          - "helm.sh/*"
+          - "github.com/helm/*"
+  - package-ecosystem: github-actions
+    directory: "/.github"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions:
+        applies-to: "version-updates"
+        patterns:
+          - "*"
