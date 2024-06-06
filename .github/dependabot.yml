@@ -4,14 +4,13 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    groups:
-      k8s:
-        applies-to: "version-updates"
-        patterns:
-          - "k8s.io/*"
-          - "sigs.k8s.io/*"
-          - "helm.sh/*"
-          - "github.com/helm/*"
+    ignore:
+      # Automatic updates for these are disabled as they are updated manually to
+      # align with platform dependencies defined at
+      # https://github.com/openshift/console.
+      - dependency-name: "k8s.io/*"
+      - dependency-name: "helm.sh/*"
+      - dependency-name: "github.com/helm/*"
   - package-ecosystem: github-actions
     directory: "/.github"
     schedule:
