@@ -27,7 +27,7 @@ jobs:
                 path: "chart-verifier"
 
             - name: Setup Go
-              uses: actions/setup-go@v4
+              uses: actions/setup-go@v5
               with:
                 go-version-file: ./chart-verifier/go.mod
                 
@@ -51,7 +51,7 @@ jobs:
                   fi
 
             - name: Set up Python 3.x
-              uses: actions/setup-python@v4
+              uses: actions/setup-python@v5
               with:
                 python-version: '3.9'
 
@@ -76,7 +76,7 @@ jobs:
                 echo "date=$(/bin/date -u "+%Y%m%d")" | tee -a $GITHUB_OUTPUT
               shell: bash
 
-            - uses: actions/cache@v3
+            - uses: actions/cache@v4
               id: cache
               with:
                   path: ./chart-verifier/oc
@@ -179,7 +179,7 @@ jobs:
             - name: Merge PR
               id: merge_pr
               if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
-              uses: pascalgn/automerge-action@v0.16.2
+              uses: pascalgn/automerge-action@v0.16.3
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                 MERGE_METHOD: squash
@@ -196,7 +196,7 @@ jobs:
             - name: Create release tag
               id: create_release_tag
               if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
-              uses: mathieudutour/github-tag-action@v6.1
+              uses: mathieudutour/github-tag-action@v6.2
               with:
                 # It is necessary to use a Personal Access Token here rather than the usual GITHUB_TOKEN, as this
                 # step should trigger the release.yaml workflow, and events (such as tags) triggered by the
