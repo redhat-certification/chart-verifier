@@ -40,3 +40,37 @@ report-info.*
 # ignore python venvs
 ve1/
 venv.*/
+
+*.egg-info
+sanity-check.py
+.cr-release-packages/*.tgz
+oc
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+
+# For Pyenv users
+.python-version

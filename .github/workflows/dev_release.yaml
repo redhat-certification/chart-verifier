@@ -27,16 +27,14 @@ jobs:
                 go-version-file: go.mod
 
             - name: Set up Python 3.x
-              uses: actions/setup-python@v5
-              with:
-                  python-version: '3.9'
+              uses: ./.github/actions/setup-python
 
             - name: Set up Python scripts
               run: |
                 # set up python requirements and scripts on PR branch
                 python3 -m venv ve1
                 cd scripts && ../ve1/bin/pip3 install -r requirements.txt && cd ..
-                cd scripts && ../ve1/bin/python3 setup.py install && cd ..
+                cd scripts && ../ve1/bin/pip3 install . install && cd ..
 
             - name: Build Binary
               id: build-binary

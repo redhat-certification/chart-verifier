@@ -127,8 +127,9 @@ venv.tools:
 .PHONY: venv.tools.always-reinstall
 venv.tools.always-reinstall:
 	$(PY_BIN) -m venv $(VENV_TOOLS)
-	./$(VENV_TOOLS_BIN)/pip install -r requirements.txt
-	./$(VENV_TOOLS_BIN)/python setup.py install
+	./$(VENV_TOOLS_BIN)/pip install -r ./scripts/requirements.txt
+	./$(VENV_TOOLS_BIN)/pip install ./scripts
+	cd ..
 
 
 ### Developer Tooling Installation
