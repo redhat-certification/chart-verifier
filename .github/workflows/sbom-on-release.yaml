@@ -1,0 +1,27 @@
+name: Generate and Publish SBOM on release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  generate-src-sbom:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Parse release tag
+        run: echo RELEASE_TAG=$(echo $GITHUB_REF | cut -d '/' -f 3) | tee -a $GITHUB_ENV
+      - name: Set output filename
+        run: echo SBOM_OUTPUT_FILE="${{ github.event.repository.name }}-${{ env.RELEASE_TAG }}-sbom.spdx.json" | tee -a $GITHUB_ENV
+      - name: Generate SBOM and Attach to Release
+        # Attaching SBOM to release is inherent behavior of this action.
+        uses: anchore/sbom-action@v0
+        with:
+          # Setting path to null works around this bug:
+          # https://github.com/anchore/sbom-action/issues/389
+          path: null
+          file: go.mod
+          format: spdx-json
+          output-file: ${{ env.SBOM_OUTPUT_FILE }}
+          artifact-name: ${{ env.SBOM_OUTPUT_FILE }}
