@@ -1,0 +1,10 @@
+name: Setup Python
+description: |
+  Consistently installs python across this project.
+  Should be used as a replacement for direct calls to actions/setup-python.
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
