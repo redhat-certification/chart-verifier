@@ -20,3 +20,12 @@ updates:
         applies-to: "version-updates"
         patterns:
           - "*"
+  - package-ecosystem: pip
+    groups:
+      testing:
+        applies-to: "version-updates"
+        patterns:
+          - "*"
+    directory: "/scripts"
+    schedule:
+      interval: "monthly"

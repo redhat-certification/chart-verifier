@@ -8,7 +8,6 @@ Following environment variables are expected to be set in order to run the tests
               deploy the charts on.
 """
 
-
 from pytest_bdd import scenario, given, when, then, parsers
 import os
 import subprocess
@@ -47,15 +46,15 @@ def test_chart_signed():
 
 
 @given(
-    parsers.parse("I would like to use the <type> profile"),
+    parsers.parse("I would like to use the {category} profile"),
     target_fixture="profile_type",
 )
-def profile_type(type):
-    return type
+def profile_type(category):
+    return category
 
 
 @given(
-    parsers.parse("I will provide a <location> of a <helm_chart>"),
+    parsers.parse("I will provide a {location} of a {helm_chart}"),
     target_fixture="chart_location",
 )
 def chart_location(location, helm_chart):
@@ -63,7 +62,7 @@ def chart_location(location, helm_chart):
 
 
 @given(
-    parsers.parse("I will provide a <location> of an expected <report_info>"),
+    parsers.parse("I will provide a {location} of an expected {report_info}"),
     target_fixture="report_info_location",
 )
 def report_info_location(location, report_info):
@@ -72,7 +71,7 @@ def report_info_location(location, report_info):
 
 @given(
     parsers.parse(
-        "I will provide a <location> of a <public_key> to verify the signature"
+        "I will provide a {location} of a {public_key} to verify the signature"
     ),
     target_fixture="public_key_location",
 )
@@ -81,7 +80,7 @@ def public_key_location(location, public_key):
 
 
 @given(
-    parsers.parse("I will use the chart verifier <image_type> image"),
+    parsers.parse("I will use the chart verifier {image_type} image"),
     target_fixture="image_type",
 )
 def image_type(image_type):

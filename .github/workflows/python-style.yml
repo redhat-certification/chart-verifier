@@ -6,6 +6,10 @@ on:
     # Only trigger on changes to Python source.
     - 'scripts/**.py'
     - 'tests/**.py'
+    - 'scripts/requirements.txt'
+    - 'scripts/pyproject.toml'
+    - 'scripts/setup.py'
+    - 'scripts/setup.cfg'
 
 jobs:
   enforce:
@@ -14,10 +18,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Python 3.x Part 1
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.9"
+    - name: Set up Python
+      uses: ./.github/actions/setup-python
 
     - name: Install style tooling
       run: make venv.codestyle
@@ -25,7 +27,5 @@ jobs:
     - name: Run formatter
       run: make py.ci.format
 
-      # Temporarily auto-pass linting until we are able to manually review and
-      # address.
     - name: Run linter
       run: make py.lint
