@@ -51,6 +51,8 @@ var (
 	disabledChecksFlag []string
 	// outputFormatFlag contains the output format the user has specified: default, yaml or json.
 	outputFormatFlag string
+	// junitFileFlag set the output file to output results in junit format.
+	junitFileFlag string
 	// openshiftVersionFlag set the value of `certifiedOpenShiftVersions` in the report
 	openshiftVersionFlag string
 	// write report to file
@@ -143,10 +145,9 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 
 			reportName := ""
 			if reportToFile {
+				reportName = "report.yaml"
 				if outputFormatFlag == "json" {
 					reportName = "report.json"
-				} else {
-					reportName = "report.yaml"
 				}
 			}
 
@@ -215,6 +216,14 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 				return reportErr
 			}
 
+			if junitFileFlag != "" {
+				junitReport, junitReportErr := verifier.GetReport().JUnitContent()
+				if junitReportErr != nil {
+					utils.LogWarning(fmt.Sprintf("Failed to write JUnit output: %s", junitReportErr))
+				}
+				utils.WriteToFile(junitReport, junitFileFlag)
+			}
+
 			utils.WriteStdOut(report)
 
 			utils.WriteLogs(outputFormatFlag)
@@ -237,7 +246,9 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 
 	cmd.Flags().StringSliceVarP(&disabledChecksFlag, "disable", "x", nil, "all checks will be enabled except the informed ones")
 
-	cmd.Flags().StringVarP(&outputFormatFlag, "output", "o", "", "the output format: default, json or yaml")
+	cmd.Flags().StringVarP(&outputFormatFlag, "output", "o", "", "the output format: default, json, or yaml")
+
+	cmd.Flags().StringVarP(&junitFileFlag, "write-junit-to", "j", "", "set the output file to output results in junit format")
 
 	cmd.Flags().StringSliceVarP(&verifyOpts.Values, "set", "s", []string{}, "overrides a configuration, e.g: dummy.ok=false")
 

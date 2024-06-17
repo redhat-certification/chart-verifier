@@ -200,6 +200,17 @@ func TestReport(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "Should pass writing output to junit file",
+			args: []string{
+				"-w",
+				"-o",
+				"junit",
+				string(apireportsummary.AnnotationsSummary),
+				"test/report.xml",
+			},
+			wantErr: false,
+		},
+		{
 			name: "Should pass for skip digest check",
 			args: []string{
 				"-d",
