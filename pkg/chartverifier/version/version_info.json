@@ -1,14 +1,19 @@
 {
-    "version": "1.13.4",
+    "version": "1.13.5",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
         "<ul>",
-        "<li>Wrong file name documented in contains-values check. (#427) by @zvigrinberg</li>",
-        "<li>Removing unused variable setOverridesFlag (#421) by @dcurran90</li>",
-        "<li>Add NOTES.txt check (#430) by @trgeiger</li>",
-        "<li>remove output directory from file list for digest (#410) by @dcurran90</li>",
-        "<li>Output unavailable resources (#436) by @rocrisp</li>",
-        "<li>Case sensitive management for input options keys (#435) by @mrizzi</li>",
+        "<li>Replace missing ibm/nginx image used in tests (#440) by @komish</li>",
+        "<li>Update workflow versions (#439) by @komish</li>",
+        "<li>Bump dependencies (#438) by @komish</li>",
+        "<li>add starting dependabot configuration (#441) by @komish</li>",
+        "<li>Manually manage k8s dep updates (#444) by @komish</li>",
+        "<li>Automate the addition of SBOMs to releases (#446) by @komish</li>",
+        "<li>Add reusable setup-python action (#448) by @komish</li>",
+        "<li>Update integration test dependencies (#447) by @komish</li>",
+        "<li>Bump packaging from 24.0 to 24.1 in /scripts in the testing group (#449) by @dependabot</li>",
+        "<li>Bump github.com/spf13/cobra from 1.8.0 to 1.8.1 (#450) by @dependabot</li>",
+        "<li>Update helm and related dependencies to support k8s 1.29 (#445) by @komish</li>",
         "</ul>"
     ]
 }
