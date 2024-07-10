@@ -63,6 +63,24 @@ jobs:
             echo "Binary version ($bin_version) doesn't match tag ($release_version)" && exit 1
           fi
 
+      - name: Generate SBOM filename
+        id: generate_sbom_filename
+        run: echo sbom_filename="${{ github.event.repository.name }}-${{ steps.get_tag.outputs.release_version }}-sbom.spdx.json" | tee -a $GITHUB_OUTPUT
+
+      - name: Generate SBOM
+        continue-on-error: true
+        id: generate_sbom
+        uses: anchore/sbom-action@v0
+        with:
+          # Setting path to null works around this bug:
+          # https://github.com/anchore/sbom-action/issues/389
+          path: null
+          file: go.mod
+          format: spdx-json
+          output-file: ${{ steps.generate_sbom_filename.outputs.sbom_filename }}
+          artifact-name: ${{ steps.generate_sbom_filename.outputs.sbom_filename }}
+          upload-release-assets: false
+
       - name: Set up Python 3.x
         uses: ./.github/actions/setup-python
 
@@ -83,7 +101,9 @@ jobs:
         with:
           tag_name: ${{ steps.get_tag.outputs.release_version }}
           body: ${{ steps.release_body.outputs.release_body }}
-          files: ${{ steps.build_bin.outputs.tarball_path }}
+          files: |
+            ${{ steps.build_bin.outputs.tarball_path }}
+            ${{ steps.generate_sbom_filename.outputs.sbom_filename }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
