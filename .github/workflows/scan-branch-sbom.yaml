@@ -1,0 +1,54 @@
+name: Scan Repository SBOM
+
+# Pull the repository, generate an SBOM, and scan the result.
+
+on:
+  workflow_dispatch:
+    inputs:
+      notify-on-failure:
+        type: boolean
+        description: |
+          Whether to notify if grype finds vulnerabilities over the severity cutoff.
+        required: false
+        default: false
+
+jobs:
+  grype:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          # Setting path to null works around this bug:
+          # https://github.com/anchore/sbom-action/issues/389
+          path: null
+          file: go.mod
+          format: spdx-json
+          output-file: temporary.sbom.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+      - name: Scan SBOM
+        id: scan
+        uses: anchore/scan-action@v3
+        continue-on-error: true
+        with:
+          sbom: temporary.sbom.spdx.json
+          # We continue-on-error to handle task failures, so make this fail if
+          # we're above cutoff.
+          fail-build: true
+          only-fixed: true
+          by-cve: true
+          severity-cutoff: ${{ vars.GRYPE_SEVERITY_CUTOFF || 'critical' }}
+          output-format: json
+      - name: Send message on scan failure
+        id: notify
+        if: ${{ steps.scan.outcome == 'failure' && inputs.notify-on-failure }}
+        uses: archive/github-actions-slack@v2.9.0
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+          slack-channel: C02979BDUPL
+          slack-text: |
+            (Chart Verifier) Grype scan result is finding vulnerabilities above the configured severity cutoff.
+            See: '${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}'
