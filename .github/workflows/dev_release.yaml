@@ -34,7 +34,7 @@ jobs:
                 # set up python requirements and scripts on PR branch
                 python3 -m venv ve1
                 cd scripts && ../ve1/bin/pip3 install -r requirements.txt && cd ..
-                cd scripts && ../ve1/bin/pip3 install . install && cd ..
+                cd scripts && ../ve1/bin/pip3 install . && cd ..
 
             - name: Build Binary
               id: build-binary
