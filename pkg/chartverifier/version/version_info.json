@@ -1,19 +1,18 @@
 {
-    "version": "1.13.5",
+    "version": "1.13.6",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
         "<ul>",
-        "<li>Replace missing ibm/nginx image used in tests (#440) by @komish</li>",
-        "<li>Update workflow versions (#439) by @komish</li>",
-        "<li>Bump dependencies (#438) by @komish</li>",
-        "<li>add starting dependabot configuration (#441) by @komish</li>",
-        "<li>Manually manage k8s dep updates (#444) by @komish</li>",
-        "<li>Automate the addition of SBOMs to releases (#446) by @komish</li>",
-        "<li>Add reusable setup-python action (#448) by @komish</li>",
-        "<li>Update integration test dependencies (#447) by @komish</li>",
-        "<li>Bump packaging from 24.0 to 24.1 in /scripts in the testing group (#449) by @dependabot</li>",
-        "<li>Bump github.com/spf13/cobra from 1.8.0 to 1.8.1 (#450) by @dependabot</li>",
-        "<li>Update helm and related dependencies to support k8s 1.29 (#445) by @komish</li>",
+        "<li>Bump golang.org/x/mod from 0.18.0 to 0.19.0 (#452) by @dependabot</li>",
+        "<li>Bump the testing group in /scripts with 2 updates (#451) by @dependabot</li>",
+        "<li>Inline the workflow that generate sbom into the general release tasks (#455) by @komish</li>",
+        "<li>Bump github.com/hashicorp/go-retryablehttp to v0.7.7 from v0.7.4 (#454) by @komish</li>",
+        "<li>Add workflow dispatch to allow on-demand scanning of repository sbom (#456) by @komish</li>",
+        "<li>Remove additional invocation of install command (#457) by @komish</li>",
+        "<li>Align chart testing logic with helm cert pipeline (#458) by @komish</li>",
+        "<li>Bump the testing group in /scripts with 2 updates (#459) by @dependabot</li>",
+        "<li>Bump golang.org/x/mod from 0.19.0 to 0.20.0 (#460) by @dependabot</li>",
+        "<li>Update github.com/docker/docker and related dependencies (#461) by @komish</li>",
         "</ul>"
     ]
 }
