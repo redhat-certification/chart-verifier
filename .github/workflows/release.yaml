@@ -49,7 +49,7 @@ jobs:
         id: build_bin
         run: |
           make bin
-          TARBALL_NAME="chart-verifier.tgz-${{ steps.get_tag.outputs.release_version }}.tgz"
+          TARBALL_NAME="chart-verifier-${{ steps.get_tag.outputs.release_version }}.tgz"
           tar -zcvf $TARBALL_NAME -C out/ chart-verifier
           export TARBALL_PATH=$(realpath $TARBALL_NAME)
           echo "tarball_path=$TARBALL_PATH" | tee -a $GITHUB_OUTPUT
