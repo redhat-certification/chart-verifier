@@ -109,6 +109,16 @@ func WriteStdOut(output string) {
 	}
 }
 
+func WriteToFile(output string, filename string) {
+	fileWriteSuccess := false
+	if len(filename) > 0 {
+		fileWriteSuccess = writeToFile(output, filename)
+	}
+	if !fileWriteSuccess {
+		LogError(fmt.Sprintf("Failed writing output to: %s", filename))
+	}
+}
+
 func writeToStdOut(output string) {
 	savedOut := cmd.OutOrStdout()
 	cmd.SetOut(CmdStdout)

@@ -2,6 +2,7 @@ package report
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"errors"
 	"fmt"
 	"io"
@@ -20,8 +21,9 @@ const (
 	SkippedOutcomeType OutcomeType = "SKIPPED"
 	UnknownOutcomeType OutcomeType = "UNKNOWN"
 
-	JSONReport ReportFormat = "json"
-	YamlReport ReportFormat = "yaml"
+	JSONReport  ReportFormat = "json"
+	JUnitReport ReportFormat = "junit"
+	YamlReport  ReportFormat = "yaml"
 
 	ReportShaVersion string = "v1.9.0"
 )
@@ -45,6 +47,87 @@ func (r *Report) Init() APIReport {
 	return r
 }
 
+func (r *Report) JUnitContent() (string, error) {
+	junitContent := ""
+
+	var passedTests []*CheckReport
+	var failedTests []*CheckReport
+	var skippedTests []*CheckReport
+	var unknownTests []*CheckReport
+
+	for _, element := range r.Results {
+		switch element.Outcome {
+		case PassOutcomeType:
+			passedTests = append(passedTests, element)
+		case FailOutcomeType:
+			failedTests = append(failedTests, element)
+		case SkippedOutcomeType:
+			skippedTests = append(skippedTests, element)
+		case UnknownOutcomeType:
+			unknownTests = append(unknownTests, element)
+		}
+	}
+
+	suites := JUnitTestSuites{}
+	testsuite := JUnitTestSuite{
+		Tests:      len(passedTests) + len(failedTests) + len(skippedTests) + len(unknownTests),
+		Failures:   len(failedTests),
+		Skipped:    len(skippedTests),
+		Name:       "Red Hat Chart Verifier",
+		Properties: []JUnitProperty{},
+		TestCases:  []JUnitTestCase{},
+	}
+
+	for _, result := range passedTests {
+		testCase := JUnitTestCase{
+			Classname: string(result.Type),
+			Name:      string(result.Check),
+			Failure:   nil,
+			Message:   result.Reason,
+		}
+		testsuite.TestCases = append(testsuite.TestCases, testCase)
+	}
+
+	for _, result := range append(failedTests, unknownTests...) {
+		testCase := JUnitTestCase{
+			Classname: string(result.Type),
+			Name:      string(result.Check),
+			Failure: &JUnitMessage{
+				Message:  string(result.Outcome),
+				Type:     "",
+				Contents: result.Reason,
+			},
+		}
+		testsuite.TestCases = append(testsuite.TestCases, testCase)
+	}
+
+	for _, result := range skippedTests {
+		testCase := JUnitTestCase{
+			Classname: string(result.Type),
+			Name:      string(result.Check),
+			SkipMessage: &JUnitSkipMessage{
+				Message: fmt.Sprintf("Skipped: %s", result.Reason),
+			},
+		}
+		testsuite.TestCases = append(testsuite.TestCases, testCase)
+	}
+
+	suites.Suites = append(suites.Suites, testsuite)
+
+	bytes, err := xml.MarshalIndent(suites, "", "\t")
+	if err != nil {
+		o := fmt.Errorf("error formatting results with formatter %s: %v",
+			"junitxml",
+			err,
+		)
+
+		return "", o
+	}
+	junitContent = xml.Header + string(bytes)
+
+	return junitContent, nil
+}
+
 func (r *Report) GetContent(format ReportFormat) (string, error) {
 	reportContent := ""
 
@@ -56,7 +139,7 @@ func (r *Report) GetContent(format ReportFormat) (string, error) {
 	if format == JSONReport {
 		b, marshalErr := json.Marshal(report)
 		if marshalErr != nil {
-			return "", fmt.Errorf("report json marshal failed : %v", marshalErr)
+			return "", fmt.Errorf("report xml marshal failed : %v", marshalErr)
 		}
 		reportContent = string(b)
 	} else {
@@ -112,6 +195,11 @@ func (r *Report) loadReport() error {
 		unMarshalErr := json.Unmarshal([]byte(reportString), r)
 		if unMarshalErr != nil {
 			return fmt.Errorf("report json ummarshal failed : %v", unMarshalErr)
+		}
+	} else if strings.HasPrefix(strings.TrimSpace(reportString), "<?xml version=\"1.0\" encoding=\"UTF-8\"?>") {
+		unMarshalErr := xml.Unmarshal([]byte(reportString), r)
+		if unMarshalErr != nil {
+			return fmt.Errorf("report junit ummarshal failed : %v", unMarshalErr)
 		}
 	} else {
 		unMarshalErr := yaml.Unmarshal([]byte(reportString), r)
