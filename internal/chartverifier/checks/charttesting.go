@@ -371,12 +371,13 @@ func newTempValuesFileWithOverrides(filename string, valuesOverrides map[string]
 
 	if filename != "" {
 		// in the case a filename is provided, read its contents and merge any available values override.
-		obj, err := readObjectFromYamlFile(filename)
+		var err error
+		obj, err = readObjectFromYamlFile(filename)
 		if err != nil {
 			return "", nil, fmt.Errorf("reading values file: %w", err)
 		}
 
-		err = mergo.MergeWithOverwrite(&obj, valuesOverrides)
+		err = mergo.Merge(&obj, valuesOverrides, mergo.WithOverride)
 		if err != nil {
 			return "", nil, fmt.Errorf("merging extra values: %w", err)
 		}
