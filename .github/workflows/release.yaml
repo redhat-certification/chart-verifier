@@ -26,11 +26,19 @@ on:
     # Publish semver tags as releases.
     tags: '[0-9]+.[0-9]+.[0-9]+'
 
+env:
+  IMAGE_NAME: chart-verifier
+
 jobs:
   build-and-release:
     name: Create GitHub release
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
+      packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
+      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,6 +47,11 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 #v3.5.0
+        with:
+          cosign-release: 'v2.2.4'
 
       - name: Print tag to GITHUB_OUTPUT
         id: get_tag
@@ -111,17 +124,35 @@ jobs:
         id: build_container_images
         run: |
             # Build podman images locally
-            make build-image IMAGE_TAG=${{ steps.get_tag.outputs.release_version }}
-            make build-image IMAGE_TAG=latest
+            make build-image IMAGE_TAG=${{ steps.get_tag.outputs.release_version }} IMAGE_REPO=${{ secrets.IMAGE_REGISTRY }}
+            podman tag \
+              ${{ secrets.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.get_tag.outputs.release_version }} \
+              ${{ secrets.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
       - name: Push to quay.io
         id: push_to_quay
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: chart-verifier
+          image: ${{ env.IMAGE_NAME }}
           tags: |
-            ${{ steps.get_tag.outputs.release_version }}
             latest
-          registry: quay.io/redhat-certification
+            ${{ steps.get_tag.outputs.release_version }}
+          registry: ${{ secrets.IMAGE_REGISTRY }}
           username: ${{ secrets.QUAY_BOT_USERNAME }}
           password: ${{ secrets.QUAY_BOT_TOKEN }}
+          
+      - name: Sign published image
+        id: sign-image
+        run: |
+          cosign sign \
+            --yes \
+            --registry-username ${{ secrets.QUAY_BOT_USERNAME }} \
+            --registry-password ${{ secrets.QUAY_BOT_TOKEN }} \
+            ${{ secrets.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.push_to_quay.outputs.digest }}
+
+      - name: Verify the image signature
+        run: |
+          cosign verify \
+            --certificate-identity https://github.com/${{ github.repository }}/.github/workflows/release.yaml@refs/tags/${{ steps.get_tag.outputs.release_version }} \
+            --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+            ${{ secrets.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.get_tag.outputs.release_version }}
