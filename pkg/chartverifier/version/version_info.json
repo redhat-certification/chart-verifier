@@ -1,10 +1,9 @@
 {
-    "version": "1.13.7",
+    "version": "1.13.8",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
         "<ul>",
-        "<li>fix: drop extra .tgz from release artifact (#464) by @jessesimpson36</li>",
-        "<li>Fix bug in values merging when ci directory exists (#466) by @komish</li>",
+        "<li>update getocprange to add support for OCP 4.17 (#476) by @komish</li>",
         "</ul>"
     ]
 }
