@@ -19,9 +19,11 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/junitxml"
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/utils"
 	"github.com/redhat-certification/chart-verifier/internal/tool"
 	apiChecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
@@ -67,6 +69,8 @@ var (
 	pgpPublicKeyFile string
 	// helm install timeout
 	helmInstallTimeout time.Duration
+	// writeJUnitXMLTo is where to write an additional junitxml representation of the outcome
+	writeJUnitXMLTo string
 )
 
 func buildChecks(enabled []string, unEnabled []string) ([]apiChecks.CheckName, []apiChecks.CheckName, error) {
@@ -215,6 +219,20 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 				return reportErr
 			}
 
+			// Failure to write JUnitXML result is non-fatal because junitxml reports are considered extra.
+			if writeJUnitXMLTo != "" {
+				utils.LogInfo(fmt.Sprintf("user requested additional junitxml report be written to %s", writeJUnitXMLTo))
+				junitOutput, err := junitxml.Format(*verifier.GetReport())
+				if err != nil {
+					utils.LogError(fmt.Sprintf("failed to convert report content to junitxml: %s", err))
+				} else {
+					err = os.WriteFile(writeJUnitXMLTo, junitOutput, 0o644)
+					if err != nil {
+						utils.LogError(fmt.Sprintf("failed to write junitxml output to specified path %s: %s", writeJUnitXMLTo, err))
+					}
+				}
+			}
+
 			utils.WriteStdOut(report)
 
 			utils.WriteLogs(outputFormatFlag)
@@ -250,6 +268,8 @@ func NewVerifyCmd(config *viper.Viper) *cobra.Command {
 	cmd.Flags().BoolVarP(&webCatalogOnly, "web-catalog-only", "W", false, "set this to indicate that the distribution method is web catalog only (default: false)")
 	cmd.Flags().StringVarP(&pgpPublicKeyFile, "pgp-public-key", "k", "", "file containing gpg public key of the key used to sign the chart")
 	cmd.Flags().DurationVar(&helmInstallTimeout, "helm-install-timeout", 5*time.Minute, "helm install timeout")
+	cmd.Flags().StringVar(&writeJUnitXMLTo, "write-junitxml-to", "", "If set, will write a junitXML representation of the result to the specified path in addition to the configured output format")
+
 	return cmd
 }
 

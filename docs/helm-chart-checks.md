@@ -148,6 +148,7 @@ This section provides help on the basic usage of Helm chart checks with the podm
       -f, --set-values strings          specify application and check configuration values in a YAML file or a URL (can specify multiple)
       -E, --suppress-error-log          suppress the error log (default: written to ./chartverifier/verifier-<timestamp>.log)
           --timeout duration            time to wait for completion of chart install and test (default 30m0s)
+          --write-junitxml-to string    If set, will write a junitXML representation of the result to the specified path in addition to the configured output format
       -w, --write-to-file               write report to ./chartverifier/report.yaml (default: stdout)
     Global Flags:
           --config string   config file (default is $HOME/.chart-verifier.yaml)
@@ -238,6 +239,25 @@ Alternatively, use the ```-w```  option to write the report directly to the file
 
   ```
 If the file already exists it is overwritten.
+
+An additional report can be written in JUnit XML format if requested with the
+`--write-junitxml-to` flag, passing in the desired output filename. 
+
+```
+  $ podman run --rm -i                                         \
+          -e KUBECONFIG=/.kube/config                          \
+          -v "${HOME}/.kube":/.kube:z                          \
+          -v $(pwd)/chartverifier:/app/chartverifier:z         \
+          -w                                                   \
+          "quay.io/redhat-certification/chart-verifier"        \
+          verify                                               \
+          --write-junitxml-to /app/chartverifier/report-junit.xml \
+          <chart-uri>
+```
+
+JUnitXML is not an additional report format that can be used for certification
+or validation using chart-verifier, and is only intended to be consumed by user
+tooling. The YAML or JSON report is always written as specified.
 
 ### The error log
 
