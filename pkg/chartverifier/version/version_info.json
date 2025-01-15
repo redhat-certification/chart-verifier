@@ -1,9 +1,14 @@
 {
-    "version": "1.13.8",
+    "version": "1.13.9",
     "quay-image":  "quay.io/redhat-certification/chart-verifier",
     "release-info": [
         "<ul>",
-        "<li>update getocprange to add support for OCP 4.17 (#476) by @komish</li>",
+        "<li>Adds support for writing supplemental junitxml reports (#471) by @komish</li>",
+        "<li>Bump github.com/stretchr/testify from 1.9.0 to 1.10.0 (#481) by @dependabot</li>",
+        "<li>Add installed oc bin to the path (#483) by @komish</li>",
+        "<li>oc has a version subcommand, not a flag (#484) by @komish</li>",
+        "<li>Bump golang.org/x/mod from 0.21.0 to 0.22.0 (#479) by @dependabot</li>",
+        "<li>Bump golang.org/x/net from 0.26.0 to 0.33.0 (#486) by @dependabot</li>",
         "</ul>"
     ]
 }
