@@ -86,7 +86,9 @@ jobs:
               run: |
                   # install oc
                   curl -sLO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz
-                  tar zxvf openshift-client-linux.tar.gz oc
+                  tar zxvf openshift-client-linux.tar.gz -C /usr/local/bin/
+                  which oc
+                  oc --version --client=true
 
             - name: Build podman Image
               working-directory: ./chart-verifier
@@ -118,9 +120,9 @@ jobs:
                   if [ $GITHUB_REPOSITORY == "redhat-certification/chart-verifier" ]; then
                     # TODO: temporarily allow for skipping TLS verification as the new cluster uses local-only certificates
                     # This if logic isn't removed to remind us to come back and swap this out when a valid cert is put in place.
-                    ./oc login --insecure-skip-tls-verify --token=${{ secrets.CLUSTER_TOKEN }} --server=${API_SERVER}
+                    oc login --insecure-skip-tls-verify --token=${{ secrets.CLUSTER_TOKEN }} --server=${API_SERVER}
                   else
-                    ./oc login --insecure-skip-tls-verify --token=${{ secrets.CLUSTER_TOKEN }} --server=${API_SERVER}
+                    oc login --insecure-skip-tls-verify --token=${{ secrets.CLUSTER_TOKEN }} --server=${API_SERVER}
                   fi
                   ve1/bin/sa-for-chart-testing --create charts-${{ github.event.number }} --token token.txt --server ${API_SERVER}
 
@@ -143,7 +145,7 @@ jobs:
               run: |
                   # delete the namespace
                   API_SERVER=$( echo -n ${{ secrets.API_SERVER }} | base64 -d)
-                  ./oc login --token=${{ secrets.CLUSTER_TOKEN }} --server=${API_SERVER}
+                  oc login --token=${{ secrets.CLUSTER_TOKEN }} --server=${API_SERVER}
                   ve1/bin/sa-for-chart-testing --delete charts-${{ github.event.number }}
 
             - name: Set up Python scripts on main branch
