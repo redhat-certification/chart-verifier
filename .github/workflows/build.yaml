@@ -88,7 +88,7 @@ jobs:
                   curl -sLO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz
                   tar zxvf openshift-client-linux.tar.gz -C /usr/local/bin/
                   which oc
-                  oc --version --client=true
+                  oc version --client=true
 
             - name: Build podman Image
               working-directory: ./chart-verifier
