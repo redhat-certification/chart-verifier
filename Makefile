@@ -146,7 +146,7 @@ install.gofumpt:
 
 # golangci-lint
 GOLANGCI_LINT = $(shell pwd)/out/golangci-lint
-GOLANGCI_LINT_VERSION ?= v1.52.2
+GOLANGCI_LINT_VERSION ?= v1.63.4
 install.golangci-lint: $(GOLANGCI_LINT)
 $(GOLANGCI_LINT):
 	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION))\
