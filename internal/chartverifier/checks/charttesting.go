@@ -26,7 +26,7 @@ const (
 // Versioner provides OpenShift version
 type Versioner func(envSettings *cli.EnvSettings) (string, error)
 
-func getVersion(envSettings *cli.EnvSettings) (string, error) {
+func GetVersion(envSettings *cli.EnvSettings) (string, error) {
 	kubeConfig := tool.GetClientConfig(envSettings)
 	kubectl, err := tool.NewKubectl(kubeConfig)
 	if err != nil {
@@ -174,7 +174,7 @@ func ChartTesting(opts *CheckOptions) (Result, error) {
 		}
 	}
 
-	if versionError := setOCVersion(opts.AnnotationHolder, opts.HelmEnvSettings, getVersion); versionError != nil {
+	if versionError := setOCVersion(opts.AnnotationHolder, opts.HelmEnvSettings, GetVersion); versionError != nil {
 		if versionError != nil {
 			utils.LogWarning(fmt.Sprintf("End chart install and test check with version error: %v", versionError))
 		}

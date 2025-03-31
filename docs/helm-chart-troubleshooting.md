@@ -180,6 +180,10 @@ This check requires that the public key provided to the chart verifier is from a
 Requires a "NOTES.txt" file to exist in the templates directory of the chart. Any other spelling or
 capitialisation of letters will result in the check failing.
 
+### `cluster-is-not-eol` v1.0
+
+Requires that helm charts be tested on a non EOL cluster. It will fail if the lifecycle status of the cluster is EOL.
+
 ## Report related submission failures
 
 ### One or more mandatory checks have failed or are missing from the report.

@@ -24,6 +24,7 @@ const (
 	configVersion11     string     = "v1.1"
 	configVersion12     string     = "v1.2"
 	configVersion13     string     = "v1.3"
+	configVersion14     string     = "v1.4"
 	checkVersion10      string     = CheckVersion10
 	checkVersion11      string     = "v1.1"
 	NoVendorType        VendorType = ""
@@ -34,7 +35,7 @@ const (
 
 func TestProfile(t *testing.T) {
 	testProfile := getDefaultProfile("test")
-	testProfile.Name = "profile-partner-1.3"
+	testProfile.Name = "profile-partner-1.4"
 	config := make(map[string]interface{})
 	config[VendorTypeConfigName] = PartnerVendorType
 
@@ -78,14 +79,14 @@ func TestGetProfiles(t *testing.T) {
 	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion11, configVersion11)
 	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion11, configVersion11)
 	getAndCheckProfile(t, NoVendorType, PartnerVendorType, configVersion11, configVersion11)
-	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, NoVersion, configVersion13)
-	getAndCheckProfile(t, NoVendorType, PartnerVendorType, NoVersion, configVersion13)
-	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion13, configVersion13)
-	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion00, configVersion13)
-	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion13, configVersion13)
-	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion00, configVersion13)
-	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion00, configVersion13)
-	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion13, configVersion13)
+	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, NoVersion, configVersion14)
+	getAndCheckProfile(t, NoVendorType, PartnerVendorType, NoVersion, configVersion14)
+	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion14, configVersion14)
+	getAndCheckProfile(t, PartnerVendorType, PartnerVendorType, configVersion00, configVersion14)
+	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion14, configVersion14)
+	getAndCheckProfile(t, RedhatVendorType, RedhatVendorType, configVersion00, configVersion14)
+	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion00, configVersion14)
+	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion14, configVersion14)
 }
 
 func getAndCheckProfile(t *testing.T, configVendorType, expectVendorType VendorType, configVersion, expectVersion string) {

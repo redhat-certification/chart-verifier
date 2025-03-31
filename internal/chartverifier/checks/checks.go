@@ -64,6 +64,8 @@ const (
 	ImageCertified               = "Image is Red Hat certified"
 	ImageNotCertified            = "Image is not Red Hat certified"
 	ChartTestingSuccess          = "Chart tests have passed"
+	ClusterNotEOL                = "Chart tests ran on a non EOL cluster"
+	ClusterIsEOL                 = "Chart tests ran on an EOL cluster"
 	MetadataFailure              = "Empty metadata in chart"
 	RequiredAnnotationsSuccess   = "All required annotations present"
 	RequiredAnnotationsFailure   = "Missing required annotations"
@@ -528,4 +530,42 @@ func certifyImages(r Result, opts *CheckOptions, registry string) Result {
 	}
 
 	return r
+}
+
+func ClusterIsNotEOL(opt *CheckOptions) (Result, error) {
+	// Populating version client if not set
+	if opt.versionClient == nil {
+		opt.versionClient = GetVersion
+	}
+	// Populating lifecycle client if not set
+	if opt.lifecycleClient == nil {
+		lcd := LifecycleData{}
+		opt.lifecycleClient = lcd.GetLifecycleStatus
+	}
+	// Get version
+	version, err := opt.versionClient(opt.HelmEnvSettings)
+	if err != nil {
+		return Result{}, err
+	}
+	// Get lifecycle status for version
+	lifecycleStatus, err := opt.lifecycleClient(version)
+	if err != nil {
+		return Result{}, err
+	}
+
+	// Default to false
+	result := NewResult(false, ClusterIsEOL)
+
+	// Supported
+	if strings.Contains(lifecycleStatus, "Support") {
+		result.SetResult(true, ClusterNotEOL)
+		return result, nil
+	}
+	// End of life
+	if lifecycleStatus == "End of life" {
+		result.SetResult(false, ClusterIsEOL)
+		return result, nil
+	}
+
+	return result, nil
 }
