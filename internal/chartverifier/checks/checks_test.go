@@ -403,6 +403,42 @@ func TestHelmLint(t *testing.T) {
 	}
 }
 
+func TestImageCertifyKubeVersionConstraints(t *testing.T) {
+	specificKubeVersion := "v1.21.0"
+	tests := []struct {
+		description               string
+		uri                       string
+		optionalKubeVersionString *string
+		outputIsValidFunc         func(s string) bool
+	}{
+		{
+			description: "KubeVersion mismatch between default and chart should fail to run image checks",
+			uri:         "chart-0.1.0-v3.mocked-kubeversion-constraint-mismatch.tgz",
+			outputIsValidFunc: func(s string) bool {
+				return strings.Contains(s, ImageCertifyFailed) && strings.Contains(s, "which is incompatible with Kubernetes")
+			},
+		},
+		{
+			description: "KubeVersion should align when --set is used to set a kubeversion",
+			uri:         "chart-0.1.0-v3.mocked-kubeversion-constraint-mismatch.tgz",
+			outputIsValidFunc: func(s string) bool {
+				return strings.Contains(s, ImageCertified)
+			},
+			optionalKubeVersionString: &specificKubeVersion,
+		},
+	}
+
+	for _, test := range tests {
+		v := viper.New()
+		if test.optionalKubeVersionString != nil {
+			v.Set("kube-version", *test.optionalKubeVersionString)
+		}
+		// error is ignored because this fn never returns an error.
+		result, _ := ImagesAreCertified_V1_1(&CheckOptions{URI: test.uri, ViperConfig: v, HelmEnvSettings: cli.New()})
+		require.True(t, test.outputIsValidFunc(result.Reason), test.description)
+	}
+}
+
 func TestImageCertify(t *testing.T) {
 	checkImages(t)
 }
@@ -415,6 +451,7 @@ func checkImages(t *testing.T) {
 		numErrors   int
 		numPasses   int
 		numSkips    int
+		numFailures int
 	}{
 		{
 			description: "chart-0.1.0-v3.valid.tgz check images passes",

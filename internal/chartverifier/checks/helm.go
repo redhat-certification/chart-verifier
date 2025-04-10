@@ -189,13 +189,34 @@ func IsChartNotFound(err error) bool {
 	return ok
 }
 
-func getImageReferences(chartURI string, vals map[string]interface{}) ([]string, error) {
+// getImageReferences renders the templates for chartURI and extracts
+// imageReferences from the template output, using vals as necessaary.
+//
+// Note that template rendering doesn't technically need a remote cluster, but
+// the chart's constraints are still validated against mocked cluster
+// information. For this reaosn, serverKubeVersionString must produce a valid
+// semantic version corresponding to a kubeVersion within the chart's
+// constraints as defined in Chart.yaml.
+func getImageReferences(chartURI string, vals map[string]interface{}, serverKubeVersionString string) ([]string, error) {
+	// We'll start with DefaultCapabilities, but we'll really only use the
+	// kubeVersion of this when rendering manifests because Helm replaces the
+	// action config's capabilities for client-only execution.
+	caps := chartutil.DefaultCapabilities.Copy()
+
+	kubeVersion, err := chartutil.ParseKubeVersion(serverKubeVersionString)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", "unable to render manifests and extract images due to invalid kubeVersion in server capabilities", err)
+	}
+
+	caps.KubeVersion = *kubeVersion
+
 	actionConfig := &action.Configuration{
 		Releases:     nil,
 		KubeClient:   &kubefake.PrintingKubeClient{Out: io.Discard},
-		Capabilities: chartutil.DefaultCapabilities,
+		Capabilities: caps,
 		Log:          func(format string, v ...interface{}) {},
 	}
+
 	mem := driver.NewMemory()
 	mem.SetNamespace("TestNamespace")
 	actionConfig.Releases = storage.Init(mem)

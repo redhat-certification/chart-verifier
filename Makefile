@@ -34,10 +34,22 @@ fmt: install.gofumpt
 	${GOFUMPT} -l -w . 
 	git diff --exit-code
 
+
+# These values capture client-go's supported Kubernetes version and uses that to
+# inform some sane defaults for the chart-verifier CLI, particularly when faking server
+# interactions for things like template rendering. It's modeled after Helm.
+K8S_MODULES_VER=$(subst ., ,$(subst v,,$(shell go list -f '{{.Version}}' -m k8s.io/client-go)))
+K8S_MODULES_MAJOR_VER=$(shell echo $$(($(firstword $(K8S_MODULES_VER)) + 1)))
+K8S_MODULES_MINOR_VER=$(word 2,$(K8S_MODULES_VER))
+
+LDFLAGS :=
+LDFLAGS += -X github.com/redhat-certification/chart-verifier/cmd.CommitIDLong=$(COMMIT_ID_LONG)
+LDFLAGS += -X github.com/redhat-certification/chart-verifier/internal/chartverifier/checks.defaultMockedKubeVersionString=v$(K8S_MODULES_MAJOR_VER).$(K8S_MODULES_MINOR_VER)
+
 .PHONY: bin
 bin:
 	CGO_ENABLED=0 go build \
-		-ldflags "-X 'github.com/redhat-certification/chart-verifier/cmd.CommitIDLong=$(COMMIT_ID_LONG)'" \
+		-ldflags '$(LDFLAGS)' \
 		-o ./out/chart-verifier main.go
 
 .PHONY: lint
