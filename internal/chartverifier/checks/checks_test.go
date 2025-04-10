@@ -21,12 +21,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/redhat-certification/chart-verifier/internal/chartverifier/pyxis"
+	"github.com/redhat-certification/chart-verifier/internal/tool"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 	"helm.sh/helm/v3/pkg/cli"
-
-	"github.com/redhat-certification/chart-verifier/internal/chartverifier/pyxis"
-	"github.com/redhat-certification/chart-verifier/internal/tool"
 )
 
 func TestIsHelmV3(t *testing.T) {
@@ -286,6 +285,83 @@ func TestHasMinKubeVersion(t *testing.T) {
 			require.NotNil(t, r)
 			require.False(t, r.Ok)
 			require.Equal(t, KuberVersionNotSpecified, r.Reason)
+		})
+	}
+}
+
+func GetVersionEOL(env *cli.EnvSettings) (string, error) {
+	return "4.11", nil
+}
+
+func GetVersionSupported(env *cli.EnvSettings) (string, error) {
+	return "4.17", nil
+}
+
+func GetVersionUnknown(env *cli.EnvSettings) (string, error) {
+	return "99", nil
+}
+
+func GetTestLifecycleStatus(clusterVersion string) (string, error) {
+	if clusterVersion == "4.11" {
+		return "End of life", nil
+	}
+	if clusterVersion == "4.17" {
+		return "Full Support", nil
+	}
+	return "Unknown", nil
+}
+
+func TestClusterIsNotEOL(t *testing.T) {
+	type testCase struct {
+		description     string
+		versionClient   Versioner
+		lifecycleClient LifecycleDataGetter
+	}
+
+	positiveTestCases := []testCase{
+		{
+			description:     "Cluster is not EOL",
+			versionClient:   GetVersionSupported,
+			lifecycleClient: GetTestLifecycleStatus,
+		},
+	}
+
+	for _, tc := range positiveTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			options := &CheckOptions{}
+			options.versionClient = tc.versionClient
+			options.lifecycleClient = tc.lifecycleClient
+			r, err := ClusterIsNotEOL(options)
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.True(t, r.Ok)
+			require.Equal(t, ClusterNotEOL, r.Reason)
+		})
+	}
+
+	negativeTestCases := []testCase{
+		{
+			description:     "Cluster is EOL",
+			versionClient:   GetVersionEOL,
+			lifecycleClient: GetTestLifecycleStatus,
+		},
+		{
+			description:     "Cluster version is unknown",
+			versionClient:   GetVersionUnknown,
+			lifecycleClient: GetTestLifecycleStatus,
+		},
+	}
+
+	for _, tc := range negativeTestCases {
+		t.Run(tc.description, func(t *testing.T) {
+			options := &CheckOptions{}
+			options.versionClient = tc.versionClient
+			options.lifecycleClient = tc.lifecycleClient
+			r, err := ClusterIsNotEOL(options)
+			require.NoError(t, err)
+			require.NotNil(t, r)
+			require.False(t, r.Ok)
+			require.Equal(t, ClusterIsEOL, r.Reason)
 		})
 	}
 }
