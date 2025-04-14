@@ -482,10 +482,34 @@ func downloadFile(fileURL *url.URL, directory string) (string, error) {
 	return filePath, nil
 }
 
+// defaultMockedKubeVersionString represents a baseline "kubeVersion" for
+// use in rendering templates without actually talking to a server.
+//
+// Rendering templates doesn't technically require a server, but the
+// rendering process used by upstream libraries still does a compatibility
+// check between Chart.yaml kubeVersion constraints and a mocked server
+// version.
+//
+// For this reason, we set this version expected to be "newer than all
+// versions" to satisfy a majority of cases. For everything else, users
+// should set `--set images-are-certified.kube-version=<version>` to match
+// their constraints.
+//
+// Our built binaries will default this to the current k8s version supported
+// by client.go.
+var defaultMockedKubeVersionString = "v99.99"
+
 func certifyImages(r Result, opts *CheckOptions, registry string) Result {
-	images, err := getImageReferences(opts.URI, opts.Values)
+	kubeVersionString := defaultMockedKubeVersionString
+
+	if userKubeVersion := opts.ViperConfig.GetString("kube-version"); userKubeVersion != "" {
+		kubeVersionString = userKubeVersion
+	}
+
+	images, err := getImageReferences(opts.URI, opts.Values, kubeVersionString)
 	if err != nil {
 		r.SetResult(false, fmt.Sprintf("%s : Failed to get images, error running helm template : %v", ImageCertifyFailed, err))
+		return r
 	}
 
 	if len(images) == 0 {
