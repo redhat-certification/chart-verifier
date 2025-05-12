@@ -3,7 +3,7 @@ module github.com/redhat-certification/chart-verifier
 go 1.23.5
 
 require (
-	dario.cat/mergo v1.0.1
+	dario.cat/mergo v1.0.2
 	github.com/Masterminds/semver v1.5.0
 	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
