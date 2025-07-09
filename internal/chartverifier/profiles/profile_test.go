@@ -18,8 +18,7 @@ import (
 const (
 	NoVersion       string = ""
 	configVersion00 string = "v0.0"
-	//nolint:deadcode // TODO(komish) identify where this was intended to be used, or remove.
-	// This should be unused but its triggering as deadcode which is replaced by the unused linter.
+	// TODO(komish) identify where this was intended to be used, or remove.
 	configVersion10     string     = "v1.0"
 	configVersion11     string     = "v1.1"
 	configVersion12     string     = "v1.2"

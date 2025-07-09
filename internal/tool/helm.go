@@ -49,7 +49,7 @@ func (h Helm) Install(ctx context.Context, namespace, chart, release, valuesFile
 	// ref: https://helm.sh/docs/helm/helm_install
 	client.Timeout = h.timeout
 
-	cp, err := client.ChartPathOptions.LocateChart(chart, h.envSettings)
+	cp, err := client.LocateChart(chart, h.envSettings)
 	if err != nil {
 		utils.LogError(fmt.Sprintf("Error LocateChart: %v", err))
 		return err
@@ -148,7 +148,7 @@ func (h Helm) Upgrade(ctx context.Context, namespace, chart, release string) err
 	client.ReuseValues = true
 	client.Wait = true
 
-	cp, err := client.ChartPathOptions.LocateChart(chart, h.envSettings)
+	cp, err := client.LocateChart(chart, h.envSettings)
 	if err != nil {
 		utils.LogError(fmt.Sprintf("Error LocateChart: %v", err))
 		return err

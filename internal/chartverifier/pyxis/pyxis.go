@@ -222,7 +222,7 @@ Loops:
 						// when working with certified images or internal registries. Better to deal with this
 						// by itself at a future date than introduce a potentially subtle bug.
 						//
-						//nolint:stylecheck
+						//nolint:staticcheck // ST1005
 						err = fmt.Errorf("No images found for Registry/Repository: %s/%s", registry, imageRef.Repository)
 					}
 				} else {
