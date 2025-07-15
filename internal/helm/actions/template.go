@@ -38,7 +38,7 @@ func RenderManifests(name string, url string, vals map[string]interface{}, conf 
 	}
 	client.ReleaseName = name
 
-	cp, err := client.ChartPathOptions.LocateChart(chart, cli.New())
+	cp, err := client.LocateChart(chart, cli.New())
 	if err != nil {
 		return emptyResponse, err
 	}
