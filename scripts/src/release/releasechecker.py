@@ -54,6 +54,12 @@ def check_if_only_version_file_is_modified(api_url):
     while page_size == max_page_size:
         files_api_query = f"{files_api_url}?per_page={page_size}&page={page_number}"
         r = requests.get(files_api_query, headers=headers)
+        try:
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print("[ERROR] Error listing files")
+            raise e
+
         files = r.json()
         page_size = len(files)
         page_number += 1
