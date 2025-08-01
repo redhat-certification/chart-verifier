@@ -13,7 +13,7 @@ packaging==25.0
 parse==1.20.2
 parse-type==0.6.4
 pluggy==1.6.0
-PyGithub==2.6.1
+PyGithub==2.7.0
 pyparsing==3.2.3
 pytest==8.4.1
 pytest-bdd==8.1.0
