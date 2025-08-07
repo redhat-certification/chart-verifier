@@ -64,9 +64,11 @@ jobs:
             - name: Check if only release file in PR
               working-directory: ./chart-verifier
               id: check_version_in_PR
+              env:
+                API_URL: ${{ github.event.pull_request._links.self.href }}
               run: |
                 # check if release file only is included in PR
-                ve1/bin/release-checker --api-url=${{ github.event.pull_request._links.self.href }}
+                ve1/bin/release-checker --api-url="${API_URL}"
 
             - name: Get Date
               id: get-date
@@ -96,10 +98,10 @@ jobs:
               run: |
                   # build a podman image
                   image_tag="test"
-                  echo "Building container image using podman for the tests, tagging as $image_tag"
-                  make build-image IMAGE_TAG=$image_tag
-                  podman build -t quay.io/redhat-certification/chart-verifier:$image_tag .
-                  echo "podman_image_tag=$image_tag" | tee -a $GITHUB_OUTPUT
+                  echo "Building container image using podman for the tests, tagging as ${image_tag}"
+                  make build-image "IMAGE_TAG=${image_tag}"
+                  podman build -t "quay.io/redhat-certification/chart-verifier:${image_tag}" .
+                  echo "podman_image_tag=${image_tag}" | tee -a $GITHUB_OUTPUT
 
             - name: Create tarfile
               id: create-tarfile
@@ -112,6 +114,7 @@ jobs:
               working-directory: ./chart-verifier
               env:
                   KUBECONFIG: /tmp/ci-kubeconfig
+                  EVENT_NUMBER: ${{ github.event.number }}
               run: |
                   # oc login
                   API_SERVER=$( echo -n ${{ secrets.API_SERVER }} | base64 -d)
@@ -120,11 +123,11 @@ jobs:
                   if [ $GITHUB_REPOSITORY == "redhat-certification/chart-verifier" ]; then
                     # TODO: temporarily allow for skipping TLS verification as the new cluster uses local-only certificates
                     # This if logic isn't removed to remind us to come back and swap this out when a valid cert is put in place.
-                    oc login --insecure-skip-tls-verify --token=${{ secrets.CLUSTER_TOKEN }} --server=${API_SERVER}
+                    oc login --insecure-skip-tls-verify --token="${{ secrets.CLUSTER_TOKEN }}" --server="${API_SERVER}"
                   else
-                    oc login --insecure-skip-tls-verify --token=${{ secrets.CLUSTER_TOKEN }} --server=${API_SERVER}
+                    oc login --insecure-skip-tls-verify --token="${{ secrets.CLUSTER_TOKEN }}" --server="${API_SERVER}"
                   fi
-                  ve1/bin/sa-for-chart-testing --create charts-${{ github.event.number }} --token token.txt --server ${API_SERVER}
+                  ve1/bin/sa-for-chart-testing --create "charts-${EVENT_NUMBER}" --token token.txt --server "${API_SERVER}"
 
             - name: Run the tests
               working-directory: ./chart-verifier
@@ -142,11 +145,12 @@ jobs:
               working-directory: ./chart-verifier
               env:
                   KUBECONFIG: /tmp/ci-kubeconfig
+                  EVENT_NUMBER: ${{ github.event.number }}
               run: |
                   # delete the namespace
                   API_SERVER=$( echo -n ${{ secrets.API_SERVER }} | base64 -d)
-                  oc login --token=${{ secrets.CLUSTER_TOKEN }} --server=${API_SERVER}
-                  ve1/bin/sa-for-chart-testing --delete charts-${{ github.event.number }}
+                  oc login --token="${{ secrets.CLUSTER_TOKEN }}" --server="${API_SERVER}"
+                  ve1/bin/sa-for-chart-testing --delete "charts-${EVENT_NUMBER}"
 
             - name: Set up Python scripts on main branch
               run: |
@@ -158,16 +162,21 @@ jobs:
 
             - name: Check for restricted files and user permissiom
               id: check_authorization
+              env:
+                API_URL: ${{ github.event.pull_request._links.self.href }}
+                API_USER: ${{ github.event.pull_request.user.login }}
               run: |
                 # check for a restricted file and, if found, check user has permissiom
-                ve1/bin/check-user --api-url=${{ github.event.pull_request._links.self.href }} --user=${{ github.event.pull_request.user.login }}
+                ve1/bin/check-user --api-url="${API_URL}" --user="${API_USER}"
 
             - name: Check if version updated
               id: check_version_updated
               if: ${{ steps.check_version_in_PR.outputs.PR_includes_release == 'true' }}
+              env:
+                PR_VERSION: ${{ steps.check_version_in_PR.outputs.PR_version }}
               run: |
                 # check if version file was changed
-                ve1/bin/release-checker --version=${{ steps.check_version_in_PR.outputs.PR_version }}
+                ve1/bin/release-checker --version="${PR_VERSION}"
 
             - name: Approve PR
               id: approve_pr
