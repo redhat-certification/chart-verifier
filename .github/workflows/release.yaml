@@ -41,15 +41,18 @@ jobs:
       id-token: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
         with:
           go-version-file: go.mod
+          cache: false
 
       - name: Install cosign
-        uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 #v3.5.0
+        uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # v3.5.0
         with:
           cosign-release: 'v2.2.4'
 
@@ -89,7 +92,7 @@ jobs:
       - name: Generate SBOM
         continue-on-error: true
         id: generate_sbom
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@7b36ad622f042cab6f59a75c2ac24ccb256e9b45 # v0.20.4
         with:
           # Setting path to null works around this bug:
           # https://github.com/anchore/sbom-action/issues/389
@@ -114,17 +117,18 @@ jobs:
         id: release_body
         run: echo "release_body=$(ve1/bin/print-release-body)" | tee -a $GITHUB_OUTPUT
 
-      - name: Create the release
-        id: create_release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.get_tag.outputs.release_version }}
-          body: ${{ steps.release_body.outputs.release_body }}
-          files: |
-            ${{ steps.build_bin.outputs.tarball_path }}
-            ${{ steps.generate_sbom_filename.outputs.sbom_filename }}
+      - name: Create tag and release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ steps.get_tag.outputs.release_version }}
+          RELEASE_NOTES: ${{ steps.release_body.outputs.release_body }}
+          TARBALL_PATH: ${{ steps.build_bin.outputs.tarball_path }}
+          SBOM_FILENAME: ${{ steps.generate_sbom_filename.outputs.sbom_filename }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${TAG_NAME}" \
+            "${TARBALL_PATH}" \
+            "${SBOM_FILENAME}" \
+            --notes "${RELEASE_NOTES}"
 
       - name: Build container images
         id: build_container_images
@@ -139,7 +143,7 @@ jobs:
 
       - name: Push to quay.io
         id: push_to_quay
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
         with:
           image: ${{ env.IMAGE_NAME }}
           tags: |

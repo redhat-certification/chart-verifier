@@ -19,10 +19,12 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
-              uses: actions/checkout@v4
+              uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+              with:
+                persist-credentials: false
 
             - name: Setup Go
-              uses: actions/setup-go@v5
+              uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
               with:
                 go-version-file: go.mod
 
@@ -47,30 +49,19 @@ jobs:
                 # check if release file only is included in PR
                 ve1/bin/tar-file --release="${DEV_RELEASE}"
 
-            - name: Delete previous release and tag
-              id: delete-previous
+            - name: Create development tag and release
               if: ${{ steps.create-tarfile.outcome == 'success' }}
-              uses: dev-drprasad/delete-tag-and-release@v1.1
-              with:
-                delete_release: true # default: false
-                tag_name: ${{ env.DEV_RELEASE }} # tag name to delete
-                github_token: ${{ secrets.GITHUB_TOKEN }}
-            
-              # The next step seems to periodically create a draft release.
-              # We think this is because of a race condition.
-              # Force a wait after the previous release was deleted.
-            - name: Sleep and to buffer release recreation
-              id: sleep-after-delete-previous
-              run: sleep 8
+              env:
+                GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                TARBALL_FULL_NAME: ${{ steps.create-tarfile.outputs.tarball_full_name }}
+              run: |
+                gh release delete "${DEV_RELEASE}" --cleanup-tag --yes
 
-            - name: Create the release
-              id: create_release
-              if: ${{ steps.delete-previous.outcome == 'success' && steps.sleep-after-delete-previous.outcome == 'success' }}
-              uses: softprops/action-gh-release@v2
-              with:
-                tag_name: ${{ env.DEV_RELEASE }}
-                body: "Development release created with each merge into the main branch."
-                files: ${{ steps.create-tarfile.outputs.tarball_full_name }}
-                prerelease: true
-                draft: false
-                token: ${{ secrets.GITHUB_TOKEN }}
+                # The next step seems to periodically create a draft release.
+                # We think this is because of a race condition.
+                # Force a wait after the previous release was deleted.
+                sleep 8
+
+                gh release create "${DEV_RELEASE}" "${TARBALL_FULL_NAME}" \
+                  --notes "Development release created with each merge into the main branch." \
+                  --prerelease
