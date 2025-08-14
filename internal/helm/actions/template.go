@@ -25,13 +25,20 @@ func RenderManifests(name string, url string, vals map[string]interface{}, conf 
 	client.ClientOnly = !validate
 	emptyResponse := ""
 
+	// Must set the capabilities on *action.Install{}.KubeVersion directly
+	// because Helm will replace our capabilities with the defaults they
+	// configure.
+	if conf.Capabilities != nil {
+		client.KubeVersion = &conf.Capabilities.KubeVersion
+	}
+
 	name, chart, err := client.NameAndChart([]string{name, url})
 	if err != nil {
 		return emptyResponse, err
 	}
 	client.ReleaseName = name
 
-	cp, err := client.ChartPathOptions.LocateChart(chart, cli.New())
+	cp, err := client.LocateChart(chart, cli.New())
 	if err != nil {
 		return emptyResponse, err
 	}

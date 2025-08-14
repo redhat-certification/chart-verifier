@@ -45,7 +45,7 @@ jobs:
               id: create-tarfile
               run: |
                 # check if release file only is included in PR
-                ve1/bin/tar-file --release=${DEV_RELEASE}
+                ve1/bin/tar-file --release="${DEV_RELEASE}"
 
             - name: Delete previous release and tag
               id: delete-previous

@@ -37,7 +37,7 @@ const (
 	SkipDigestCheck BooleanKey = "skipDigestCheck"
 )
 
-//nolint:deadcode,unused // Note(komish) need to ensure this isn't used, and research
+//nolint:unused // Note(komish) need to ensure this isn't used, and research
 var setBooleanKeys = [...]BooleanKey{SkipDigestCheck}
 
 type APIReportSummary interface {

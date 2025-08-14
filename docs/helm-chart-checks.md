@@ -14,8 +14,6 @@ Helm chart checks are a set of checks against which the Red Hat Helm chart-verif
     - [Using the podman or docker command for Helm chart checks](#using-the-podman-or-docker-command-for-helm-chart-checks)
       - [Prerequisites](#prerequisites)
       - [Procedure](#procedure)
-    - [Check processing](#check-processing)
-    - [Chart testing timeouts](#chart-testing-timeouts)
   - [Signed charts](#signed-charts)
 
 ## Key features
@@ -522,6 +520,32 @@ Notes:
 - The [helm chart certification process](./helm-chart-submission.md#submission-of-helm-charts-for-red-hat-openShift-certification) uses default timeout values.
   - If a helm chart can only pass the chart testing check with modified timeouts a verifier report must be included in the chart submission.  
 
+## Images are Certified
+
+The **images-are-certified** check must be able to render your templates in
+order to extract image references. In that process, your chart's kubeVersion
+constraint will be evaluated against a "server" version. No server is required
+for this check, and Chart Verifier will mock out the server version information
+for you (as is also done via `helm template`).
+
+However, you may find that Chart Verifier mocks out server version that does not
+fall within your chart's constraints. In most cases, this will happen if you
+have an upper bound on your supported kubeVersion (e.g. `<= v1.30.0`).
+
+If this is the case, you can override the mocked version
+string to another valid semantic version that falls within your constraints.
+This is done using the `--set images-are-certified.kube-version=<yourversion>`
+flag.
+
+For example, to set the kube-version value for this check to `v1.29`:
+
+```shell
+    $ chart-verifier                                                  \
+        verify                                                        \
+        --enable images-are-certified                                 \
+        --set images-are-certified.kube-version=v1.29                 \
+        some-chart.tgz
+```
 
 ## Signed charts
 

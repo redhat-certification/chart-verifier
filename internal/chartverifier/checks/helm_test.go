@@ -167,7 +167,7 @@ func TestTemplate(t *testing.T) {
 
 	for _, tc := range TestCases {
 		t.Run(tc.description, func(t *testing.T) {
-			images, err := getImageReferences(tc.uri, map[string]interface{}{})
+			images, err := getImageReferences(tc.uri, map[string]interface{}{}, defaultMockedKubeVersionString)
 			require.NoError(t, err)
 			require.Equal(t, len(images), len(tc.images))
 			for i := 0; i < len(tc.images); i++ {

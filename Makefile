@@ -34,10 +34,22 @@ fmt: install.gofumpt
 	${GOFUMPT} -l -w . 
 	git diff --exit-code
 
+
+# These values capture client-go's supported Kubernetes version and uses that to
+# inform some sane defaults for the chart-verifier CLI, particularly when faking server
+# interactions for things like template rendering. It's modeled after Helm.
+K8S_MODULES_VER=$(subst ., ,$(subst v,,$(shell go list -f '{{.Version}}' -m k8s.io/client-go)))
+K8S_MODULES_MAJOR_VER=$(shell echo $$(($(firstword $(K8S_MODULES_VER)) + 1)))
+K8S_MODULES_MINOR_VER=$(word 2,$(K8S_MODULES_VER))
+
+LDFLAGS :=
+LDFLAGS += -X github.com/redhat-certification/chart-verifier/cmd.CommitIDLong=$(COMMIT_ID_LONG)
+LDFLAGS += -X github.com/redhat-certification/chart-verifier/internal/chartverifier/checks.defaultMockedKubeVersionString=v$(K8S_MODULES_MAJOR_VER).$(K8S_MODULES_MINOR_VER)
+
 .PHONY: bin
 bin:
 	CGO_ENABLED=0 go build \
-		-ldflags "-X 'github.com/redhat-certification/chart-verifier/cmd.CommitIDLong=$(COMMIT_ID_LONG)'" \
+		-ldflags '$(LDFLAGS)' \
 		-o ./out/chart-verifier main.go
 
 .PHONY: lint
@@ -58,10 +70,7 @@ test:
 # If IMAGE_TAG is not provided, use the COMMIT_ID
 .PHONY: build-image
 build-image:
-	# TODO: Adding --no-cache option as a workaround to https://github.com/containers/buildah/issues/4632
-	# This can be removed as soon as we can ensure that the ubuntu-latest runner image uses podman=>4.6.0
 	$(IMAGE_BUILDER) build \
-		--no-cache \
 		--label quay.expires-after=$(QUAY_EXPIRE_AFTER) \
 		-t $(IMAGE_REPO)/chart-verifier:$(IMAGE_TAG) .
 
@@ -146,10 +155,10 @@ install.gofumpt:
 
 # golangci-lint
 GOLANGCI_LINT = $(shell pwd)/out/golangci-lint
-GOLANGCI_LINT_VERSION ?= v1.52.2
+GOLANGCI_LINT_VERSION ?= v2.2.1
 install.golangci-lint: $(GOLANGCI_LINT)
 $(GOLANGCI_LINT):
-	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION))\
+	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION))\
 
 # go-install-tool will 'go install' any package $2 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))

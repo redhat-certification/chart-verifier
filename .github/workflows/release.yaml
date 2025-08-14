@@ -60,25 +60,31 @@ jobs:
 
       - name: Build binary and make tarball
         id: build_bin
+        env:
+          RELEASE_VERSION: ${{ steps.get_tag.outputs.release_version }}
         run: |
           make bin
-          TARBALL_NAME="chart-verifier-${{ steps.get_tag.outputs.release_version }}.tgz"
-          tar -zcvf $TARBALL_NAME -C out/ chart-verifier
-          export TARBALL_PATH=$(realpath $TARBALL_NAME)
+          TARBALL_NAME="chart-verifier-${RELEASE_VERSION}.tgz"
+          tar -zcvf "$TARBALL_NAME" -C out/ chart-verifier
+          export TARBALL_PATH=$(realpath "$TARBALL_NAME")
           echo "tarball_path=$TARBALL_PATH" | tee -a $GITHUB_OUTPUT
 
       - name: Check that the tag matches the current version
         id: check_tag_and_version
+        env:
+          RELEASE_VERSION: ${{ steps.get_tag.outputs.release_version }}
         run: |
-          release_version=${{ steps.get_tag.outputs.release_version }}
           bin_version=$(out/chart-verifier version --as-data | jq -r .version)
-          if [[ "$release_version" != "$bin_version" ]]; then
-            echo "Binary version ($bin_version) doesn't match tag ($release_version)" && exit 1
+          if [[ "${RELEASE_VERSION}" != "$bin_version" ]]; then
+            echo "Binary version ($bin_version) doesn't match tag (${RELEASE_VERSION})" && exit 1
           fi
 
       - name: Generate SBOM filename
         id: generate_sbom_filename
-        run: echo sbom_filename="${{ github.event.repository.name }}-${{ steps.get_tag.outputs.release_version }}-sbom.spdx.json" | tee -a $GITHUB_OUTPUT
+        env:
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+          RELEASE_VERSION: ${{ steps.get_tag.outputs.release_version }}
+        run: echo sbom_filename="${REPOSITORY_NAME}-${RELEASE_VERSION}-sbom.spdx.json" | tee -a $GITHUB_OUTPUT
 
       - name: Generate SBOM
         continue-on-error: true
@@ -122,12 +128,14 @@ jobs:
 
       - name: Build container images
         id: build_container_images
+        env:
+          RELEASE_VERSION: ${{ steps.get_tag.outputs.release_version }}
         run: |
             # Build podman images locally
-            make build-image IMAGE_TAG=${{ steps.get_tag.outputs.release_version }} IMAGE_REPO=${{ secrets.IMAGE_REGISTRY }}
+            make build-image "IMAGE_TAG=${RELEASE_VERSION}" "IMAGE_REPO=${{ secrets.IMAGE_REGISTRY }}"
             podman tag \
-              ${{ secrets.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.get_tag.outputs.release_version }} \
-              ${{ secrets.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+              "${{ secrets.IMAGE_REGISTRY }}/${IMAGE_NAME}:${RELEASE_VERSION}" \
+              "${{ secrets.IMAGE_REGISTRY }}/${IMAGE_NAME}:latest"
 
       - name: Push to quay.io
         id: push_to_quay
@@ -143,16 +151,20 @@ jobs:
           
       - name: Sign published image
         id: sign-image
+        env:
+          DIGEST: ${{ steps.push_to_quay.outputs.digest }}
         run: |
           cosign sign \
             --yes \
-            --registry-username ${{ secrets.QUAY_BOT_USERNAME }} \
-            --registry-password ${{ secrets.QUAY_BOT_TOKEN }} \
-            ${{ secrets.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.push_to_quay.outputs.digest }}
+            --registry-username "${{ secrets.QUAY_BOT_USERNAME }}" \
+            --registry-password "${{ secrets.QUAY_BOT_TOKEN }}" \
+            "${{ secrets.IMAGE_REGISTRY }}/${IMAGE_NAME}@${DIGEST}"
 
       - name: Verify the image signature
+        env:
+          RELEASE_VERSION: ${{ steps.get_tag.outputs.release_version }}
         run: |
           cosign verify \
-            --certificate-identity https://github.com/${{ github.repository }}/.github/workflows/release.yaml@refs/tags/${{ steps.get_tag.outputs.release_version }} \
+            --certificate-identity "https://github.com/${GITHUB_REPOSITORY}/.github/workflows/release.yaml@refs/tags/${RELEASE_VERSION}" \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com \
-            ${{ secrets.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.get_tag.outputs.release_version }}
+            "${{ secrets.IMAGE_REGISTRY }}/${IMAGE_NAME}:${RELEASE_VERSION}"

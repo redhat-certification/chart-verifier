@@ -35,7 +35,7 @@ import (
 func isOk(c *apiReport.Report) bool {
 	outcome := true
 	for _, check := range c.Results {
-		if !(check.Outcome == apiReport.PassOutcomeType) {
+		if check.Outcome != apiReport.PassOutcomeType {
 			outcome = false
 			break
 		}

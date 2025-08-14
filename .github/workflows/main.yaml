@@ -28,12 +28,14 @@ jobs:
 
       - name: Build container images
         id: build_container_images
+        env:
+          COMMIT_ID: ${{ steps.get_commit_id.outputs.commit_id }}
         run: |
             podman version
             # Build podman images locally
-            make build-image IMAGE_TAG=${{ steps.get_commit_id.outputs.commit_id }} QUAY_EXPIRE_AFTER=1w
+            make build-image "IMAGE_TAG=${COMMIT_ID}" QUAY_EXPIRE_AFTER=1w
             make build-image IMAGE_TAG=main
-            podman tag ${{ env.CONTAINER_REGISTRY }}/chart-verifier:main ${{ env.CONTAINER_REGISTRY }}/chart-verifier:${{ env.DEV_RELEASE }}
+            podman tag "${CONTAINER_REGISTRY}/chart-verifier:main" "${CONTAINER_REGISTRY}/chart-verifier:${DEV_RELEASE}"
 
       - name: Push to quay.io
         id: push_to_quay
