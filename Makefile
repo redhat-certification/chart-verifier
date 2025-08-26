@@ -43,12 +43,14 @@ K8S_MODULES_MAJOR_VER=$(shell echo $$(($(firstword $(K8S_MODULES_VER)) + 1)))
 K8S_MODULES_MINOR_VER=$(word 2,$(K8S_MODULES_VER))
 
 LDFLAGS :=
+LDFLAGS += -s -w
 LDFLAGS += -X github.com/redhat-certification/chart-verifier/cmd.CommitIDLong=$(COMMIT_ID_LONG)
 LDFLAGS += -X github.com/redhat-certification/chart-verifier/internal/chartverifier/checks.defaultMockedKubeVersionString=v$(K8S_MODULES_MAJOR_VER).$(K8S_MODULES_MINOR_VER)
 
 .PHONY: bin
 bin:
 	CGO_ENABLED=0 go build \
+		-trimpath \
 		-ldflags '$(LDFLAGS)' \
 		-o ./out/chart-verifier main.go
 
@@ -59,7 +61,8 @@ lint: install.golangci-lint
 .PHONY: bin_win
 bin_win:
 	env GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build \
-		-ldflags "-X 'github.com/redhat-certification/chart-verifier/cmd.CommitIDLong=$(COMMIT_ID_LONG)'" \
+		-trimpath \
+		-ldflags "-s -w -X 'github.com/redhat-certification/chart-verifier/cmd.CommitIDLong=$(COMMIT_ID_LONG)'" \
 		-o .\out\chart-verifier.exe main.go
 
 .PHONY: test
