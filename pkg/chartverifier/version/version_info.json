@@ -1,9 +1,21 @@
 {
-    "version": "1.13.12",
-    "quay-image":  "quay.io/redhat-certification/chart-verifier",
+    "version": "1.13.13",
+    "quay-image": "quay.io/redhat-certification/chart-verifier",
     "release-info": [
         "<ul>",
-        "<li>Bump getocprange to support OCP 4.19 (#509) by @komish</li>",
+        "<li>Upgrade to Go 1.24 and golangci-lint v2 (#512) by @caxu-rh in 512</li>",
+        "<li>Update getocprange dependency to support Go 1.24 (#515) by @caxu-rh in 515</li>",
+        "<li>Handle cases of failed requests to the GitHub API (#513) by @mgoerens in 513</li>",
+        "<li>Remove unneeded --no-cache option when calling podman (#516) by @caxu-rh in 516</li>",
+        "<li>Resolve dependency updates (#517) by @komish in 517</li>",
+        "<li>Bump the testing group across 1 directory with 3 updates (#518) by @dependabot[bot] in 518</li>",
+        "<li>workflows: avoid using ${{ ... }} syntax in inline scripts (#520) by @caxu-rh in 520</li>",
+        "<li>Bump github.com/stretchr/testify from 1.10.0 to 1.11.0 (#525) by @dependabot[bot] in 525</li>",
+        "<li>Add -trimpath flag and -s -w ldflags on builds (#523) by @caxu-rh in 523</li>",
+        "<li>Bump golang.org/x/mod from 0.26.0 to 0.27.0 (#524) by @dependabot[bot] in 524</li>",
+        "<li>Bump the testing group across 1 directory with 3 updates (#521) by @dependabot[bot] in 521</li>",
+        "<li>Bump github.com/go-viper/mapstructure/v2 from 2.3.0 to 2.4.0 (#526) by @dependabot[bot] in 526</li>",
+        "<li>bump helm and docker dependencies (#527) by @komish in 527</li>",
         "</ul>"
     ]
 }
