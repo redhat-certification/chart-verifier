@@ -17,7 +17,9 @@ jobs:
       runs-on: ubuntu-latest
       steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Get commit ID
         id: get_commit_id
@@ -39,7 +41,7 @@ jobs:
 
       - name: Push to quay.io
         id: push_to_quay
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
         with:
           image: chart-verifier
           tags: |

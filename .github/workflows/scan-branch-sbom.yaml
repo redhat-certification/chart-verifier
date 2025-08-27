@@ -17,9 +17,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
       - name: Generate SBOM
-        uses: anchore/sbom-action@v0
+        uses: anchore/sbom-action@7b36ad622f042cab6f59a75c2ac24ccb256e9b45 # v0.20.4
         with:
           # Setting path to null works around this bug:
           # https://github.com/anchore/sbom-action/issues/389
@@ -31,7 +33,7 @@ jobs:
           upload-release-assets: false
       - name: Scan SBOM
         id: scan
-        uses: anchore/scan-action@v3
+        uses: anchore/scan-action@1638637db639e0ade3258b51db49a9a137574c3e # v6.5.1
         continue-on-error: true
         with:
           sbom: temporary.sbom.spdx.json
@@ -45,7 +47,7 @@ jobs:
       - name: Send message on scan failure
         id: notify
         if: ${{ steps.scan.outcome == 'failure' && inputs.notify-on-failure }}
-        uses: archive/github-actions-slack@v2.9.0
+        uses: archive/github-actions-slack@c643e5093620d65506466f2c9b317d5d29a5e517 # v2.10.1
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
           slack-channel: C02979BDUPL
