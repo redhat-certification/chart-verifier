@@ -227,7 +227,7 @@ func generateInstallConfig(
 			kubectl.DeleteNamespace(context.TODO(), namespace)
 		}
 	}
-	return
+	return namespace, release, releaseSelector, cleanup
 }
 
 // testRelease tests a release.
