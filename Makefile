@@ -153,8 +153,9 @@ install.gosec:
 
 # gofumpt
 GOFUMPT = $(shell pwd)/out/gofumpt
+GOFUMPT_VERSION ?= v0.9.0
 install.gofumpt:
-	$(call go-install-tool,$(GOFUMPT),mvdan.cc/gofumpt@latest)
+	$(call go-install-tool,$(GOFUMPT),mvdan.cc/gofumpt@$(GOFUMPT_VERSION))
 
 # golangci-lint
 GOLANGCI_LINT = $(shell pwd)/out/golangci-lint
