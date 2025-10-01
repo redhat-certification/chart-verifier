@@ -46,6 +46,20 @@ jobs:
           repository: ${{ inputs.checkout-repository }}
           persist-credentials: false
 
+      # TODO: May be worth caching this binary, given there are several places
+      # that build the binary in workflows. For now, just build this to allow
+      # functional tests to work as expected.
+      - name: Setup Go
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version-file: go.mod
+          
+      - name: Ensure Modules
+        run: make tidy
+
+      - name: Build Binary
+        run: make bin
+
       - name: Set up Python 3.x
         uses: ./.github/actions/setup-python
 
