@@ -35,6 +35,17 @@ on:
 
           For security, this checkout-ref should generally be a commit hash
           for untrusted content.
+    secrets:
+      # TODO: Refactor cluster-api-server as it's not actually a secret but must
+      # be because it's listed in-repo as a secret.
+      cluster-api-server:
+        required: true
+        description: |
+          Base64 encoded API server URL for the cluster. Not technically a secret.
+
+      cluster-token:
+        required: true
+        description: Token for authenticating with the cluster
 jobs:
   run-functional-tests:
     runs-on: ubuntu-latest
@@ -113,17 +124,19 @@ jobs:
         env:
           KUBECONFIG: /tmp/ci-kubeconfig
           EVENT_NUMBER: ${{ inputs.event-identifier }}
+          CLUSTER_API_SERVER: ${{ secrets.cluster-api-server }}
+          CLUSTER_TOKEN: ${{ secrets.cluster-token }}
         run: |
           # oc login
-          API_SERVER=$( echo -n ${{ secrets.API_SERVER }} | base64 -d)
+          API_SERVER=$( echo -n "${CLUSTER_API_SERVER}" | base64 -d)
           gpg --version
           curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
           if [ $GITHUB_REPOSITORY == "redhat-certification/chart-verifier" ]; then
             # TODO: temporarily allow for skipping TLS verification as the new cluster uses local-only certificates
             # This if logic isn't removed to remind us to come back and swap this out when a valid cert is put in place.
-            oc login --insecure-skip-tls-verify --token="${{ secrets.CLUSTER_TOKEN }}" --server="${API_SERVER}"
+            oc login --insecure-skip-tls-verify --token="${CLUSTER_TOKEN}" --server="${API_SERVER}"
           else
-            oc login --insecure-skip-tls-verify --token="${{ secrets.CLUSTER_TOKEN }}" --server="${API_SERVER}"
+            oc login --insecure-skip-tls-verify --token="${CLUSTER_TOKEN}" --server="${API_SERVER}"
           fi
           ve1/bin/sa-for-chart-testing --create "charts-${EVENT_NUMBER}" --token token.txt --server "${API_SERVER}"
 
@@ -142,8 +155,10 @@ jobs:
         env:
           KUBECONFIG: /tmp/ci-kubeconfig
           EVENT_NUMBER: ${{ inputs.event-identifier }}
+          CLUSTER_API_SERVER: ${{ secrets.cluster-api-server }}
+          CLUSTER_TOKEN: ${{ secrets.cluster-token }}
         run: |
           # delete the namespace
-          API_SERVER=$( echo -n ${{ secrets.API_SERVER }} | base64 -d)
-          oc login --token="${{ secrets.CLUSTER_TOKEN }}" --server="${API_SERVER}"
+          API_SERVER=$( echo -n "${CLUSTER_API_SERVER}" | base64 -d)
+          oc login --token="${CLUSTER_TOKEN}" --server="${API_SERVER}"
           ve1/bin/sa-for-chart-testing --delete "charts-${EVENT_NUMBER}"

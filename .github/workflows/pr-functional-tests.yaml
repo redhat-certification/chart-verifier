@@ -84,7 +84,9 @@ jobs:
       checkout-repository: ${{ needs.check-ok-to-test.outputs.target-repo }}
       checkout-ref: ${{ needs.check-ok-to-test.outputs.target-sha }}
       event-identifier: ${{ github.event.pull_request.number }}
-      
+    secrets:
+      cluster-api-server: ${{ secrets.API_SERVER }}
+      cluster-token: ${{ secrets.CLUSTER_TOKEN }}
 
   handle-release-pr:
     name: Validate Release Intent
