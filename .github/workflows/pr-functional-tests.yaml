@@ -1,0 +1,185 @@
+name: Pull request functional testing
+
+# This workflow runs functional testing against pull request content.
+# If the content contains release artifacts only, submitted by a maintainer,
+# and has passing tests, then it will be considered for release tagging.
+# 
+# Functional testing requires the ok-to-test label.
+# This workflow also handles removing said label on content changes.
+
+on:
+  pull_request_target:
+    branches: [main]
+    types:
+      - opened
+      - synchronize
+      - closed
+      - labeled
+      - reopened
+
+env:
+  TRUSTED_LABEL: ok-to-test
+
+jobs:
+  manage-label-on-content-change:
+    name: Remove label on state change
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    # Labeling is not considered a state change that
+    # should trigger removing the label.
+    if: github.event.action != 'labeled'
+    steps:
+    - name: Remove label on state change
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        REPOSITORY: ${{ github.repository }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: |
+        gh pr edit \
+          --remove-label "${TRUSTED_LABEL}" \
+          --repo "${REPOSITORY}" \
+          "${PR_NUMBER}"
+
+  check-ok-to-test:
+    # NOTE:
+    # This step just adds observability into the process of parsing label
+    # events, and could likely be replaced with a conditional to
+    # run-functional-tests in the future.
+    name: Assert content is OK to test
+    if: github.event.action == 'labeled'
+    outputs:
+      is-ok-to-test: ${{ steps.parse-label-event.outputs.ok-to-test }}
+      target-sha: ${{ steps.emit-commit-ref.outputs.test-sha }}
+      target-repo: ${{ steps.emit-commit-ref.outputs.test-repo }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Parse Labeling Event
+      id: parse-label-event
+      env:
+        EVENT_LABEL: ${{ github.event.label.name }}
+        EVENT_NUMBER: ${{ github.event.pull_request.number }}
+        OK_TO_TEST: ${{ env.TRUSTED_LABEL == github.event.label.name }}
+      run: |
+        echo "The label \"${EVENT_LABEL}\" has been applied to PR ${EVENT_NUMBER}."
+        echo "The trusted label is: ${TRUSTED_LABEL}."
+        echo "The label event is for the trusted label: ${OK_TO_TEST}"
+        echo "ok-to-test=${OK_TO_TEST}" | tee "${GITHUB_OUTPUT}"
+    - name: Emit Commit Ref
+      id: emit-commit-ref
+      if: steps.parse-label-event.outputs.ok-to-test == 'true'
+      env:
+        TEST_SHA: ${{ github.event.pull_request.head.sha }}
+        TEST_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+      run: |
+        echo "${TEST_REPO} at ${TEST_SHA} is considered ok to test."
+        echo "test-sha=${TEST_SHA}" | tee "${GITHUB_OUTPUT}"
+        echo "test-repo=${TEST_REPO}" | tee "${GITHUB_OUTPUT}"
+
+  run-functional-tests:
+    needs: [check-ok-to-test]
+    if: needs.check-ok-to-test.outputs.is-ok-to-test == 'true'
+    uses: .github/workflows/functional-tests.yaml
+    with:
+      checkout-repository: ${{ needs.check-ok-to-test.outputs.target-repo }}
+      checkout-ref: ${{ needs.check-ok-to-test.outputs.target-sha }}
+      event-identifier: ${{ github.event.pull_request.number }}
+      
+
+  handle-release-pr:
+    name: Validate Release Intent
+    needs: [run-functional-tests]
+    runs-on: ubuntu-latest
+    if: needs.run-functional-tests.result == 'success'
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.x
+        uses: ./.github/actions/setup-python
+
+      - name: Set up Python scripts from base branch
+        run: |
+          python3 -m venv ve1
+          cd scripts && ../ve1/bin/pip3 install -r requirements.txt && cd ..
+          cd scripts && ../ve1/bin/pip3 install . && cd ..
+
+      - name: Check for restricted files and user permission # Gate
+        id: check_authorization
+        env:
+          API_URL: ${{ github.event.pull_request._links.self.href }}
+          API_USER: ${{ github.event.pull_request.user.login }}
+        run: |
+          # check for a restricted file and, if found, check user has permission
+          ve1/bin/check-user --api-url="${API_URL}" --user="${API_USER}"
+
+      - name: Checkout PR branch # untrusted content!
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          path: "chart-verifier"
+          persist-credentials: false
+
+      - name: Check if only release file in PR
+        working-directory: ./chart-verifier
+        id: check_version_in_PR
+        env:
+          API_URL: ${{ github.event.pull_request._links.self.href }}
+        run: |
+          # check if release file only is included in PR
+          ../ve1/bin/release-checker --api-url="${API_URL}"
+
+      - name: Check if version updated
+        id: check_version_updated
+        if: ${{ steps.check_version_in_PR.outputs.PR_includes_release == 'true' }}
+        env:
+          PR_VERSION: ${{ steps.check_version_in_PR.outputs.PR_version }}
+        run: |
+          # check if version file was changed
+          ve1/bin/release-checker --version="${PR_VERSION}"
+
+      - name: Approve PR
+        id: approve_pr
+        if: ${{ steps.check_version_updated.outputs.updated == 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh pr review --approve "${PR_NUMBER}"
+
+      - name: Merge PR
+        id: merge_pr
+        if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: gh pr merge --squash "${PR_NUMBER}"
+
+      - name: Get main branch sha
+        id: main_sha
+        if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
+        run: |
+          git fetch
+          export ORIGIN_MAIN_SHA=$(git rev-parse origin/main)
+          echo "origin_main_sha=$ORIGIN_MAIN_SHA" | tee -a $GITHUB_OUTPUT
+
+      - name: Create release tag
+        id: create_release_tag
+        if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
+        env:
+          # It is necessary to use a Personal Access Token here rather than the usual GITHUB_TOKEN, as this
+          # step should trigger the release.yaml workflow, and events (such as tags) triggered by the
+          # GITHUB_TOKEN cannot create a new workflow run. See:
+          # https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow
+          # This Personal Access Token belongs to the openshift-helm-charts-bot account.
+          GH_TOKEN: ${{ secrets.GH_HELM_BOT_TOKEN }}
+          TARGET_TAG: ${{ steps.check_version_in_PR.outputs.PR_version }}
+          TARGET_COMMIT: ${{ steps.main_sha.outputs.origin_main_sha }}
+        run: |
+          git tag "${TARGET_TAG}" "${TARGET_COMMIT}"
+          git push --force-with-lease origin "${TARGET_TAG}"
