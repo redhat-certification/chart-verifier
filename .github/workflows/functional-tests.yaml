@@ -1,0 +1,135 @@
+name: Run Functional Tests
+
+# Runs functional testing against the specified checkout-ref.
+# Note that this workflow runs and installs software from the checkout-ref, 
+# and so untrusted content should be verified as safe to install
+
+on:
+  workflow_call:
+    inputs:
+      event-identifier:
+        type: string
+        required: true
+        description: |
+          Used to generate a working environment unique to this identifier.
+          Common use case would be a pull request number
+          (e.g. github.event.pull_request.number, etc.)
+      checkout-repository:
+        type: string
+        required: false
+        default: ""
+        description: |
+          repository flag to actions/checkout.
+          
+          If setting to a pull request, caller is responsible 
+          for verifying the user is a trusted user.
+      checkout-ref:
+        type: string
+        required: false
+        default: ""
+        description: |
+          ref flag to actions/checkout
+          
+          If setting to a pull request, caller is responsible 
+          for verifying the user is a trusted user.
+
+          For security, this checkout-ref should generally be a commit hash
+          for untrusted content.
+jobs:
+  run-functional-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          ref: ${{ inputs.checkout-ref }}
+          repository: ${{ inputs.checkout-repository }}
+          persist-credentials: false
+
+      - name: Set up Python 3.x
+        uses: ./.github/actions/setup-python
+
+      - name: Set up Python scripts on PR branch
+        run: |
+          # set up python requirements and scripts on PR branch
+          python3 -m venv ve1
+          cd scripts && ../ve1/bin/pip3 install -r requirements.txt && cd ..
+          cd scripts && ../ve1/bin/pip3 install . && cd ..
+
+      - name: Get Date
+        id: get-date
+        run: |
+          echo "date=$(/bin/date -u "+%Y%m%d")" | tee -a $GITHUB_OUTPUT
+        shell: bash
+
+      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        id: cache-oc
+        with:
+          path: /usr/local/bin/oc
+          key: "oc-${{ steps.get-date.outputs.date }}"
+
+      - name: Install oc
+        id: install-oc
+        if: steps.cache-oc.outputs.cache-hit != 'true'
+        run: |
+          # install oc
+          curl -sLO https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz
+          tar zxvf openshift-client-linux.tar.gz -C /usr/local/bin/
+          which oc
+          oc version --client=true
+          rm openshift-client-linux.tar.gz
+
+      - name: Build podman Image
+        id: build_podman_image
+        run: |
+          # build a podman image
+          image_tag="test"
+          echo "Building container image using podman for the tests, tagging as ${image_tag}"
+          make build-image "IMAGE_TAG=${image_tag}"
+          podman build -t "quay.io/redhat-certification/chart-verifier:${image_tag}" .
+          echo "podman_image_tag=${image_tag}" | tee -a $GITHUB_OUTPUT
+
+      - name: Create tarfile
+        id: create-tarfile
+        run: |
+          # create test tarball for the tests
+          ve1/bin/tar-file --release="test"
+
+      - name: Login to oc
+        env:
+          KUBECONFIG: /tmp/ci-kubeconfig
+          EVENT_NUMBER: ${{ inputs.event-identifier }}
+        run: |
+          # oc login
+          API_SERVER=$( echo -n ${{ secrets.API_SERVER }} | base64 -d)
+          gpg --version
+          curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+          if [ $GITHUB_REPOSITORY == "redhat-certification/chart-verifier" ]; then
+            # TODO: temporarily allow for skipping TLS verification as the new cluster uses local-only certificates
+            # This if logic isn't removed to remind us to come back and swap this out when a valid cert is put in place.
+            oc login --insecure-skip-tls-verify --token="${{ secrets.CLUSTER_TOKEN }}" --server="${API_SERVER}"
+          else
+            oc login --insecure-skip-tls-verify --token="${{ secrets.CLUSTER_TOKEN }}" --server="${API_SERVER}"
+          fi
+          ve1/bin/sa-for-chart-testing --create "charts-${EVENT_NUMBER}" --token token.txt --server "${API_SERVER}"
+
+      - name: Run the tests
+        env:
+          KUBECONFIG: /tmp/ci-kubeconfig
+          VERIFIER_TARBALL_NAME: ${{ steps.create-tarfile.outputs.tarball_full_name }}
+          PODMAN_IMAGE_TAG: ${{ steps.build_podman_image.outputs.podman_image_tag }}
+        id: run_test
+        run: |
+          # run pytest
+          ve1/bin/pytest -v --log-cli-level=WARNING --tb=short
+
+      - name: Delete Namespace
+        if: ${{ always() && steps.install-oc.conclusion == 'success' }}
+        env:
+          KUBECONFIG: /tmp/ci-kubeconfig
+          EVENT_NUMBER: ${{ inputs.event-identifier }}
+        run: |
+          # delete the namespace
+          API_SERVER=$( echo -n ${{ secrets.API_SERVER }} | base64 -d)
+          oc login --token="${{ secrets.CLUSTER_TOKEN }}" --server="${API_SERVER}"
+          ve1/bin/sa-for-chart-testing --delete "charts-${EVENT_NUMBER}"
