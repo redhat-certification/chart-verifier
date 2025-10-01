@@ -79,7 +79,7 @@ jobs:
   run-functional-tests:
     needs: [check-ok-to-test]
     if: needs.check-ok-to-test.outputs.is-ok-to-test == 'true'
-    uses: .github/workflows/functional-tests.yaml
+    uses: ./.github/workflows/functional-tests.yaml
     with:
       checkout-repository: ${{ needs.check-ok-to-test.outputs.target-repo }}
       checkout-ref: ${{ needs.check-ok-to-test.outputs.target-sha }}
