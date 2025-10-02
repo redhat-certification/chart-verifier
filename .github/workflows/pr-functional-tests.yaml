@@ -123,11 +123,29 @@ jobs:
       - name: Checkout PR branch # untrusted content!
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.event.pull_request.head.sha }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           path: "chart-verifier"
           persist-credentials: false
 
+      # TODO: May be worth caching this binary, given there are several places
+      # that build the binary in workflows. For now, just build this to allow
+      # functional tests to work as expected.
+      - name: Setup Go
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version-file: ./chart-verifier/go.mod
+
+      - name: Ensure Modules
+        working-directory: ./chart-verifier
+        run: make tidy
+
+      - name: Build Binary
+        working-directory: ./chart-verifier
+        run: make bin
+
+        # TODO: This release-checker call requires chart-verifier on disk.
+        # Consider refactoring the script to remove this requirement.
       - name: Check if only release file in PR
         working-directory: ./chart-verifier
         id: check_version_in_PR
