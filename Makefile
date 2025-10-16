@@ -85,7 +85,8 @@ push-image:
 
 .PHONY: gosec
 gosec: install.gosec
-	$(GOSEC) -no-fail -fmt=sarif -out=gosec.sarif -exclude-dir tests ./...
+	$(GOSEC) -no-fail -fmt=sarif -out=gosec.sarif -exclude-dir tests --exclude G304 ./...
+	# excluding rule G304 because hits currently produce an invalid SARIF.
 
 ### Python Specific Targets
 PY_BIN ?= python3
@@ -147,7 +148,7 @@ venv.tools.always-reinstall:
 ### Developer Tooling Installation
 # gosec
 GOSEC = $(shell pwd)/out/gosec
-GOSEC_VERSION ?= latest
+GOSEC_VERSION ?= 6be2b51fd78feca86af91f5186b7964d76cb1256 # v2.22.10
 install.gosec: 
 	$(call go-install-tool,$(GOSEC),github.com/securego/gosec/v2/cmd/gosec@$(GOSEC_VERSION))
 
