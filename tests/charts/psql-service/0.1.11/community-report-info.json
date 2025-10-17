@@ -24,7 +24,7 @@
     },
     "metadata": {
         "vendorType": "community",
-        "profileVersion": "v1.3",
+        "profileVersion": "v1.4",
         "webCatalogOnly": false,
         "chart-uri": "psql-service-0.1.11.tgz",
         "chart": {
