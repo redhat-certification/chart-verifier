@@ -82,7 +82,7 @@ jobs:
       with:
         slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
         slack-channel: C02979BDUPL
-        slack-text: Failure! CodeQL analysis for chart verifier. See '${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}'
+        slack-text: Failure! CodeQL analysis (${{ matrix.language }}) for chart verifier. See '${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}'
 
     - name: Result from "Send Message to helm_dev slack channel"
       if: ${{ always() &&  github.event_name == 'schedule' && steps.codeql-analysis.conclusion != 'success' }}
@@ -97,7 +97,7 @@ jobs:
       with:
         slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
         slack-channel: C04K1ARMH8A
-        slack-text: Success! CodeQL analysis for chart verifier. See '${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}'
+        slack-text: Success! CodeQL analysis (${{ matrix.language }}) for chart verifier. See '${{github.server_url}}/${{github.repository}}/actions/runs/${{github.run_id}}'
 
     - name: Result from "Send Message to helm_notify slack channel"
       if: ${{ always() &&  github.event_name == 'schedule' && steps.codeql-analysis.conclusion == 'success' }}
