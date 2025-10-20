@@ -53,6 +53,8 @@ jobs:
       target-sha: ${{ steps.emit-commit-ref.outputs.test-sha }}
       target-repo: ${{ steps.emit-commit-ref.outputs.test-repo }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
     - name: Parse Labeling Event
       id: parse-label-event
