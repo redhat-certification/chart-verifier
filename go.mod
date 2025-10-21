@@ -10,7 +10,7 @@ require (
 	github.com/helm/chart-testing/v3 v3.10.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/hashstructure/v2 v2.0.2
-	github.com/opdev/getocprange v0.0.0-20250708190624-73c3e6cd5e1d
+	github.com/opdev/getocprange v0.0.0-20251021151351-5ec57f0a8fd8
 	github.com/spf13/cobra v1.10.1
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1

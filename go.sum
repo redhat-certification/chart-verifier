@@ -236,8 +236,8 @@ github.com/onsi/ginkgo/v2 v2.21.0 h1:7rg/4f3rB88pb5obDgNZrNHrQ4e6WpjonchcpuBRnZM
 github.com/onsi/ginkgo/v2 v2.21.0/go.mod h1:7Du3c42kxCUegi0IImZ1wUQzMBVecgIHjR1C+NkhLQo=
 github.com/onsi/gomega v1.35.1 h1:Cwbd75ZBPxFSuZ6T+rN/WCb/gOc6YgFBXLlZLhC7Ds4=
 github.com/onsi/gomega v1.35.1/go.mod h1:PvZbdDc8J6XJEpDK4HCuRBm8a6Fzp9/DmhC9C7yFlog=
-github.com/opdev/getocprange v0.0.0-20250708190624-73c3e6cd5e1d h1:m7lfXMJB6RpIE61vPtHXPkAD+iKSWy6hiNf9vKAnNRU=
-github.com/opdev/getocprange v0.0.0-20250708190624-73c3e6cd5e1d/go.mod h1:KcJlwpPaON5E/3w+DBYuqkbKIESpfrYZGNMTJs8ehB8=
+github.com/opdev/getocprange v0.0.0-20251021151351-5ec57f0a8fd8 h1:SBxtClrmXiVsvtlJ1k7f4+BP97nt2JL9cfHuvHjR+SQ=
+github.com/opdev/getocprange v0.0.0-20251021151351-5ec57f0a8fd8/go.mod h1:KcJlwpPaON5E/3w+DBYuqkbKIESpfrYZGNMTJs8ehB8=
 github.com/opencontainers/go-digest v1.0.0 h1:apOUWs51W5PlhuyGyz9FCeeBIOUDA/6nW8Oi/yOhh5U=
 github.com/opencontainers/go-digest v1.0.0/go.mod h1:0JzlMkj0TRzQZfJkVvzbP0HBR3IKzErnv2BNG4W4MAM=
 github.com/opencontainers/image-spec v1.1.1 h1:y0fUlFfIZhPF1W537XOLg0/fcx6zcHCJwooC2xJA040=
