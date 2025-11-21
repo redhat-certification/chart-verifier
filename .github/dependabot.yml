@@ -4,6 +4,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 4
     ignore:
       # Automatic updates for these are disabled as they are updated manually to
       # align with platform dependencies defined at
@@ -15,6 +17,8 @@ updates:
     directory: "/.github"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 4
     groups:
       actions:
         applies-to: "version-updates"
@@ -29,3 +33,5 @@ updates:
     directory: "/scripts"
     schedule:
       interval: "monthly"
+    cooldown:
+      default-days: 4
