@@ -59,7 +59,7 @@ jobs:
       - name: Print tag to GITHUB_OUTPUT
         id: get_tag
         run: |
-          echo "release_version=${GITHUB_REF#refs/*/}" | tee -a $GITHUB_OUTPUT
+          echo "release_version=${GITHUB_REF#refs/*/}" | tee -a "${GITHUB_OUTPUT}"
 
       - name: Build binary and make tarball
         id: build_bin
@@ -69,8 +69,9 @@ jobs:
           make bin
           TARBALL_NAME="chart-verifier-${RELEASE_VERSION}.tgz"
           tar -zcvf "$TARBALL_NAME" -C out/ chart-verifier
-          export TARBALL_PATH=$(realpath "$TARBALL_NAME")
-          echo "tarball_path=$TARBALL_PATH" | tee -a $GITHUB_OUTPUT
+          TARBALL_PATH="$(realpath "$TARBALL_NAME")"
+          export TARBALL_PATH
+          echo "tarball_path=$TARBALL_PATH" | tee -a "${GITHUB_OUTPUT}"
 
       - name: Check that the tag matches the current version
         id: check_tag_and_version
@@ -87,7 +88,7 @@ jobs:
         env:
           REPOSITORY_NAME: ${{ github.event.repository.name }}
           RELEASE_VERSION: ${{ steps.get_tag.outputs.release_version }}
-        run: echo sbom_filename="${REPOSITORY_NAME}-${RELEASE_VERSION}-sbom.spdx.json" | tee -a $GITHUB_OUTPUT
+        run: echo sbom_filename="${REPOSITORY_NAME}-${RELEASE_VERSION}-sbom.spdx.json" | tee -a "${GITHUB_OUTPUT}"
 
       - name: Generate SBOM
         continue-on-error: true
@@ -115,7 +116,7 @@ jobs:
 
       - name: Generate release body
         id: release_body
-        run: echo "release_body=$(ve1/bin/print-release-body)" | tee -a $GITHUB_OUTPUT
+        run: echo "release_body=$(ve1/bin/print-release-body)" | tee -a "${GITHUB_OUTPUT}"
 
       - name: Create tag and release
         env:

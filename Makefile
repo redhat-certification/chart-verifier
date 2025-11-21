@@ -144,6 +144,13 @@ venv.tools.always-reinstall:
 	./$(VENV_TOOLS_BIN)/pip install ./scripts
 	cd ..
 
+gha.lint: actionlint zizmor
+
+actionlint: install.actionlint
+	$(ACTIONLINT)
+
+zizmor: install.zizmor
+	$(ZIZMOR) .
 
 ### Developer Tooling Installation
 # gosec
@@ -163,12 +170,43 @@ GOLANGCI_LINT = $(shell pwd)/out/golangci-lint
 GOLANGCI_LINT_VERSION ?= v2.2.1
 install.golangci-lint: $(GOLANGCI_LINT)
 $(GOLANGCI_LINT):
-	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION))\
+	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION))
+
+# actionlint
+ACTIONLINT = $(shell pwd)/out/actionlint
+ACTIONLINT_VERSION ?= v1.7.0
+install.actionlint: $(ACTIONLINT)
+$(ACTIONLINT):
+	$(call go-install-tool,$(ACTIONLINT),github.com/rhysd/actionlint/cmd/actionlint@$(ACTIONLINT_VERSION))
+
+# zizmor
+ZIZMOR = $(shell pwd)/out/zizmor
+ZIZMOR_VERSION ?= v1.17.0
+ZIZMOR_ARCH = $(shell uname -m | sed 's/amd64/x86_64/g; s/arm64/aarch64/g')
+ZIZMOR_OS = $(shell uname -s | sed 's/Linux/unknown-linux-gnu/g; s/Darwin/apple-darwin/g')
+ZIZMOR_PLATFORM ?= $(ZIZMOR_ARCH)-$(ZIZMOR_OS)
+install.zizmor: $(ZIZMOR)
+$(ZIZMOR):
+	$(call github-release-install-tool,$(shell pwd)/out/zizmor.tar.gz,zizmorcore/zizmor,$(ZIZMOR_VERSION),zizmor-$(ZIZMOR_PLATFORM).tar.gz)
+	tar -xzf $(shell pwd)/out/zizmor.tar.gz -C $(shell pwd)/out ./zizmor
+	rm $(shell pwd)/out/zizmor.tar.gz
 
 # go-install-tool will 'go install' any package $2 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 define go-install-tool
 @[ -f $(1) ] || { \
 GOBIN=$(PROJECT_DIR)/out go install $(2) ;\
+}
+endef
+
+# github-release-install-tool
+# Arguments:
+# $1 - destination path
+# $2 - GitHub repository
+# $3 - release version
+# $4 - artifact name
+define github-release-install-tool
+@[ -f $(1) ] || { \
+curl -L https://github.com/$(2)/releases/download/$(3)/$(4) -o $(1) ;\
 }
 endef

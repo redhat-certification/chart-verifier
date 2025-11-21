@@ -1,7 +1,7 @@
 name: Notify ok-to-test required
 
 on:
-  pull_request_target:
+  pull_request_target: # zizmor: ignore[dangerous-triggers] # pull_request_target is needed to be able to comment on the pull request.
     branches: [main]
     types:
       - opened

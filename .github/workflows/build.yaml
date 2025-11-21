@@ -31,7 +31,7 @@ jobs:
               run: |
                   # Run go tests
                   make test
-                  if [[ ! -z $(git status -s) ]]
+                  if [[ -n $(git status -s) ]]
                   then
                     echo "go test - errors running go tests : $(git status -s)"
                     exit 1
