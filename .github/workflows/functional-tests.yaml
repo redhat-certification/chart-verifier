@@ -86,7 +86,7 @@ jobs:
       - name: Get Date
         id: get-date
         run: |
-          echo "date=$(/bin/date -u "+%Y%m%d")" | tee -a $GITHUB_OUTPUT
+          echo "date=$(/bin/date -u "+%Y%m%d")" | tee -a "${GITHUB_OUTPUT}"
         shell: bash
 
       - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
@@ -114,7 +114,7 @@ jobs:
           echo "Building container image using podman for the tests, tagging as ${image_tag}"
           make build-image "IMAGE_TAG=${image_tag}"
           podman build -t "quay.io/redhat-certification/chart-verifier:${image_tag}" .
-          echo "podman_image_tag=${image_tag}" | tee -a $GITHUB_OUTPUT
+          echo "podman_image_tag=${image_tag}" | tee -a "${GITHUB_OUTPUT}"
 
       - name: Create tarfile
         id: create-tarfile
@@ -130,10 +130,10 @@ jobs:
           CLUSTER_TOKEN: ${{ secrets.cluster-token }}
         run: |
           # oc login
-          API_SERVER=$( echo -n "${CLUSTER_API_SERVER}" | base64 -d)
+          API_SERVER="$( echo -n "${CLUSTER_API_SERVER}" | base64 -d)"
           gpg --version
           curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
-          if [ $GITHUB_REPOSITORY == "redhat-certification/chart-verifier" ]; then
+          if [ "${GITHUB_REPOSITORY}" == "redhat-certification/chart-verifier" ]; then
             # TODO: temporarily allow for skipping TLS verification as the new cluster uses local-only certificates
             # This if logic isn't removed to remind us to come back and swap this out when a valid cert is put in place.
             oc login --insecure-skip-tls-verify --token="${CLUSTER_TOKEN}" --server="${API_SERVER}"

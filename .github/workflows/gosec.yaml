@@ -23,8 +23,7 @@ jobs:
       - name: Security scan
         shell: bash
         run: |
-            make gosec
-            if [[ $? != 0 ]]
+            if ! make gosec
             then
               echo "gosec scanner failed to run "
               exit 1

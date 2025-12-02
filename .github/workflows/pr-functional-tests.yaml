@@ -8,7 +8,7 @@ name: Pull request functional testing
 # This workflow also handles removing said label on content changes.
 
 on:
-  pull_request_target:
+  pull_request_target: # zizmor: ignore[dangerous-triggers] # pull_request_target is needed to be able to modify labels on the pull request and to access repository secrets.
     branches: [main]
     types:
       - opened
@@ -189,8 +189,9 @@ jobs:
         if: ${{ steps.check_version_updated.outputs.updated == 'true'}}
         run: |
           git fetch
-          export ORIGIN_MAIN_SHA=$(git rev-parse origin/main)
-          echo "origin_main_sha=$ORIGIN_MAIN_SHA" | tee -a $GITHUB_OUTPUT
+          ORIGIN_MAIN_SHA="$(git rev-parse origin/main)"
+          export ORIGIN_MAIN_SHA
+          echo "origin_main_sha=$ORIGIN_MAIN_SHA" | tee -a "${GITHUB_OUTPUT}"
 
       - name: Create release tag
         id: create_release_tag
