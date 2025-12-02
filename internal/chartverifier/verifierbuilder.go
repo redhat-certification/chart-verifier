@@ -51,6 +51,7 @@ func init() {
 	defaultRegistry.Add(apiChecks.RequiredAnnotationsPresent, "v1.0", checks.RequiredAnnotationsPresent)
 	defaultRegistry.Add(apiChecks.SignatureIsValid, "v1.0", checks.SignatureIsValid)
 	defaultRegistry.Add(apiChecks.HasNotes, "v1.0", checks.HasNotes)
+	defaultRegistry.Add(apiChecks.ClusterIsNotEOL, "v1.0", checks.ClusterIsNotEOL)
 }
 
 func DefaultRegistry() checks.Registry {
