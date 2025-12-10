@@ -206,5 +206,8 @@ jobs:
           TARGET_TAG: ${{ steps.check_version_in_PR.outputs.PR_version }}
           TARGET_COMMIT: ${{ steps.main_sha.outputs.origin_main_sha }}
         run: |
-          git tag "${TARGET_TAG}" "${TARGET_COMMIT}"
-          git push --force-with-lease origin "${TARGET_TAG}"
+          gh api \
+            --method POST \
+            "/repos/${GITHUB_REPOSITORY}/git/refs" \
+            -f "ref=refs/tags/${TARGET_TAG}" \
+            -f "sha=${TARGET_COMMIT}"
