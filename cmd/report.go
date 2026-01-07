@@ -80,6 +80,7 @@ func NewReportCmd(config *viper.Viper) *cobra.Command {
 			if openErr != nil {
 				return fmt.Errorf("report path %s: error opening file  %v", reportArg, openErr)
 			}
+			defer reportFile.Close()
 
 			reportBytes, readErr := io.ReadAll(reportFile)
 			if readErr != nil {
