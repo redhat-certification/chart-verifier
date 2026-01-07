@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -96,14 +97,11 @@ func buildChecks(enabled []string, unEnabled []string) ([]apiChecks.CheckName, [
 func convertChecks(checks []string) ([]apiChecks.CheckName, error) {
 	var apiCheckSet []apiChecks.CheckName
 	for _, check := range checks {
-		checkFound := false
-		for _, checkName := range apiChecks.GetChecks() {
-			if apiChecks.CheckName(check) == checkName {
-				apiCheckSet = append(apiCheckSet, checkName)
-				checkFound = true
-			}
-		}
-		if !checkFound {
+		checkName := apiChecks.CheckName(check)
+		checkFound := slices.Contains(apiChecks.GetChecks(), checkName)
+		if checkFound {
+			apiCheckSet = append(apiCheckSet, checkName)
+		} else {
 			return apiCheckSet, fmt.Errorf("enabled check is invalid :%s", check)
 		}
 	}
