@@ -51,6 +51,7 @@ func loadChartFromRemote(url *url.URL) (*chart.Chart, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusNotFound {
 		return nil, ChartNotFoundErr(url.String())

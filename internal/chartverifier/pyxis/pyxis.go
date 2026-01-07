@@ -95,9 +95,9 @@ func GetImageRegistries(repository string) ([]string, error) {
 		if reqErr != nil {
 			err = fmt.Errorf("error getting repository %s : %v", repository, err)
 		} else {
+			// #nosec G307
+			defer resp.Body.Close()
 			if resp.StatusCode == 200 {
-				// #nosec G307
-				defer resp.Body.Close()
 				body, _ := io.ReadAll(resp.Body)
 				var repositoriesBody RepositoriesBody
 				//nolint:errcheck // TODO(komish): this should be checked, but we really need
@@ -162,9 +162,9 @@ Loops:
 			resp, reqErr := client.Do(req)
 
 			if reqErr == nil {
+				// #nosec G307
+				defer resp.Body.Close()
 				if resp.StatusCode == 200 {
-					// #nosec G307
-					defer resp.Body.Close()
 					// TODO(komish): this should be checked, but we really need
 					// to look at refactoring this block in its entirety. Delay fixing this until then
 					//
