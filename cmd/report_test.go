@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -273,7 +272,7 @@ func TestReport(t *testing.T) {
 
 func compareMetadata(expected *apireportsummary.MetadataReport, result *apireportsummary.MetadataReport) bool {
 	outcome := true
-	if strings.Compare(expected.ProfileVersion, result.ProfileVersion) != 0 {
+	if expected.ProfileVersion != result.ProfileVersion {
 		fmt.Printf("profile version mismatch %s : %s\n", expected.ProfileVersion, result.ProfileVersion)
 		outcome = false
 	}
@@ -303,11 +302,11 @@ func compareMetadata(expected *apireportsummary.MetadataReport, result *apirepor
 
 func compareDigests(expected *apireportsummary.DigestReport, result *apireportsummary.DigestReport) bool {
 	outcome := true
-	if strings.Compare(expected.PackageDigest, result.PackageDigest) != 0 {
+	if expected.PackageDigest != result.PackageDigest {
 		fmt.Printf("package digest mismatch %s : %s\n", expected.PackageDigest, result.PackageDigest)
 		outcome = false
 	}
-	if strings.Compare(expected.ChartDigest, result.ChartDigest) != 0 {
+	if expected.ChartDigest != result.ChartDigest {
 		fmt.Printf("chart digest mismatch %s : %s\n", expected.ChartDigest, result.ChartDigest)
 		outcome = false
 	}
@@ -316,11 +315,11 @@ func compareDigests(expected *apireportsummary.DigestReport, result *apireportsu
 
 func compareResults(expected *apireportsummary.ResultsReport, result *apireportsummary.ResultsReport) bool {
 	outcome := true
-	if strings.Compare(expected.Passed, result.Passed) != 0 {
+	if expected.Passed != result.Passed {
 		fmt.Printf("results passed mismatch; want %s but got %s\n", expected.Passed, result.Passed)
 		outcome = false
 	}
-	if strings.Compare(expected.Failed, result.Failed) != 0 {
+	if expected.Failed != result.Failed {
 		fmt.Printf("results failed mismatch %s : %s\n", expected.Failed, result.Failed)
 		outcome = false
 	}
@@ -345,9 +344,9 @@ func compareAnnotations(expected []apireportsummary.Annotation, result []apirepo
 	for _, expectedAnnotation := range expected {
 		found := false
 		for _, resultAnnotation := range result {
-			if strings.Compare(expectedAnnotation.Name, resultAnnotation.Name) == 0 {
+			if expectedAnnotation.Name == resultAnnotation.Name {
 				found = true
-				if strings.Compare(expectedAnnotation.Value, resultAnnotation.Value) != 0 {
+				if expectedAnnotation.Value != resultAnnotation.Value {
 					fmt.Printf("%s annotation mismatch %s : %s\n", expectedAnnotation.Name, expectedAnnotation.Value, resultAnnotation.Value)
 					outcome = false
 				}

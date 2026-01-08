@@ -246,7 +246,7 @@ func (r *ReportSummary) addResults() {
 		if profileCheck.Type == checks.MandatoryCheckType {
 			found := false
 			for _, reportCheck := range r.options.report.Results {
-				if strings.Compare(profileCheck.Name, string(reportCheck.Check)) == 0 {
+				if profileCheck.Name == string(reportCheck.Check) {
 					found = true
 					if reportCheck.Outcome == report.PassOutcomeType || reportCheck.Outcome == report.SkippedOutcomeType {
 						passed++
