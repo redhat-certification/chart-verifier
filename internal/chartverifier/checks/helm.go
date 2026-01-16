@@ -232,7 +232,7 @@ func getImageReferences(chartURI string, vals map[string]interface{}, serverKube
 // getImagesFromContent evaluates generated templates from
 // helm and extracts images which are returned in a slice
 func getImagesFromContent(content string) ([]string, error) {
-	re, err := regexp.Compile(`\s+image\:\s+(?P<image>.*)\n`)
+	re, err := regexp.Compile(`(?m)\s+image\:[ \t]+(?P<image>\S.*)\s*$`)
 	if err != nil {
 		return nil, fmt.Errorf("error getting images; %v", err)
 	}

@@ -191,39 +191,52 @@ func TestLongLineTemplate(t *testing.T) {
 }
 
 func TestGetImagesFromContent(t *testing.T) {
-	test := struct {
+	testCases := []struct {
 		name    string
 		content string
 		want    []string
 	}{
-		name: "find images in yaml",
-		content: `
+		{
+			name: "find images in yaml",
+			content: `
 	image: "registry.access.redhat.com/rhscl/postgresql-10-rhel7:1-161"
 	image: 'busybox'
 	image:  "  "
 	image: registry.redhat.io/cpopen/ibmcloud-object-storage-driver@sha256:fc17bb3e89d00b3eb0f50b3ea83aa75c52e43d8e56cf2e0f17475e934eeeeb5f
 `,
-		want: []string{
-			"registry.access.redhat.com/rhscl/postgresql-10-rhel7:1-161",
-			"busybox",
-			"",
-			"registry.redhat.io/cpopen/ibmcloud-object-storage-driver@sha256:fc17bb3e89d00b3eb0f50b3ea83aa75c52e43d8e56cf2e0f17475e934eeeeb5f",
+			want: []string{
+				"registry.access.redhat.com/rhscl/postgresql-10-rhel7:1-161",
+				"busybox",
+				"",
+				"registry.redhat.io/cpopen/ibmcloud-object-storage-driver@sha256:fc17bb3e89d00b3eb0f50b3ea83aa75c52e43d8e56cf2e0f17475e934eeeeb5f",
+			},
+		},
+		{
+			name: "do not match against mappings",
+			content: `
+			image:
+			  repository: "registry.access.redhat.com/rhscl/postgresql-10-rhel7:1-161"
+			`,
+			want: []string{},
 		},
 	}
 
-	t.Run(test.name, func(t *testing.T) {
-		got, err := getImagesFromContent(test.content)
-		require.Nil(t, err)
-		if testing.Verbose() {
-			t.Logf("got %d images", len(got))
-		}
-		if len(got) != len(test.want) {
-			t.Errorf("got %d images but, want %d", len(got), len(test.want))
-		}
-		for _, image := range got {
-			if strings.TrimSpace(image) == "" {
-				t.Logf("Found empty image")
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := getImagesFromContent(tc.content)
+			require.Nil(t, err)
+			if testing.Verbose() {
+				t.Logf("got %d images", len(got))
+				t.Logf("got: %s", got)
 			}
-		}
-	})
+			if len(got) != len(tc.want) {
+				t.Errorf("got %d images but, want %d", len(got), len(tc.want))
+			}
+			for _, image := range got {
+				if strings.TrimSpace(image) == "" {
+					t.Logf("Found empty image")
+				}
+			}
+		})
+	}
 }
