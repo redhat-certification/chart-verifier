@@ -1,9 +1,9 @@
 attrs==25.4.0
-certifi==2025.11.12
+certifi==2026.1.4
 chardet==5.2.0
 deepdiff==8.6.1
 gitdb==4.0.12
-GitPython==3.1.45
+GitPython==3.1.46
 glob2==0.7
 idna==3.11
 iniconfig==2.3.0
@@ -14,8 +14,8 @@ parse==1.20.2
 parse-type==0.6.6
 pluggy==1.6.0
 PyGithub==2.8.1
-pyparsing==3.2.5
-pytest==9.0.1
+pyparsing==3.3.1
+pytest==9.0.2
 pytest-bdd==8.1.0
 PyYAML==6.0.3
 requests==2.32.5
@@ -24,5 +24,5 @@ semver==3.0.4
 six==1.17.0
 smmap==5.0.2
 toml==0.10.2
-urllib3==2.5.0
+urllib3==2.6.3
 six==1.17.0
