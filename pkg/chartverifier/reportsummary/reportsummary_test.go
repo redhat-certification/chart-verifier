@@ -304,6 +304,7 @@ func loadChartFromAbsPath(path string) ([]byte, error) {
 	if openErr != nil {
 		return nil, fmt.Errorf("report path %s: error opening file  %v", path, openErr)
 	}
+	defer reportFile.Close()
 
 	reportBytes, readErr := io.ReadAll(reportFile)
 	if readErr != nil {

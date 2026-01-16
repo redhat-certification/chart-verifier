@@ -361,6 +361,7 @@ func SignatureIsValid(opts *CheckOptions) (Result, error) {
 		if err != nil {
 			return NewResult(false, fmt.Sprintf("%s : get error was %v", SignatureFailure, err)), nil
 		}
+		defer resp.Body.Close()
 
 		if resp.StatusCode == 404 {
 			return NewSkippedResult(fmt.Sprintf("%s : %s", ChartNotSigned, SignatureIsNotPresentSuccess)), nil
@@ -458,6 +459,8 @@ func downloadFile(fileURL *url.URL, directory string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer file.Close()
+
 	client := http.Client{
 		CheckRedirect: func(r *http.Request, via []*http.Request) error {
 			r.URL.Opaque = r.URL.Path
@@ -476,8 +479,6 @@ func downloadFile(fileURL *url.URL, directory string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	// #nosec G307
-	defer file.Close()
 
 	return filePath, nil
 }
