@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
-	"strings"
+	"slices"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -45,26 +45,12 @@ func TestProfile(t *testing.T) {
 			assert.Equal(t, testProfile.Version, diskProfile.Version, "Version mismatch")
 			assert.Equal(t, len(testProfile.Annotations), len(diskProfile.Annotations), "Annotations number mismatch")
 			for _, testAnnotation := range testProfile.Annotations {
-				found := false
-				for _, diskAnnotation := range diskProfile.Annotations {
-					if testAnnotation == diskAnnotation {
-						found = true
-						break
-					}
-				}
+				found := slices.Contains(diskProfile.Annotations, testAnnotation)
 				assert.True(t, found, fmt.Sprintf("Annotation not found : %s", testAnnotation))
 			}
 			assert.Equal(t, len(testProfile.Checks), len(diskProfile.Checks), "Checks number mismatch")
 			for _, testCheck := range testProfile.Checks {
-				found := false
-				for _, diskCheck := range diskProfile.Checks {
-					if strings.Compare(testCheck.Name, diskCheck.Name) == 0 {
-						if testCheck.Type == diskCheck.Type {
-							found = true
-							break
-						}
-					}
-				}
+				found := slices.Contains(diskProfile.Checks, testCheck)
 				assert.True(t, found, fmt.Sprintf("Check not matched : %s : %s", testCheck.Name, testCheck.Type))
 			}
 			assert.True(t, cmp.Equal(diskProfile, testProfile), "profiles do not match")

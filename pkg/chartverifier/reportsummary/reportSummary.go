@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"maps"
 	"strings"
 
 	"golang.org/x/mod/semver"
@@ -66,9 +67,7 @@ func (r *ReportSummary) SetReport(report *report.Report) APIReportSummary {
 }
 
 func (r *ReportSummary) SetValues(values map[string]interface{}) APIReportSummary {
-	for key, element := range values {
-		r.options.values[key] = element
-	}
+	maps.Copy(r.options.values, values)
 	return r
 }
 

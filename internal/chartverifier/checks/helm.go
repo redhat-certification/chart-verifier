@@ -19,12 +19,14 @@ package checks
 import (
 	"fmt"
 	"io"
+	"maps"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 
 	"helm.sh/helm/v3/pkg/chartutil"
@@ -245,11 +247,7 @@ func getImagesFromContent(content string) ([]string, error) {
 		imageMap[image] = struct{}{}
 	}
 
-	var images []string
-	for k := range imageMap {
-		images = append(images, k)
-	}
-
+	images := slices.Collect(maps.Keys(imageMap))
 	return images, nil
 }
 
