@@ -301,13 +301,11 @@ def switch_project_context(namespace, token, api_server):
         time.sleep(10)
 
     # This exit will happen if there is an infra failure
-    print(
-        """[ERROR] There is an error creating the namespace and service account. It
+    print("""[ERROR] There is an error creating the namespace and service account. It
         happens due to some infrastructure failure.  It is not directly related to the
         changes in the pull request. You can wait for some time and try to re-run the
         job.  To re-run the job change the PR into a draft and remove the draft
-        state."""
-    )
+        state.""")
     sys.exit(1)
 
 
