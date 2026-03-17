@@ -181,7 +181,7 @@ $(ACTIONLINT):
 
 # zizmor
 ZIZMOR = $(shell pwd)/out/zizmor
-ZIZMOR_VERSION ?= v1.17.0
+ZIZMOR_VERSION ?= v1.23.1
 ZIZMOR_ARCH = $(shell uname -m | sed 's/amd64/x86_64/g; s/arm64/aarch64/g')
 ZIZMOR_OS = $(shell uname -s | sed 's/Linux/unknown-linux-gnu/g; s/Darwin/apple-darwin/g')
 ZIZMOR_PLATFORM ?= $(ZIZMOR_ARCH)-$(ZIZMOR_OS)

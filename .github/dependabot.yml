@@ -5,7 +5,7 @@ updates:
     schedule:
       interval: "weekly"
     cooldown:
-      default-days: 4
+      default-days: 7
     ignore:
       # Automatic updates for these are disabled as they are updated manually to
       # align with platform dependencies defined at
@@ -18,7 +18,7 @@ updates:
     schedule:
       interval: "weekly"
     cooldown:
-      default-days: 4
+      default-days: 7
     groups:
       actions:
         applies-to: "version-updates"
@@ -34,4 +34,4 @@ updates:
     schedule:
       interval: "monthly"
     cooldown:
-      default-days: 4
+      default-days: 7
