@@ -1,7 +1,7 @@
 attrs==25.4.0
 certifi==2026.2.25
 chardet==6.0.0.post1
-deepdiff==8.6.1
+deepdiff==8.6.2
 gitdb==4.0.12
 GitPython==3.1.46
 glob2==0.7
