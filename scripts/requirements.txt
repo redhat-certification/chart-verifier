@@ -1,7 +1,7 @@
-attrs==25.4.0
+attrs==26.1.0
 certifi==2026.2.25
-chardet==6.0.0.post1
-deepdiff==8.6.1
+chardet==7.3.0
+deepdiff==8.6.2
 gitdb==4.0.12
 GitPython==3.1.46
 glob2==0.7
@@ -13,7 +13,7 @@ packaging==26.0
 parse==1.21.1
 parse-type==0.6.6
 pluggy==1.6.0
-PyGithub==2.8.1
+PyGithub==2.9.0
 pyparsing==3.3.2
 pytest==9.0.2
 pytest-bdd==8.1.0
@@ -22,7 +22,7 @@ requests==2.32.5
 retrying==1.4.2
 semver==3.0.4
 six==1.17.0
-smmap==5.0.2
+smmap==5.0.3
 toml==0.10.2
 urllib3==2.6.3
 six==1.17.0
