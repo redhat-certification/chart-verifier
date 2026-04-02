@@ -1,18 +1,19 @@
 {
-    "version": "1.14.0",
+    "version": "1.14.1",
     "quay-image": "quay.io/redhat-certification/chart-verifier",
     "release-info": [
         "<ul>",
-        "<li>Bump the version of golangci-lint (#560) by @komish</li>",
-        "<li>leverage github api for release tag creation (#561) by @komish</li>",
-        "<li>Add caxu-rh as maintainer and approver (#568) by @komish</li>",
-        "<li>Avoid unnecessary usage of strings.Compare (#566) by @caxu-rh</li>",
-        "<li>Bump the testing group across 1 directory with 5 updates (#569) by @dependabot[bot]</li>",
-        "<li>Bump github.com/spf13/cobra from 1.10.1 to 1.10.2 (#559) by @dependabot[bot]</li>",
-        "<li>Bump golang.org/x/mod from 0.30.0 to 0.31.0 (#562) by @dependabot[bot]</li>",
-        "<li>Use maps and slices functions instead of loops where possible (#565) by @caxu-rh</li>",
-        "<li>Call Close() on files and HTTP response bodies (#564) by @caxu-rh</li>",
-        "<li>Ensure image values are parsed from the same line as the image key (#567) by @komish</li>",
+        "<li>Bump getocprange to support OCP 4.21 / k8s 1.34 (#574) by @mgoerens</li>",
+        "<li>Fix script linting error (#573) by @komish</li>",
+        "<li>Bump the testing group across 1 directory with 3 updates (#575) by @dependabot[bot]</li>",
+        "<li>Bump golang.org/x/mod from 0.31.0 to 0.33.0 (#576) by @dependabot[bot]</li>",
+        "<li>Bump the testing group in /scripts with 3 updates (#577) by @dependabot[bot]</li>",
+        "<li>Update to Zizmor 1.23.1 (#579) by @caxu-rh</li>",
+        "<li>Bump google.golang.org/grpc from 1.68.1 to 1.79.3 (#582) by @dependabot[bot]</li>",
+        "<li>Bump requests from 2.32.5 to 2.33.0 in /scripts (#583) by @dependabot[bot]</li>",
+        "<li>Bump the testing group in /scripts with 5 updates (#580) by @dependabot[bot]</li>",
+        "<li>Bump golang.org/x/mod from 0.33.0 to 0.34.0 (#578) by @dependabot[bot]</li>",
+        "<li>Update Dockerfile and tooling to support go 1.25.0 (#584) by @komish</li>",
         "</ul>"
     ]
 }
