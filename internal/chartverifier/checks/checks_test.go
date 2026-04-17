@@ -313,6 +313,11 @@ func TestNotContainCRDs(t *testing.T) {
 
 	negativeTestCases := []testCase{
 		{description: "Contain CRDs", uri: "chart-0.1.0-v3.with-crd.tgz"},
+		{description: "Contain CRDs in /templates", uri: "chart-0.1.0-v3.with-crd-in-templates.tgz"},
+		{description: "Contain CRDs in root", uri: "chart-0.1.0-v3.with-crd-in-root.tgz"},
+		{description: "Contain CRDs in /charts", uri: "chart-0.1.0-v3.with-crd-in-charts.tgz"},
+		{description: "Contain CRDs in subchart /crds", uri: "chart-0.1.0-v3.with-crd-in-subchart-crds.tgz"},
+		{description: "Contain CRDs with quoted kind values", uri: "chart-0.1.0-v3.with-crd-quoted-kind.tgz"},
 	}
 
 	for _, tc := range negativeTestCases {
