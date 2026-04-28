@@ -16,8 +16,7 @@ on:
           (e.g. github.event.pull_request.number, etc.)
       checkout-repository:
         type: string
-        required: false
-        default: ""
+        required: true
         description: |
           repository flag to actions/checkout.
           
@@ -25,8 +24,7 @@ on:
           for verifying the user is a trusted user.
       checkout-ref:
         type: string
-        required: false
-        default: ""
+        required: true
         description: |
           ref flag to actions/checkout
           
