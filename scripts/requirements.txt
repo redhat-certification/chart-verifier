@@ -15,7 +15,7 @@ parse-type==0.6.6
 pluggy==1.6.0
 PyGithub==2.9.0
 pyparsing==3.3.2
-pytest==9.0.2
+pytest==9.0.3
 pytest-bdd==8.1.0
 PyYAML==6.0.3
 requests==2.33.0
