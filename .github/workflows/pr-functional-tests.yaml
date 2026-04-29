@@ -75,8 +75,8 @@ jobs:
         TEST_REPO: ${{ github.event.pull_request.head.repo.full_name }}
       run: |
         echo "${TEST_REPO} at ${TEST_SHA} is considered ok to test."
-        echo "test-sha=${TEST_SHA}" | tee "${GITHUB_OUTPUT}"
-        echo "test-repo=${TEST_REPO}" | tee "${GITHUB_OUTPUT}"
+        echo "test-sha=${TEST_SHA}" | tee -a "${GITHUB_OUTPUT}"
+        echo "test-repo=${TEST_REPO}" | tee -a "${GITHUB_OUTPUT}"
 
   run-functional-tests:
     needs: [check-ok-to-test]
