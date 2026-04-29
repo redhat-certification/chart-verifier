@@ -16,26 +16,32 @@ import (
 
 var testDeployments = []v1.Deployment{
 	{
+		TypeMeta:   metav1.TypeMeta{Kind: "Deployment", APIVersion: "apps/v1"},
 		ObjectMeta: metav1.ObjectMeta{Name: "test0"},
 		Status:     v1.DeploymentStatus{UnavailableReplicas: 1},
 	},
 	{
+		TypeMeta:   metav1.TypeMeta{Kind: "Deployment", APIVersion: "apps/v1"},
 		ObjectMeta: metav1.ObjectMeta{Name: "test1"},
 		Status:     v1.DeploymentStatus{UnavailableReplicas: 2},
 	},
 	{
+		TypeMeta:   metav1.TypeMeta{Kind: "Deployment", APIVersion: "apps/v1"},
 		ObjectMeta: metav1.ObjectMeta{Name: "test2"},
 		Status:     v1.DeploymentStatus{UnavailableReplicas: 3},
 	},
 	{
+		TypeMeta:   metav1.TypeMeta{Kind: "Deployment", APIVersion: "apps/v1"},
 		ObjectMeta: metav1.ObjectMeta{Name: "test3"},
 		Status:     v1.DeploymentStatus{UnavailableReplicas: 4},
 	},
 	{
+		TypeMeta:   metav1.TypeMeta{Kind: "Deployment", APIVersion: "apps/v1"},
 		ObjectMeta: metav1.ObjectMeta{Name: "test4"},
 		Status:     v1.DeploymentStatus{UnavailableReplicas: 5},
 	},
 	{
+		TypeMeta:   metav1.TypeMeta{Kind: "Deployment", APIVersion: "apps/v1"},
 		ObjectMeta: metav1.ObjectMeta{Name: "test5"},
 		Status:     v1.DeploymentStatus{UnavailableReplicas: 6},
 	},
@@ -43,14 +49,17 @@ var testDeployments = []v1.Deployment{
 
 var testDaemonSets = []v1.DaemonSet{
 	{
+		TypeMeta:   metav1.TypeMeta{Kind: "DaemonSet", APIVersion: "apps/v1"},
 		ObjectMeta: metav1.ObjectMeta{Name: "test0"},
 		Status:     v1.DaemonSetStatus{NumberUnavailable: 1},
 	},
 	{
+		TypeMeta:   metav1.TypeMeta{Kind: "DaemonSet", APIVersion: "apps/v1"},
 		ObjectMeta: metav1.ObjectMeta{Name: "test1"},
 		Status:     v1.DaemonSetStatus{NumberUnavailable: 2},
 	},
 	{
+		TypeMeta:   metav1.TypeMeta{Kind: "DaemonSet", APIVersion: "apps/v1"},
 		ObjectMeta: metav1.ObjectMeta{Name: "test2"},
 		Status:     v1.DaemonSetStatus{NumberUnavailable: 3},
 	},
@@ -58,14 +67,17 @@ var testDaemonSets = []v1.DaemonSet{
 
 var testStatefulSets = []v1.StatefulSet{
 	{
+		TypeMeta:   metav1.TypeMeta{Kind: "StatefulSet", APIVersion: "apps/v1"},
 		ObjectMeta: metav1.ObjectMeta{Name: "test0"},
 		Status:     v1.StatefulSetStatus{Replicas: 1, AvailableReplicas: 0},
 	},
 	{
+		TypeMeta:   metav1.TypeMeta{Kind: "StatefulSet", APIVersion: "apps/v1"},
 		ObjectMeta: metav1.ObjectMeta{Name: "test1"},
 		Status:     v1.StatefulSetStatus{Replicas: 2, AvailableReplicas: 0},
 	},
 	{
+		TypeMeta:   metav1.TypeMeta{Kind: "StatefulSet", APIVersion: "apps/v1"},
 		ObjectMeta: metav1.ObjectMeta{Name: "test0"},
 		Status:     v1.StatefulSetStatus{Replicas: 3, AvailableReplicas: 0},
 	},
@@ -81,7 +93,7 @@ func TestGetDeploymentList(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	clientset := fake.NewSimpleClientset()
+	clientset := fake.NewClientset()
 	_, err := clientset.AppsV1().Deployments("").Create(ctx, &testDeployments[0], metav1.CreateOptions{})
 	require.NoError(t, err)
 
@@ -90,6 +102,8 @@ func TestGetDeploymentList(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Equal(t, 1, len(deps))
+	// Clear ManagedFields for comparison since it's dynamically generated
+	deps[0].ManagedFields = nil
 	require.Equal(t, testDeployments[0], deps[0])
 }
 
@@ -97,7 +111,7 @@ func TestGetDaemonSetList(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	clientset := fake.NewSimpleClientset()
+	clientset := fake.NewClientset()
 	_, err := clientset.AppsV1().DaemonSets("").Create(ctx, &testDaemonSets[0], metav1.CreateOptions{})
 	require.NoError(t, err)
 
@@ -106,6 +120,8 @@ func TestGetDaemonSetList(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Equal(t, 1, len(daemons))
+	// Clear ManagedFields for comparison since it's dynamically generated
+	daemons[0].ManagedFields = nil
 	require.Equal(t, testDaemonSets[0], daemons[0])
 }
 
@@ -113,7 +129,7 @@ func TestGetStatefulSetList(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	clientset := fake.NewSimpleClientset()
+	clientset := fake.NewClientset()
 	_, err := clientset.AppsV1().StatefulSets("").Create(ctx, &testStatefulSets[0], metav1.CreateOptions{})
 	require.NoError(t, err)
 
@@ -122,6 +138,8 @@ func TestGetStatefulSetList(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Equal(t, 1, len(sts))
+	// Clear ManagedFields for comparison since it's dynamically generated
+	sts[0].ManagedFields = nil
 	require.Equal(t, testStatefulSets[0], sts[0])
 }
 
