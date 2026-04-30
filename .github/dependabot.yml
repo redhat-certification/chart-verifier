@@ -14,16 +14,11 @@ updates:
       - dependency-name: "helm.sh/*"
       - dependency-name: "github.com/helm/*"
   - package-ecosystem: github-actions
-    directory: "/.github"
+    directory: "/"
     schedule:
       interval: "weekly"
     cooldown:
       default-days: 7
-    groups:
-      actions:
-        applies-to: "version-updates"
-        patterns:
-          - "*"
   - package-ecosystem: pip
     groups:
       testing:
