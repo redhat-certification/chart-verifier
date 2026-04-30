@@ -23,7 +23,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Generate SBOM
-        uses: anchore/sbom-action@7b36ad622f042cab6f59a75c2ac24ccb256e9b45 # v0.20.4
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
         with:
           # Setting path to null works around this bug:
           # https://github.com/anchore/sbom-action/issues/389
