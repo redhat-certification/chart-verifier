@@ -49,7 +49,7 @@ jobs:
       - name: Send message on scan failure
         id: notify
         if: ${{ steps.scan.outcome == 'failure' && inputs.notify-on-failure }}
-        uses: archive/github-actions-slack@c643e5093620d65506466f2c9b317d5d29a5e517 # v2.10.1
+        uses: archive/github-actions-slack@433fef9978d3adae73168bfc9c5a7ce722780231 # v3.1.0
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
           slack-channel: C02979BDUPL
