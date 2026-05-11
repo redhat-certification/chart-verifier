@@ -223,30 +223,45 @@ func GenerateSha(rawFiles []*helmchart.File) string {
 	return fmt.Sprintf("sha256:%x", chartSha.Sum(nil))
 }
 
+// openChartPackageReader opens the chart package byte stream at u for digesting.
+// On success, it returns an [io.ReadCloser]: for http or https, the response body from [http.Get];
+// for file or an empty scheme, the file from [os.Open] when the URL path ends with ".tgz".
+// It returns (nil, nil) for file or an empty scheme when the path does not end with ".tgz".
+// It returns (nil, err) if the scheme is unsupported, or if [http.Get] or [os.Open] fails.
+func openChartPackageReader(u *url.URL) (io.ReadCloser, error) {
+	switch u.Scheme {
+	case "http", "https":
+		resp, err := http.Get(u.String())
+		if err != nil {
+			return nil, err
+		}
+		return resp.Body, nil
+	case "file", "":
+		if !strings.HasSuffix(u.Path, ".tgz") {
+			return nil, nil
+		}
+		return os.Open(u.Path)
+	default:
+		return nil, fmt.Errorf("scheme %q not supported", u.Scheme)
+	}
+}
+
+// GetPackageDigest returns a hex-encoded SHA256 hash of the chart package bytes at uri.
+// Supported schemes are http, https, file, and the empty scheme (local path). Only paths
+// ending in ".tgz" are read for file and empty-scheme URIs. It returns an empty string if
+// uri cannot be parsed, the scheme is unsupported, the resource cannot be opened or read,
+// or the URI does not denote a .tgz chart package for file and path-only forms.
 func GetPackageDigest(uri string) string {
-	url, err := url.Parse(uri)
+	u, err := url.Parse(uri)
 	if err != nil {
 		return ""
 	}
-	var chartReader io.Reader
-	switch url.Scheme {
-	case "http", "https":
-		var chartGetResponse *http.Response
-		chartGetResponse, err = http.Get(url.String())
-		if err == nil {
-			chartReader = chartGetResponse.Body
-		}
-	case "file", "":
-		if strings.HasSuffix(url.Path, ".tgz") {
-			chartReader, _ = os.Open(url.Path)
-		}
-	default:
-		err = fmt.Errorf("scheme %q not supported", url.Scheme)
-	}
-	if err != nil || chartReader == nil {
+	rc, err := openChartPackageReader(u)
+	if err != nil || rc == nil {
 		return ""
 	}
-	return getDigest(chartReader)
+	defer rc.Close()
+	return getDigest(rc)
 }
 
 // Digest hashes a reader and returns a SHA256 digest.
