@@ -15,6 +15,7 @@ const (
 	RequiredAnnotationsPresent CheckName = "required-annotations-present"
 	SignatureIsValid           CheckName = "signature-is-valid"
 	HasNotes                   CheckName = "has-notes"
+	ClusterIsNotEOL            CheckName = "cluster-is-not-eol"
 	MandatoryCheckType         CheckType = "Mandatory"
 	OptionalCheckType          CheckType = "Optional"
 	ExperimentalCheckType      CheckType = "Experimental"
@@ -27,6 +28,7 @@ var setCheckNames = []CheckName{
 	ContainsValues,
 	HasKubeVersion,
 	HasNotes,
+	ClusterIsNotEOL,
 	HasReadme,
 	HelmLint,
 	ImagesAreCertified,

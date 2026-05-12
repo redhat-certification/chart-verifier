@@ -17,7 +17,7 @@ import (
 func TestVerifyApi(t *testing.T) {
 	chartURI := "../../../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz"
 	verifier, reportErr := NewVerifier().
-		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified}).
+		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified, apichecks.ClusterIsNotEOL}).
 		Run(chartURI)
 
 	require.NoError(t, reportErr)
@@ -33,7 +33,7 @@ func TestProfiles(t *testing.T) {
 
 	verifier, RunErr := NewVerifier().
 		SetValues(CommandSet, commandSet).
-		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified}).
+		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified, apichecks.ClusterIsNotEOL}).
 		Run("../../../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz")
 	require.NoError(t, RunErr)
 
@@ -64,7 +64,7 @@ func TestWebCatalogOnly(t *testing.T) {
 
 	verifier, RunErr := NewVerifier().
 		SetBoolean(WebCatalogOnly, true).
-		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified}).
+		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified, apichecks.ClusterIsNotEOL}).
 		Run("../../../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz")
 	require.NoError(t, RunErr)
 
@@ -80,7 +80,7 @@ func TestWebCatalogOnly(t *testing.T) {
 
 	verifier, RunErr = NewVerifier().
 		SetBoolean(WebCatalogOnly, false).
-		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified}).
+		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified, apichecks.ClusterIsNotEOL}).
 		Run("../../../internal/chartverifier/checks/chart-0.1.0-v3.valid.tgz")
 	require.NoError(t, RunErr)
 
@@ -146,7 +146,7 @@ func TestSignedChart(t *testing.T) {
 
 	// good key first
 	verifier, reportErr := NewVerifier().
-		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified}).
+		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified, apichecks.ClusterIsNotEOL}).
 		SetString(PGPPublicKey, []string{encodedKey1, encodedKey2}).
 		Run(chartURI)
 
@@ -166,7 +166,7 @@ func TestSignedChart(t *testing.T) {
 
 	// bad key first
 	verifier, reportErr = NewVerifier().
-		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified}).
+		UnEnableChecks([]apichecks.CheckName{apichecks.ChartTesting, apichecks.ImagesAreCertified, apichecks.ClusterIsNotEOL}).
 		SetString(PGPPublicKey, []string{encodedKey2, encodedKey1}).
 		Run(chartURI)
 

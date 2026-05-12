@@ -115,6 +115,10 @@ type CheckOptions struct {
 	HelmInstallTimeout time.Duration
 	// skip helm cleanup
 	SkipCleanup bool
+	// Client used to get cluster version
+	versionClient Versioner
+	// Client used to get lifecycle data
+	lifecycleClient LifecycleDataGetter
 }
 
 type CheckFunc func(options *CheckOptions) (Result, error)
