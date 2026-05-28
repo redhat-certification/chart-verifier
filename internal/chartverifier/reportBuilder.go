@@ -223,30 +223,40 @@ func GenerateSha(rawFiles []*helmchart.File) string {
 	return fmt.Sprintf("sha256:%x", chartSha.Sum(nil))
 }
 
+// openChartPackage opens the chart package byte stream at u as an [io.ReadCloser].
+func openChartPackage(u *url.URL) (io.ReadCloser, error) {
+	switch u.Scheme {
+	case "http", "https":
+		resp, err := http.Get(u.String())
+		if err != nil {
+			return nil, err
+		}
+		return resp.Body, nil
+	case "file", "":
+		if !strings.HasSuffix(u.Path, ".tgz") {
+			return nil, nil
+		}
+		return os.Open(u.Path)
+	default:
+		return nil, fmt.Errorf("scheme %q not supported", u.Scheme)
+	}
+}
+
+// GetPackageDigest returns a hex-encoded SHA256 hash of the chart package bytes at uri.
 func GetPackageDigest(uri string) string {
-	url, err := url.Parse(uri)
+	u, err := url.Parse(uri)
 	if err != nil {
 		return ""
 	}
-	var chartReader io.Reader
-	switch url.Scheme {
-	case "http", "https":
-		var chartGetResponse *http.Response
-		chartGetResponse, err = http.Get(url.String())
-		if err == nil {
-			chartReader = chartGetResponse.Body
-		}
-	case "file", "":
-		if strings.HasSuffix(url.Path, ".tgz") {
-			chartReader, _ = os.Open(url.Path)
-		}
-	default:
-		err = fmt.Errorf("scheme %q not supported", url.Scheme)
-	}
-	if err != nil || chartReader == nil {
+	rc, err := openChartPackage(u)
+	if err != nil {
 		return ""
 	}
-	return getDigest(chartReader)
+	if rc == nil {
+		return ""
+	}
+	defer rc.Close()
+	return getDigest(rc)
 }
 
 // Digest hashes a reader and returns a SHA256 digest.
