@@ -28,6 +28,7 @@ import (
 
 	"github.com/opdev/getocprange"
 	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/lint"
 	"helm.sh/helm/v3/pkg/lint/support"
 
@@ -234,12 +235,105 @@ func NotContainCRDs(opts *CheckOptions) (Result, error) {
 
 	r := NewResult(true, ChartDoesNotContainCRDs)
 
-	if len(c.CRDObjects()) > 0 {
+	// Check standard CRD directory in main chart and dependencies
+	if hasCRDObjects(c) {
 		r.Ok = false
 		r.SetResult(false, ChartContainCRDs)
+		return r, nil
+	}
+
+	// Check for CRDs in templates (main chart and dependencies)
+	if hasCRDInTemplates(c) {
+		r.Ok = false
+		r.SetResult(false, ChartContainCRDs)
+		return r, nil
+	}
+
+	// Check for CRDs in files (root directory of main chart and dependencies)
+	if hasCRDInFiles(c) {
+		r.Ok = false
+		r.SetResult(false, ChartContainCRDs)
+		return r, nil
 	}
 
 	return r, nil
+}
+
+func hasCRDObjects(c *chart.Chart) bool {
+	// Check main chart CRDs directory
+	if len(c.CRDObjects()) > 0 {
+		return true
+	}
+
+	// Recursively check dependencies' CRDs directories
+	for _, dep := range c.Dependencies() {
+		if hasCRDObjects(dep) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func hasCRDInTemplates(c *chart.Chart) bool {
+	// Check main chart templates
+	for _, f := range c.Templates {
+		if !strings.HasSuffix(f.Name, ".yaml") && !strings.HasSuffix(f.Name, ".yml") {
+			continue
+		}
+		if isCRDFile(f.Data) {
+			return true
+		}
+	}
+
+	// Check dependency/subchart templates
+	for _, dep := range c.Dependencies() {
+		if hasCRDInTemplates(dep) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func isCRDFile(data []byte) bool {
+	// Split on YAML document separator for multi-doc files
+	docs := strings.Split(string(data), "\n---")
+	for _, doc := range docs {
+		for _, line := range strings.Split(doc, "\n") {
+			trimmed := strings.TrimSpace(line)
+			if strings.HasPrefix(trimmed, "kind:") {
+				kind := strings.TrimSpace(strings.TrimPrefix(trimmed, "kind:"))
+				// Remove surrounding quotes if present (both single and double)
+				kind = strings.Trim(kind, "\"'")
+				if kind == "CustomResourceDefinition" {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+func hasCRDInFiles(c *chart.Chart) bool {
+	// Check this chart's files (root directory)
+	for _, f := range c.Files {
+		if !strings.HasSuffix(f.Name, ".yaml") && !strings.HasSuffix(f.Name, ".yml") {
+			continue
+		}
+		if isCRDFile(f.Data) {
+			return true
+		}
+	}
+
+	// Recursively check dependencies
+	for _, dep := range c.Dependencies() {
+		if hasCRDInFiles(dep) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func HelmLint(opts *CheckOptions) (Result, error) {
