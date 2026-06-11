@@ -11,7 +11,7 @@ import (
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
-	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v4/pkg/cli"
 )
 
 // absPathFromSourceFileLocation returns the absolute path of a file or directory under the current source file's

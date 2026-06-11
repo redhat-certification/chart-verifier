@@ -3,7 +3,7 @@ package report
 import (
 	"net/url"
 
-	helmchart "helm.sh/helm/v3/pkg/chart"
+	helmchart "helm.sh/helm/v4/pkg/chart/v2"
 
 	apichecks "github.com/redhat-certification/chart-verifier/pkg/chartverifier/checks"
 )

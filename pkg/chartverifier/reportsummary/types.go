@@ -1,7 +1,7 @@
 package reportsummary
 
 import (
-	helmchart "helm.sh/helm/v3/pkg/chart"
+	helmchart "helm.sh/helm/v4/pkg/chart/v2"
 
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
 	apireport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"

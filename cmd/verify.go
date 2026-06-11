@@ -32,10 +32,8 @@ import (
 	apiverifier "github.com/redhat-certification/chart-verifier/pkg/chartverifier/verifier"
 	apiversion "github.com/redhat-certification/chart-verifier/pkg/chartverifier/version"
 
-	"helm.sh/helm/v3/pkg/cli"
-	"helm.sh/helm/v3/pkg/cli/values"
-
-	//"helm.sh/helm/v3/pkg/getter"
+	"helm.sh/helm/v4/pkg/cli"
+	"helm.sh/helm/v4/pkg/cli/values"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

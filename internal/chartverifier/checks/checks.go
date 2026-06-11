@@ -27,10 +27,11 @@ import (
 	"strings"
 
 	"github.com/opdev/getocprange"
-	"helm.sh/helm/v3/pkg/action"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/lint"
-	"helm.sh/helm/v3/pkg/lint/support"
+	"helm.sh/helm/v4/pkg/action"
+
+	chartv2 "helm.sh/helm/v4/pkg/chart/v2"
+	"helm.sh/helm/v4/pkg/chart/v2/lint"
+	"helm.sh/helm/v4/pkg/chart/v2/lint/support"
 
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/pyxis"
 	"github.com/redhat-certification/chart-verifier/internal/tool"
@@ -259,7 +260,7 @@ func NotContainCRDs(opts *CheckOptions) (Result, error) {
 	return r, nil
 }
 
-func hasCRDObjects(c *chart.Chart) bool {
+func hasCRDObjects(c *chartv2.Chart) bool {
 	// Check main chart CRDs directory
 	if len(c.CRDObjects()) > 0 {
 		return true
@@ -275,7 +276,7 @@ func hasCRDObjects(c *chart.Chart) bool {
 	return false
 }
 
-func hasCRDInTemplates(c *chart.Chart) bool {
+func hasCRDInTemplates(c *chartv2.Chart) bool {
 	// Check main chart templates
 	for _, f := range c.Templates {
 		if !strings.HasSuffix(f.Name, ".yaml") && !strings.HasSuffix(f.Name, ".yml") {
@@ -315,7 +316,7 @@ func isCRDFile(data []byte) bool {
 	return false
 }
 
-func hasCRDInFiles(c *chart.Chart) bool {
+func hasCRDInFiles(c *chartv2.Chart) bool {
 	// Check this chart's files (root directory)
 	for _, f := range c.Files {
 		if !strings.HasSuffix(f.Name, ".yaml") && !strings.HasSuffix(f.Name, ".yml") {
@@ -341,8 +342,12 @@ func HelmLint(opts *CheckOptions) (Result, error) {
 	if err != nil {
 		return NewResult(false, err.Error()), err
 	}
+
 	r := NewResult(true, HelmLintSuccessful)
-	linter := lint.All(p, opts.Values, "default", false)
+	// TODO: When chart/v3 is released, consider whether it makes sense to use
+	// actions.Lint related APIs vs. chart/v3/lint (given we use chart/v2/lint
+	// here, but will need to support both.)
+	linter := lint.RunAll(p, opts.Values, "default")
 	if linter.HighestSeverity > support.WarningSev {
 		reason := ""
 		for _, m := range linter.Messages {
@@ -506,7 +511,7 @@ func SignatureIsValid(opts *CheckOptions) (Result, error) {
 	}
 	verify.Keyring = keyringFilename
 
-	err = verify.Run(chartPath)
+	_, err = verify.Run(chartPath)
 	if err != nil {
 		failureMsg := fmt.Sprintf("%s : %s : %v", ChartSigned, SignatureFailure, err)
 		return NewResult(false, failureMsg), nil

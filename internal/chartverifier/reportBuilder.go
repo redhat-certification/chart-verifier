@@ -34,7 +34,8 @@ import (
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/utils"
 	apiReport "github.com/redhat-certification/chart-verifier/pkg/chartverifier/report"
 
-	helmchart "helm.sh/helm/v3/pkg/chart"
+	chartcommon "helm.sh/helm/v4/pkg/chart/common"
+	helmchart "helm.sh/helm/v4/pkg/chart/v2"
 )
 
 type ReportBuilder interface {
@@ -162,17 +163,17 @@ func (r *reportBuilder) Build() (*apiReport.Report, error) {
 	return apiReport, nil
 }
 
-type By func(p1, p2 *helmchart.File) bool
+type By func(p1, p2 *chartcommon.File) bool
 
 type fileSorter struct {
-	files []*helmchart.File
-	by    func(p1, p2 *helmchart.File) bool // Closure used in the Less method.
+	files []*chartcommon.File
+	by    func(p1, p2 *chartcommon.File) bool // Closure used in the Less method.
 }
 
 // If chart-verifier is run from within the helm chart directory
 // the output will be sent to the OutputDirectory and affect the digest.
 // This removes any verifier output files from the calculated digest
-func filterOutputDirectory(files []*helmchart.File) []*helmchart.File {
+func filterOutputDirectory(files []*chartcommon.File) []*chartcommon.File {
 	n := 0
 	for _, file := range files {
 		if !strings.Contains(file.Name, utils.OutputDirectory) {
@@ -183,7 +184,7 @@ func filterOutputDirectory(files []*helmchart.File) []*helmchart.File {
 	return files[:n]
 }
 
-func (by By) sort(files []*helmchart.File) {
+func (by By) sort(files []*chartcommon.File) {
 	fs := &fileSorter{
 		files: files,
 		by:    by, // The Sort method's receiver is the function (closure) that defines the sort order.
@@ -206,8 +207,8 @@ func (fs *fileSorter) Less(i, j int) bool {
 	return fs.by(fs.files[i], fs.files[j])
 }
 
-func GenerateSha(rawFiles []*helmchart.File) string {
-	name := func(f1, f2 *helmchart.File) bool {
+func GenerateSha(rawFiles []*chartcommon.File) string {
+	name := func(f1, f2 *chartcommon.File) bool {
 		return f1.Name < f2.Name
 	}
 

@@ -22,7 +22,7 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
-	helmcli "helm.sh/helm/v3/pkg/cli"
+	helmcli "helm.sh/helm/v4/pkg/cli"
 
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/checks"
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/profiles"
