@@ -9,7 +9,7 @@ import (
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
-	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v4/pkg/cli"
 
 	"github.com/stretchr/testify/require"
 

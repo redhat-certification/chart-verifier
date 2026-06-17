@@ -23,7 +23,7 @@ import (
 
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
-	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v4/pkg/cli"
 
 	"github.com/redhat-certification/chart-verifier/internal/chartverifier/pyxis"
 	"github.com/redhat-certification/chart-verifier/internal/tool"
