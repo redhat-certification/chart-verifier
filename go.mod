@@ -1,6 +1,6 @@
 module github.com/redhat-certification/chart-verifier
 
-go 1.26.0
+go 1.26.4
 
 require (
 	dario.cat/mergo v1.0.2
@@ -10,7 +10,7 @@ require (
 	github.com/helm/chart-testing/v3 v3.10.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/hashstructure/v2 v2.0.2
-	github.com/opdev/getocprange v0.0.0-20260608195748-56b0b7806c21
+	github.com/opdev/getocprange v0.0.0-20260707211424-64b7ed030c0b
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
