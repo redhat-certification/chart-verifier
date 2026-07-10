@@ -43,10 +43,29 @@ func (h Helm) Install(ctx context.Context, namespace, chart, release, valuesFile
 	client := action.NewInstall(h.config)
 	client.Namespace = namespace
 	client.ReleaseName = release
-	client.WaitStrategy = kube.StatusWatcherStrategy
 	// default timeout duration
 	// ref: https://helm.sh/docs/helm/helm_install
 	client.Timeout = h.timeout
+	// TODO(komish): Swapping ServerSideApply and WaitStrategy settings for
+	// helm/v3 defaults instead of helm/v4 defaults.
+	//
+	// ServerSideApply (default in helm/v4) requires patch permissions (e.g. for
+	// ClusterRoleBindings) which are currently disallowed in our public-good
+	// cluster.
+	//
+	// StatusWatcherStrategy (default in helm/v4) requires list permissions
+	// (e.g. for ClusterRoleBinding) at the cluster scope which is currently
+	// disallowed in our public-good cluster.
+	//
+	// To enable the newer approaches, we should
+	// (a) consider if we want to expand service account permissions in our public-good clusters
+	// (b) offer these settings as options
+	// (c) force the newer behavior and adjust our test fixtures which expect the old behavior.
+	//
+	// Enabling the historical functionality is potentially less effective, but gives partners
+	// a little more room to use our cluster before they have to use their own and submit reports.
+	client.ServerSideApply = false
+	client.WaitStrategy = kube.LegacyStrategy
 
 	cp, err := client.LocateChart(chart, h.envSettings)
 	if err != nil {
@@ -132,7 +151,10 @@ func (h Helm) Test(ctx context.Context, namespace, release string) error {
 func (h Helm) Uninstall(namespace, release string) error {
 	utils.LogInfo(fmt.Sprintf("Execute helm uninstall. namespace: %s, release: %s", namespace, release))
 	client := action.NewUninstall(h.config)
-	client.WaitStrategy = kube.StatusWatcherStrategy
+	// LegacyStrategy enabled over StatusWatcherStrategy because the latter requires
+	// additional perms (verb: list), in some cases for resources at a cluster scope
+	// which is not allowed in our public-good cluster.
+	client.WaitStrategy = kube.LegacyStrategy
 	// TODO: support other options if required
 	_, err := client.Run(release)
 	if err != nil {
@@ -149,7 +171,14 @@ func (h Helm) Upgrade(ctx context.Context, namespace, chart, release string) err
 	client := action.NewUpgrade(h.config)
 	client.Namespace = namespace
 	client.ReuseValues = true
-	client.WaitStrategy = kube.StatusWatcherStrategy
+	// LegacyStrategy enabled over StatusWatcherStrategy because the latter requires
+	// additional perms (verb: list), in some cases for resources at a cluster scope
+	// which is not allowed in our public-good cluster.
+	client.WaitStrategy = kube.LegacyStrategy
+	// ServerSideApply disabled for our use case because it seems to  require
+	// patch permissions to certain resources (e.g. ClusterRoleBindings) at
+	// a cluster scope, which is disallowed in our cluster.
+	client.ServerSideApply = "false"
 
 	cp, err := client.LocateChart(chart, h.envSettings)
 	if err != nil {
