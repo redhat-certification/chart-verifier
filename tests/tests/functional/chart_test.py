@@ -8,15 +8,15 @@ Following environment variables are expected to be set in order to run the tests
               deploy the charts on.
 """
 
-from pytest_bdd import scenario, given, when, then, parsers
+import json
 import os
 import subprocess
-import pytest
-import json
 import tarfile
-from deepdiff import DeepDiff
 
+import pytest
 import yaml
+from deepdiff import DeepDiff
+from pytest_bdd import given, parsers, scenario, then, when
 
 try:
     from yaml import CLoader as Loader
@@ -196,10 +196,12 @@ def run_verifier(
 
 
 def run_version_tarball_image(tarball_name):
-    tar = tarfile.open(tarball_name, "r:gz")
-    tar.extractall(path="./test_verifier")
+    with tarfile.open(tarball_name, "r:gz") as tar:
+        tar.extractall(path="./test_verifier")
     out = subprocess.run(
-        ["./test_verifier/chart-verifier", "version", "--as-data"], capture_output=True
+        ["./test_verifier/chart-verifier", "version", "--as-data"],
+        capture_output=True,
+        check=False,
     )
     return normalize_version(out.stdout.decode("utf-8"))
 
@@ -230,6 +232,7 @@ def run_version_podman_image(verifier_image_name, verifier_image_tag):
             "--as-data",
         ],
         capture_output=True,
+        check=False,
     )
     return normalize_version(out.stdout.decode("utf-8"))
 
@@ -239,9 +242,8 @@ def run_verify_tarball_image(
 ):
     print(f"Run tarball image from {tarball_name}")
 
-    tar = tarfile.open(tarball_name, "r:gz")
-
-    tar.extractall(path="./test_verifier")
+    with tarfile.open(tarball_name, "r:gz") as tar:
+        tar.extractall(path="./test_verifier")
 
     if pgp_key_location:
         out = subprocess.run(
@@ -255,6 +257,7 @@ def run_verify_tarball_image(
                 chart_location,
             ],
             capture_output=True,
+            check=False,
         )
     else:
         out = subprocess.run(
@@ -266,6 +269,7 @@ def run_verify_tarball_image(
                 chart_location,
             ],
             capture_output=True,
+            check=False,
         )
 
     return out.stdout.decode("utf-8")
@@ -274,9 +278,8 @@ def run_verify_tarball_image(
 def run_report_tarball_image(tarball_name, profile_type, chart_location):
     print(f"Run tarball image from {tarball_name}")
 
-    tar = tarfile.open(tarball_name, "r:gz")
-
-    tar.extractall(path="./test_verifier")
+    with tarfile.open(tarball_name, "r:gz") as tar:
+        tar.extractall(path="./test_verifier")
 
     out = subprocess.run(
         [
@@ -288,6 +291,7 @@ def run_report_tarball_image(tarball_name, profile_type, chart_location):
             chart_location,
         ],
         capture_output=True,
+        check=False,
     )
 
     return out.stdout.decode("utf-8")
@@ -305,7 +309,7 @@ def run_verify_podman_image(
     if not kubeconfig:
         return "FAIL: missing KUBECONFIG environment variable"
 
-    if chart_location.startswith("http:/") or chart_location.startswith("https:/"):
+    if chart_location.startswith(("http:/", "https:/")):
         if pgp_key_location:
             out = subprocess.run(
                 [
@@ -325,6 +329,7 @@ def run_verify_podman_image(
                     chart_location,
                 ],
                 capture_output=True,
+                check=False,
             )
         else:
             out = subprocess.run(
@@ -343,6 +348,7 @@ def run_verify_podman_image(
                     chart_location,
                 ],
                 capture_output=True,
+                check=False,
             )
     else:
         chart_directory = os.path.dirname(os.path.abspath(chart_location))
@@ -369,6 +375,7 @@ def run_verify_podman_image(
                     f"/charts/{chart_name}",
                 ],
                 capture_output=True,
+                check=False,
             )
         else:
             out = subprocess.run(
@@ -389,6 +396,7 @@ def run_verify_podman_image(
                     f"/charts/{chart_name}",
                 ],
                 capture_output=True,
+                check=False,
             )
 
     return out.stdout.decode("utf-8")
@@ -416,6 +424,7 @@ def run_report_podman_image(
             f"/reports/{report_name}",
         ],
         capture_output=True,
+        check=False,
     )
 
     return out.stdout.decode("utf-8")
@@ -504,10 +513,8 @@ def check_report(
     with open(report_path, "w") as fd:
         fd.write(verify_result)
 
-    expected_reports_file = open(
-        report_info_location,
-    )
-    expected_reports = json.load(expected_reports_file)
+    with open(report_info_location) as expected_reports_file:
+        expected_reports = json.load(expected_reports_file)
 
     test_report_data = run_report(image_type, profile_type, report_path)
     print(f"test_report_data : \n{test_report_data}")
@@ -547,15 +554,17 @@ def check_report(
         "charts.openshift.io/testedOpenShiftVersion",
     }
 
-    for annotation in expected_annotations.keys():
-        if annotation not in differing_annotations:
-            if expected_annotations[annotation] != tested_annotations[annotation]:
-                test_passed = False
-                print(
-                    f"{annotation} has different content, "
-                    f"expected: {expected_annotations[annotation]}, "
-                    f"got: {tested_annotations[annotation]}"
-                )
+    for annotation, expected_value in expected_annotations.items():
+        if (
+            annotation not in differing_annotations
+            and expected_value != tested_annotations[annotation]
+        ):
+            test_passed = False
+            print(
+                f"{annotation} has different content, "
+                f"expected: {expected_value}, "
+                f"got: {tested_annotations[annotation]}"
+            )
 
     digests_diff = DeepDiff(
         expected_reports[REPORT_DIGESTS], test_report[REPORT_DIGESTS], ignore_order=True
@@ -567,7 +576,7 @@ def check_report(
     differing_metadata = {"chart-uri"}
     expected_metadata = expected_reports[REPORT_METADATA]
     test_metadata = test_report[REPORT_METADATA]
-    for metadata in expected_metadata.keys():
+    for metadata in expected_metadata:
         if metadata not in differing_metadata:
             metadata_diff = DeepDiff(
                 expected_metadata[metadata], test_metadata[metadata], ignore_order=True

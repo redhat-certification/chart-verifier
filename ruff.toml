@@ -1,3 +1,5 @@
 lint.ignore = [
-    "E203" # https://github.com/PyCQA/pycodestyle/issues/373
+    "E203",   # https://github.com/PyCQA/pycodestyle/issues/373
+    "FLY002", # no need to prefer fstring over string joining
+    "TRY201", # specifying exception name is okay
 ]
