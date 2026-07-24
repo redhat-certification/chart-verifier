@@ -24,18 +24,19 @@ results:
         PR_release_image : The name of the image from the version file from main branch.
 """
 
-import re
 import argparse
-from github import Github
 import json
 import os
+import re
+import sys
+
 import requests
 import semver
-import sys
+from github import Github
 
 sys.path.append("./scripts/src/")
 from release import tarfile_asset, releasebody  # noqa 402
-from utils import utils  # noqa 402
+from utils import utils
 
 VERSION_FILE = "pkg/chartverifier/version/version_info.json"
 
