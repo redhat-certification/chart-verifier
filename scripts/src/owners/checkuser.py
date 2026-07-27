@@ -11,11 +11,12 @@ results:
     to modify them.
 """
 
-import re
 import argparse
-import requests
 import os
+import re
 import sys
+
+import requests
 import yaml
 
 try:
@@ -34,8 +35,8 @@ def verify_user(username):
     if not os.path.exists(OWNERS_FILE):
         print(f"[ERROR] {OWNERS_FILE} file does not exist.")
     else:
-        data = open(OWNERS_FILE).read()
-        out = yaml.load(data, Loader=Loader)
+        with open(OWNERS_FILE) as f:
+            out = yaml.load(f, Loader=Loader)
         if username in out["approvers"]:
             print(f"[INFO] {username} authorized")
             return True

@@ -1,7 +1,7 @@
 import sys
 
 sys.path.append("./scripts/src/")
-from release import releasechecker  # noqa E402
+from release import releasechecker
 
 
 def get_release_body(version, image_name, release_info):
