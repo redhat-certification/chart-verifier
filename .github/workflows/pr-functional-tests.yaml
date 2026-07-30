@@ -87,6 +87,8 @@ jobs:
     with:
       checkout-repository: ${{ needs.check-ok-to-test.outputs.target-repo }}
       checkout-ref: ${{ needs.check-ok-to-test.outputs.target-sha }}
+      # Gated by ok-to-test label, which requires a maintainer to apply.
+      allow-unsafe-pr-checkout: true
       event-identifier: ${{ github.event.pull_request.number }}
     secrets:
       cluster-api-server: ${{ secrets.API_SERVER }}
@@ -102,7 +104,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout main branch
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -124,13 +126,16 @@ jobs:
           # check for a restricted file and, if found, check user has permission
           ve1/bin/check-user --api-url="${API_URL}" --user="${API_USER}"
 
+      # Gated by the ok-to-test label (check-ok-to-test job) and the
+      # check-user authorization step above (check_authorization).
       - name: Checkout PR branch # untrusted content!
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           path: "chart-verifier"
           persist-credentials: false
+          allow-unsafe-pr-checkout: true
 
       # TODO: May be worth caching this binary, given there are several places
       # that build the binary in workflows. For now, just build this to allow

@@ -1,8 +1,12 @@
 name: Run Functional Tests
 
 # Runs functional testing against the specified checkout-ref.
-# Note that this workflow runs and installs software from the checkout-ref, 
-# and so untrusted content should be verified as safe to install
+# Note that this workflow runs and installs software from the checkout-ref,
+# and so untrusted content should be verified as safe to install.
+#
+# This workflow does not gate untrusted content itself. Callers must verify
+# that the checkout-ref and checkout-repository inputs point to acceptable
+# content before invoking this workflow.
 
 on:
   workflow_call:
@@ -33,6 +37,17 @@ on:
 
           For security, this checkout-ref should generally be a commit hash
           for untrusted content.
+      allow-unsafe-pr-checkout:
+        type: boolean
+        required: false
+        default: false
+        description: |
+          Whether actions/checkout should allow an unsafe checkout of
+          checkout-ref and checkout-repository.
+
+          Enable only when the checkout-ref and/or checkout-repository
+          content has been evaluated and is safe to checkout in a workflow
+          with privileged context.
     secrets:
       # TODO: Refactor cluster-api-server as it's not actually a secret but must
       # be because it's listed in-repo as a secret.
@@ -51,11 +66,15 @@ jobs:
       contents: read
     steps:
       - name: Checkout PR branch
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.checkout-ref }}
           repository: ${{ inputs.checkout-repository }}
           persist-credentials: false
+          # This workflow does not gate untrusted content itself. Callers
+          # must verify that the checkout-ref and checkout-repository inputs
+          # point to acceptable content before invoking this workflow.
+          allow-unsafe-pr-checkout: ${{ inputs.allow-unsafe-pr-checkout }}
 
       # TODO: May be worth caching this binary, given there are several places
       # that build the binary in workflows. For now, just build this to allow
