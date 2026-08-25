@@ -39,17 +39,17 @@ jobs:
             # Build podman images locally
             make build-image "IMAGE_TAG=${COMMIT_ID}" QUAY_EXPIRE_AFTER=1w
             make build-image IMAGE_TAG=main
-            podman tag "${CONTAINER_REGISTRY}/chart-verifier:main" "${CONTAINER_REGISTRY}/chart-verifier:${DEV_RELEASE}"
+            podman tag "chart-verifier:main" "chart-verifier:${DEV_RELEASE}"
 
       - name: Push to quay.io
         id: push_to_quay
-        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
+        uses: redhat-actions/push-to-registry@94ade333c38ecc0e60e94785125d9a52ca423b37 # v3.0.0
         with:
           image: chart-verifier
           tags: |
             ${{ steps.get_commit_id.outputs.commit_id }}
             main
             ${{ env.DEV_RELEASE }}
-          registry: quay.io/redhat-certification
+          registry: ${{ env.CONTAINER_REGISTRY }}
           username: ${{ secrets.QUAY_BOT_USERNAME }}
           password: ${{ secrets.QUAY_BOT_TOKEN }}
