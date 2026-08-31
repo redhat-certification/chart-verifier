@@ -137,15 +137,16 @@ jobs:
           RELEASE_VERSION: ${{ steps.get_tag.outputs.release_version }}
         run: |
             # Build podman images locally
-            make build-image "IMAGE_TAG=${RELEASE_VERSION}" "IMAGE_REPO=${{ secrets.IMAGE_REGISTRY }}"
+            make build-image "IMAGE_TAG=${RELEASE_VERSION}" IMAGE_REPO=localhost
             podman tag \
-              "${{ secrets.IMAGE_REGISTRY }}/${IMAGE_NAME}:${RELEASE_VERSION}" \
-              "${{ secrets.IMAGE_REGISTRY }}/${IMAGE_NAME}:latest"
+              "localhost/${IMAGE_NAME}:${RELEASE_VERSION}" \
+              "localhost/${IMAGE_NAME}:latest"
 
       - name: Push to quay.io
         id: push_to_quay
-        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
+        uses: redhat-actions/push-to-registry@94ade333c38ecc0e60e94785125d9a52ca423b37 # v3.0.0
         with:
+          # Prepended with localhost by the action to match build_container_images step.
           image: ${{ env.IMAGE_NAME }}
           tags: |
             latest
