@@ -88,28 +88,55 @@ func New(values map[string]interface{}) *Profile {
 		}
 	}
 
-	profileInUse = getDefaultProfile(fmt.Sprintf("profile %s not found", profileVendorType))
-
-	if vendorProfiles, ok := profileMap[profileVendorType]; ok {
-		if len(vendorProfiles) > 0 {
-			profileInUse = vendorProfiles[0]
-			if len(vendorProfiles) > 1 {
-				for _, vendorProfile := range vendorProfiles {
-					if len(profileVersion) > 0 {
-						if semver.Compare(semver.MajorMinor(vendorProfile.Version), semver.MajorMinor(profileVersion)) == 0 {
-							profileInUse = vendorProfile
-							break
-						}
-					}
-					if semver.Compare(semver.MajorMinor(vendorProfile.Version), semver.MajorMinor(profileInUse.Version)) > 0 {
-						profileInUse = vendorProfile
-					}
-				}
-			}
-		}
-	}
+	profileInUse = selectProfile(profileVendorType, profileVersion)
 	utils.LogInfo(fmt.Sprintf("Profile in use: %s %s", profileInUse.Vendor, profileInUse.Version))
 	return profileInUse
+}
+
+// Vendor types shown by list-checks, in the order they are printed.
+var listedVendorTypes = []VendorType{
+	DefaultProfile,
+	"redhat",
+	"community",
+	"developer-console",
+}
+
+func selectProfile(vendor VendorType, version string) *Profile {
+	selected := getDefaultProfile(fmt.Sprintf("profile %s not found", vendor))
+
+	vendorProfiles, ok := profileMap[vendor]
+	if !ok || len(vendorProfiles) == 0 {
+		return selected
+	}
+
+	selected = vendorProfiles[0]
+	if len(vendorProfiles) == 1 {
+		return selected
+	}
+
+	for _, vendorProfile := range vendorProfiles {
+		if len(version) > 0 {
+			if semver.Compare(semver.MajorMinor(vendorProfile.Version), semver.MajorMinor(version)) == 0 {
+				return vendorProfile
+			}
+		}
+		if semver.Compare(semver.MajorMinor(vendorProfile.Version), semver.MajorMinor(selected.Version)) > 0 {
+			selected = vendorProfile
+		}
+	}
+
+	return selected
+}
+
+// ListLatest returns the newest profile version for each known vendor type.
+func ListLatest() []*Profile {
+	var result []*Profile
+	for _, vendor := range listedVendorTypes {
+		if _, ok := profileMap[vendor]; ok {
+			result = append(result, selectProfile(vendor, ""))
+		}
+	}
+	return result
 }
 
 // Get all profiles in the profiles directory, and any subdirectories, and add each to the profile map

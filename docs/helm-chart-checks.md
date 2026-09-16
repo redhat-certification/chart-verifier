@@ -25,6 +25,7 @@ Helm chart checks are a set of checks against which the Red Hat Helm chart-verif
 - When there are no error messages, the `helm-lint` check passes the verification and is successful. Messages such as `Warning` and `info` do not cause the check to fail.
 - Profiles define the checks needed based on the chart type: partner, redhat or community.
   - Profiles are versioned. Each new version can include updated checks, new checks, new annotations, or changed annotations.
+- The `list-checks` command prints the checks for each vendor profile without running verification.
 - The generated report, by default, is written to stdout.
   - Alternatively the ```--write-to-file``` flag can be used to write to a ```report.yaml``` file.
 - An error log is created for all verify commands but can be optionally suppressed.
@@ -105,6 +106,14 @@ This section provides help on the basic usage of Helm chart checks with the podm
           verify                                        \
           /charts/<chart>
   ```
+- List the checks that run for each vendor profile without verifying a chart:
+
+  ```
+  $ podman run --rm quay.io/redhat-certification/chart-verifier list-checks
+  ```
+
+  The output groups checks by profile (`partner`, `redhat`, `community`, `developer-console`) and shows whether each check is Mandatory or Optional. Use a check name with `--enable` or `--disable` on `verify`.
+
 - Get the list of options for the `verify` command:
 
   ```
