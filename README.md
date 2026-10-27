@@ -12,6 +12,7 @@ The tool provides the following features:
 -   Red Hat OpenShift Certified chart validation: Verifies the Helm chart's readiness for being certified and submitted in the OpenShift Helm Repository.    
 -   Report generation: Generates a verification report in a YAML format.    
 -   Customizable checks: Defines the checks you wish to execute during the verification process.
+-   List checks: `chart-verifier list-checks` prints the checks for each vendor profile without running verification.
 
 For more information see:
 
