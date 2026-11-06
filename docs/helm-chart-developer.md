@@ -52,6 +52,12 @@ To verify a chart against all available checks:
 > out/chart-verifier verify https://www.example.com/chart.tgz
 ```
 
+To list the checks that run for each vendor profile:
+
+```text
+> out/chart-verifier list-checks
+```
+
 To apply only the `is-helm-v3` check:
 
 ```text
