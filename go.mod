@@ -1,6 +1,6 @@
 module github.com/redhat-certification/chart-verifier
 
-go 1.26.4
+go 1.26.10
 
 require (
 	dario.cat/mergo v1.0.2
