@@ -73,6 +73,21 @@ func TestGetProfiles(t *testing.T) {
 	getAndCheckProfile(t, CommunityVendorType, CommunityVendorType, configVersion13, configVersion13)
 }
 
+func TestListLatest(t *testing.T) {
+	latest := ListLatest()
+	for _, vendor := range []VendorType{PartnerVendorType, RedhatVendorType, CommunityVendorType} {
+		profile, ok := latest[vendor]
+		assert.True(t, ok, "no profile listed for vendor type %s", vendor)
+		assert.Equal(t, vendor, profile.Vendor)
+		assert.Equal(t, configVersion13, profile.Version)
+		assert.NotEmpty(t, profile.Checks)
+	}
+
+	devConsole, ok := latest["developer-console"]
+	assert.True(t, ok, "no profile listed for vendor type developer-console")
+	assert.NotEmpty(t, devConsole.Checks)
+}
+
 func getAndCheckProfile(t *testing.T, configVendorType, expectVendorType VendorType, configVersion, expectVersion string) {
 	config := make(map[string]interface{})
 

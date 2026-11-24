@@ -112,6 +112,20 @@ func New(values map[string]interface{}) *Profile {
 	return profileInUse
 }
 
+// ListLatest returns the newest profile version known for each vendor type.
+func ListLatest() map[VendorType]*Profile {
+	latest := make(map[VendorType]*Profile, len(profileMap))
+	for vendor, vendorProfiles := range profileMap {
+		for _, vendorProfile := range vendorProfiles {
+			current, found := latest[vendor]
+			if !found || semver.Compare(semver.MajorMinor(vendorProfile.Version), semver.MajorMinor(current.Version)) > 0 {
+				latest[vendor] = vendorProfile
+			}
+		}
+	}
+	return latest
+}
+
 // Get all profiles in the profiles directory, and any subdirectories, and add each to the profile map
 func getProfiles() {
 	profileFiles, err := profileconfig.GetProfiles()
