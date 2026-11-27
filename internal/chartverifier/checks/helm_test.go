@@ -157,11 +157,8 @@ func TestTemplate(t *testing.T) {
 	TestCases := []testCase{
 		{description: "chart-0.1.0-v3.valid.tgz images ", uri: "chart-0.1.0-v3.valid.tgz", images: []string{
 			"registry.access.redhat.com/rhscl/postgresql-10-rhel7:1-161",
-			"snyk/kubernetes-operator", "rhscl/mongodb-36-rhel7:1-65",
-			"icr.io/cpopen/ibmcloud-object-storage-driver@sha256:fc17bb3e89d00b3eb0f50b3ea83aa75c52e43d8e56cf2e0f17475e934eeeeb5f",
-			"icr.io/cpopen/ibmcloud-object-storage-plugin@sha256:cf654987c38d048bc9e654f3928e9ce9a2a4fd47ce0283bb5f339c1b99298e6e",
 		}},
-		{description: "chart-0.1.0-v3.with-crd.tgz", uri: "chart-0.1.0-v3.with-crd.tgz", images: []string{"nginx:1.16.0", "busybox"}},
+		{description: "chart-0.1.0-v3.with-crd.tgz", uri: "chart-0.1.0-v3.with-crd.tgz", images: []string{"nginx:1.16.0"}},
 		{description: "chart-0.1.0-v3.with-csi.tgz", uri: "chart-0.1.0-v3.with-csi.tgz", images: []string{"nginx:1.16.0"}},
 	}
 
@@ -236,6 +233,189 @@ func TestGetImagesFromContent(t *testing.T) {
 				if strings.TrimSpace(image) == "" {
 					t.Logf("Found empty image")
 				}
+			}
+		})
+	}
+}
+
+func TestExcludeTestTemplates(t *testing.T) {
+	testCases := []struct {
+		name           string
+		content        string
+		expectedImages int
+	}{
+		{
+			name: "excludes images from test templates identified by source path",
+			content: `---
+# Source: mychart/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  template:
+    spec:
+      containers:
+        - image: registry.redhat.io/rhel8/nginx-120:latest
+---
+# Source: mychart/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - image: dotnet-runtime:latest
+`,
+			expectedImages: 1,
+		},
+		{
+			name: "excludes images from test templates identified by hook annotation (double quotes)",
+			content: `---
+# Source: mychart/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  template:
+    spec:
+      containers:
+        - image: registry.redhat.io/rhel8/nginx-120:latest
+---
+# Source: mychart/templates/test-pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - image: busybox:latest
+`,
+			expectedImages: 1,
+		},
+		{
+			name: "excludes images from test templates identified by hook annotation (no quotes)",
+			content: `---
+# Source: mychart/templates/hook-test.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    helm.sh/hook: test
+spec:
+  containers:
+    - image: uncertified:latest
+---
+# Source: mychart/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  template:
+    spec:
+      containers:
+        - image: registry.redhat.io/app:1.0
+`,
+			expectedImages: 1,
+		},
+		{
+			name: "keeps all images when no test templates present",
+			content: `---
+# Source: mychart/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  template:
+    spec:
+      containers:
+        - image: registry.redhat.io/app:1.0
+---
+# Source: mychart/templates/sidecar.yaml
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - image: registry.redhat.io/sidecar:2.0
+`,
+			expectedImages: 2,
+		},
+		{
+			name: "handles multiple test templates",
+			content: `---
+# Source: mychart/templates/deployment.yaml
+spec:
+  containers:
+    - image: registry.redhat.io/app:1.0
+---
+# Source: mychart/templates/tests/test-1.yaml
+spec:
+  containers:
+    - image: test-image-1:latest
+---
+# Source: mychart/templates/tests/test-2.yaml
+spec:
+  containers:
+    - image: test-image-2:latest
+`,
+			expectedImages: 1,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			filtered := excludeTestTemplates(tc.content)
+			images, err := getImagesFromContent(filtered)
+			require.Nil(t, err)
+			if len(images) != tc.expectedImages {
+				t.Errorf("got %d images, want %d. Images: %v", len(images), tc.expectedImages, images)
+			}
+		})
+	}
+}
+
+func TestIsTestTemplate(t *testing.T) {
+	testCases := []struct {
+		name     string
+		doc      string
+		expected bool
+	}{
+		{
+			name:     "source path with /tests/ directory",
+			doc:      "# Source: mychart/templates/tests/test-connection.yaml\napiVersion: v1\nkind: Pod\n",
+			expected: true,
+		},
+		{
+			name:     "helm.sh/hook test annotation double-quoted",
+			doc:      "apiVersion: v1\nmetadata:\n  annotations:\n    \"helm.sh/hook\": test\n",
+			expected: true,
+		},
+		{
+			name:     "helm.sh/hook test annotation single-quoted",
+			doc:      "apiVersion: v1\nmetadata:\n  annotations:\n    'helm.sh/hook': test\n",
+			expected: true,
+		},
+		{
+			name:     "helm.sh/hook test annotation unquoted",
+			doc:      "apiVersion: v1\nmetadata:\n  annotations:\n    helm.sh/hook: test\n",
+			expected: true,
+		},
+		{
+			name:     "regular deployment template",
+			doc:      "# Source: mychart/templates/deployment.yaml\napiVersion: apps/v1\nkind: Deployment\n",
+			expected: false,
+		},
+		{
+			name:     "empty document",
+			doc:      "",
+			expected: false,
+		},
+		{
+			name:     "path containing test but not in /tests/ directory",
+			doc:      "# Source: mychart/templates/deployment-test-config.yaml\napiVersion: v1\n",
+			expected: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := isTestTemplate(tc.doc)
+			if got != tc.expected {
+				t.Errorf("isTestTemplate() = %v, want %v", got, tc.expected)
 			}
 		})
 	}

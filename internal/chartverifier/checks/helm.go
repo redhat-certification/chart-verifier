@@ -230,7 +230,40 @@ func getImageReferences(chartURI string, vals map[string]interface{}, serverKube
 		return nil, err
 	}
 
+	txt = excludeTestTemplates(txt)
 	return getImagesFromContent(txt)
+}
+
+// excludeTestTemplates removes YAML documents originating from Helm test
+// templates. Test templates are identified by their source path containing
+// "/tests/" (the Helm convention for test hooks) or by having a
+// "helm.sh/hook": test annotation.
+func excludeTestTemplates(content string) string {
+	documents := strings.Split(content, "---\n")
+	var filtered []string
+	for _, doc := range documents {
+		if isTestTemplate(doc) {
+			continue
+		}
+		filtered = append(filtered, doc)
+	}
+	return strings.Join(filtered, "---\n")
+}
+
+func isTestTemplate(doc string) bool {
+	lines := strings.SplitN(doc, "\n", 5)
+	for _, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "# Source:") && strings.Contains(trimmed, "/tests/") {
+			return true
+		}
+	}
+	if strings.Contains(doc, "\"helm.sh/hook\": test") ||
+		strings.Contains(doc, "'helm.sh/hook': test") ||
+		strings.Contains(doc, "helm.sh/hook: test") {
+		return true
+	}
+	return false
 }
 
 // getImagesFromContent evaluates generated templates from
